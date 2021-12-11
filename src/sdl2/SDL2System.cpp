@@ -3,17 +3,36 @@
 // Read LICENSE.txt for more information.
 
 #include <SDL2/SDL.h>
+
 #include <common/System.hpp>
 #include <log/Log.hpp>
 
 class SDL2System : public System {
 public:
+    bool running = false;
+
     bool boot() override {
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
             Log::write(Log::Level::ERROR, SDL_GetError());
             return false;
         }
         return true;
+    }
+
+    bool run() override {
+        pumpEvents();
+        return running;
+    }
+
+    void pumpEvents() {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_QUIT:
+                running = false;
+                break;
+            }
+        }
     }
 
     ~SDL2System() {

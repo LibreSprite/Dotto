@@ -9,4 +9,5 @@
 class System : public Injectable<System> {
 public:
     virtual bool boot() = 0;
+    virtual bool run() = 0;
 };

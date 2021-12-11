@@ -22,6 +22,8 @@ public:
     }
 
     bool run() override {
+        if (!system->run())
+            return false;
         return running;
     }
 
