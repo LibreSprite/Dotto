@@ -5,9 +5,11 @@
 #pragma once
 
 #include <inject.hpp>
+#include <common/Window.hpp>
 
 class System : public Injectable<System> {
 public:
     virtual bool boot() = 0;
     virtual bool run() = 0;
+    virtual std::shared_ptr<Window> openWindow(const PropertySet&) = 0;
 };

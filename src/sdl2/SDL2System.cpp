@@ -19,6 +19,12 @@ public:
         return true;
     }
 
+    std::shared_ptr<Window> openWindow(const PropertySet& properties) override {
+        inject<Window> window{"sdl2Window"};
+        window->init(properties);
+        return window;
+    }
+
     bool run() override {
         pumpEvents();
         return running;
