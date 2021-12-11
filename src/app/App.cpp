@@ -3,20 +3,22 @@
 // Read LICENSE.txt for more information.
 
 #include <app/App.hpp>
+#include <common/System.hpp>
 #include <log/Log.hpp>
 
 class AppImpl : public App {
 public:
     bool running = true;
     inject<Log> log;
+    inject<System> system;
 
     void boot(int argc, const char* argv[]) override {
         bootLogger();
+        system->boot();
         Log::write(Log::Level::VERBOSE, "Booting complete");
     }
 
     bool run() override {
-        Log::write(Log::Level::VERBOSE, "Running Dotto!");
         return running;
     }
 
