@@ -4,6 +4,7 @@
 
 #include <app/App.hpp>
 #include <common/System.hpp>
+#include <fs/FileSystem.hpp>
 #include <log/Log.hpp>
 
 class AppImpl : public App {
@@ -11,9 +12,11 @@ public:
     bool running = true;
     inject<Log> log;
     inject<System> system;
+    inject<FileSystem> fs;
 
     void boot(int argc, const char* argv[]) override {
         bootLogger();
+        bootFS();
         system->boot();
         Log::write(Log::Level::VERBOSE, "Booting complete");
     }
@@ -25,6 +28,10 @@ public:
     void bootLogger() {
         log->setGlobal();
         log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args
+    }
+
+    void bootFS() {
+
     }
 };
 
