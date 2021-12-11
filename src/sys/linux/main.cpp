@@ -3,12 +3,13 @@
 // Read LICENSE.txt for more information.
 
 #include <log/Log.hpp>
+#include <app/App.hpp>
 
 int main(int argc, const char* argv[]) {
-    inject<Log> log{"stdout"};
-    log->setGlobal();
-    log->setLevel(Log::Level::VERBOSE); // TODO: Configure using args
-    Log::write(Log::Level::VERBOSE, "Logger initialized");
-
+    Log::setDefault("stdout");
+    inject<App> app{"dotto"};
+    app->boot(argc, argv);
+    while(app->run());
+    Log::write(Log::Level::INFO, "Shutting down");
     return 0;
 }
