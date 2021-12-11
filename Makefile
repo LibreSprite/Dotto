@@ -2,12 +2,16 @@ CXX = g++
 LN = g++
 ODIR = build
 
+SRC_DIRS = $(shell find src -type d)
+
 CPP_FLAGS += --std=c++17
 CPP_FLAGS += -MMD -MP
+CPP_FLAGS += $(patsubst %,-I%,$(SRC_DIRS))
+
 CPP_FILES := $(shell find src -type f -name '*.cpp')
 
-FLAGS += -Og -g
-# FLAGS += -O3
+FLAGS += -Og -g # debug build
+# FLAGS += -O3 # release build
 
 LN_FLAGS += -lm
 
