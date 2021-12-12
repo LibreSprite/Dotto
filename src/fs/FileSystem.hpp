@@ -4,11 +4,15 @@
 
 #pragma once
 
-#include <inject.hpp>
+#include <common/inject.hpp>
+#include <fs/File.hpp>
 
 class FileSystem : public Injectable<FileSystem> {
+protected:
+    inject<FSEntity> root{"rootDir"};
+
 public:
     Provides p{this};
-
-
+    Vector<String> splitPath(const String& path);
+    virtual std::shared_ptr<File> open(const String& path, const FileOpenSettings& settings = {});
 };
