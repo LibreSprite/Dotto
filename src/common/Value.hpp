@@ -6,6 +6,8 @@
 
 #include <any>
 
+#include <common/types.hpp>
+
 class Value {
     std::any value;
 
@@ -16,6 +18,10 @@ public:
     Value(const Value& v) : value(v.value) {}
 
     Value(Value&& v) : value(std::move(v.value)) {}
+
+    Value(const char* v) : value(String(v)) {}
+
+    Value(char* v) : value(String(v)) {}
 
     template<typename Type>
     bool has() const {
