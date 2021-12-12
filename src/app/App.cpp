@@ -5,6 +5,7 @@
 #include <app/App.hpp>
 #include <common/PropertySet.hpp>
 #include <common/System.hpp>
+#include <common/Config.hpp>
 #include <fs/FileSystem.hpp>
 #include <log/Log.hpp>
 
@@ -13,33 +14,32 @@ public:
     bool running = true;
     inject<Log> log;
     inject<System> system;
-    inject<FileSystem> fs{"new"};
 
-    PropertySet appSettings;
+    inject<FileSystem> fs{"new"};
+    FileSystem::Provides globalFS{fs.get()};
+
+    inject<Config> config{"new"};
+    Config::Provides globalConfig{config.get()};
 
     void boot(int argc, const char* argv[]) override {
-        bootLogger();
-        bootFS();
+        log->setGlobal();
+        log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args
+        fs->boot();
+        config->boot();
         system->boot();
+        openMainWindow();
+    }
+
+    void openMainWindow() {
+        PropertySet main;
+        main.append(config->properties->get<std::shared_ptr<PropertySet>>("GfxMode"));
+        system->openWindow(main);
     }
 
     bool run() override {
         if (!system->run())
             return false;
         return running;
-    }
-
-    void bootLogger() {
-        log->setGlobal();
-        log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args
-    }
-
-    void bootFS() {
-        auto file = fs->open("%userdata/LICENSE.txt", {.write=false});
-        if (!file->isOpen()) file = fs->open("%appdir/LICENSE.txt", {.write=false});
-        if (file->isOpen()) {
-            Log::write(Log::Level::VERBOSE, file->readTextFile());
-        }
     }
 };
 

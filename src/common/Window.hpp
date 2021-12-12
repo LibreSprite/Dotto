@@ -7,7 +7,16 @@
 #include <common/inject.hpp>
 #include <common/PropertySet.hpp>
 
-class Window : public Injectable<Window>, public std::enable_shared_from_this<Window> {
+class Window : public Injectable<Window>, public std::enable_shared_from_this<Window>, Serializable {
 public:
-    virtual bool init(const PropertySet& properties) = 0;
+    Property<String> title{this, "title"};
+    Property<bool> maximized{this, "maximized"};
+    Property<bool> border{this, "border"};
+    Property<U32> width{this, "width"};
+    Property<U32> height{this, "height"};
+
+    virtual bool init(const PropertySet& properties) {
+        load(properties);
+        return true;
+    }
 };
