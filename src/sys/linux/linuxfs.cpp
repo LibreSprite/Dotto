@@ -2,15 +2,15 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include <unistd.h>
 #include <limits.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <unistd.h>
 
 #include <common/String.hpp>
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>
 #include <fs/StdFile.hpp>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 static auto fontPaths = std::array{
     "/usr/share/fonts",

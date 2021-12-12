@@ -2,11 +2,12 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <memory>
+
+#include <common/String.hpp>
 #include <fs/File.hpp>
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>
-#include <common/String.hpp>
-#include <memory>
 
 bool FileSystem::boot() {
     if (auto root = std::dynamic_pointer_cast<RootFolder>(this->root.shared())) {

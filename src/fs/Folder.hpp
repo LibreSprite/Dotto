@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <log/Log.hpp>
 #include <common/Value.hpp>
 #include <fs/FSEntity.hpp>
+#include <log/Log.hpp>
 
 class Folder : public FSEntity {
     struct FSNode {

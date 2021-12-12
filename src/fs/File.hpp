@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <log/Log.hpp>
 #include <fs/FSEntity.hpp>
+#include <log/Log.hpp>
 
 struct FileOpenSettings {
     bool write = false;

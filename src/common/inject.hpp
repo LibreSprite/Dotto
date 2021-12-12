@@ -148,10 +148,11 @@ to delete AccountManager. Perfectly balanced...
 
 #pragma once
 
-#include <type_traits>
-#include <typeinfo>
 #include <functional>
 #include <iostream>
+#include <type_traits>
+#include <typeinfo>
+
 #include "types.hpp"
 
 #if defined(__GNUG__) && defined(_DEBUG)

@@ -3,11 +3,11 @@
 // Read LICENSE.txt for more information.
 
 #include <app/App.hpp>
+#include <common/Config.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
 #include <common/System.hpp>
-#include <common/Config.hpp>
 #include <fs/FileSystem.hpp>
 #include <log/Log.hpp>
 
