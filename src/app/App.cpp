@@ -3,6 +3,8 @@
 // Read LICENSE.txt for more information.
 
 #include <app/App.hpp>
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
 #include <common/System.hpp>
 #include <common/Config.hpp>
@@ -21,6 +23,8 @@ public:
     inject<Config> config{"new"};
     Config::Provides globalConfig{config.get()};
 
+    PubSub<msg::Shutdown> pub{this};
+
     void boot(int argc, const char* argv[]) override {
         log->setGlobal();
         log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args
@@ -28,6 +32,7 @@ public:
         config->boot();
         system->boot();
         openMainWindow();
+        pub(msg::BootComplete{});
     }
 
     void openMainWindow() {
@@ -40,6 +45,14 @@ public:
         if (!system->run())
             return false;
         return running;
+    }
+
+    void on(msg::Shutdown&) {
+        logI("Shutting down");
+    }
+
+    ~AppImpl() {
+        pub(msg::Shutdown{});
     }
 };
 
