@@ -201,7 +201,7 @@ public:
 
   template <typename Derived = BaseClass>
   operator std::shared_ptr<Derived>() {
-    return std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this());
+    return m_ptr ? std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this()) : nullptr;
   }
 
   template <typename Derived = BaseClass>
