@@ -33,9 +33,15 @@ public:
 
             if (line.front() == '[' && line.back() == ']') {
                 domain = trim(line.substr(1, line.size() - 2));
+                auto parent = set;
                 logV("Section [", domain, "]");
-                subset = std::make_shared<PropertySet>();
-                set->set(domain, subset);
+                for (auto& part : split(domain, ":")) {
+                    if (!parent->get(part, subset)) {
+                        subset = std::make_shared<PropertySet>();
+                        parent->set(part, subset);
+                    }
+                    parent = subset;
+                }
                 continue;
             }
 
