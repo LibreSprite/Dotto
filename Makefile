@@ -11,7 +11,7 @@ CPP_FLAGS += $(shell sdl2-config --cflags)
 
 CPP_FILES := $(shell find src -type f -name '*.cpp')
 
-FLAGS += -Og -g # debug build
+FLAGS += -Og -g -D_DEBUG # debug build
 # FLAGS += -O3 # release build
 
 LN_FLAGS += $(shell sdl2-config --libs)
