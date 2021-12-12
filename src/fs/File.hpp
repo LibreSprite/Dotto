@@ -27,9 +27,9 @@ public:
     virtual U64 read(void* buffer, U64 size) = 0;
     virtual U64 write(const void* buffer, U64 size) = 0;
 
-    std::string readTextFile() {
+    String readTextFile() {
         auto len = size();
-        std::string str;
+        String str;
         str.resize(len);
         read(&str[0], len);
         return str;

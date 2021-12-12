@@ -34,9 +34,11 @@ public:
         std::shared_ptr<FSEntity> driver;
         auto it = children.find(name);
         if (it == children.end()) {
-            driver = inject<FSEntity>{missingDriver};
-            if (driver)
-                driver->init(path + separator + name);
+            if (!missingDriver.empty()) {
+                driver = inject<FSEntity>{missingDriver};
+                if (driver)
+                    driver->init(path + separator + name);
+            }
         } else {
             driver = inject<FSEntity>{it->second->driver};
             if (driver)
@@ -46,6 +48,16 @@ public:
     }
 
     void mount(const String& name, const String& driver, const Value& resource) {
+        if (resource.has<String>()) {
+            logV("Creating ", driver, " mount point ", name, " to ", resource.get<String>());
+        } else {
+            logV("Creating ", driver, " mount point ", name, " to ", resource.typeName());
+        }
         children.insert({name, std::make_shared<FSNode>(resource, driver)});
     }
+};
+
+class RootFolder : public Folder {
+public:
+    virtual bool boot() = 0;
 };
