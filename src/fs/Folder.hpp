@@ -23,7 +23,7 @@ public:
         if (resource.has<String>()) {
             path = resource.get<String>();
         } else {
-            Log::write(Log::Level::ERROR, String("Invalid resource for Folder: ") + resource.typeName());
+            logE(String("Invalid resource for Folder: ") + resource.typeName());
         }
     }
 

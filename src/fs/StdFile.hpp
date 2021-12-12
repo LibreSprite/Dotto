@@ -24,7 +24,7 @@ public:
         file = fopen(path.c_str(), mode);
         if (!file && settings.create && settings.write)
             file = fopen(path.c_str(), "wb+");
-        Log::write(Log::Level::VERBOSE, "Open ", path, ": ", (bool) file);
+        logV("Open ", path, ": ", (bool) file);
         return file;
     }
 
@@ -35,7 +35,7 @@ public:
     void close() override {
         if (file) {
             fclose(file);
-            Log::write(Log::Level::VERBOSE, "Close ", path);
+            logV("Close ", path);
         }
         file = nullptr;
     }

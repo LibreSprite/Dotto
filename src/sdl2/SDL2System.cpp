@@ -13,7 +13,7 @@ public:
 
     bool boot() override {
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-            Log::write(Log::Level::ERROR, SDL_GetError());
+            logE(SDL_GetError());
             return false;
         }
         return true;

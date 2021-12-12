@@ -50,3 +50,18 @@ private:
     template<typename Arg>
     void writeArg(Arg value) {internalWrite(std::to_string(value).c_str());}
 };
+
+template<typename ... Args>
+inline void logV(Args&& ... args) {
+    Log::write(Log::Level::VERBOSE, std::forward<Args>(args)...);
+}
+
+template<typename ... Args>
+inline void logI(Args&& ... args) {
+    Log::write(Log::Level::INFO, std::forward<Args>(args)...);
+}
+
+template<typename ... Args>
+inline void logE(Args&& ... args) {
+    Log::write(Log::Level::ERROR, std::forward<Args>(args)...);
+}
