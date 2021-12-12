@@ -4,7 +4,8 @@
 
 #pragma once
 
-#include "types.hpp"
+#include <common/types.hpp>
+#include <common/Value.hpp>
 #include <fs/File.hpp>
 
 class StdFile : public File {
@@ -23,7 +24,7 @@ public:
         file = fopen(path.c_str(), mode);
         if (!file && settings.create && settings.write)
             file = fopen(path.c_str(), "wb+");
-        Log::write(Log::Level::INFO, "Open ", path, ": ", (bool) file);
+        Log::write(Log::Level::VERBOSE, "Open ", path, ": ", (bool) file);
         return file;
     }
 
@@ -34,7 +35,7 @@ public:
     void close() override {
         if (file) {
             fclose(file);
-            Log::write(Log::Level::INFO, "Close ", path);
+            Log::write(Log::Level::VERBOSE, "Close ", path);
         }
         file = nullptr;
     }

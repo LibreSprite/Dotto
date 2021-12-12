@@ -7,6 +7,7 @@
 #include <limits.h>
 
 #include <fs/FileSystem.hpp>
+#include <fs/Folder.hpp>
 #include <fs/StdFile.hpp>
 
 class LinuxRootDir : public Folder {

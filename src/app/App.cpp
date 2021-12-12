@@ -3,6 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <app/App.hpp>
+#include <common/PropertySet.hpp>
 #include <common/System.hpp>
 #include <fs/FileSystem.hpp>
 #include <log/Log.hpp>
@@ -12,13 +13,14 @@ public:
     bool running = true;
     inject<Log> log;
     inject<System> system;
-    inject<FileSystem> fs;
+    inject<FileSystem> fs{"new"};
+
+    PropertySet appSettings;
 
     void boot(int argc, const char* argv[]) override {
         bootLogger();
         bootFS();
         system->boot();
-        Log::write(Log::Level::VERBOSE, "Booting complete");
     }
 
     bool run() override {
@@ -33,7 +35,11 @@ public:
     }
 
     void bootFS() {
-
+        auto file = fs->open("%userdata/LICENSE.txt", {.write=false});
+        if (!file->isOpen()) file = fs->open("%appdir/LICENSE.txt", {.write=false});
+        if (file->isOpen()) {
+            Log::write(Log::Level::VERBOSE, file->readTextFile());
+        }
     }
 };
 
