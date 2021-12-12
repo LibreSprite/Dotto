@@ -4,7 +4,20 @@
 
 #pragma once
 
+#include <regex>
+
 #include <common/types.hpp>
 
+String tolower(const String& string);
+
+String toupper(const String& string);
+
+String trim(const String& input);
+
+Vector<String> inline split(const String& str, const std::regex& expr) {
+    return {std::sregex_token_iterator{str.begin(), str.end(), expr, -1}, std::sregex_token_iterator{}};
+}
+
 Vector<String> split(const String& str, const String& sep);
+
 String join(const Vector<String>& str, const String& sep);

@@ -1,4 +1,44 @@
+// Copyright (c) 2021 LibreSprite Authors (cf. AUTHORS.md)
+// This file is released under the terms of the MIT license.
+// Read LICENSE.txt for more information.
+
+#include <regex>
+
 #include <common/String.hpp>
+
+String tolower(const String& string) {
+    String out;
+    out.reserve(string.size());
+    for (auto c : string)
+        out.push_back(std::tolower(c));
+    return out;
+}
+
+String toupper(const String& string) {
+    String out;
+    out.reserve(string.size());
+    for (auto c : string)
+        out.push_back(std::toupper(c));
+    return out;
+}
+
+String trim(const String& input) {
+    std::size_t start = 0;
+    std::size_t end = input.size() - 1;
+    for (auto c : input) {
+        if (c > ' ')
+            break;
+        start++;
+    }
+
+    if (start == end)
+        return "";
+
+    while (input[end] <= ' ')
+        end--;
+
+    return input.substr(start, end - start + 1);
+}
 
 Vector<String> split(const String& str, const String& sep) {
     Vector<String> out;
