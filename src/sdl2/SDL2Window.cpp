@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL.h>
 
-#include <common/Window.hpp>
+#include <gui/Window.hpp>
 #include <log/Log.hpp>
 
 class SDL2Window : public Window {

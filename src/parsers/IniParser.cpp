@@ -2,9 +2,9 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include "PropertySet.hpp"
 #include <common/inject.hpp>
 #include <common/Parser.hpp>
+#include <common/PropertySet.hpp>
 #include <common/String.hpp>
 
 class IniParser : public Parser {
@@ -51,7 +51,7 @@ public:
 
             auto key = trim(line.substr(0, sep));
             auto value = trim(line.substr(sep + 1));
-            logI(domain, "[", key, "] = [", value, "]");
+            logV(domain, "[", key, "] = [", value, "]");
 
             subset->set(key, value);
         }

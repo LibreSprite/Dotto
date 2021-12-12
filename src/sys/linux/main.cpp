@@ -16,6 +16,5 @@ int main(int argc, const char* argv[]) {
     Log::write(Log::Level::VERBOSE, "Running Dotto!");
     while(app->run());
 
-    Log::write(Log::Level::INFO, "Shutting down");
     return 0;
 }

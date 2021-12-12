@@ -5,7 +5,7 @@
 #pragma once
 
 #include <inject.hpp>
-#include <common/Window.hpp>
+#include <gui/Window.hpp>
 
 class System : public Injectable<System> {
 public:
