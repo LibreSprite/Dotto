@@ -27,7 +27,7 @@ $(ODIR)/%.cpp.o: %.cpp
 	$(CXX) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
 
 libresprite: $(OBJ)
-	$(LN) $(FLAGS) $(LN_FLAGS) $^ -o $@
+	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
 
 .PHONY: clean
 
