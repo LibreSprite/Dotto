@@ -2,6 +2,9 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <chrono>
+#include <thread>
+
 #include <app/App.hpp>
 #include <common/Config.hpp>
 #include <common/Messages.hpp>
@@ -25,7 +28,12 @@ public:
 
     PubSub<msg::Shutdown> pub{this};
 
+    using clock = std::chrono::high_resolution_clock;
+
+    clock::time_point referenceTime;
+
     void boot(int argc, const char* argv[]) override {
+        referenceTime = clock::now();
         log->setGlobal();
         log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args
         fs->boot();
@@ -45,6 +53,10 @@ public:
     bool run() override {
         if (!system->run())
             return false;
+        clock::time_point now = clock::now();
+        auto delta = now - referenceTime;
+        referenceTime = now;
+        std::this_thread::sleep_for(std::chrono::milliseconds{1000 / 60} - delta);
         return running;
     }
 
