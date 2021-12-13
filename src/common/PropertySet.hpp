@@ -8,6 +8,7 @@
 
 #include <common/String.hpp>
 #include <common/Value.hpp>
+#include <Log.hpp>
 
 class PropertySet {
     mutable HashMap<String, std::shared_ptr<Value>> properties;
@@ -37,12 +38,8 @@ public:
             if (!it->second->has<String>())
                 return false;
             out = std::atof(it->second->get<String>().c_str());
-        } else if constexpr (std::is_constructible_v<Type, Value>) {
-            out = Type{*it->second};
         } else if constexpr (std::is_constructible_v<Type, std::shared_ptr<Value>>) {
             out = Type{it->second};
-        } else if constexpr (std::is_assignable_v<Type, Value>) {
-            out = *it->second;
         } else if constexpr (std::is_assignable_v<Type, std::shared_ptr<Value>>) {
             out = Type{it->second};
         } else if constexpr (std::is_assignable_v<Type, String>) {
@@ -53,6 +50,12 @@ public:
             if (!it->second->has<String>())
                 return false;
             out = Type{it->second->get<String>()};
+        } else if constexpr (std::is_assignable_v<Type, Value>) {
+            out = *it->second;
+        } else if constexpr (std::is_constructible_v<Type, Value>) {
+            out = Type{*it->second};
+        } else {
+            return false;
         }
 
         *it->second = out;
@@ -118,7 +121,8 @@ protected:
                     this,
                     +[](void* data, const PropertySet& set) {
                         auto prop = static_cast<Property<Type>*>(data);
-                        set.get(prop->name, prop->value);
+                        bool result = set.get(prop->name, prop->value);
+                        logV("Loading ", prop->name, result?" OK":" FAIL");
                     },
                     +[](void* data, PropertySet& set) {
                         auto prop = static_cast<Property<Type>*>(data);
