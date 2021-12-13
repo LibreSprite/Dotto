@@ -37,7 +37,8 @@ public:
 
     void openMainWindow() {
         PropertySet main;
-        main.append(config->properties->get<std::shared_ptr<PropertySet>>("GfxMode"));
+        main.append(config->properties->get<std::shared_ptr<PropertySet>>("Window"));
+        main.append(config->properties->get<std::shared_ptr<PropertySet>>("MainWindow"));
         system->openWindow(main);
     }
 

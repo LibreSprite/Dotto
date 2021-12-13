@@ -4,19 +4,21 @@
 
 #pragma once
 
-#include <common/inject.hpp>
-#include <common/PropertySet.hpp>
+#include <gui/Node.hpp>
+#include <common/Color.hpp>
 
-class Window : public Injectable<Window>, public std::enable_shared_from_this<Window>, Serializable {
+namespace ui {
+
+class Window : public Node {
 public:
     Property<String> title{this, "title"};
     Property<bool> maximized{this, "maximized"};
     Property<bool> border{this, "border"};
+    Property<S32> x{this, "x"};
+    Property<S32> y{this, "y"};
     Property<U32> width{this, "width"};
     Property<U32> height{this, "height"};
-
-    virtual bool init(const PropertySet& properties) {
-        load(properties);
-        return true;
-    }
+    Property<Color> background{this, "background"};
 };
+
+}
