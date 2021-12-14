@@ -22,7 +22,12 @@ public:
                    " width=", *width,
                    " height=", *height);
 
-        window = SDL_CreateWindow(title->c_str(), *x, *y, *width, *height, SDL_WINDOW_OPENGL);
+        globalRect.width = width->toPixel(0);
+        globalRect.height = height->toPixel(0);
+        localRect.width = globalRect.width;
+        localRect.height = globalRect.height;
+
+        window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL);
         if (!window)
             return false;
 
@@ -39,8 +44,12 @@ public:
             return false;
         ui::Window::update();
         setDirty();
-        glViewport(0, 0, *width, *height);
-        glClearColor(background->r/255.0f, background->g/255.0f, background->b/255.0f, background->a/255.0f);
+
+        glViewport(0, 0, globalRect.width, globalRect.height);
+        glClearColor(background->r/255.0f,
+                     background->g/255.0f,
+                     background->b/255.0f,
+                     background->a/255.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         SDL_GL_SwapWindow(window);
         return true;
