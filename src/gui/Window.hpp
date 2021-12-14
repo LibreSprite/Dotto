@@ -16,8 +16,6 @@ public:
     Property<bool> border{this, "border"};
     Property<S32> x{this, "x"};
     Property<S32> y{this, "y"};
-    Property<U32> width{this, "width"};
-    Property<U32> height{this, "height"};
     Property<Color> background{this, "background"};
 };
 

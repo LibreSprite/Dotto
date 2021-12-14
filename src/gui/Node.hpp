@@ -8,6 +8,8 @@
 #include <common/PropertySet.hpp>
 #include <gui/Events.hpp>
 #include <gui/EventHandler.hpp>
+#include <gui/Rect.hpp>
+#include <gui/Unit.hpp>
 #include <log/Log.hpp>
 
 namespace ui {
@@ -39,6 +41,10 @@ namespace ui {
         }
 
     public:
+        Property<Unit> width{this, "width"};
+        Property<Unit> height{this, "height"};
+        Rect localRect, globalRect;
+
         Node() {
             addEventListener<AddToScene, RemoveFromScene>(this);
         }
