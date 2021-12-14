@@ -25,6 +25,8 @@ public:
         fromString(color);
     }
 
+    Color(U8 r, U8 g, U8 b, U8 a = 255) : r{r}, g{g}, b{b}, a{a} {}
+
     void fromString(const String& color) {
         if (color.empty())
             return;
