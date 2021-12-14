@@ -162,265 +162,274 @@ to delete AccountManager. Perfectly balanced...
 
 template<typename BaseClass_>
 class inject {
-  void doInjection(const String& name);
+    void doInjection(const String& name);
 
 public:
-  using BaseClass = BaseClass_;
+    using BaseClass = BaseClass_;
 
-  inject(std::nullptr_t){}
+    inject(std::nullptr_t){}
 
-  template<typename...Args>
-  inject(const String& name = "", Args&& ... args) {
-    doInjection(name);
-    if (m_ptr) {
-      m_ptr->postInject(std::forward<Args>(args)...);
+    template<typename...Args>
+    inject(const String& name = "", Args&& ... args) {
+        doInjection(name);
+        if (m_ptr) {
+            m_ptr->postInject(std::forward<Args>(args)...);
+        }
     }
-  }
 
-  inject(inject&& other) {
-    std::swap(m_ptr, other.m_ptr);
-    std::swap(onDetach, other.onDetach);
-  }
+    inject(inject&& other) {
+        std::swap(m_ptr, other.m_ptr);
+        std::swap(onDetach, other.onDetach);
+    }
 
-  inject(const inject& other) = delete;
+    inject(const inject& other) = delete;
 
-  ~inject() {onDetach(m_ptr);}
+    ~inject() {onDetach(m_ptr);}
 
-  void operator = (inject&& other) {
-    std::swap(m_ptr, other.m_ptr);
-    std::swap(onDetach, other.onDetach);
-  }
+    void operator = (inject&& other) {
+        std::swap(m_ptr, other.m_ptr);
+        std::swap(onDetach, other.onDetach);
+    }
 
-  bool operator == (BaseClass* other) {return m_ptr == other;}
-  bool operator != (BaseClass* other) {return m_ptr == other;}
+    bool operator == (BaseClass* other) {return m_ptr == other;}
+    bool operator != (BaseClass* other) {return m_ptr == other;}
 
-  BaseClass* operator -> () const {return m_ptr;}
-  BaseClass& operator * () const {return *m_ptr;}
+    BaseClass* operator -> () const {return m_ptr;}
+    BaseClass& operator * () const {return *m_ptr;}
 
-  operator bool () const {return m_ptr;}
-  operator BaseClass* () const {return m_ptr;}
+    operator bool () const {return m_ptr;}
+    operator BaseClass* () const {return m_ptr;}
 
-  template <typename Derived = BaseClass>
-  operator std::shared_ptr<Derived>() {
-    return m_ptr ? std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this()) : nullptr;
-  }
+    template <typename Derived = BaseClass>
+    operator std::shared_ptr<Derived>() {
+        return m_ptr ? std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this()) : nullptr;
+    }
 
-  template <typename Derived = BaseClass>
-  std::shared_ptr<Derived> shared() {
-    return std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this());
-  }
+    template <typename Derived = BaseClass>
+    std::shared_ptr<Derived> shared() {
+        return std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this());
+    }
 
-  template<typename Derived = BaseClass>
-  Derived* get() const {return dynamic_cast<Derived*>(m_ptr);}
+    template<typename Derived = BaseClass>
+    Derived* get() const {return dynamic_cast<Derived*>(m_ptr);}
 
-  void reset() {
-    *this = inject<BaseClass>{nullptr};
-  }
+    void reset() {
+        *this = inject<BaseClass>{nullptr};
+    }
 
 private:
-  BaseClass *m_ptr = nullptr;
-  std::function<void(BaseClass*)> onDetach = [](BaseClass*){};
+    BaseClass *m_ptr = nullptr;
+    std::function<void(BaseClass*)> onDetach = [](BaseClass*){};
 };
 
 template<typename BaseClass_>
 class Injectable {
-  using BaseClass = BaseClass_;
-  using AttachFunction = std::function<BaseClass*()>;
-  using DetachFunction = std::function<void(BaseClass*)>;
-  using TypeMatch = std::function<bool(BaseClass*)>;
-  struct RegistryEntry {
-    AttachFunction attach;
-    DetachFunction detach;
-    TypeMatch match;
-    void* data;
-    std::unordered_set<String> flags;
-    bool hasFlag(const String& flag) {
-      return flags.find(flag) != flags.end();
-    }
-  };
+    using BaseClass = BaseClass_;
+    using AttachFunction = std::function<BaseClass*()>;
+    using DetachFunction = std::function<void(BaseClass*)>;
+    using TypeMatch = std::function<bool(BaseClass*)>;
+    struct RegistryEntry {
+        AttachFunction attach;
+        DetachFunction detach;
+        TypeMatch match;
+        void* data;
+        std::unordered_set<String> flags;
+        bool hasFlag(const String& flag) {
+            return flags.find(flag) != flags.end();
+        }
+    };
 
-  using Registry = std::unordered_map<String, RegistryEntry>;
-  friend class inject<BaseClass_>;
+    using Registry = std::unordered_map<String, RegistryEntry>;
+    friend class inject<BaseClass_>;
 
 public:
-  virtual void postInject(){}
+    virtual void postInject(){}
 
-  template<typename ... Args>
-  static inject<BaseClass_> create(Args&& ... args) {
-    return {"", std::forward<Args>(args)...};
-  }
+    template<typename ... Args>
+    static inject<BaseClass_> create(Args&& ... args) {
+        return {"", std::forward<Args>(args)...};
+    }
 
-  virtual String getName() const {
+    virtual String getName() const {
 #ifdef HAS_DEMANGLE
-    int status;
-    String result = typeid(*this).name();
-    auto name = abi::__cxa_demangle(result.c_str(), 0, 0, &status);
-    if (status == 0) result = name;
-    free(name);
-    return result;
+        int status;
+        String result = typeid(*this).name();
+        auto name = abi::__cxa_demangle(result.c_str(), 0, 0, &status);
+        if (status == 0) result = name;
+        free(name);
+        return result;
 #else
-    return std::to_string(reinterpret_cast<uintptr_t>(this));
+        return std::to_string(reinterpret_cast<uintptr_t>(this));
 #endif
-  }
-
-  virtual ~Injectable() = default;
-
-  static Registry& getRegistry() {
-    static Registry* registry = new Registry();
-    return *registry;
-  }
-
-  static Vector<inject<BaseClass>> getAllWithFlag(const String& flag) {
-    Vector<String> temp;
-    Vector<inject<BaseClass>> all;
-    auto& registry = getRegistry();
-
-    temp.reserve(registry.size());
-    for (auto& entry : registry) {
-      if (!entry.first.empty() && entry.second.hasFlag(flag))
-        temp.emplace_back(entry.first);
     }
 
-    all.reserve(temp.size());
-    for (auto& entry : temp) {
-      all.emplace_back(entry);
-    }
-    return all;
-  }
+    virtual ~Injectable() = default;
 
-  static bool setDefault(const String& name, const std::unordered_set<String>& flags = {}) {
-    auto& registry = getRegistry();
-    auto it = registry.find(name);
-    if (it == registry.end()) {
-      for (auto& entry : registry) {
-        bool match = true;
-        for (auto& flag : flags) {
-          if (!entry.second.hasFlag(flag)) {
-            match = false;
-            break;
-          }
+    static Registry& getRegistry() {
+        static Registry* registry = new Registry();
+        return *registry;
+    }
+
+    static Vector<inject<BaseClass>> getAllWithFlag(const String& flag) {
+        Vector<String> temp;
+        Vector<inject<BaseClass>> all;
+        auto& registry = getRegistry();
+
+        temp.reserve(registry.size());
+        for (auto& entry : registry) {
+            if (!entry.first.empty() && entry.second.hasFlag(flag))
+                temp.emplace_back(entry.first);
         }
-        if (match) {
-          registry[""] = entry.second;
-          return true;
+
+        all.reserve(temp.size());
+        for (auto& entry : temp) {
+            all.emplace_back(entry);
         }
-      }
-
-      std::cout << "Invalid default: " << name << std::endl;
-      return false;
+        return all;
     }
 
-    registry[""] = it->second;
-    return true;
-  }
+    static bool setDefault(const String& name, const std::unordered_set<String>& flags = {}, const String& altName = "") {
+        auto& registry = getRegistry();
+        auto it = registry.find(name);
+        if (it == registry.end()) {
+            for (auto& entry : registry) {
+                bool match = true;
+                for (auto& flag : flags) {
+                    if (!entry.second.hasFlag(flag)) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    registry[altName] = entry.second;
+                    return true;
+                }
+            }
 
-  template<typename DerivedClass>
-  static bool matchType(BaseClass* base) {
-    return !!dynamic_cast<DerivedClass*>(base);
-  }
+            std::cout << "Invalid default: " << name << std::endl;
+            return false;
+        }
 
-  template<typename DerivedClass>
-  class Regular {
-  public:
-    Regular(const String& name, const std::unordered_set<String>& flags = {}) {
-      #if _DEBUG
-      std::cout << "Registered [" << name << "]" << std::endl;
-      #endif
-
-      Injectable<BaseClass>::getRegistry()[name] = {
-        []()->BaseClass*{return new DerivedClass();},
-        [](BaseClass* instance){delete instance;},
-        matchType<DerivedClass>,
-        nullptr,
-        flags
-      };
-    }
-  };
-
-  template<typename DerivedClass>
-  class Shared {
-  public:
-    Shared(const String& name, const std::unordered_set<String>& flags = {}) {
-      #if _DEBUG
-      std::cout << "Registered Shared [" << name << "]" << std::endl;
-      #endif
-
-      class EnableDerivedLock : public DerivedClass {
-      public:
-        std::shared_ptr<EnableDerivedLock> _injection_lock_;
-      };
-
-      Injectable<BaseClass>::getRegistry()[name] = {
-        []()->BaseClass*{
-          auto shared = std::make_shared<EnableDerivedLock>();
-          shared->_injection_lock_ = shared;
-          return shared.get();
-        },
-        [](BaseClass* instance){
-          auto edl = static_cast<EnableDerivedLock*>(instance);
-          if (auto lock = edl->_injection_lock_) {
-            edl->_injection_lock_.reset();
-          }
-        },
-        matchType<DerivedClass>,
-        nullptr,
-        flags
-      };
-    }
-  };
-
-  template<typename DerivedClass>
-  class Singleton {
-  public:
-    Singleton(const String& name, const std::unordered_set<String>& flags = {}) {
-      Injectable<BaseClass>::getRegistry()[name] = {
-        []{
-          static DerivedClass instance;
-          return &instance;
-        },
-        [](BaseClass* ptr){},
-        matchType<DerivedClass>,
-        nullptr,
-        flags
-      };
-    }
-  };
-
-  class Provides {
-  public:
-    String m_name;
-
-    ~Provides(){
-      auto& registry = Injectable<BaseClass>::getRegistry();
-      auto iterator = registry.find(m_name);
-      if (iterator != registry.end() && iterator->second.data == this) {
-        registry.erase(iterator);
-      }
+        registry[altName] = it->second;
+        return true;
     }
 
     template<typename DerivedClass>
-    Provides(DerivedClass* instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
-      m_name = name;
-      Injectable<BaseClass>::getRegistry()[name] = {
-        [=] {return instance;},
-        [](BaseClass* ptr) {},
-        matchType<DerivedClass>,
-        this,
-        flags
-      };
+    static bool matchType(BaseClass* base) {
+        return !!dynamic_cast<DerivedClass*>(base);
     }
-  };
+
+    template<typename DerivedClass>
+    class Regular {
+    public:
+        Regular(const String& name, const std::unordered_set<String>& flags = {}) {
+#if _DEBUG
+            std::cout << "Registered [" << name << "]" << std::endl;
+#endif
+
+            Injectable<BaseClass>::getRegistry()[name] = {
+                []()->BaseClass*{return new DerivedClass();},
+                [](BaseClass* instance){delete instance;},
+                matchType<DerivedClass>,
+                nullptr,
+                flags
+            };
+        }
+    };
+
+    template<typename DerivedClass>
+    class Shared {
+    public:
+        Shared(const String& name, const std::unordered_set<String>& flags = {}) {
+#if _DEBUG
+            std::cout << "Registered Shared [" << name << "]" << std::endl;
+#endif
+
+            class EnableDerivedLock : public DerivedClass {
+            public:
+                std::shared_ptr<EnableDerivedLock> _injection_lock_;
+            };
+
+            Injectable<BaseClass>::getRegistry()[name] = {
+                []()->BaseClass*{
+                    auto shared = std::make_shared<EnableDerivedLock>();
+                    shared->_injection_lock_ = shared;
+                    return shared.get();
+                },
+                [](BaseClass* instance){
+                    auto edl = static_cast<EnableDerivedLock*>(instance);
+                    if (auto lock = edl->_injection_lock_) {
+                        edl->_injection_lock_.reset();
+                    }
+                },
+                matchType<DerivedClass>,
+                nullptr,
+                flags
+            };
+        }
+    };
+
+    template<typename DerivedClass>
+    class Singleton {
+    public:
+        Singleton(const String& name, const std::unordered_set<String>& flags = {}) {
+            Injectable<BaseClass>::getRegistry()[name] = {
+                []{
+                    static DerivedClass instance;
+                    return &instance;
+                },
+                [](BaseClass* ptr){},
+                matchType<DerivedClass>,
+                nullptr,
+                flags
+            };
+        }
+    };
+
+    class Provides {
+    public:
+        String m_name;
+
+        ~Provides(){
+            auto& registry = Injectable<BaseClass>::getRegistry();
+            auto iterator = registry.find(m_name);
+            if (iterator != registry.end() && iterator->second.data == this) {
+                registry.erase(iterator);
+            }
+        }
+
+        Provides(const String& name, const String& alias) {
+            m_name = name;
+            auto& registry = Injectable<BaseClass>::getRegistry();
+            auto it = registry.find(name);
+            if (it != registry.end()) {
+                registry[alias] = it->second;
+            }
+        }
+
+        template<typename DerivedClass, std::enable_if_t<std::is_base_of_v<BaseClass, DerivedClass>, int> = 0>
+        Provides(DerivedClass* instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
+            m_name = name;
+            Injectable<BaseClass>::getRegistry()[name] = {
+                [=] {return instance;},
+                [](BaseClass* ptr) {},
+                matchType<DerivedClass>,
+                this,
+                flags
+            };
+        }
+    };
 };
 
 template<typename BaseClass_>
 void inject<BaseClass_>::doInjection(const String& name) {
-  auto& registry = Injectable<BaseClass>::getRegistry();
-  auto it = registry.find(name);
-  if (it != registry.end()) {
-    auto& registryEntry = it->second;
-    onDetach = registryEntry.detach;
-    m_ptr = registryEntry.attach();
-  } else {
-    std::cout << "Could not create " << name << std::endl;
-  }
+    auto& registry = Injectable<BaseClass>::getRegistry();
+    auto it = registry.find(name);
+    if (it != registry.end()) {
+        auto& registryEntry = it->second;
+        onDetach = registryEntry.detach;
+        m_ptr = registryEntry.attach();
+    } else {
+        std::cout << "Could not create " << name << std::endl;
+    }
 }

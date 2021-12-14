@@ -10,6 +10,9 @@
 
 class SDL2System : public System {
 public:
+    Provides sys{this};
+    ui::Node::Provides win{"sdl2Window", "window"};
+
     bool running = true;
     std::shared_ptr<ui::Node> root;
 
@@ -24,7 +27,7 @@ public:
     }
 
     std::shared_ptr<ui::Window> openWindow(const PropertySet& properties) override {
-        std::shared_ptr<ui::Window> window = inject<ui::Node>{"sdl2Window"};
+        std::shared_ptr<ui::Window> window = inject<ui::Node>{"window"};
         if (window) {
             window->init(properties);
             root->addChild(window);
