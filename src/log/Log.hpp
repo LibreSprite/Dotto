@@ -48,7 +48,13 @@ private:
     void writeArg(char* str) {internalWrite(str);}
 
     template<typename Arg>
-    void writeArg(Arg value) {internalWrite(std::to_string(value).c_str());}
+    void writeArg(Arg value) {
+        if constexpr (std::is_convertible_v<Arg, String>) {
+            internalWrite(static_cast<String>(value).c_str());
+        } else {
+            internalWrite(std::to_string(value).c_str());
+        }
+    }
 };
 
 template<typename ... Args>
