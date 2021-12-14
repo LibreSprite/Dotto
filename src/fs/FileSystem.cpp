@@ -16,6 +16,13 @@ bool FileSystem::boot() {
     return false;
 }
 
+String FileSystem::extension(const String &path) {
+    auto it = path.find_last_of('.');
+    if (it == String::npos)
+        return "";
+    return tolower(path.substr(it + 1));
+}
+
 Vector<String> FileSystem::splitPath(const String& path) {
     auto parts = split(path, std::regex("[/\\\\]"));
     for (auto it = parts.begin(); it != parts.end();) {

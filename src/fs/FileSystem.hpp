@@ -14,6 +14,7 @@ protected:
 public:
     Provides p{this};
     Vector<String> splitPath(const String& path);
+    String extension(const String& path);
     virtual std::shared_ptr<FSEntity> find(const String& path);
     virtual bool boot();
 };
