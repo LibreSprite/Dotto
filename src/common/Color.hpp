@@ -7,7 +7,6 @@
 #include <charconv>
 #include <common/types.hpp>
 #include <common/String.hpp>
-#include <log/Log.hpp>
 
 class Color {
 public:
@@ -61,5 +60,20 @@ public:
         b = static_cast<U8>(rgba >> 8);
         a = static_cast<U8>(rgba);
         return *this;
+    }
+
+    U32 toU32() const {
+        return (U32{r} << 24) |
+            (U32{g} << 16) |
+            (U32{b} << 8) |
+            U32{a};
+    }
+
+    U32 distanceSquared(const Color& other) const {
+        S32 dr = S32{r} - S32{other.r};
+        S32 dg = S32{g} - S32{other.g};
+        S32 db = S32{b} - S32{other.b};
+        S32 da = S32{a} - S32{other.a};
+        return dr*dr + dg*dg + db*db + da*da;
     }
 };
