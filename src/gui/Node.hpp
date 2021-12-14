@@ -43,6 +43,7 @@ namespace ui {
     public:
         Property<Unit> width{this, "width"};
         Property<Unit> height{this, "height"};
+        Property<S32> zIndex{this, "z"};
         Rect localRect, globalRect;
 
         Node() {
@@ -62,7 +63,7 @@ namespace ui {
                 parent->processEvent(event);
         }
 
-        void setDirty() {
+        virtual void setDirty() {
             if (!isDirty) {
                 isDirty = true;
                 if (parent)
@@ -84,12 +85,18 @@ namespace ui {
             return true;
         }
 
+        virtual void draw(U32 z) {
+            for (auto& child : children) {
+                child->draw(z + 1 + *child->zIndex);
+            }
+        }
+
         void remove() {
             if (parent)
                 parent->removeChild(shared_from_this());
         }
 
-        void addChild(std::shared_ptr<Node> child) {
+        virtual void addChild(std::shared_ptr<Node> child) {
             if (!child)
                 return;
             child->remove();
@@ -99,7 +106,7 @@ namespace ui {
                 child->processEvent(AddToScene{});
         }
 
-        void removeChild(std::shared_ptr<Node> node) {
+        virtual void removeChild(std::shared_ptr<Node> node) {
             if (!node) return;
             if (node->parent == this) {
                 auto it = std::find(children.begin(), children.end(), node);

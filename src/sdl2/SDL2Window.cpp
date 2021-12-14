@@ -31,6 +31,8 @@ public:
         if (!window)
             return false;
 
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         context = SDL_GL_CreateContext(window);
         if (!context)
             return false;

@@ -41,6 +41,7 @@ public:
         pumpEvents();
         if (!running) return false;
         root->update();
+        root->draw(0);
         return running;
     }
 
