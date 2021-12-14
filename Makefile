@@ -17,6 +17,7 @@ FLAGS += -Og -g -D_DEBUG # debug build
 
 LN_FLAGS += $(shell sdl2-config --libs)
 LN_FLAGS += -lGL
+LN_FLAGS += -lpng
 LN_FLAGS += -lm
 
 OBJ = $(patsubst %,$(ODIR)/%.o,$(CPP_FILES))
