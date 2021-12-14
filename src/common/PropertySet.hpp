@@ -115,14 +115,20 @@ protected:
         using Type = _Type;
         Type value;
         const String name;
+        std::function<void()> change;
 
-        Property(Serializable* parent, const String& name, const Type& value = Type{}) : name{name} {
+        template<typename ParentType>
+        Property(ParentType* parent, const String& name, const Type& value = Type{}, void (ParentType::*change)() = nullptr) : name{name} {
+            if (change) {
+                this->change = [=]{(parent->*change)();};
+            }
             parent->propertySerializers.push_back(PropertySerializer{
                     this,
                     +[](void* data, const PropertySet& set) {
                         auto prop = static_cast<Property<Type>*>(data);
                         bool result = set.get(prop->name, prop->value);
-                        logV("Loading ", prop->name, result?" OK":" FAIL");
+                        if (result && prop->change)
+                            prop->change();
                     },
                     +[](void* data, PropertySet& set) {
                         auto prop = static_cast<Property<Type>*>(data);
