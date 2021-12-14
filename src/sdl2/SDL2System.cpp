@@ -31,6 +31,12 @@ public:
         if (window) {
             window->init(properties);
             root->addChild(window);
+
+            PropertySet imgProp;
+            imgProp.set("src", "%userhome/Pictures/2021-08-16_12-49.png");
+            std::shared_ptr<ui::Node> img = inject<ui::Node>{"image"};
+            img->init(imgProp);
+            window->addChild(img);
         }
         return window;
     }
