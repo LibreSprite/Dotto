@@ -39,7 +39,7 @@ namespace ui {
 
         Unit& operator = (const String& str) {
             if (!str.empty()) {
-                std::from_chars(str.c_str(), str.c_str() + str.size(), value);
+                value = std::strtof(str.c_str(), nullptr);
                 auto back = str.back();
                 if (back == '%') {
                     type = Type::Percent;
