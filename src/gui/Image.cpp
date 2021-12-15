@@ -12,15 +12,20 @@
 namespace ui {
     class Image : public Node {
         Property<String> src{this, "src", "", &Image::reload};
-        std::shared_ptr<Surface> surface;
+        Property<std::shared_ptr<Surface>> surface{this, "surface"};
+
     public:
         void reload() {
+            auto& surface = *this->surface;
+            surface.reset();
+            if (src->empty())
+                return;
             inject<FileSystem> fs;
             auto file = fs->find(*src)->get<File>();
             if (!file || !file->open()) {
                 logE("Could not load image ", src);
             } else if (auto parser = inject<Parser>{fs->extension(src)}) {
-                surface = parser->parseFile(file).get<std::shared_ptr<Surface>>();
+                surface = parser->parseFile(file);
                 if (!surface) logE("Could not parse ", src);
                 else {
                     logV("Loaded ", src);
@@ -35,6 +40,11 @@ namespace ui {
             } else {
                 logE("Unknown file type ", *src);
             }
+        }
+
+        void draw(U32 z, Graphics& g) override {
+            Node::draw(z, g);
+            g.blit(**surface, 10, 10, z);
         }
     };
 }

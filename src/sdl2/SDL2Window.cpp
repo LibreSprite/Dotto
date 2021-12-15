@@ -2,9 +2,9 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include <GL/gl.h>
 #include <SDL2/SDL.h>
 
+#include <gui/GLGraphics.hpp>
 #include <gui/Window.hpp>
 #include <log/Log.hpp>
 
@@ -12,6 +12,7 @@ class SDL2Window : public ui::Window {
 public:
     SDL_Window* window = nullptr;
     SDL_GLContext context = nullptr;
+    std::unique_ptr<GLGraphics> graphics{new GLGraphics()};
 
     bool init(const PropertySet& properties) override {
         Window::init(properties);
@@ -37,6 +38,9 @@ public:
         if (!context)
             return false;
 
+        SDL_GL_MakeCurrent(window, context);
+        graphics->init();
+
         setDirty();
         return true;
     }
@@ -46,15 +50,15 @@ public:
             return false;
         ui::Window::update();
         setDirty();
-
-        glViewport(0, 0, globalRect.width, globalRect.height);
-        glClearColor(background->r/255.0f,
-                     background->g/255.0f,
-                     background->b/255.0f,
-                     background->a/255.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        SDL_GL_SwapWindow(window);
         return true;
+    }
+
+    void draw(U32 z, Graphics&) override {
+        SDL_GL_MakeCurrent(window, context);
+        graphics->begin(globalRect, *background);
+        ui::Window::draw(z, *graphics.get());
+        graphics->end();
+        SDL_GL_SwapWindow(window);
     }
 
     ~SDL2Window() {

@@ -27,6 +27,10 @@ public:
 
     PixelType* data() {return pixels.data();}
 
+    bool isDirty() const {return dirty;}
+    void setDirty() {dirty = true;}
+    void clearDirty() {dirty = false;}
+
     Color getPixel(U32 x, U32 y) {
         U32 index = x + y * _width;
         return (index >= _width * _height) ? Color{} : getColor(pixels[index]);
@@ -35,17 +39,21 @@ public:
     void setPixelUnsafe(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
         pixels[index] = pixel;
+        dirty = true;
     }
 
     void setPixel(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
-        if (index < _width * _height)
+        if (index < _width * _height) {
             pixels[index] = pixel;
+            dirty = true;
+        }
     }
 
     void setPixel(U32 x, U32 y, const Color& color) {
         U32 index = x + y * _width;
         if (index < _width * _height) {
+            dirty = true;
             if constexpr (std::is_same_v<PixelType, U32>) {
                 pixels[index] = color.toU32();
             } else {
@@ -65,11 +73,11 @@ public:
     }
 
     Palette palette;
+    std::shared_ptr<Texture> texture;
 
 private:
     U32 _width = 0, _height = 0;
     Vector<_PixelType> pixels;
-    std::shared_ptr<Texture> _texture;
     bool dirty;
 };
 

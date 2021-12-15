@@ -47,7 +47,8 @@ public:
         pumpEvents();
         if (!running) return false;
         root->update();
-        root->draw(0);
+        Graphics gfx;
+        root->draw(0, gfx);
         return running;
     }
 

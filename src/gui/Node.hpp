@@ -8,6 +8,7 @@
 #include <common/PropertySet.hpp>
 #include <gui/Events.hpp>
 #include <gui/EventHandler.hpp>
+#include <gui/Graphics.hpp>
 #include <gui/Rect.hpp>
 #include <gui/Unit.hpp>
 #include <log/Log.hpp>
@@ -85,9 +86,9 @@ namespace ui {
             return true;
         }
 
-        virtual void draw(U32 z) {
+        virtual void draw(U32 z, Graphics& gfx) {
             for (auto& child : children) {
-                child->draw(z + 1 + *child->zIndex);
+                child->draw(z + 1 + *child->zIndex, gfx);
             }
         }
 
