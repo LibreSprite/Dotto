@@ -165,7 +165,7 @@ class inject {
     void doInjection(const String& name);
 
 public:
-    using BaseClass = BaseClass_;
+    using BaseClass = typename BaseClass_::BaseClass;
 
     inject(std::nullptr_t){}
 
@@ -205,7 +205,7 @@ public:
         return m_ptr ? std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this()) : nullptr;
     }
 
-    template <typename Derived = BaseClass>
+    template <typename Derived = BaseClass_>
     std::shared_ptr<Derived> shared() {
         return std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this());
     }
@@ -224,7 +224,10 @@ private:
 
 template<typename BaseClass_>
 class Injectable {
+public:
     using BaseClass = BaseClass_;
+
+private:
     using AttachFunction = std::function<BaseClass*()>;
     using DetachFunction = std::function<void(BaseClass*)>;
     using TypeMatch = std::function<bool(BaseClass*)>;
@@ -348,6 +351,9 @@ public:
             class EnableDerivedLock : public DerivedClass {
             public:
                 std::shared_ptr<EnableDerivedLock> _injection_lock_;
+                virtual String getName() const {
+                    return typeid(DerivedClass).name();
+                }
             };
 
             Injectable<BaseClass>::getRegistry()[name] = {
@@ -375,8 +381,8 @@ public:
         Singleton(const String& name, const std::unordered_set<String>& flags = {}) {
             Injectable<BaseClass>::getRegistry()[name] = {
                 []{
-                    static DerivedClass instance;
-                    return &instance;
+                    static std::shared_ptr<DerivedClass> instance = std::make_shared<DerivedClass>();
+                    return instance.get();
                 },
                 [](BaseClass* ptr){},
                 matchType<DerivedClass>,
