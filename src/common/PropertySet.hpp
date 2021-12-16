@@ -8,12 +8,24 @@
 
 #include <common/String.hpp>
 #include <common/Value.hpp>
-#include <Log.hpp>
+#include <log/Log.hpp>
 
 class PropertySet {
     mutable HashMap<String, std::shared_ptr<Value>> properties;
 
 public:
+    PropertySet() = default;
+
+    PropertySet(const PropertySet& other) = default;
+
+    PropertySet(PropertySet&& other) : properties{std::move(other.properties)} {}
+
+    PropertySet(const HashMap<String, Value>& other) {
+        for (auto& entry : other) {
+            set(entry.first, entry.second);
+        }
+    }
+
     template<typename Type>
     bool get(const String& key, Type& out) const {
         auto it = properties.find(tolower(key));
@@ -70,8 +82,8 @@ public:
     }
 
     template<typename Type>
-    void set(const String& key, Type& value) {
-        properties.insert({tolower(key), std::make_shared<Value>(value)});
+    void set(const String& key, Type&& value) {
+        properties.insert({tolower(key), std::make_shared<Value>(std::forward<Type>(value))});
     }
 
     void append(const PropertySet& other) {
@@ -118,7 +130,7 @@ protected:
         std::function<void()> change;
 
         template<typename ParentType>
-        Property(ParentType* parent, const String& name, const Type& value = Type{}, void (ParentType::*change)() = nullptr) : name{name} {
+        Property(ParentType* parent, const String& name, const Type& value = Type{}, void (ParentType::*change)() = nullptr) : name{name}, value{value} {
             if (change) {
                 this->change = [=]{(parent->*change)();};
             }
