@@ -8,6 +8,7 @@
 #include <common/PropertySet.hpp>
 #include <gui/Events.hpp>
 #include <gui/EventHandler.hpp>
+#include <gui/Flow.hpp>
 #include <gui/Graphics.hpp>
 #include <gui/Rect.hpp>
 #include <gui/Unit.hpp>
@@ -24,6 +25,12 @@ namespace ui {
         Node* parent = nullptr;
         bool isInScene = false;
         bool isDirty = true;
+        std::shared_ptr<Flow> flowInstance;
+
+        void reflow() {
+            flowInstance = inject<Flow>{*flow};
+            setDirty();
+        }
 
     protected:
         void forwardToChildren(const Event& event) {
@@ -33,6 +40,7 @@ namespace ui {
 
         virtual void eventHandler(const AddToScene& event) {
             isInScene = true;
+            resize();
             if (isDirty && parent) // parent is null for root node
                 parent->setDirty();
         }
@@ -42,10 +50,20 @@ namespace ui {
         }
 
     public:
-        Property<Unit> width{this, "width"};
-        Property<Unit> height{this, "height"};
-        Property<S32> zIndex{this, "z"};
         Rect localRect, globalRect;
+
+        Property<bool> visible{this, "visible"};
+
+        Property<Unit> width{this, "width", {"50px"}, &Node::resize};
+        Property<Unit> minWidth{this, "min-width", {"10px"}, &Node::resize};
+        Property<Unit> maxWidth{this, "max-width", {"100%"}, &Node::resize};
+
+        Property<Unit> height{this, "height", {"50px"}, &Node::resize};
+        Property<Unit> minHeight{this, "min-height", {"10px"}, &Node::resize};
+        Property<Unit> maxHeight{this, "max-height", {"100%"}, &Node::resize};
+
+        Property<String> flow{this, "flow", "column", &Node::reflow};
+        Property<S32> zIndex{this, "z", 0};
 
         Node() {
             addEventListener<AddToScene, RemoveFromScene>(this);
@@ -53,13 +71,14 @@ namespace ui {
 
         virtual bool init(const PropertySet& properties) {
             load(properties);
+            reflow();
             return true;
         }
 
         virtual void processEvent(const Event& event) {
+            EventHandler::processEvent(event);
             if (event.bubble == Event::Bubble::Down && !event.cancel)
                 forwardToChildren(event);
-            EventHandler::processEvent(event);
             if (event.bubble == Event::Bubble::Up && !event.cancel && parent)
                 parent->processEvent(event);
         }
@@ -86,7 +105,20 @@ namespace ui {
             return true;
         }
 
-        virtual void draw(U32 z, Graphics& gfx) {
+        virtual void resize() {
+            if (parent)
+                parent->resize();
+        }
+
+        virtual void doResize() {
+            if (!parent || !flowInstance)
+                return;
+            flowInstance->update(children, globalRect);
+            for (auto& child : children)
+                child->doResize();
+        }
+
+        virtual void draw(S32 z, Graphics& gfx) {
             for (auto& child : children) {
                 child->draw(z + 1 + *child->zIndex, gfx);
             }
