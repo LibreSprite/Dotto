@@ -7,6 +7,7 @@
 #include <common/System.hpp>
 #include <doc/Surface.hpp>
 #include <fs/FileSystem.hpp>
+#include <gui/Graphics.hpp>
 #include <gui/Node.hpp>
 
 namespace ui {
@@ -20,31 +21,21 @@ namespace ui {
             surface.reset();
             if (src->empty())
                 return;
-            inject<FileSystem> fs;
-            auto file = fs->find(*src)->get<File>();
-            if (!file || !file->open()) {
+            surface = inject<FileSystem>{}->find(*src)->parse();
+            if (!surface)
                 logE("Could not load image ", src);
-            } else if (auto parser = inject<Parser>{fs->extension(src)}) {
-                surface = parser->parseFile(file);
-                if (!surface) logE("Could not parse ", src);
-                else {
-                    logV("Loaded ", src);
-                    match::variant(*surface,
-                                   [](Surface256& surface){
-                                       logI("Image256 size: ", surface.width(), " x ", surface.height());
-                                   },
-                                   [](SurfaceRGBA& surface){
-                                       logI("ImageRGBA size: ", surface.width(), " x ", surface.height());
-                                   });
-                }
-            } else {
-                logE("Unknown file type ", *src);
-            }
         }
 
-        void draw(U32 z, Graphics& g) override {
+        void draw(S32 z, Graphics& g) override {
+            if (*surface) {
+                g.blit({
+                        .surface = *surface,
+                        .source = localRect,
+                        .destination = globalRect,
+                        .zIndex = z
+                    });
+            }
             Node::draw(z, g);
-            g.blit(**surface, 10, 10, z);
         }
     };
 }

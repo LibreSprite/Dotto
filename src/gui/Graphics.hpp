@@ -5,8 +5,15 @@
 #pragma once
 
 #include <doc/Surface.hpp>
+#include <gui/Rect.hpp>
 
 class Graphics {
 public:
-    virtual void blit(Surface& surface, S32 x, S32 y, S32 z){}
+    struct BlitSettings {
+        std::shared_ptr<Surface> surface;
+        const ui::Rect& source;
+        const ui::Rect& destination;
+        S32 zIndex;
+    };
+    virtual void blit(const BlitSettings& settings){}
 };
