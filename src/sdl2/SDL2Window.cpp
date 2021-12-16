@@ -48,12 +48,19 @@ public:
     bool update() override {
         if (!window || !context)
             return false;
+        int width, height;
+        SDL_GetWindowSize(window, &width, &height);
+        if (width != globalRect.width || height != globalRect.height || needResize) {
+            globalRect.width = width;
+            globalRect.height = height;
+            doResize();
+        }
         ui::Window::update();
         setDirty();
         return true;
     }
 
-    void draw(U32 z, Graphics&) override {
+    void draw(S32 z, Graphics&) override {
         SDL_GL_MakeCurrent(window, context);
         graphics->begin(globalRect, *background);
         ui::Window::draw(z, *graphics.get());

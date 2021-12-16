@@ -10,6 +10,8 @@
 namespace ui {
 
 class Window : public Node {
+protected:
+    bool needResize = true;
 public:
     Property<String> title{this, "title"};
     Property<bool> maximized{this, "maximized"};
@@ -18,6 +20,15 @@ public:
     Property<S32> y{this, "y"};
     Property<Color> background{this, "background"};
     Property<String> skin{this, "skin", "default"};
+
+    void resize() override {
+        needResize = true;
+    }
+
+    void doResize() override {
+        needResize = false;
+        Node::doResize();
+    }
 };
 
 }
