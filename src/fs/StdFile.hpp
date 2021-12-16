@@ -40,6 +40,10 @@ public:
         file = nullptr;
     }
 
+    String type() override {
+        return inject<FileSystem>{}->extension(path);
+    }
+
     bool isOpen() override {
         return file;
     }

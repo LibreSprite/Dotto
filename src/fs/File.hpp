@@ -26,6 +26,7 @@ public:
     virtual U64 tell() = 0;
     virtual U64 read(void* buffer, U64 size) = 0;
     virtual U64 write(const void* buffer, U64 size) = 0;
+    virtual String type() = 0;
 
     String readTextFile() {
         auto len = size();

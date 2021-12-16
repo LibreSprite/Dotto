@@ -19,5 +19,7 @@ public:
         return this ? std::dynamic_pointer_cast<Type>(shared_from_this()) : nullptr;
     }
 
+    Value parse();
+
     static inline String separator;
 };
