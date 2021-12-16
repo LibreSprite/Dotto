@@ -17,6 +17,7 @@ public:
     Property<S32> x{this, "x"};
     Property<S32> y{this, "y"};
     Property<Color> background{this, "background"};
+    Property<String> skin{this, "skin", "default"};
 };
 
 }

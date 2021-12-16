@@ -27,15 +27,15 @@ public:
     }
 
     std::shared_ptr<ui::Window> openWindow(const PropertySet& properties) override {
-        std::shared_ptr<ui::Window> window = inject<ui::Node>{"window"};
+        auto window = inject<ui::Window>{"window"}.shared();
         if (window) {
             window->init(properties);
             root->addChild(window);
-
-            PropertySet imgProp;
-            imgProp.set("src", "%userhome/Pictures/2021-08-16_12-49.png");
-            std::shared_ptr<ui::Node> img = inject<ui::Node>{"image"};
-            img->init(imgProp);
+            auto img = inject<ui::Node>{"image"}.shared();
+            img->init({{
+                        {"src", *window->skin + "/skin.png"},
+                        {"height", "100%"}
+                    }});
             window->addChild(img);
         }
         return window;
