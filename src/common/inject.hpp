@@ -207,7 +207,7 @@ public:
 
     template <typename Derived = BaseClass_>
     std::shared_ptr<Derived> shared() {
-        return std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this());
+        return m_ptr ? std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this()) : nullptr;
     }
 
     template<typename Derived = BaseClass>
@@ -411,6 +411,17 @@ public:
             if (it != registry.end()) {
                 registry[alias] = it->second;
             }
+        }
+
+        Provides(std::shared_ptr<BaseClass>& instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
+            m_name = name;
+            Injectable<BaseClass>::getRegistry()[name] = {
+                [&] {return instance.get();},
+                [](BaseClass* ptr) {},
+                [](BaseClass*){return false;},
+                this,
+                flags
+            };
         }
 
         template<typename DerivedClass, std::enable_if_t<std::is_base_of_v<BaseClass, DerivedClass>, int> = 0>

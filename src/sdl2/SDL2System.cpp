@@ -15,6 +15,7 @@ public:
 
     bool running = true;
     std::shared_ptr<ui::Node> root;
+    ui::Node::Provides _root{root, "root"};
 
     bool boot() override {
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
