@@ -16,6 +16,17 @@ namespace ui {
         Rect(Rect&&) = default;
         Rect(const String& str) {*this = str;}
 
+        Rect& operator = (Rect& other) = default;
+        Rect& operator = (Rect&& other) = default;
+        Rect& operator = (const Rect& other) = default;
+
+        bool operator == (const Rect& other) {
+            return x == other.x &&
+                y == other.y &&
+                width == other.width &&
+                height == other.height;
+        }
+
         Rect& operator = (const String& str) {
             auto parts = split(str, std::regex("\\s+"));
             x = parts.size() > 0 ? std::stol(parts[0]) : 0;

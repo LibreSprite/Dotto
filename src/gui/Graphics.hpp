@@ -13,6 +13,7 @@ public:
         std::shared_ptr<Surface> surface;
         const ui::Rect& source;
         const ui::Rect& destination;
+        const ui::Rect& nineSlice;
         S32 zIndex;
     };
     virtual void blit(const BlitSettings& settings){}

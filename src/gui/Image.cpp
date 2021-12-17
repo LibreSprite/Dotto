@@ -17,6 +17,7 @@ namespace ui {
         Property<String> src{this, "src", "", &Image::reload};
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
         PubSub<msg::Flush> pub{this};
+        Property<Rect> nineSlice{this, "slice"};
 
     public:
         void on(msg::Flush& flush) {
@@ -39,6 +40,7 @@ namespace ui {
                         .surface = *surface,
                         .source = localRect,
                         .destination = globalRect,
+                        .nineSlice = nineSlice,
                         .zIndex = z
                     });
             }

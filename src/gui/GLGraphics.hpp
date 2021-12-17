@@ -18,6 +18,10 @@
 class GLTexture : public Texture {
 public:
     U32 id = 0;
+    U32 width = 0;
+    U32 height = 0;
+    F32 iwidth = 0;
+    F32 iheight = 0;
 
     GLTexture() {
         glGenTextures(1, &id);
@@ -161,6 +165,10 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface.width(), surface.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, surface.data());
+        texture->width = surface.width();
+        texture->iwidth = 1.0f / texture->width;
+        texture->height = surface.height();
+        texture->iheight = 1.0f / texture->height;
         // glGenerateMipmap(GL_TEXTURE_2D);
     }
 
@@ -169,57 +177,77 @@ public:
         surface.clearDirty();
     }
 
-    void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
-        auto x = settings.destination.x;
-        auto y = settings.destination.y;
-        auto z = settings.zIndex;
-        auto w = settings.destination.width;
-        auto h = settings.destination.height;
+    struct Vertex {
+        F32 x;
+        F32 y;
+        F32 z;
+        F32 u;
+        F32 v;
+    };
 
+    void push(const Vertex& vtx) {
         constexpr const F32 depthFactor = 0.0000001f;
-        auto zFloat = z * depthFactor;
+        vertices.push_back(vtx.x * iwidth - 1.0f);
+        vertices.push_back(1.0f - vtx.y * iheight);
+        vertices.push_back(vtx.z * depthFactor);
+        vertices.push_back(vtx.u);
+        vertices.push_back(vtx.v);
+    }
+
+    struct Rectf {
+        F32 x, y, w, h;
+        F32 u0, v0, u1, v1;
+    };
+
+    void push(F32 z, const Rectf& rect) {
+            push({rect.x, rect.y, z, rect.u0, rect.v0});
+            push({rect.x, (rect.y + rect.h), z, rect.u0, rect.v1});
+            push({(rect.x + rect.w), rect.y, z, rect.u1, rect.v0});
+            push({rect.x, (rect.y + rect.h), z, rect.u0, rect.v1});
+            push({(rect.x + rect.w), (rect.y + rect.h), z, rect.u1, rect.v1});
+            push({(rect.x + rect.w), rect.y, z, rect.u1, rect.v0});
+    }
+
+    void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
+        F32 x = settings.destination.x;
+        F32 y = settings.destination.y;
+        F32 z = settings.zIndex;
+        F32 w = settings.destination.width;
+        F32 h = settings.destination.height;
 
         if (activeTexture != texture) {
             flush();
             activeTexture = texture;
         }
 
-        vertices.push_back(x * iwidth - 1.0f);
-        vertices.push_back(1.0f - y * iheight);
-        vertices.push_back(zFloat);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
+        if (settings.nineSlice.width == 0) {
+            push(z, {x, y, w, h, 0.0f, 0.0f, 1.0f, 1.0f});
+        } else {
+            F32 sX = settings.nineSlice.x;
+            F32 sY = settings.nineSlice.y;
+            F32 sW = settings.nineSlice.width;
+            F32 sH = settings.nineSlice.height;
+            F32 nsX = sX * texture->iwidth;
+            F32 nsY = sY * texture->iheight;
+            F32 nsW = sW * texture->iwidth;
+            F32 nsH = sH * texture->iheight;
+            F32 rW = texture->width - sW - sX;
+            F32 rH = texture->height - sH - sY;
 
-        vertices.push_back(x * iwidth - 1.0f);
-        vertices.push_back(1.0f - (y + h) * iheight);
-        vertices.push_back(zFloat);
-        vertices.push_back(0.0f);
-        vertices.push_back(1.0f);
+            push(z, {x, y, sX, sY, 0.0f, 0.0f, nsX, nsY});
+            push(z, {x + sX, y, w - sX - rW, sY, nsX, 0.0f, nsX + nsW, nsY});
+            push(z, {x + w - rW, y, rW, sY, nsX + nsW, 0.0f, 1.0f, nsY});
 
-        vertices.push_back((x + w) * iwidth - 1.0f);
-        vertices.push_back(1.0f - y * iheight);
-        vertices.push_back(zFloat);
-        vertices.push_back(1.0f);
-        vertices.push_back(0.0f);
+            y += sY;
+            push(z, {x, y, sX, h - sY - rH, 0.0f, nsY, nsX, nsY + nsH});
+            push(z, {x + sX, y, w - sX - rW, h - sY - rH, nsX, nsY, nsX + nsW, nsY + nsH});
+            push(z, {x + w - rW, y, rW, h - sY - rH, nsX + nsW, nsY, 1.0f, nsY + nsH});
 
-
-        vertices.push_back(x * iwidth - 1.0f);
-        vertices.push_back(1.0f - (y + h) * iheight);
-        vertices.push_back(zFloat);
-        vertices.push_back(0.0f);
-        vertices.push_back(1.0f);
-
-        vertices.push_back((x + w) * iwidth - 1.0f);
-        vertices.push_back(1.0f - (y + h) * iheight);
-        vertices.push_back(zFloat);
-        vertices.push_back(1.0f);
-        vertices.push_back(1.0f);
-
-        vertices.push_back((x + w) * iwidth - 1.0f);
-        vertices.push_back(1.0f - y * iheight);
-        vertices.push_back(zFloat);
-        vertices.push_back(1.0f);
-        vertices.push_back(0.0f);
+            y += h - sY - rH;
+            push(z, {x, y, sX, rH, 0.0f, nsY + nsH, nsX, 1.0f});
+            push(z, {x + sX, y, w - sX - rW, rH, nsX, nsY + nsH, nsX + nsW, 1.0f});
+            push(z, {x + w - rW, y, rW, rH, nsX + nsW, nsY + nsH, 1.0f, 1.0f});
+        }
     }
 
     template<typename SurfaceType>
