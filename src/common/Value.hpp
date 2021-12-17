@@ -10,18 +10,25 @@
 
 class Value {
     std::any value;
+    bool (*equal)(const std::any& left, const std::any& right);
 
 public:
+    Value() : equal{nullptr} {}
+
     template <typename Type>
-    Value(const Type& v) : value(v) {}
+    Value(const Type& v) {*this = v;}
 
-    Value(const Value& v) : value(v.value) {}
+    Value(const Value& v) = default;
 
-    Value(Value&& v) : value(std::move(v.value)) {}
+    Value(Value&& v) = default;
 
-    Value(const char* v) : value(String(v)) {}
+    Value(const char* v) {*this = String{v};}
 
-    Value(char* v) : value(String(v)) {}
+    Value(char* v) {*this = String{v};}
+
+    bool empty() {
+        return !value.has_value() || has<std::nullptr_t>();
+    }
 
     template<typename Type>
     bool has() const {
@@ -38,10 +45,27 @@ public:
         return std::any_cast<Type>(value);
     }
 
+    Value& operator = (Value&& other) = default;
+    Value& operator = (Value& other) = default;
+    Value& operator = (const Value& other) = default;
+
     template<typename Type>
     Value& operator = (const Type& v) {
         value = v;
+        equal = +[](const std::any& left, const std::any& right) {
+            return std::any_cast<Type>(left) == std::any_cast<Type>(right);
+        };
         return *this;
+    }
+
+    bool operator == (const Value& other) const {
+        if (other.value.has_value() != value.has_value())
+            return false;
+        if (!value.has_value())
+            return true;
+        if (value.type() != other.value.type())
+            return false;
+        return equal(value, other.value);
     }
 
     const char* typeName() const {

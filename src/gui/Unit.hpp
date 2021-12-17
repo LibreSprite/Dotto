@@ -51,6 +51,10 @@ namespace ui {
             return *this;
         }
 
+        bool operator == (const Unit& other) const {
+            return other.type == type && other.value == value;
+        }
+
         operator String () {
             switch (type) {
             case Type::Default: return "";

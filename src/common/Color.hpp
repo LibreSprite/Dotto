@@ -76,4 +76,11 @@ public:
         S32 da = S32{a} - S32{other.a};
         return dr*dr + dg*dg + db*db + da*da;
     }
+
+    bool operator == (const Color& other) const {
+        return r == other.r &&
+            g == other.g &&
+            b == other.b &&
+            a == other.a;
+    }
 };
