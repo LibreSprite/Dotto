@@ -3,6 +3,7 @@ LN = g++
 ODIR = build
 
 SRC_DIRS = $(shell find src -type d)
+SRC_DIRS += $(shell find libs -type d)
 
 CPP_FLAGS += --std=c++17
 CPP_FLAGS += -MMD -MP
@@ -10,6 +11,7 @@ CPP_FLAGS += $(patsubst %,-I%,$(SRC_DIRS))
 CPP_FLAGS += $(shell sdl2-config --cflags)
 
 CPP_FILES := $(shell find src -type f -name '*.cpp')
+CPP_FILES += $(shell find libs -type f -name '*.cpp')
 
 # FLAGS += -m32 # uncomment for 32-bit build
 FLAGS += -Og -g -D_DEBUG # debug build
