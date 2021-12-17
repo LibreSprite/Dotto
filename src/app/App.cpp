@@ -39,15 +39,8 @@ public:
         fs->boot();
         config->boot();
         system->boot();
-        openMainWindow();
+        ui::Node::fromXML("MainWindow");
         pub(msg::BootComplete{});
-    }
-
-    void openMainWindow() {
-        PropertySet main;
-        main.append(config->properties->get<std::shared_ptr<PropertySet>>("Window"));
-        main.append(config->properties->get<std::shared_ptr<PropertySet>>("MainWindow"));
-        system->openWindow(main);
     }
 
     bool run() override {

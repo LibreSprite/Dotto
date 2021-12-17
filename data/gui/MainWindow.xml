@@ -1,0 +1,5 @@
+<window width="800px" height="600px" background="rgb{64,32,32}">
+  <image src="%appdata/skins/default/skin.png" height="25%"/>
+  <image src="%appdata/skins/default/skin.png" height="25%"/>
+  <image src="%appdata/skins/default/skin.png" height="50%"/>
+</window>

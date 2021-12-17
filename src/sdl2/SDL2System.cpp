@@ -27,21 +27,6 @@ public:
         return true;
     }
 
-    std::shared_ptr<ui::Window> openWindow(const PropertySet& properties) override {
-        auto window = inject<ui::Window>{"window"}.shared();
-        if (window) {
-            window->init(properties);
-            root->addChild(window);
-            auto img = inject<ui::Node>{"image"}.shared();
-            img->init({{
-                        {"src", *window->skin + "/skin.png"},
-                        {"height", "100%"}
-                    }});
-            window->addChild(img);
-        }
-        return window;
-    }
-
     bool run() override {
         if (!running) return false;
         if (!root || root->getChildren().empty()) return false;

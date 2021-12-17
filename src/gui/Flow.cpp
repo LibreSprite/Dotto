@@ -96,7 +96,7 @@ namespace ui {
 
             for (auto& size : sizes) {
                 if (!size.done) {
-                    S32 result = fillWidth * (size.result / totalWeight);
+                    S32 result = fillWidth * (size.result / F32(totalWeight));
                     S32 adjusted = result;
                     if (size.min.getType() != Unit::Type::Default)
                         adjusted = std::max(adjusted, size.min.toPixel(parent));

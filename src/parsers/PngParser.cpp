@@ -33,7 +33,6 @@ public:
     }
 
     std::shared_ptr<Surface> read(File& file) {
-        logI("Initializing libpng");
         png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         if (!png) {
             logE("Could not init libpng");
