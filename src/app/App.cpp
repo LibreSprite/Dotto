@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include "fs/Cache.hpp"
 #include <chrono>
 #include <thread>
 
@@ -19,6 +20,9 @@ public:
     bool running = true;
     inject<Log> log;
     inject<System> system;
+
+    inject<Cache> cache{"new"};
+    Cache::Provides globalCache{cache.get()};
 
     inject<FileSystem> fs{"new"};
     FileSystem::Provides globalFS{fs.get()};
