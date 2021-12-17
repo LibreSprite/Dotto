@@ -12,6 +12,8 @@ namespace ui {
     class Node;
 
     class Flow : public Injectable<Flow>, public std::enable_shared_from_this<Flow> {
+    protected:
+        virtual void absolute(std::shared_ptr<Node> child, ui::Rect& parentRect);
     public:
         virtual void update(Vector<std::shared_ptr<Node>>&, ui::Rect& parentRect) = 0;
     };

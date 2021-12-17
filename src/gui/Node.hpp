@@ -54,6 +54,10 @@ namespace ui {
 
         Property<bool> visible{this, "visible"};
 
+        Property<bool> absolute{this, "absolute", false, &Node::resize};
+        Property<Unit> x{this, "x", {"0px"}, &Node::resize};
+        Property<Unit> y{this, "y", {"0px"}, &Node::resize};
+
         Property<Unit> width{this, "width", {"50px"}, &Node::resize};
         Property<Unit> minWidth{this, "min-width", {"10px"}, &Node::resize};
         Property<Unit> maxWidth{this, "max-width", {"100%"}, &Node::resize};

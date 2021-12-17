@@ -6,19 +6,33 @@
 #include <gui/Node.hpp>
 
 namespace ui {
+    void Flow::absolute(std::shared_ptr<Node> child, ui::Rect& parentRect) {
+        child->localRect.x = child->x->toPixel(parentRect.width);
+        child->localRect.y = child->y->toPixel(parentRect.height);
+        child->localRect.width = child->width->toPixel(parentRect.width);
+        child->localRect.height = child->width->toPixel(parentRect.height);
+        child->globalRect.x = child->localRect.x + parentRect.x;
+        child->globalRect.y = child->localRect.y + parentRect.y;
+        child->globalRect.width = child->localRect.width;
+        child->globalRect.height = child->localRect.height;
+    }
 
     class FlowFill : public Flow {
     public:
         void update(Vector<std::shared_ptr<Node>>& children, ui::Rect& parentRect) override {
             for (auto& child : children) {
-                child->localRect.x = 0;
-                child->localRect.y = 0;
-                child->localRect.width = parentRect.width;
-                child->localRect.height = parentRect.height;
-                child->globalRect.x = parentRect.x;
-                child->globalRect.y = parentRect.y;
-                child->globalRect.width = parentRect.width;
-                child->globalRect.height = parentRect.height;
+                if (*child->absolute) {
+                    absolute(child, parentRect);
+                } else {
+                    child->localRect.x = 0;
+                    child->localRect.y = 0;
+                    child->localRect.width = parentRect.width;
+                    child->localRect.height = parentRect.height;
+                    child->globalRect.x = parentRect.x;
+                    child->globalRect.y = parentRect.y;
+                    child->globalRect.width = parentRect.width;
+                    child->globalRect.height = parentRect.height;
+                }
             }
         }
     };
@@ -29,6 +43,7 @@ namespace ui {
     class FlowRow : public Flow {
     public:
         struct Size {
+            Node* child;
             Unit given, min, max;
             bool done;
             U32 result;
@@ -38,17 +53,21 @@ namespace ui {
         void update(Vector<std::shared_ptr<Node>>& children, ui::Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
-                sizes.push_back({
-                        .given = child->width,
-                        .min = child->minWidth,
-                        .max = child->maxWidth
-                    });
+                if (*child->absolute) {
+                    absolute(child, parentRect);
+                } else {
+                    sizes.push_back({
+                            .child = child.get(),
+                            .given = child->width,
+                            .min = child->minWidth,
+                            .max = child->maxWidth
+                        });
+                }
             }
             fit(sizes, parentRect.width);
             position(sizes, parentRect.width);
-            for (U32 i = 0, max = sizes.size(); i < max; ++i) {
-                auto& child = children[i];
-                auto& size = sizes[i];
+            for (auto& size : sizes) {
+                auto child = size.child;
                 child->localRect.x = size.offset;
                 child->localRect.y = 0;
                 child->localRect.width = size.result;
@@ -106,7 +125,6 @@ namespace ui {
                     size.result = adjusted;
                     size.done = true;
                 }
-                logI("Result: ", size.result);
             }
         }
     };
@@ -118,19 +136,22 @@ namespace ui {
     public:
         void update(Vector<std::shared_ptr<Node>>& children, ui::Rect& parentRect) override {
             Vector<Size> sizes;
-            logI("reflow child count: ", children.size());
             for (auto& child : children) {
-                sizes.push_back({
-                        .given = child->height,
-                        .min = child->minHeight,
-                        .max = child->maxHeight
-                    });
+                if (*child->absolute) {
+                    absolute(child, parentRect);
+                } else {
+                    sizes.push_back({
+                            .child = child.get(),
+                            .given = child->height,
+                            .min = child->minHeight,
+                            .max = child->maxHeight
+                        });
+                }
             }
             fit(sizes, parentRect.height);
             position(sizes, parentRect.height);
-            for (U32 i = 0, max = sizes.size(); i < max; ++i) {
-                auto& child = children[i];
-                auto& size = sizes[i];
+            for (auto& size : sizes) {
+                auto& child = size.child;
                 child->localRect.x = 0;
                 child->localRect.y = size.offset;
                 child->localRect.width = parentRect.width;
