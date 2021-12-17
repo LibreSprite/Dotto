@@ -14,6 +14,10 @@ public:
     virtual bool isFile() = 0;
     virtual void init(const Value& resource) = 0;
 
+    virtual String getUID() {
+        return std::to_string(reinterpret_cast<uintptr_t>(this));
+    }
+
     template<typename Type>
     std::shared_ptr<Type> get() {
         return this ? std::dynamic_pointer_cast<Type>(shared_from_this()) : nullptr;

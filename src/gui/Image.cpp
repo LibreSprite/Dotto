@@ -3,7 +3,9 @@
 // Read LICENSE.txt for more information.
 
 #include <common/match.hpp>
+#include <common/Messages.hpp>
 #include <common/Parser.hpp>
+#include <common/PubSub.hpp>
 #include <common/System.hpp>
 #include <doc/Surface.hpp>
 #include <fs/FileSystem.hpp>
@@ -14,8 +16,13 @@ namespace ui {
     class Image : public Node {
         Property<String> src{this, "src", "", &Image::reload};
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
+        PubSub<msg::Flush> pub{this};
 
     public:
+        void on(msg::Flush& flush) {
+            flush.hold(*surface);
+        }
+
         void reload() {
             auto& surface = *this->surface;
             surface.reset();

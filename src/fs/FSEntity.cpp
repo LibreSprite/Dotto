@@ -2,15 +2,30 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <fs/Cache.hpp>
 #include <fs/FSEntity.hpp>
 #include <fs/File.hpp>
 #include <common/Parser.hpp>
 
 Value FSEntity::parse() {
     auto file = get<File>();
-    if (!file || !file->open())
+    if (!file)
         return nullptr;
-    if (auto parser = inject<Parser>{file->type()})
-        return parser->parseFile(file);
-    return nullptr;
+
+    inject<Cache> cache;
+    auto cacheKey = file->getUID();
+    Value value = cache->get(cacheKey);
+    if (!value.empty())
+        return value;
+
+    if (!file->open())
+        return nullptr;
+
+    if (auto parser = inject<Parser>{file->type()}) {
+        value = parser->parseFile(file);
+        if (!value.empty())
+            cache->set(cacheKey, value);
+    }
+
+    return value;
 }

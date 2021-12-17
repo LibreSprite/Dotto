@@ -18,6 +18,8 @@ public:
             path = resource.get<String>();
     }
 
+    String getUID() override {return path;}
+
     bool open(const FileOpenSettings& settings) override {
         close();
         const char* mode = settings.write ? "rb+" : "rb";

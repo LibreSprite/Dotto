@@ -74,7 +74,8 @@ public:
     }
 
     template<typename Message>
-    void operator () (Message&& msg) {
+    Message& operator () (Message&& msg) {
         internal::pub(internal::channel<Message>(), &msg);
+        return msg;
     }
 };

@@ -4,9 +4,26 @@
 
 #pragma once
 
+#include <Value.hpp>
+
 namespace msg {
 
     class BootComplete{};
     class Shutdown{};
 
+    class Flush{
+        const Value& resource;
+        bool held = false;
+    public:
+        Flush(const Value& resource) : resource{resource} {};
+
+        void hold(const Value& other) {
+            if (!held)
+                held = other == resource;
+        }
+
+        bool isHeld() {
+            return held;
+        }
+    };
 }
