@@ -10,7 +10,7 @@ namespace ui {
         child->localRect.x = child->x->toPixel(parentRect.width);
         child->localRect.y = child->y->toPixel(parentRect.height);
         child->localRect.width = child->width->toPixel(parentRect.width);
-        child->localRect.height = child->width->toPixel(parentRect.height);
+        child->localRect.height = child->height->toPixel(parentRect.height);
         child->globalRect.x = child->localRect.x + parentRect.x;
         child->globalRect.y = child->localRect.y + parentRect.y;
         child->globalRect.width = child->localRect.width;
