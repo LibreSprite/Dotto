@@ -11,9 +11,8 @@
 
 class Texture;
 
-template<typename _PixelType>
-class GenericSurface {
-    using PixelType = _PixelType;
+class Surface {
+    using PixelType = U32;
 
 public:
     U32 width() const {return _width;}
@@ -68,7 +67,7 @@ public:
         } else {
             if (pixel < palette.size())
                 return palette[pixel];
-            return {pixel, pixel, pixel};
+            return Color(pixel, pixel, pixel);
         }
     }
 
@@ -77,10 +76,6 @@ public:
 
 private:
     U32 _width = 0, _height = 0;
-    Vector<_PixelType> pixels;
+    Vector<PixelType> pixels;
     bool dirty;
 };
-
-using SurfaceRGBA = GenericSurface<U32>;
-using Surface256 = GenericSurface<U8>;
-using Surface = std::variant<Surface256, SurfaceRGBA>;

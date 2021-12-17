@@ -97,16 +97,14 @@ public:
 
         png_read_image(png, rowPointers);
 
-        auto varsurface = std::make_shared<Surface>(SurfaceRGBA{});
-        auto& surface = std::get<SurfaceRGBA>(*varsurface);
-
-        surface.resize(width, height);
-        auto data = surface.data();
+        auto surface = std::make_shared<Surface>(Surface{});
+        surface->resize(width, height);
+        auto data = surface->data();
         for (U32 y = 0; y < height; y++) {
             std::memcpy(&data[y * width], rowPointers[y], stride);
         }
 
-        return varsurface;
+        return surface;
     }
 };
 

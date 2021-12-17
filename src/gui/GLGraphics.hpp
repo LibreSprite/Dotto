@@ -67,7 +67,7 @@ public:
             "in vec2 uv;\n"
             "uniform sampler2D surface;\n"
             "void main() {\n"
-            "    FragColor = texture(surface, uv);\n" // vec4(uv.x, uv.y, 0.0f, 1.0f);\n"
+            "    FragColor = texture(surface, uv);\n"
             "}");
 
         shader = link(vertexShader, fragmentShader);
@@ -158,7 +158,7 @@ public:
         activeTexture.reset();
     }
 
-    void upload(SurfaceRGBA& surface) {
+    void upload(Surface& surface) {
         auto texture = std::static_pointer_cast<GLTexture>(surface.texture);
         surface.clearDirty();
         texture->bind(GL_TEXTURE_2D);
@@ -170,11 +170,6 @@ public:
         texture->height = surface.height();
         texture->iheight = 1.0f / texture->height;
         // glGenerateMipmap(GL_TEXTURE_2D);
-    }
-
-    void upload(Surface256& surface) {
-        auto texture = std::static_pointer_cast<GLTexture>(surface.texture);
-        surface.clearDirty();
     }
 
     struct Vertex {
@@ -250,8 +245,8 @@ public:
         }
     }
 
-    template<typename SurfaceType>
-    void blit(SurfaceType& surface, const BlitSettings& settings) {
+    void blit(const BlitSettings& settings) override {
+        auto& surface = *settings.surface;
         auto texture = std::static_pointer_cast<GLTexture>(surface.texture);
         if (!texture) {
             texture = std::make_shared<GLTexture>();
@@ -263,11 +258,5 @@ public:
             upload(surface);
 
         push(texture, settings);
-    }
-
-    void blit(const BlitSettings& settings) override {
-        match::variant(*settings.surface,
-                       [&](Surface256& surface){blit(surface, settings);},
-                       [&](SurfaceRGBA& surface){blit(surface, settings);});
     }
 };
