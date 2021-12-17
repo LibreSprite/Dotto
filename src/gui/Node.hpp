@@ -69,6 +69,8 @@ namespace ui {
             addEventListener<AddToScene, RemoveFromScene>(this);
         }
 
+        static std::shared_ptr<Node> fromXML(const String& widgetName);
+
         virtual bool init(const PropertySet& properties) {
             load(properties);
             reflow();
