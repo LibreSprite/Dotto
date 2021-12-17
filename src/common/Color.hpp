@@ -26,6 +26,14 @@ public:
 
     Color(U8 r, U8 g, U8 b, U8 a = 255) : r{r}, g{g}, b{b}, a{a} {}
 
+    operator String () const {
+        return "rgba{" + std::to_string(r) +
+            "," + std::to_string(g) +
+            "," + std::to_string(b) +
+            "," + std::to_string(a) +
+            "}";
+    }
+
     void fromString(const String& color) {
         if (color.empty())
             return;
