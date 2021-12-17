@@ -21,6 +21,11 @@ public:
     Property<Color> background{this, "background"};
     Property<String> skin{this, "skin", "default"};
 
+    void postInject() override {
+        if (auto root = inject<ui::Node>{"root"})
+            root->addChild(shared_from_this());
+    }
+
     void resize() override {
         needResize = true;
     }
