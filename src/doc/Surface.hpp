@@ -26,6 +26,8 @@ public:
 
     PixelType* data() {return pixels.data();}
 
+    U32 dataSize() {return pixels.size() * sizeof(PixelType);};
+
     bool isDirty() const {return dirty;}
     void setDirty() {dirty = true;}
     void clearDirty() {dirty = false;}
