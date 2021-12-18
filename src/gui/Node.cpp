@@ -9,6 +9,31 @@
 
 static ui::Node::Shared<ui::Node> node{"node"};
 
+static void loadNodeProperties(ui::Node* node, XMLElement* element) {
+    PropertySet props;
+    for (auto& prop : element->attributes) {
+        props.set(prop.first, prop.second);
+    }
+    node->init(props);
+}
+
+static void loadChildNodes(ui::Node* parent, XMLElement* element) {
+    for (auto xml : element->children) {
+        if (!xml->isElement())
+            continue;
+
+        auto childElement = std::static_pointer_cast<XMLElement>(xml);
+        auto child = ui::Node::fromXML(childElement->tag);
+        if (!child)
+            continue;
+
+        loadNodeProperties(child.get(), childElement.get());
+        loadChildNodes(child.get(), childElement.get());
+
+        parent->addChild(child);
+    }
+}
+
 std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
     auto& nodeRegistry = ui::Node::getRegistry();
 
@@ -27,32 +52,8 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
         return nullptr;
     }
 
-    {
-        PropertySet props;
-        for (auto& prop : element->attributes) {
-            props.set(prop.first, prop.second);
-        }
-        widget->init(props);
-    }
-
-    for (auto xml : element->children) {
-        if (!xml->isElement())
-            continue;
-
-        auto childElement = std::static_pointer_cast<XMLElement>(xml);
-        auto child = fromXML(childElement->tag);
-        if (!child)
-            continue;
-
-        {
-            PropertySet props;
-            for (auto& prop : childElement->attributes)
-                props.set(prop.first, prop.second);
-            child->init(props);
-        }
-
-        widget->addChild(child);
-    }
+    loadNodeProperties(widget.get(), element.get());
+    loadChildNodes(widget.get(), element.get());
 
     return widget;
 }

@@ -96,7 +96,7 @@ namespace ui {
                 switch (size.given.getType()) {
                 case Unit::Type::Pixel: {
                     size.done = true;
-                    size.result = size.given.toPixel(0);
+                    size.result = size.given.toPixel(parent);
                     fillWidth -= size.result;
                     break;
                 }

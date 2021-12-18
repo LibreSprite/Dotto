@@ -5,6 +5,7 @@
 #pragma once
 
 #include <common/types.hpp>
+#include <regex>
 
 namespace ui {
     class Unit {
@@ -17,37 +18,56 @@ namespace ui {
 
         constexpr Unit() = default;
 
-        constexpr Unit(const Unit& other) : value{other.value}, type{other.type} {}
+        constexpr Unit(const Unit& other) = default;
 
-        constexpr Unit(Unit&& other) : value{other.value}, type{other.type} {}
+        constexpr Unit(Unit&& other) = default;
 
         Unit(const String& str) {*this = str;}
 
         constexpr Unit& operator = (const Unit& other) {
             value = other.value;
             type = other.type;
+            reference = other.reference;
+            referenceType = other.referenceType;
             return *this;
         }
 
         constexpr Unit& operator = (Unit&& other) {
             value = other.value;
             type = other.type;
+            reference = other.reference;
+            referenceType = other.referenceType;
             return *this;
         }
 
         Unit& operator = (const String& str) {
-            if (str.empty()) {
-                type = Type::Default;
-            } else {
-                value = std::strtof(str.c_str(), nullptr);
-                auto back = str.back();
-                if (back == '%') {
-                    value /= 100.0f;
-                    type = Type::Percent;
+            auto load = +[](const String& str, F32& value, Type& type){
+                if (str.empty()) {
+                    type = Type::Default;
                 } else {
-                    type = Type::Pixel;
+                    value = std::strtof(str.c_str(), nullptr);
+                    auto back = str.back();
+                    if (back == '%') {
+                        value /= 100.0f;
+                        type = Type::Percent;
+                    } else {
+                        type = Type::Pixel;
+                    }
                 }
+            };
+            std::cmatch match;
+            std::regex_match(str.c_str(), match, std::regex("(?:([0-9]*(?:px|%?))(\\s*[+-]\\s*))?([0-9]+(?:px|%?))"));
+
+            if (match.empty()) {
+                type = Type::Default;
+                referenceType = Type::Default;
+            } else {
+                load(match[1].matched ? match[1].str() : "", reference, referenceType);
+                load(match[3].matched ? match[3].str() : "", value, type);
+                if (match[2].str() == "-")
+                    value = -value;
             }
+
             return *this;
         }
 
@@ -66,9 +86,30 @@ namespace ui {
 
         S32 toPixel(S32 parent) {
             switch (type) {
-            case Type::Default: return 0;
-            case Type::Percent: return static_cast<S32>(parent * value + 0.5f);
-            case Type::Pixel: return static_cast<S32>(value + 0.5f);
+            case Type::Default:
+                return 0;
+
+            case Type::Percent:
+                switch (referenceType) {
+                case Type::Default:
+                    return static_cast<S32>(parent * value + 0.5f);
+                case Type::Pixel:
+                    return static_cast<S32>(reference + 0.5f) + static_cast<S32>(parent * value + 0.5f);
+                case Type::Percent:
+                    return static_cast<S32>(parent * reference + 0.5f) + static_cast<S32>(parent * value + 0.5f);
+                }
+                return 0;
+
+            case Type::Pixel:
+                switch (referenceType) {
+                case Type::Default:
+                    return static_cast<S32>(value + 0.5f);
+                case Type::Pixel:
+                    return static_cast<S32>(reference + 0.5f) + static_cast<S32>(value + 0.5f);
+                case Type::Percent:
+                    return static_cast<S32>(parent * reference + 0.5f) + static_cast<S32>(value + 0.5f);
+                }
+                return 0;
             }
             return 0;
         }
@@ -80,5 +121,7 @@ namespace ui {
     private:
         F32 value = 1.0f;
         Type type = Type::Percent;
+        F32 reference = 0;
+        Type referenceType = Type::Default;
     };
 }
