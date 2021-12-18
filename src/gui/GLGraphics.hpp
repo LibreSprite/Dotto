@@ -215,13 +215,19 @@ public:
             activeTexture = texture;
         }
 
-        if (settings.nineSlice.width == 0) {
+        F32 sW = settings.nineSlice.width;
+        F32 sH = settings.nineSlice.height;
+
+        if (sW == 0 && settings.nineSlice.x != 0)
+            sW = texture->width - settings.nineSlice.x * 2;
+        if (sH == 0 && settings.nineSlice.y != 0)
+            sH = texture->height - settings.nineSlice.y * 2;
+
+        if (sW <= 0 || sH <= 0) {
             push(z, {x, y, w, h, 0.0f, 0.0f, 1.0f, 1.0f});
         } else {
             F32 sX = settings.nineSlice.x;
             F32 sY = settings.nineSlice.y;
-            F32 sW = settings.nineSlice.width;
-            F32 sH = settings.nineSlice.height;
             F32 nsX = sX * texture->iwidth;
             F32 nsY = sY * texture->iheight;
             F32 nsW = sW * texture->iwidth;
