@@ -17,12 +17,6 @@ public:
     bool init(const PropertySet& properties) override {
         Window::init(properties);
 
-        Log::write(Log::Level::VERBOSE,
-                   "SDL2Window maximized=", *maximized,
-                   " title=", *title,
-                   " width=", *width,
-                   " height=", *height);
-
         globalRect.width = width->toPixel(0);
         globalRect.height = height->toPixel(0);
         localRect.width = globalRect.width;
@@ -31,6 +25,8 @@ public:
         window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL);
         if (!window)
             return false;
+
+        id = SDL_GetWindowID(window);
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);

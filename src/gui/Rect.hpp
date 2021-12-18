@@ -43,6 +43,13 @@ namespace ui {
                    std::to_string(height);
         }
 
+        bool contains(S32 px, S32 py) {
+            return px >= x &&
+                px < static_cast<S32>(x + width) &&
+                py >= y &&
+                py < static_cast<S32>(y + height);
+        }
+
         S32 right() {return x + width;}
         S32 bottom() {return y + height;}
         S32 top() {return y;}

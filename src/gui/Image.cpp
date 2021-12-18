@@ -16,13 +16,42 @@ namespace ui {
     class Image : public Node {
         Property<String> src{this, "src", "", &Image::reload};
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
-        PubSub<msg::Flush> pub{this};
         Property<Rect> nineSlice{this, "slice"};
+        PubSub<msg::Flush> pub{this};
 
     public:
+        Image() {
+            addEventListener<ui::MouseEnter,
+                             ui::MouseLeave,
+                             ui::Click,
+                             ui::Focus,
+                             ui::Blur>(this);
+        }
+
         void on(msg::Flush& flush) {
             flush.hold(*surface);
         }
+
+        void eventHandler(const ui::MouseLeave&) {
+            logI("Move Leave ", src);
+        }
+
+        void eventHandler(const ui::MouseEnter&) {
+            logI("Move Enter ", src);
+        }
+
+        void eventHandler(const ui::Click&) {
+            logI("Click ", src);
+        }
+
+        void eventHandler(const ui::Blur&) {
+            logI("Blur ", src);
+        }
+
+        void eventHandler(const ui::Focus&) {
+            logI("Focus ", src);
+        }
+
 
         void reload() {
             auto& surface = *this->surface;

@@ -26,4 +26,25 @@ namespace msg {
             return held;
         }
     };
+
+    struct WindowMaximized {const U32 windowId;};
+    struct WindowMinimized {const U32 windowId;};
+    struct WindowRestored {const U32 windowId;};
+
+    struct MouseMove {
+        const U32 windowId;
+        const S32 x, y;
+    };
+
+    struct MouseUp {
+        const U32 windowId;
+        S32 x, y;
+        U32 button;
+    };
+
+    struct MouseDown {
+        const U32 windowId;
+        S32 x, y;
+        U32 button;
+    };
 }

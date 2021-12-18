@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <common/types.hpp>
+
 namespace ui {
 
     class Node;
@@ -11,7 +13,7 @@ namespace ui {
     class Event {
     public:
         virtual ~Event() = default;
-        Node* target = nullptr;
+        mutable Node* target = nullptr;
         enum class Bubble {
             None,
             Up,
@@ -20,6 +22,12 @@ namespace ui {
         Bubble bubble = Bubble::None;
         bool cascade = true;
         mutable bool cancel = false;
+
+        S32 globalX;
+        S32 globalY;
+
+        virtual S32 targetX() const;
+        virtual S32 targetY() const;
     };
 
     struct AddToScene : public Event {
@@ -28,9 +36,51 @@ namespace ui {
         }
     };
 
+    struct Blur : public Event {};
+    struct Focus : public Event {};
+
     struct RemoveFromScene : public Event {
         RemoveFromScene() {
             bubble = Bubble::Down;
+        }
+    };
+
+    struct MouseEnter : public Event {};
+
+    struct MouseLeave : public Event {};
+
+    struct MouseMove : public Event {
+        MouseMove(S32 globalX, S32 globalY) {
+            bubble = Bubble::Up;
+            this->globalX = globalX;
+            this->globalY = globalY;
+        }
+    };
+
+    struct MouseDown : public Event {
+        U32 button;
+        MouseDown(S32 globalX, S32 globalY, U32 button) : button{button} {
+            bubble = Bubble::Up;
+            this->globalX = globalX;
+            this->globalY = globalY;
+        }
+    };
+
+    struct MouseUp : public Event {
+        U32 button;
+        MouseUp(S32 globalX, S32 globalY, U32 button) : button{button} {
+            bubble = Bubble::Up;
+            this->globalX = globalX;
+            this->globalY = globalY;
+        }
+    };
+
+    struct Click : public Event {
+        U32 button;
+        Click(S32 globalX, S32 globalY, U32 button) : button{button} {
+            bubble = Bubble::Up;
+            this->globalX = globalX;
+            this->globalY = globalY;
         }
     };
 }

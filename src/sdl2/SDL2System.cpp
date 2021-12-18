@@ -4,6 +4,8 @@
 
 #include <SDL2/SDL.h>
 
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <common/System.hpp>
 #include <gui/Events.hpp>
 #include <log/Log.hpp>
@@ -12,6 +14,7 @@ class SDL2System : public System {
 public:
     Provides sys{this};
     ui::Node::Provides win{"sdl2Window", "window"};
+    PubSub<> pub{this};
 
     bool running = true;
     std::shared_ptr<ui::Node> root;
@@ -44,6 +47,24 @@ public:
             switch (event.type) {
             case SDL_QUIT:
                 running = false;
+                break;
+            case SDL_WINDOWEVENT_MAXIMIZED:
+                pub(msg::WindowMaximized{event.window.windowID});
+                break;
+            case SDL_WINDOWEVENT_MINIMIZED:
+                pub(msg::WindowMinimized{event.window.windowID});
+                break;
+            case SDL_WINDOWEVENT_RESTORED:
+                pub(msg::WindowMinimized{event.window.windowID});
+                break;
+            case SDL_MOUSEMOTION:
+                pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y});
+                break;
+            case SDL_MOUSEBUTTONUP:
+                pub(msg::MouseUp{event.button.windowID, event.button.x, event.button.y, event.button.button});
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, event.button.button});
                 break;
             }
         }
