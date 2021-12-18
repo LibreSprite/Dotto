@@ -50,7 +50,8 @@ namespace ui {
     struct MouseLeave : public Event {};
 
     struct MouseMove : public Event {
-        MouseMove(S32 globalX, S32 globalY) {
+        U32 buttons;
+        MouseMove(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
             bubble = Bubble::Up;
             this->globalX = globalX;
             this->globalY = globalY;
@@ -58,8 +59,8 @@ namespace ui {
     };
 
     struct MouseDown : public Event {
-        U32 button;
-        MouseDown(S32 globalX, S32 globalY, U32 button) : button{button} {
+        U32 buttons;
+        MouseDown(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
             bubble = Bubble::Up;
             this->globalX = globalX;
             this->globalY = globalY;
@@ -67,8 +68,8 @@ namespace ui {
     };
 
     struct MouseUp : public Event {
-        U32 button;
-        MouseUp(S32 globalX, S32 globalY, U32 button) : button{button} {
+        U32 buttons;
+        MouseUp(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
             bubble = Bubble::Up;
             this->globalX = globalX;
             this->globalY = globalY;
@@ -76,8 +77,8 @@ namespace ui {
     };
 
     struct Click : public Event {
-        U32 button;
-        Click(S32 globalX, S32 globalY, U32 button) : button{button} {
+        U32 buttons;
+        Click(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
             bubble = Bubble::Up;
             this->globalX = globalX;
             this->globalY = globalY;

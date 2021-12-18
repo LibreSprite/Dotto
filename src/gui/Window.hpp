@@ -45,7 +45,7 @@ public:
 
     void on(msg::MouseMove& event) {
         if (event.windowId == id) {
-            ui::MouseMove guiEvent{event.x, event.y};
+            ui::MouseMove guiEvent{event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
@@ -67,7 +67,7 @@ public:
 
     void on(msg::MouseDown& event) {
         if (event.windowId == id) {
-            ui::MouseDown guiEvent{event.x, event.y, event.button};
+            ui::MouseDown guiEvent{event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
@@ -90,14 +90,14 @@ public:
 
     void on(msg::MouseUp& event) {
         if (event.windowId == id) {
-            ui::MouseUp guiEvent{event.x, event.y, event.button};
+            ui::MouseUp guiEvent{event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
 
             if (auto focus = focusTarget.lock()) {
                 if (focus.get() == guiEvent.target) {
-                    guiEvent.target->processEvent(ui::Click{event.x, event.y, event.button});
+                    guiEvent.target->processEvent(ui::Click{event.x, event.y, event.buttons});
                 }
             }
 

@@ -58,13 +58,13 @@ public:
                 pub(msg::WindowMinimized{event.window.windowID});
                 break;
             case SDL_MOUSEMOTION:
-                pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y});
+                pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y, event.motion.state});
                 break;
             case SDL_MOUSEBUTTONUP:
-                pub(msg::MouseUp{event.button.windowID, event.button.x, event.button.y, event.button.button});
+                pub(msg::MouseUp{event.button.windowID, event.button.x, event.button.y, 1U << event.button.button});
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, event.button.button});
+                pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, 1U << event.button.button});
                 break;
             }
         }

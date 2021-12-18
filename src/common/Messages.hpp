@@ -34,17 +34,18 @@ namespace msg {
     struct MouseMove {
         const U32 windowId;
         const S32 x, y;
+        U32 buttons;
     };
 
     struct MouseUp {
         const U32 windowId;
         S32 x, y;
-        U32 button;
+        U32 buttons;
     };
 
     struct MouseDown {
         const U32 windowId;
         S32 x, y;
-        U32 button;
+        U32 buttons;
     };
 }
