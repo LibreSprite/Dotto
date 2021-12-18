@@ -13,31 +13,49 @@ namespace ui {
 
     class EventHandler {
         struct Listener {
-            void* const target;
-            void (* const call)(void* target, const Event& event);
+            void* target;
+            void (*call)(void* target, const Event& event);
         };
 
         HashMap<std::type_index, Vector<Listener>> handlers;
 
         template<typename Type, typename Target>
         void addSingleEventListener(Target* target) {
+            auto& listeners = handlers[std::type_index(typeid(Type))];
             Listener obj {
                 target,
                 +[](void* target, const Event& event){
                     static_cast<Target*>(target)->eventHandler(*static_cast<const Type*>(&event));
                 }
             };
-            handlers[std::type_index(typeid(Type))].push_back(obj);
+
+            for (auto& listener : listeners) {
+                if (listener.target == nullptr) {
+                    listener = obj;
+                    return;
+                }
+            }
+
+            listeners.push_back(obj);
         }
 
-    protected:
-
+    public:
         template<typename ... Type, typename Target>
         void addEventListener(Target* target) {
             (addSingleEventListener<Type>(target),...);
         }
 
-    public:
+        void removeEventListeners(void* target) {
+            for (auto& entry : handlers) {
+                for (auto& listener : entry.second) {
+                    if (listener.target == target) {
+                        listener.target = nullptr;
+                        listener.call = nullptr;
+                    }
+                }
+            }
+        }
+
         virtual void processEvent(const Event& event) {
             auto it = handlers.find(std::type_index(typeid(event)));
             if (it != handlers.end()) {

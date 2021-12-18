@@ -16,6 +16,8 @@
 
 namespace ui {
 
+    class Controller;
+
     class Node : public Injectable<Node>,
                  public EventHandler,
                  public Serializable,
@@ -26,11 +28,14 @@ namespace ui {
         bool isInScene = false;
         bool isDirty = true;
         std::shared_ptr<Flow> flowInstance;
+        std::shared_ptr<Controller> controller;
 
         void reflow() {
             flowInstance = inject<Flow>{*flow};
             setDirty();
         }
+
+        void reattach();
 
     protected:
         void forwardToChildren(const Event& event) {
@@ -52,6 +57,7 @@ namespace ui {
     public:
         Rect localRect, globalRect;
 
+        Property<String> controllerName{this, "controller", "", &Node::reattach};
         Property<bool> visible{this, "visible"};
 
         Property<bool> absolute{this, "absolute", false, &Node::resize};

@@ -4,6 +4,7 @@
 
 #include <common/XML.hpp>
 #include <fs/FileSystem.hpp>
+#include <gui/Controller.hpp>
 #include <gui/Node.hpp>
 
 
@@ -56,4 +57,20 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
     loadChildNodes(widget.get(), element.get());
 
     return widget;
+}
+
+void ui::Node::reattach() {
+    if (controller) {
+        auto copy = controller;
+        controller.reset();
+        copy->detach();
+        removeEventListeners(copy.get());
+    }
+
+    if (controllerName->empty())
+        return;
+
+    controller = inject<Controller>{controllerName};
+    if (controller)
+        controller->attach(this);
 }
