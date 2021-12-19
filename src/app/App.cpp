@@ -2,7 +2,6 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include "fs/Cache.hpp"
 #include <chrono>
 #include <thread>
 
@@ -12,8 +11,10 @@
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
 #include <common/System.hpp>
+#include <fs/Cache.hpp>
 #include <fs/FileSystem.hpp>
 #include <log/Log.hpp>
+#include <tools/Tool.hpp>
 
 class AppImpl : public App {
 public:
@@ -43,6 +44,7 @@ public:
         fs->boot();
         config->boot();
         system->boot();
+        Tool::boot();
         ui::Node::fromXML("MainWindow");
         pub(msg::BootComplete{});
     }
