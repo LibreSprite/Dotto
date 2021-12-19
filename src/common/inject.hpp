@@ -291,6 +291,24 @@ public:
         return all;
     }
 
+    static Vector<inject<BaseClass>> createAll() {
+        Vector<String> temp;
+        Vector<inject<BaseClass>> all;
+        auto& registry = getRegistry();
+
+        temp.reserve(registry.size());
+        for (auto& entry : registry) {
+            if (!entry.first.empty())
+                temp.emplace_back(entry.first);
+        }
+
+        all.reserve(temp.size());
+        for (auto& entry : temp) {
+            all.emplace_back(entry);
+        }
+        return all;
+    }
+
     static bool setDefault(const String& name, const std::unordered_set<String>& flags = {}, const String& altName = "") {
         auto& registry = getRegistry();
         auto it = registry.find(name);
