@@ -14,7 +14,6 @@
 #include <fs/Cache.hpp>
 #include <fs/FileSystem.hpp>
 #include <log/Log.hpp>
-#include <tools/Tool.hpp>
 
 class AppImpl : public App {
 public:
@@ -44,7 +43,6 @@ public:
         fs->boot();
         config->boot();
         system->boot();
-        Tool::boot();
         ui::Node::fromXML("MainWindow");
         pub(msg::BootComplete{});
     }

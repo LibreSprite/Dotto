@@ -91,4 +91,8 @@ public:
             b == other.b &&
             a == other.a;
     }
+
+    bool operator != (const Color& other) const {
+        return !(*this == other);
+    }
 };

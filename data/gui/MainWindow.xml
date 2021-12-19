@@ -1,4 +1,4 @@
-<window width="800px" height="600px" flow="column" background="rgb{64,32,32}">
+<window controller="main" width="800px" height="600px" flow="column" background="rgb{64,32,32}">
   <image src="%appdata/skins/default/skin.png" height="25%"/>
   <image src="%appdata/skins/default/window.png" height="90%" width="90%" x="5%" y="10px" absolute="true" slice="7 30">
     <image src="%appdata/skins/default/close.png" height="21px" width="21px" x="100%-30px" y="4px" absolute="true"/>
