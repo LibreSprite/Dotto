@@ -10,20 +10,16 @@
 
 class MainWindow : public ui::Controller {
 public:
-    void attach(ui::Node* node) override {
-        ui::Controller::attach(node);
+    void attach() override {
         Tool::boot();
-        node->addEventListener<ui::KeyDown, ui::KeyUp>(this);
-        // node->init({{
-        //             {"surface", surface}
-        //         }});
+        node()->addEventListener<ui::KeyDown, ui::KeyUp>(this);
     }
 
     void eventHandler(const ui::KeyDown& event) {
         if (event.keycode == 'b') {
-            Tool::active = Tool::instances.back().shared();
+            Tool::active = Tool::instances["pencil"];
         } else if (event.keycode == 'f') {
-            Tool::active = Tool::instances.front().shared();
+            Tool::active = Tool::instances["bucket"];
         }
         if (auto tool = Tool::active.lock())
             logV("Active tool: ", tool->getName());

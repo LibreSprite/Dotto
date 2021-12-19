@@ -9,8 +9,8 @@ namespace ui {
 
     void Controller::detach() {
         if (_node)
-            _node->removeEventListeners(this);
-        _node = nullptr;
+            node()->removeEventListeners(this);
+        *_node = nullptr;
     }
 
 }

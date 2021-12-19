@@ -24,9 +24,11 @@ namespace ui {
             surface.reset();
             if (src->empty())
                 return;
-            surface = inject<FileSystem>{}->find(*src)->parse();
+            surface = FileSystem::parse(*src);
             if (!surface)
                 logE("Could not load image ", src);
+            else
+                logI("Loaded ", src);
         }
 
     public:

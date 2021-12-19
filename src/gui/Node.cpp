@@ -35,14 +35,33 @@ static void loadChildNodes(ui::Node* parent, XMLElement* element) {
             continue;
 
         auto childElement = std::static_pointer_cast<XMLElement>(xml);
-        auto child = ui::Node::fromXML(childElement->tag);
+
+        std::shared_ptr<ui::Node> child;
+
+        if (childElement->tag == "query") {
+            auto it = childElement->attributes.find("id");
+            if (it != childElement->attributes.end()) {
+                child = parent->findChildById(it->second);
+                if (!child)
+                    logE("Could not find child [", it->second, "]");
+            } else {
+                logE("Could not query child without id");
+                for (auto& entry : childElement->attributes) {
+                    logE(entry.first, " -> ", entry.second);
+                }
+            }
+        } else {
+            child = ui::Node::fromXML(childElement->tag);
+            if (child) {
+                parent->addChild(child);
+            }
+        }
+
         if (!child)
             continue;
 
         loadNodeProperties(child.get(), childElement.get());
         loadChildNodes(child.get(), childElement.get());
-
-        parent->addChild(child);
     }
 }
 
@@ -83,5 +102,21 @@ void ui::Node::reattach() {
 
     controller = inject<Controller>{controllerName};
     if (controller)
-        controller->attach(this);
+        controller->init(model);
+}
+
+void ui::Node::reattachWidget() {
+    if (widget) {
+        auto copy = widget;
+        widget.reset();
+        copy->detach();
+        removeEventListeners(copy.get());
+    }
+
+    if (widgetName->empty())
+        return;
+
+    widget = inject<Controller>{widgetName};
+    if (widget)
+        widget->init(model);
 }

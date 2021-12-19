@@ -11,6 +11,7 @@
 #include <log/Log.hpp>
 
 class PropertySet {
+    friend class Serializable;
     mutable HashMap<String, std::shared_ptr<Value>> properties;
 
 public:
@@ -20,10 +21,54 @@ public:
 
     PropertySet(PropertySet&& other) : properties{std::move(other.properties)} {}
 
-    PropertySet(const HashMap<String, Value>& other) {
-        for (auto& entry : other) {
+    PropertySet(const std::initializer_list<std::pair<String, Value>>& args) {
+        for (auto& entry : args) {
             set(entry.first, entry.second);
         }
+    }
+
+    template<typename Type>
+    static bool assignProperty(Value& from, Type& out) {
+        if (from.has<Type>()) {
+            out = from.get<Type>();
+            return true;
+        }
+
+        if constexpr (std::is_same_v<Type, bool>) {
+            if (from.has<String>()) {
+                String str = tolower(from.get<String>());
+                out = str.size() && (str[0] == 't' || str[0] == 'y');
+            } else out = false;
+        } else if constexpr (std::is_integral_v<Type>) {
+            if (!from.has<String>())
+                return false;
+            out = std::atol(from.get<String>().c_str());
+        } else if constexpr (std::is_floating_point_v<Type>) {
+            if (!from.has<String>())
+                return false;
+            out = std::atof(from.get<String>().c_str());
+        } else if constexpr (std::is_constructible_v<Type, std::shared_ptr<Value>>) {
+            out = Type{from};
+        } else if constexpr (std::is_assignable_v<Type, std::shared_ptr<Value>>) {
+            out = Type{from};
+        } else if constexpr (std::is_assignable_v<Type, String>) {
+            if (!from.has<String>())
+                return false;
+            out = from.get<String>();
+        } else if constexpr (std::is_constructible_v<Type, String>) {
+            if (!from.has<String>())
+                return false;
+            out = Type{from.get<String>()};
+        } else if constexpr (std::is_assignable_v<Type, Value>) {
+            out = from;
+        } else if constexpr (std::is_constructible_v<Type, Value>) {
+            out = Type{from};
+        } else {
+            return false;
+        }
+
+        from = out;
+        return true;
     }
 
     template<typename Type>
@@ -31,47 +76,7 @@ public:
         auto it = properties.find(tolower(key));
         if (it == properties.end())
             return false;
-
-        if (it->second->has<Type>()) {
-            out = it->second->get<Type>();
-            return true;
-        }
-
-        if constexpr (std::is_same_v<Type, bool>) {
-            if (it->second->has<String>()) {
-                String str = tolower(it->second->get<String>());
-                out = str.size() && (str[0] == 't' || str[0] == 'y');
-            } else out = false;
-        } else if constexpr (std::is_integral_v<Type>) {
-            if (!it->second->has<String>())
-                return false;
-            out = std::atol(it->second->get<String>().c_str());
-        } else if constexpr (std::is_floating_point_v<Type>) {
-            if (!it->second->has<String>())
-                return false;
-            out = std::atof(it->second->get<String>().c_str());
-        } else if constexpr (std::is_constructible_v<Type, std::shared_ptr<Value>>) {
-            out = Type{it->second};
-        } else if constexpr (std::is_assignable_v<Type, std::shared_ptr<Value>>) {
-            out = Type{it->second};
-        } else if constexpr (std::is_assignable_v<Type, String>) {
-            if (!it->second->has<String>())
-                return false;
-            out = it->second->get<String>();
-        } else if constexpr (std::is_constructible_v<Type, String>) {
-            if (!it->second->has<String>())
-                return false;
-            out = Type{it->second->get<String>()};
-        } else if constexpr (std::is_assignable_v<Type, Value>) {
-            out = *it->second;
-        } else if constexpr (std::is_constructible_v<Type, Value>) {
-            out = Type{*it->second};
-        } else {
-            return false;
-        }
-
-        *it->second = out;
-        return true;
+        return assignProperty(*it->second, out);
     }
 
     template<typename Type>
@@ -114,7 +119,8 @@ public:
 class Serializable {
     struct PropertySerializer {
         void* property;
-        void (*load)(void* property, const PropertySet&);
+        const String* key;
+        std::function<void()>* (*load)(void* property, Value&);
         void (*store)(void* property, PropertySet&);
     };
 
@@ -136,11 +142,12 @@ protected:
             }
             parent->propertySerializers.push_back(PropertySerializer{
                     this,
-                    +[](void* data, const PropertySet& set) {
+                    &this->name,
+                    +[](void* data, Value& value) {
                         auto prop = static_cast<Property<Type>*>(data);
-                        bool result = set.get(prop->name, prop->value);
-                        if (result && prop->change)
-                            prop->change();
+                        auto oldValue = prop->value;
+                        bool didAssign = PropertySet::assignProperty(value, prop->value);
+                        return (didAssign && prop->change && !(prop->value == oldValue)) ? &prop->change : nullptr;
                     },
                     +[](void* data, PropertySet& set) {
                         auto prop = static_cast<Property<Type>*>(data);
@@ -162,9 +169,29 @@ protected:
         }
     };
 
-    void load(const PropertySet& set) {
+    void set(const String& key, Value& value) {
         for (auto& serializer : propertySerializers) {
-            serializer.load(serializer.property, set);
+            if (key == *serializer.key) {
+                if (auto trigger = serializer.load(serializer.property, value))
+                    (*trigger)();
+                return;
+            }
+        }
+    }
+
+    void load(const PropertySet& set) {
+        Vector<std::function<void()>*> queue;
+        for (auto& serializer : propertySerializers) {
+            auto it = set.properties.find(*serializer.key);
+            if (it != set.properties.end()) {
+                if (auto trigger = serializer.load(serializer.property, *it->second)) {
+                    queue.push_back(trigger);
+                }
+            }
+        }
+
+        for (auto trigger : queue) {
+            (*trigger)();
         }
     }
 

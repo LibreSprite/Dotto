@@ -3,5 +3,13 @@
   <image src="%appdata/skins/default/window.png" height="90%" width="90%" x="5%" y="10px" absolute="true" slice="7 30">
     <image src="%appdata/skins/default/close.png" height="21px" width="21px" x="100%-30px" y="4px" absolute="true"/>
     <image controller="canvas" absolute="true" y="30px" height="100%-35px" x="7px" width="100%-14px"/>
+    <node absolute="true" width="30px" y="30px" height="100%-35px" x="100%-35px">
+      <button controller="activatetool" tool="pencil" height="30px" width="30px">
+        <query id="icon" src="%appdata/skins/default/pencil.png"/>
+      </button>
+      <button controller="activatetool" tool="bucket" height="30px" width="30px">
+        <query id="icon" src="%appdata/skins/default/bucket.png"/>
+      </button>
+    </node>
   </image>
 </window>

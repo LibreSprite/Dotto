@@ -1,0 +1,3 @@
+<image widget="button" up-src="%appdata/skins/default/button-up.png" down-src="%appdata/skins/default/button-down.png"  slice="4 4">
+  <image id="icon" x="2px" y="2px" height="100%-6px" width="100%-6px" absolute="true"/>
+</image>

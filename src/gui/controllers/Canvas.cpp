@@ -18,12 +18,9 @@ public:
         memset(surface->data(), 0xFF, surface->dataSize());
     }
 
-    void attach(ui::Node* node) override {
-        ui::Controller::attach(node);
-        node->addEventListener<ui::MouseMove, ui::MouseDown>(this);
-        node->init({{
-                    {"surface", surface}
-                }});
+    void attach() override {
+        node()->addEventListener<ui::MouseMove, ui::MouseDown>(this);
+        node()->set("surface", surface);
     }
 
     void eventHandler(const ui::MouseDown& event) {

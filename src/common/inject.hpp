@@ -291,9 +291,9 @@ public:
         return all;
     }
 
-    static Vector<inject<BaseClass>> createAll() {
+    static Vector<std::pair<String, inject<BaseClass>>> createAll() {
         Vector<String> temp;
-        Vector<inject<BaseClass>> all;
+        Vector<std::pair<String, inject<BaseClass>>> all;
         auto& registry = getRegistry();
 
         temp.reserve(registry.size());
@@ -304,7 +304,7 @@ public:
 
         all.reserve(temp.size());
         for (auto& entry : temp) {
-            all.emplace_back(entry);
+            all.emplace_back(entry, entry);
         }
         return all;
     }

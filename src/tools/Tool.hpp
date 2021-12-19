@@ -10,11 +10,12 @@ class Surface;
 
 class Tool : public Injectable<Tool>, public std::enable_shared_from_this<Tool> {
 public:
-    static inline Vector<inject<Tool>> instances;
+    static inline HashMap<String, std::shared_ptr<Tool>> instances;
     static inline std::weak_ptr<Tool> active;
     static void boot() {
-        instances = Tool::createAll();
-        active = Tool::instances[0].shared();
+        for (auto& entry : Tool::createAll()) {
+            instances.insert({entry.first, entry.second});
+        }
     }
 
     using Path = Vector<Point>;
