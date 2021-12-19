@@ -17,4 +17,5 @@ public:
     String extension(const String& path);
     virtual std::shared_ptr<FSEntity> find(const String& path);
     virtual bool boot();
+    static Value parse(const String& path);
 };

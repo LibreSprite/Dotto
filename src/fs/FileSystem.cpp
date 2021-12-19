@@ -9,6 +9,11 @@
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>
 
+Value FileSystem::parse(const String& path) {
+    return inject<FileSystem>{}->find(path)->parse();
+}
+
+
 bool FileSystem::boot() {
     if (auto root = std::dynamic_pointer_cast<RootFolder>(this->root.shared())) {
         return root->boot();
