@@ -26,7 +26,6 @@ public:
         file = fopen(path.c_str(), mode);
         if (!file && settings.create && settings.write)
             file = fopen(path.c_str(), "wb+");
-        logV("Open ", path, ": ", (bool) file);
         return file;
     }
 
@@ -37,7 +36,6 @@ public:
     void close() override {
         if (file) {
             fclose(file);
-            logV("Close ", path);
         }
         file = nullptr;
     }

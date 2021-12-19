@@ -19,40 +19,6 @@ namespace ui {
         Property<Rect> nineSlice{this, "slice"};
         PubSub<msg::Flush> pub{this};
 
-    public:
-        Image() {
-            addEventListener<ui::MouseEnter,
-                             ui::MouseLeave,
-                             ui::Click,
-                             ui::Focus,
-                             ui::Blur>(this);
-        }
-
-        void on(msg::Flush& flush) {
-            flush.hold(*surface);
-        }
-
-        void eventHandler(const ui::MouseLeave&) {
-            logI("Move Leave ", src);
-        }
-
-        void eventHandler(const ui::MouseEnter&) {
-            logI("Move Enter ", src);
-        }
-
-        void eventHandler(const ui::Click&) {
-            logI("Click ", src);
-        }
-
-        void eventHandler(const ui::Blur&) {
-            logI("Blur ", src);
-        }
-
-        void eventHandler(const ui::Focus&) {
-            logI("Focus ", src);
-        }
-
-
         void reload() {
             auto& surface = *this->surface;
             surface.reset();
@@ -61,6 +27,11 @@ namespace ui {
             surface = inject<FileSystem>{}->find(*src)->parse();
             if (!surface)
                 logE("Could not load image ", src);
+        }
+
+    public:
+        void on(msg::Flush& flush) {
+            flush.hold(*surface);
         }
 
         void draw(S32 z, Graphics& g) override {
