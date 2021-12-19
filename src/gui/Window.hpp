@@ -16,9 +16,15 @@ class Window : public Node {
 protected:
     bool needResize = true;
     U32 id;
-    PubSub<msg::MouseMove, msg::MouseUp, msg::MouseDown> pub{this};
-    inline static std::weak_ptr<ui::Node> mouseOverTarget;
-    inline static std::weak_ptr<ui::Node> focusTarget;
+    PubSub<msg::MouseMove,
+           msg::MouseUp,
+           msg::MouseDown,
+           msg::KeyDown,
+           msg::KeyUp> pub{this};
+    std::weak_ptr<ui::Node> mouseOverTarget;
+    std::weak_ptr<ui::Node> focusTarget;
+
+    ui::Node* findEventTarget(const ui::Event& event);
 
 public:
     Property<String> title{this, "title"};
@@ -29,96 +35,15 @@ public:
     Property<Color> background{this, "background"};
     Property<String> skin{this, "skin", "default"};
 
-    void postInject() override {
-        if (auto root = inject<ui::Node>{"root"})
-            root->addChild(shared_from_this());
-    }
+    void postInject() override;
+    void resize() override;
+    void doResize() override;
 
-    void resize() override {
-        needResize = true;
-    }
-
-    void doResize() override {
-        needResize = false;
-        Node::doResize();
-    }
-
-    void on(msg::MouseMove& event) {
-        if (event.windowId == id) {
-            ui::MouseMove guiEvent{event.x, event.y, event.buttons};
-            guiEvent.target = findEventTarget(guiEvent);
-            if (!guiEvent.target)
-                return;
-
-            if (auto over = mouseOverTarget.lock()) {
-                if (over.get() != guiEvent.target) {
-                    mouseOverTarget = guiEvent.target->shared_from_this();
-                    over->processEvent(ui::MouseLeave{});
-                    guiEvent.target->processEvent(ui::MouseEnter{});
-                }
-            } else {
-                mouseOverTarget = guiEvent.target->shared_from_this();
-                guiEvent.target->processEvent(ui::MouseEnter{});
-            }
-
-            guiEvent.target->processEvent(guiEvent);
-        }
-    }
-
-    void on(msg::MouseDown& event) {
-        if (event.windowId == id) {
-            ui::MouseDown guiEvent{event.x, event.y, event.buttons};
-            guiEvent.target = findEventTarget(guiEvent);
-            if (!guiEvent.target)
-                return;
-
-            if (auto focus = focusTarget.lock()) {
-                if (focus.get() != guiEvent.target) {
-                    focusTarget = guiEvent.target->shared_from_this();
-                    focus->processEvent(ui::Blur{});
-                    guiEvent.target->processEvent(ui::Focus{});
-                }
-            } else {
-                focusTarget = guiEvent.target->shared_from_this();
-                guiEvent.target->processEvent(ui::Focus{});
-            }
-
-            if (guiEvent.target)
-                guiEvent.target->processEvent(guiEvent);
-        }
-    }
-
-    void on(msg::MouseUp& event) {
-        if (event.windowId == id) {
-            ui::MouseUp guiEvent{event.x, event.y, event.buttons};
-            guiEvent.target = findEventTarget(guiEvent);
-            if (!guiEvent.target)
-                return;
-
-            if (auto focus = focusTarget.lock()) {
-                if (focus.get() == guiEvent.target) {
-                    guiEvent.target->processEvent(ui::Click{event.x, event.y, event.buttons});
-                }
-            }
-
-            guiEvent.target->processEvent(guiEvent);
-        }
-    }
-
-    ui::Node* findEventTarget(const ui::Event& event) {
-        ui::Node* target = event.target ?: this;
-        if (!event.target && event.bubble != ui::Event::Bubble::Down) {
-            while (event.target != target) {
-                event.target = target;
-                for (auto& child : target->getChildren()) {
-                    if (child->globalRect.contains(event.globalX, event.globalY)) {
-                        target = child.get();
-                    }
-                }
-            }
-        }
-        return target;
-    }
+    void on(msg::MouseMove& event);
+    void on(msg::MouseDown& event);
+    void on(msg::MouseUp& event);
+    void on(msg::KeyDown& event);
+    void on(msg::KeyUp& event);
 };
 
 }

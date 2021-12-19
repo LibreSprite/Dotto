@@ -66,6 +66,12 @@ public:
             case SDL_MOUSEBUTTONDOWN:
                 pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, 1U << event.button.button});
                 break;
+            case SDL_KEYUP:
+                pub(msg::KeyUp{event.key.windowID, event.key.keysym.scancode, static_cast<U32>(event.key.keysym.sym)});
+                break;
+            case SDL_KEYDOWN:
+                pub(msg::KeyDown{event.key.windowID, event.key.keysym.scancode, static_cast<U32>(event.key.keysym.sym)});
+                break;
             }
         }
     }

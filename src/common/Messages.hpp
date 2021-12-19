@@ -48,4 +48,16 @@ namespace msg {
         S32 x, y;
         U32 buttons;
     };
+
+    struct KeyUp {
+        const U32 windowId;
+        U32 scancode;
+        U32 keycode;
+    };
+
+    struct KeyDown {
+        const U32 windowId;
+        U32 scancode;
+        U32 keycode;
+    };
 }

@@ -84,4 +84,19 @@ namespace ui {
             this->globalY = globalY;
         }
     };
+
+    struct KeyEvent : public Event {
+        U32 scancode, keycode;
+        KeyEvent(U32 scancode, U32 keycode) : scancode{scancode}, keycode{keycode} {
+            bubble = Bubble::Up;
+        }
+    };
+
+    struct KeyDown : public KeyEvent {
+        KeyDown(U32 scancode, U32 keycode) : KeyEvent{scancode, keycode} {}
+    };
+
+    struct KeyUp : public KeyEvent {
+        KeyUp(U32 scancode, U32 keycode) : KeyEvent{scancode, keycode} {}
+    };
 }
