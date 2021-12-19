@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifdef __linux__
+
 #include <limits.h>
 #include <unistd.h>
 
@@ -88,3 +90,5 @@ static FSEntity::Shared<LinuxRootDir> lrd{"rootDir"};
 static FileSystem::Shared<FileSystem> fs{"new"};
 static File::Shared<StdFile> stdFile{"std"};
 static File::Shared<Folder> stdDir{"dir"};
+
+#endif

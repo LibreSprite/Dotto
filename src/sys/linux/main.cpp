@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifdef __linux__
+
 #include <app/App.hpp>
 #include <common/System.hpp>
 #include <log/Log.hpp>
@@ -18,3 +20,5 @@ int main(int argc, const char* argv[]) {
 
     return 0;
 }
+
+#endif
