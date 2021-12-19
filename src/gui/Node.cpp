@@ -10,6 +10,17 @@
 
 static ui::Node::Shared<ui::Node> node{"node"};
 
+std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
+    if (*id == targetId)
+        return shared_from_this();
+    for (auto& child : children) {
+        if (auto found = child->findChildById(targetId))
+            return found;
+    }
+    return nullptr;
+}
+
+
 static void loadNodeProperties(ui::Node* node, XMLElement* element) {
     PropertySet props;
     for (auto& prop : element->attributes) {

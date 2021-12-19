@@ -57,6 +57,7 @@ namespace ui {
     public:
         Rect localRect, globalRect;
 
+        Property<String> id{this, "id", ""};
         Property<String> controllerName{this, "controller", "", &Node::reattach};
         Property<bool> visible{this, "visible"};
 
@@ -87,6 +88,7 @@ namespace ui {
             return true;
         }
 
+        std::shared_ptr<Node> findChildById(const String& targetId);
         virtual void processEvent(const Event& event) {
             EventHandler::processEvent(event);
             if (event.bubble == Event::Bubble::Down && !event.cancel)
