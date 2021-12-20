@@ -15,6 +15,7 @@ namespace ui {
         Rect(const Rect&) = default;
         Rect(Rect&&) = default;
         Rect(const String& str) {*this = str;}
+        Rect(S32 x, S32 y, U32 w, U32 h) : x{x}, y{y}, width{w}, height{h} {}
 
         Rect& operator = (Rect& other) = default;
         Rect& operator = (Rect&& other) = default;
@@ -43,17 +44,39 @@ namespace ui {
                    std::to_string(height);
         }
 
-        bool contains(S32 px, S32 py) {
+        Rect& intersect(const Rect& other) {
+            S32 x2 = x + width, y2 = y + height;
+            S32 ox2 = other.x + other.width, oy2 = other.y + other.height;
+            x = std::max(x, other.x);
+            y = std::max(y, other.y);
+            x2 = std::min(x2, ox2);
+            y2 = std::min(y2, oy2);
+            width = x2 > x ? x2 - x : 0;
+            height = y2 > y ? y2 - y : 0;
+            return *this;
+        }
+
+        bool empty() const {
+            return width == 0 || height == 0;
+        }
+
+        bool overlaps(const Rect& other) const {
+            bool xoverlaps = !((other.x >= x + width) || (other.x + other.width <= x));
+            bool yoverlaps = !((other.y >= y + height) || (other.y + other.height <= y));
+            return xoverlaps && yoverlaps;
+        }
+
+        bool contains(S32 px, S32 py) const {
             return px >= x &&
                 px < static_cast<S32>(x + width) &&
                 py >= y &&
                 py < static_cast<S32>(y + height);
         }
 
-        S32 right() {return x + width;}
-        S32 bottom() {return y + height;}
-        S32 top() {return y;}
-        S32 left() {return x;}
+        S32 right() const {return x + width;}
+        S32 bottom() const {return y + height;}
+        S32 top() const {return y;}
+        S32 left() const {return x;}
 
         S32 x = 0, y = 0;
         U32 width = 0, height = 0;

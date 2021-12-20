@@ -65,6 +65,7 @@ namespace ui {
         Property<String> controllerName{this, "controller", "", &Node::reattach};
         Property<bool> visible{this, "visible"};
 
+        Property<bool> hideOverflow{this, "overflow-hidden", false};
         Property<bool> absolute{this, "absolute", false, &Node::resize};
         Property<Unit> x{this, "x", {"0px"}, &Node::resize};
         Property<Unit> y{this, "y", {"0px"}, &Node::resize};
@@ -150,8 +151,16 @@ namespace ui {
         }
 
         virtual void draw(S32 z, Graphics& gfx) {
-            for (auto& child : children) {
-                child->draw(z + 1 + *child->zIndex, gfx);
+            if (*hideOverflow) {
+                Rect clip = gfx.pushClipRect(globalRect);
+                if (!gfx.isEmptyClipRect()) {
+                    for (auto& child : children)
+                        child->draw(z + 1 + *child->zIndex, gfx);
+                }
+                gfx.setClipRect(clip);
+            } else {
+                for (auto& child : children)
+                    child->draw(z + 1 + *child->zIndex, gfx);
             }
         }
 

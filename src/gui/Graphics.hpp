@@ -8,6 +8,9 @@
 #include <gui/Rect.hpp>
 
 class Graphics {
+protected:
+    ui::Rect clip;
+
 public:
     struct BlitSettings {
         std::shared_ptr<Surface> surface;
@@ -16,5 +19,12 @@ public:
         const ui::Rect& nineSlice;
         S32 zIndex;
     };
+
     virtual void blit(const BlitSettings& settings){}
+    virtual ui::Rect pushClipRect(const ui::Rect& rect){return clip;}
+    virtual void setClipRect(const ui::Rect& rect){}
+
+    bool isEmptyClipRect() {
+        return clip.empty();
+    }
 };

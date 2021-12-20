@@ -119,6 +119,7 @@ public:
     }
 
     void begin(ui::Rect& globalRect, Color& clearColor) {
+        clip = globalRect;
         width = globalRect.width;
         iwidth = 2.0f / width;
         height = globalRect.height;
@@ -197,12 +198,54 @@ public:
     };
 
     void push(F32 z, const Rectf& rect) {
-            push({rect.x, rect.y, z, rect.u0, rect.v0});
-            push({rect.x, (rect.y + rect.h), z, rect.u0, rect.v1});
-            push({(rect.x + rect.w), rect.y, z, rect.u1, rect.v0});
-            push({rect.x, (rect.y + rect.h), z, rect.u0, rect.v1});
-            push({(rect.x + rect.w), (rect.y + rect.h), z, rect.u1, rect.v1});
-            push({(rect.x + rect.w), rect.y, z, rect.u1, rect.v0});
+        F32 x1 = rect.x,
+            y1 = rect.y,
+            x2 = rect.x + rect.w,
+            y2 = rect.y + rect.h,
+            u0 = rect.u0,
+            v0 = rect.v0,
+            u1 = rect.u1,
+            v1 = rect.v1;
+
+        if (x1 >= clip.right() ||
+            x2 <= clip.x ||
+            y1 >= clip.bottom() ||
+            y2 <= clip.y)
+            return;
+
+        if (x1 < clip.x) {
+            if (rect.w) {
+                u0 -= (u0 - u1) * ((clip.x - x1) / rect.w);
+            }
+            x1 = clip.x;
+
+        }
+        if (x2 > clip.right()) {
+            if (rect.w) {
+                u1 += (u0 - u1) * ((x2 - clip.right()) / rect.w);
+            }
+            x2 = clip.right();
+        }
+
+        if (y1 < clip.y) {
+            if (rect.h) {
+                v0 -= (v0 - v1) * ((clip.y - y1) / rect.h);
+            }
+            y1 = clip.y;
+        }
+        if (y2 > clip.bottom()) {
+            if (rect.h) {
+                v1 += (v0 - v1) * ((y2 - clip.bottom()) / rect.h);
+            }
+            y2 = clip.bottom();
+        }
+
+        push({x1, y1, z, u0, v0});
+        push({x1, y2, z, u0, v1});
+        push({x2, y1, z, u1, v0});
+        push({x1, y2, z, u0, v1});
+        push({x2, y2, z, u1, v1});
+        push({x2, y1, z, u1, v0});
     }
 
     void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
@@ -211,6 +254,9 @@ public:
         F32 z = settings.zIndex;
         F32 w = settings.destination.width;
         F32 h = settings.destination.height;
+
+        if (!clip.overlaps(settings.destination))
+            return;
 
         if (activeTexture != texture) {
             flush();
@@ -266,5 +312,17 @@ public:
             upload(surface);
 
         push(texture, settings);
+    }
+
+    ui::Rect pushClipRect(const ui::Rect& rect) override {
+        auto copy = clip;
+        flush();
+        clip.intersect(rect);
+        return copy;
+    }
+
+    void setClipRect(const ui::Rect& rect) override {
+        flush();
+        clip = rect;
     }
 };
