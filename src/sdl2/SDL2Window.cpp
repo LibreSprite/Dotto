@@ -22,7 +22,7 @@ public:
         localRect.width = globalRect.width;
         localRect.height = globalRect.height;
 
-        window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL);
+        window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if (!window)
             return false;
 
