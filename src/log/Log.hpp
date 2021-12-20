@@ -58,16 +58,19 @@ private:
 };
 
 template<typename ... Args>
-inline void logV(Args&& ... args) {
+inline bool logV(Args&& ... args) {
     Log::write(Log::Level::VERBOSE, std::forward<Args>(args)...);
+    return true;
 }
 
 template<typename ... Args>
-inline void logI(Args&& ... args) {
+inline bool logI(Args&& ... args) {
     Log::write(Log::Level::INFO, std::forward<Args>(args)...);
+    return true;
 }
 
 template<typename ... Args>
-inline void logE(Args&& ... args) {
+inline bool logE(Args&& ... args) {
     Log::write(Log::Level::ERROR, std::forward<Args>(args)...);
+    return true;
 }
