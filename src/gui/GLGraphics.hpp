@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "log/Log.hpp"
 #include <GL/gl.h>
 #include <GLES3/gl3.h>
 
@@ -13,7 +12,7 @@
 #include <gui/Graphics.hpp>
 #include <gui/Rect.hpp>
 #include <gui/Texture.hpp>
-#include <memory>
+#include <log/Log.hpp>
 
 class GLTexture : public Texture {
 public:

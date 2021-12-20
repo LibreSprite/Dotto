@@ -5,10 +5,10 @@
     <image controller="canvas" absolute="true" y="30px" height="100%-35px" x="7px" width="100%-43px"/>
     <node absolute="true" width="30px" y="30px" height="100%-35px" x="100%-35px">
       <button controller="activatetool" tool="pencil" height="30px" width="30px">
-        <query id="icon" src="%appdata/skins/default/pencil.png"/>
+        <icon src="%appdata/skins/default/pencil.png"/>
       </button>
       <button controller="activatetool" tool="bucket" height="30px" width="30px">
-        <query id="icon" src="%appdata/skins/default/bucket.png"/>
+        <icon src="%appdata/skins/default/bucket.png"/>
       </button>
     </node>
   </image>
