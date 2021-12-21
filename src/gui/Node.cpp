@@ -23,6 +23,8 @@ std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
 
 static void loadNodeProperties(ui::Node* node, XMLElement* element) {
     PropertySet props;
+    if (!element->text.empty())
+        props.set("text", trim(element->text));
     for (auto& prop : element->attributes) {
         props.set(prop.first, prop.second);
     }
