@@ -9,6 +9,7 @@ CPP_FLAGS += --std=c++17
 CPP_FLAGS += -MMD -MP
 CPP_FLAGS += $(patsubst %,-I%,$(SRC_DIRS))
 CPP_FLAGS += $(shell sdl2-config --cflags)
+CPP_FLAGS += $(shell pkg-config --cflags freetype2)
 
 CPP_FILES := $(shell find src -type f -name '*.cpp')
 CPP_FILES += $(shell find libs -type f -name '*.cpp')
@@ -18,6 +19,8 @@ FLAGS += -Og -g -D_DEBUG # debug build
 # FLAGS += -O3 # release build
 
 LN_FLAGS += $(shell sdl2-config --libs)
+LN_FLAGS += $(shell pkg-config --libs freetype2)
+
 LN_FLAGS += -lGL
 LN_FLAGS += -lpng
 LN_FLAGS += -lm

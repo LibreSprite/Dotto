@@ -3,11 +3,11 @@
 // Read LICENSE.txt for more information.
 
 #include "../libs/tinyxml2/tinyxml2.h"
-#include "log/Log.hpp"
 
 #include <common/inject.hpp>
 #include <common/Parser.hpp>
 #include <common/XML.hpp>
+#include <log/Log.hpp>
 
 class XmlParser : public Parser {
 public:
