@@ -20,7 +20,8 @@ protected:
            msg::MouseUp,
            msg::MouseDown,
            msg::KeyDown,
-           msg::KeyUp> pub{this};
+           msg::KeyUp,
+           msg::WindowClosed> pub{this};
     std::weak_ptr<ui::Node> mouseOverTarget;
     std::weak_ptr<ui::Node> focusTarget;
 
@@ -44,6 +45,7 @@ public:
     void on(msg::MouseUp& event);
     void on(msg::KeyDown& event);
     void on(msg::KeyUp& event);
+    void on(msg::WindowClosed& event);
 };
 
 }

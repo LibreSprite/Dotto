@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/Messages.hpp>
 #include <gui/Events.hpp>
 #include <gui/Window.hpp>
 
@@ -92,6 +93,12 @@ namespace ui {
     void Window::on(msg::KeyUp& event) {
         if (auto focus = focusTarget.lock()) {
             focus->processEvent(ui::KeyUp{event.scancode, event.keycode});
+        }
+    }
+
+    void Window::on(msg::WindowClosed& event) {
+        if (event.windowId == id) {
+            remove();
         }
     }
 

@@ -11,4 +11,4 @@ public:
     }
 };
 
-static Log::Shared<ConsoleLog> log{"stdout"};
+static Log::Shared<ConsoleLog> logger{"stdout"};

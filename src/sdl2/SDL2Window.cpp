@@ -12,7 +12,7 @@ class SDL2Window : public ui::Window {
 public:
     SDL_Window* window = nullptr;
     SDL_GLContext context = nullptr;
-    std::unique_ptr<GLGraphics> graphics{new GLGraphics()};
+    std::shared_ptr<GLGraphics> graphics = std::make_shared<GLGraphics>();
 
     bool init(const PropertySet& properties) override {
         Window::init(properties);
@@ -65,6 +65,11 @@ public:
     }
 
     ~SDL2Window() {
+        if (context && window) {
+            SDL_GL_MakeCurrent(window, context);
+            graphics.reset();
+        }
+
         if (context)
             SDL_GL_DeleteContext(context);
         if (window)

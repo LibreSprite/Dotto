@@ -21,6 +21,7 @@ public:
     U32 height = 0;
     F32 iwidth = 0;
     F32 iheight = 0;
+    bool dirty = true;
 
     GLTexture() {
         glGenTextures(1, &id);
@@ -36,8 +37,26 @@ public:
     }
 };
 
-class GLGraphics : public Graphics {
+class GLGraphics;
+
+class GLTextureInfo : public TextureInfo {
 public:
+    ~GLTextureInfo();
+
+    std::shared_ptr<GLTexture> get(const std::shared_ptr<GLGraphics>& context);
+
+    void setDirty() {
+        for (auto& entry : textures) {
+            entry.second->dirty = true;
+        }
+    }
+
+    HashMap<GLGraphics*, std::shared_ptr<GLTexture>> textures;
+};
+
+class GLGraphics : public Graphics, public std::enable_shared_from_this<GLGraphics> {
+public:
+    HashSet<GLTextureInfo*> textureInfo;
     U32 VBO = 0;
     U32 VAO = 0;
     U32 shader = 0;
@@ -111,8 +130,16 @@ public:
     }
 
     ~GLGraphics() {
+        while (!textureInfo.empty()) {
+            auto it = textureInfo.begin();
+            (*it)->textures.erase(this);
+            textureInfo.erase(it);
+        }
+
         if (VBO)
             glDeleteBuffers(1, &VBO);
+        if (VAO)
+            glDeleteVertexArrays(1, &VAO);
         if (shader)
             glDeleteProgram(shader);
     }
@@ -160,9 +187,8 @@ public:
         activeTexture.reset();
     }
 
-    void upload(Surface& surface) {
-        auto texture = std::static_pointer_cast<GLTexture>(surface.texture);
-        surface.clearDirty();
+    void upload(Surface& surface, GLTexture* texture) {
+        texture->dirty = false;
         texture->bind(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -300,15 +326,12 @@ public:
 
     void blit(const BlitSettings& settings) override {
         auto& surface = *settings.surface;
-        auto texture = std::static_pointer_cast<GLTexture>(surface.texture);
-        if (!texture) {
-            texture = std::make_shared<GLTexture>();
-            surface.texture = std::static_pointer_cast<Texture>(texture);
-            surface.setDirty();
-        }
+        if (!surface.textureInfo)
+            surface.textureInfo = std::make_shared<GLTextureInfo>();
+        auto texture = std::static_pointer_cast<GLTextureInfo>(surface.textureInfo)->get(shared_from_this());
 
-        if (surface.isDirty())
-            upload(surface);
+        if (texture->dirty)
+            upload(surface, texture.get());
 
         push(texture, settings);
     }
@@ -325,3 +348,19 @@ public:
         clip = rect;
     }
 };
+
+inline std::shared_ptr<GLTexture> GLTextureInfo::get(const std::shared_ptr<GLGraphics>& context) {
+    auto it = textures.find(context.get());
+    if (it == textures.end()) {
+        auto texture = std::make_shared<GLTexture>();
+        it = textures.emplace(context.get(), texture).first;
+        context->textureInfo.insert(this);
+    }
+    return it->second;
+}
+
+inline GLTextureInfo::~GLTextureInfo() {
+    for (auto& entry : textures) {
+        entry.first->textureInfo.erase(this);
+    }
+}

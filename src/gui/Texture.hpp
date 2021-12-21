@@ -8,3 +8,9 @@ class Texture {
 public:
     virtual ~Texture() = default;
 };
+
+class TextureInfo {
+public:
+    virtual ~TextureInfo() = default;
+    virtual void setDirty() = 0;
+};

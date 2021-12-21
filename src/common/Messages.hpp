@@ -30,6 +30,7 @@ namespace msg {
     struct WindowMaximized {const U32 windowId;};
     struct WindowMinimized {const U32 windowId;};
     struct WindowRestored {const U32 windowId;};
+    struct WindowClosed {const U32 windowId;};
 
     struct MouseMove {
         const U32 windowId;

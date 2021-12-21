@@ -72,6 +72,21 @@ public:
             case SDL_KEYDOWN:
                 pub(msg::KeyDown{event.key.windowID, event.key.keysym.scancode, static_cast<U32>(event.key.keysym.sym)});
                 break;
+
+            case SDL_WINDOWEVENT:
+                switch (event.window.event) {
+                case SDL_WINDOWEVENT_CLOSE:
+                    pub(msg::WindowClosed{event.window.windowID});
+                    break;
+                default:
+                    logV("Unknown SDL2 Window event: ", event.window.event);
+                    break;
+                }
+                break;
+
+            default:
+                logV("Unknown SDL2 event: ", event.type);
+                break;
             }
         }
     }

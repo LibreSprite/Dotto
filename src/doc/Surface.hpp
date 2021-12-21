@@ -6,10 +6,9 @@
 
 #include <variant>
 
+#include <common/Color.hpp>
 #include <common/types.hpp>
-#include <doc/Palette.hpp>
-
-class Texture;
+#include <gui/Texture.hpp>
 
 class Surface {
     using PixelType = U32;
@@ -28,9 +27,10 @@ public:
 
     U32 dataSize() {return pixels.size() * sizeof(PixelType);};
 
-    bool isDirty() const {return dirty;}
-    void setDirty() {dirty = true;}
-    void clearDirty() {dirty = false;}
+    void setDirty() {
+        if (textureInfo)
+            textureInfo->setDirty();
+    }
 
     Color getPixel(U32 x, U32 y) {
         U32 index = x + y * _width;
@@ -40,44 +40,32 @@ public:
     void setPixelUnsafe(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
         pixels[index] = pixel;
-        dirty = true;
+        setDirty();
     }
 
     void setPixel(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
         if (index < _width * _height) {
             pixels[index] = pixel;
-            dirty = true;
+            setDirty();
         }
     }
 
     void setPixel(U32 x, U32 y, const Color& color) {
         U32 index = x + y * _width;
         if (index < _width * _height) {
-            dirty = true;
-            if constexpr (std::is_same_v<PixelType, U32>) {
-                pixels[index] = color.toU32();
-            } else {
-                pixels[index] = findClosestColorIndex(palette, color);
-            }
+            setDirty();
+            pixels[index] = color.toU32();
         }
     }
 
     Color getColor(PixelType pixel) {
-        if constexpr (std::is_same_v<PixelType, U32>) {
-            return pixel;
-        } else {
-            if (pixel < palette.size())
-                return palette[pixel];
-            return Color(pixel, pixel, pixel);
-        }
+        return pixel;
     }
 
-    Palette palette;
-    std::shared_ptr<Texture> texture;
+    std::shared_ptr<TextureInfo> textureInfo;
 
 private:
     U32 _width = 0, _height = 0;
     Vector<PixelType> pixels;
-    bool dirty;
 };
