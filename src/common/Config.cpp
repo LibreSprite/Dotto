@@ -11,9 +11,9 @@ public:
     inject<FileSystem> fs;
 
     bool boot() override {
-        properties = fs->find("%userdata/settings.ini")->parse();
+        properties = fs->parse("%userdata/settings.ini");
         if (!properties)
-            properties = fs->find("%appdata/settings.ini")->parse();
+            properties = fs->parse("%appdata/settings.ini");
         if (!properties) {
             Log::write(Log::Level::ERROR, "Could not open settings file. Reinstalling may fix this problem.");
             return false;

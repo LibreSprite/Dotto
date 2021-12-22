@@ -172,53 +172,53 @@ public:
     template<typename...Args>
     inject(const String& name = "", Args&& ... args) {
         doInjection(name);
-        if (m_ptr) {
-            m_ptr->postInject(std::forward<Args>(args)...);
+        if (ptr) {
+            ptr->postInject(std::forward<Args>(args)...);
         }
     }
 
     inject(inject&& other) {
-        std::swap(m_ptr, other.m_ptr);
+        std::swap(ptr, other.ptr);
         std::swap(onDetach, other.onDetach);
     }
 
     inject(const inject& other) = delete;
 
-    ~inject() {onDetach(m_ptr);}
+    ~inject() {onDetach(ptr);}
 
     void operator = (inject&& other) {
-        std::swap(m_ptr, other.m_ptr);
+        std::swap(ptr, other.ptr);
         std::swap(onDetach, other.onDetach);
     }
 
-    bool operator == (BaseClass* other) {return m_ptr == other;}
-    bool operator != (BaseClass* other) {return m_ptr == other;}
+    bool operator == (BaseClass* other) {return ptr == other;}
+    bool operator != (BaseClass* other) {return ptr == other;}
 
-    BaseClass* operator -> () const {return m_ptr;}
-    BaseClass& operator * () const {return *m_ptr;}
+    BaseClass* operator -> () const {return ptr;}
+    BaseClass& operator * () const {return *ptr;}
 
-    operator bool () const {return m_ptr;}
-    operator BaseClass* () const {return m_ptr;}
+    operator bool () const {return ptr;}
+    operator BaseClass* () const {return ptr;}
 
     template <typename Derived = BaseClass>
     operator std::shared_ptr<Derived>() {
-        return m_ptr ? std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this()) : nullptr;
+        return ptr ? std::dynamic_pointer_cast<Derived>(ptr->shared_from_this()) : nullptr;
     }
 
     template <typename Derived = BaseClass_>
     std::shared_ptr<Derived> shared() {
-        return m_ptr ? std::dynamic_pointer_cast<Derived>(m_ptr->shared_from_this()) : nullptr;
+        return ptr ? std::dynamic_pointer_cast<Derived>(ptr->shared_from_this()) : nullptr;
     }
 
     template<typename Derived = BaseClass>
-    Derived* get() const {return dynamic_cast<Derived*>(m_ptr);}
+    Derived* get() const {return dynamic_cast<Derived*>(ptr);}
 
     void reset() {
         *this = inject<BaseClass>{nullptr};
     }
 
 private:
-    BaseClass *m_ptr = nullptr;
+    BaseClass *ptr = nullptr;
     std::function<void(BaseClass*)> onDetach = [](BaseClass*){};
 };
 
@@ -412,18 +412,18 @@ public:
 
     class Provides {
     public:
-        String m_name;
+        String name;
 
         ~Provides(){
             auto& registry = Injectable<BaseClass>::getRegistry();
-            auto iterator = registry.find(m_name);
+            auto iterator = registry.find(name);
             if (iterator != registry.end() && iterator->second.data == this) {
                 registry.erase(iterator);
             }
         }
 
         Provides(const String& name, const String& alias) {
-            m_name = name;
+            this->name = name;
             auto& registry = Injectable<BaseClass>::getRegistry();
             auto it = registry.find(name);
             if (it != registry.end()) {
@@ -432,7 +432,7 @@ public:
         }
 
         Provides(std::shared_ptr<BaseClass>& instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
-            m_name = name;
+            this->name = name;
             Injectable<BaseClass>::getRegistry()[name] = {
                 [&] {return instance.get();},
                 [](BaseClass* ptr) {},
@@ -444,7 +444,7 @@ public:
 
         template<typename DerivedClass, std::enable_if_t<std::is_base_of_v<BaseClass, DerivedClass>, int> = 0>
         Provides(DerivedClass* instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
-            m_name = name;
+            this->name = name;
             Injectable<BaseClass>::getRegistry()[name] = {
                 [=] {return instance;},
                 [](BaseClass* ptr) {},
@@ -463,7 +463,7 @@ void inject<BaseClass_>::doInjection(const String& name) {
     if (it != registry.end()) {
         auto& registryEntry = it->second;
         onDetach = registryEntry.detach;
-        m_ptr = registryEntry.attach();
+        ptr = registryEntry.attach();
     } else {
         std::cout << "Could not create " << name << std::endl;
     }

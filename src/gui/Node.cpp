@@ -60,7 +60,7 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
     if (nodeRegistry.find(widgetName) != nodeRegistry.end())
         return inject<ui::Node>{widgetName};
 
-    std::shared_ptr<XMLNode> xml = inject<FileSystem>{}->find("%appdata/gui/" + widgetName + ".xml")->parse();
+    std::shared_ptr<XMLNode> xml = inject<FileSystem>{}->parse("%appdata/gui/" + widgetName + ".xml");
     if (!xml || !xml->isElement())
         return nullptr;
 

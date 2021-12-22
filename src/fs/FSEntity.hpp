@@ -20,7 +20,7 @@ public:
 
     template<typename Type>
     std::shared_ptr<Type> get() {
-        return this ? std::dynamic_pointer_cast<Type>(shared_from_this()) : nullptr;
+        return std::dynamic_pointer_cast<Type>(shared_from_this());
     }
 
     Value parse();

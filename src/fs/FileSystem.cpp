@@ -10,7 +10,9 @@
 #include <fs/Folder.hpp>
 
 Value FileSystem::parse(const String& path) {
-    return inject<FileSystem>{}->find(path)->parse();
+    if (auto fsentity = inject<FileSystem>{}->find(path))
+        return fsentity->parse();
+    return nullptr;
 }
 
 
