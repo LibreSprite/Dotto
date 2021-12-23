@@ -10,13 +10,9 @@
 #include <script/Value.hpp>
 
 namespace script {
-    class Engine : public Injectable<Engine> {
+    class Engine : public Injectable<Engine>, public std::enable_shared_from_this<Engine> {
     protected:
         inject<Log> log;
-
-
-        Engine() {
-        }
 
         void execAfterEval(bool success) {
             for (auto& listener : afterEvalListeners) {

@@ -4,7 +4,7 @@
     <span font="%appdata/skins/default/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
       LibreSprite Dotto!
     </span>
-    <image src="%appdata/skins/default/close.png" height="21px" width="21px" x="100%-30px" y="4px" absolute="true"/>
+    <image controller="script" script="%appdata/test.js" src="%appdata/skins/default/close.png" height="21px" width="21px" x="100%-30px" y="4px" absolute="true"/>
     <image controller="canvas" absolute="true" y="30px" height="100%-35px" x="7px" width="100%-43px"/>
     <node absolute="true" width="30px" y="30px" height="100%-35px" x="100%-35px">
       <button controller="activatetool" tool="pencil" height="30px" width="30px">

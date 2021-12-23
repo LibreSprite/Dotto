@@ -27,8 +27,8 @@ using namespace script;
 
 class DukEngine : public Engine {
 public:
-    duk_hthread* handle;
     HashSet<void*> memory;
+    duk_hthread* handle = nullptr;
 
     DukEngine() : handle{duk_create_heap(malloc, realloc, free, this, fatal)} {
         InternalScriptObject::setDefault("DukScriptObject");
@@ -102,7 +102,7 @@ public:
     }
 };
 
-static Engine::Regular<DukEngine> registration("duk", {"js"});
+static Engine::Shared<DukEngine> registration("duk", {"js"});
 
 class DukScriptObject : public InternalScriptObject {
 public:
@@ -251,4 +251,4 @@ public:
     }
 };
 
-static InternalScriptObject::Regular<DukScriptObject> dukSO("DukScriptObject");
+static InternalScriptObject::Shared<DukScriptObject> dukSO("DukScriptObject");

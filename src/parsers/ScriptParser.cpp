@@ -1,0 +1,32 @@
+// Copyright (c) 2021 LibreSprite Authors (cf. AUTHORS.md)
+// This file is released under the terms of the MIT license.
+// Read LICENSE.txt for more information.
+
+#include <common/inject.hpp>
+#include <common/Parser.hpp>
+#include <fs/FileSystem.hpp>
+#include <log/Log.hpp>
+#include <script/Engine.hpp>
+
+class ScriptParser : public Parser {
+public:
+    Value parseFile(std::shared_ptr<File> file) override {
+        auto type = file->type();
+        script::Engine::setDefault(type, {type});
+        std::shared_ptr<script::Engine> engine = inject<script::Engine>{};
+        if (!engine) {
+            logE("No engine for ", type, " scripts");
+            return nullptr;
+        }
+
+        if (!engine->eval(file->readTextFile())) {
+            logE("Error parsing script");
+            return nullptr;
+        }
+        engine->raiseEvent("init");
+        return engine;
+    }
+};
+
+static Parser::Shared<ScriptParser> js{"js"};
+static Parser::Shared<ScriptParser> lua{"lua"};

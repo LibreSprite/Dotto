@@ -67,7 +67,7 @@ namespace script {
             return functions.emplace(name, func).first->second;
         }
 
-        std::shared_ptr<script::Engine> engine;
+        inject<script::Engine> engine;
         HashMap<String, ObjectProperty> properties;
         HashMap<String, DocumentedFunction> functions;
     };

@@ -165,7 +165,7 @@ class inject {
     void doInjection(const String& name);
 
 public:
-    using BaseClass = typename BaseClass_::BaseClass;
+    using BaseClass = BaseClass_;
 
     inject(std::nullptr_t){}
 
