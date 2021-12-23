@@ -11,6 +11,7 @@ ifeq ($(OS),Windows_NT)
     #     endif
     # endif
 else
+    CC = gcc
     CXX = g++
     OBJC = g++
     LN = g++
@@ -37,12 +38,17 @@ else
     SRC_DIRS += $(shell find src -type d)
     SRC_DIRS += $(shell find libs -type d)
 
+    CPP_FLAGS += -MMD -MP
     CPP_FLAGS += $(patsubst %,-I%,$(SRC_DIRS))
     CPP_FLAGS += $(shell sdl2-config --cflags)
     CPP_FLAGS += $(shell pkg-config --cflags freetype2)
 
     CPP_FILES += $(shell find src -type f -name '*.cpp')
     CPP_FILES += $(shell find libs -type f -name '*.cpp')
+
+    C_FLAGS = $(CPP_FLAGS)
+    C_FILES += $(shell find src -type f -name '*.c')
+    C_FILES += $(shell find libs -type f -name '*.c')
 
     LN_FLAGS += $(shell sdl2-config --libs)
     LN_FLAGS += $(shell pkg-config --libs freetype2)
@@ -51,7 +57,6 @@ endif
 ODIR = build
 
 CPP_FLAGS += --std=c++17
-CPP_FLAGS += -MMD -MP
 
 # FLAGS += -m32 # uncomment for 32-bit build
 FLAGS += -Og -g -D_DEBUG # debug build
@@ -63,11 +68,16 @@ LN_FLAGS += -lpng
 LN_FLAGS += -lm
 
 OBJ = $(patsubst %,$(ODIR)/%.o,$(CPP_FILES))
+OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
 DEP := $(OBJ:.o=.d)
 
 $(ODIR)/%.cpp.o: %.cpp
 	@mkdir -p "$$(dirname "$@")"
 	$(CXX) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+
+$(ODIR)/%.c.o: %.c
+	@mkdir -p "$$(dirname "$@")"
+	$(CC) $(FLAGS) $(C_FLAGS) -c $< -o $@
 
 $(ODIR)/%.mm.o: %.mm
 	@mkdir -p "$$(dirname "$@")"
