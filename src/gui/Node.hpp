@@ -20,10 +20,9 @@ namespace ui {
 
     class Node : public Injectable<Node>,
                  public EventHandler,
-                 public Serializable,
+                 public Model,
                  public std::enable_shared_from_this<Node> {
         friend class EventHandler;
-        PropertySet model{{"node", this}};
         Vector<std::shared_ptr<Node>> children;
         Node* parent = nullptr;
         bool isInScene = false;
@@ -83,29 +82,18 @@ namespace ui {
 
         Node() {
             addEventListener<AddToScene, RemoveFromScene>(this);
+            loadSilent({{"node", this}});
         }
 
         static std::shared_ptr<Node> fromXML(const String& widgetName);
 
         virtual bool init(const PropertySet& properties) {
-            model.append(properties);
             load(properties);
             reflow();
             return true;
         }
 
         std::shared_ptr<Node> findChildById(const String& targetId);
-
-        void set(const String& key, Value& value) {
-            model.set(key, value);
-            Serializable::set(key, value);
-        }
-
-        void set(const String& key, const Value& value) {
-            Value copy = value;
-            model.set(key, value);
-            Serializable::set(key, copy);
-        }
 
         virtual void processEvent(const Event& event) {
             EventHandler::processEvent(event);

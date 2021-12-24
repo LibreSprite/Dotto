@@ -81,6 +81,7 @@ public:
     }
 
     bool eval(const String& code) override {
+        InternalScriptObject::setDefault("DukScriptObject");
         bool success = true;
         try {
             if (duk_peval_string(handle, code.c_str()) != 0) {

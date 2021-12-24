@@ -6,6 +6,7 @@
 
 #include <type_traits>
 
+#include <common/inject.hpp>
 #include <common/String.hpp>
 #include <common/Value.hpp>
 #include <log/Log.hpp>
@@ -25,6 +26,10 @@ public:
         for (auto& entry : args) {
             set(entry.first, entry.second);
         }
+    }
+
+    const HashMap<String, std::shared_ptr<Value>>& getMap() const {
+        return properties;
     }
 
     template<typename Type>
@@ -200,4 +205,39 @@ protected:
             serializer.store(serializer.property, set);
         }
     }
+
+};
+
+class Model : public Serializable {
+    PropertySet model;
+protected:
+    void loadSilent(const PropertySet& set) {
+        model.append(set);
+    }
+
+public:
+    void load(const PropertySet& set) {
+        loadSilent(set);
+        Serializable::load(set);
+    }
+
+    void set(const String& key, const Value& value) {
+        Value copy = value;
+        set(key, copy);
+    }
+
+    void set(const String& key, Value& value) {
+        model.set(key, value);
+        Serializable::set(key, value);
+    }
+
+    const PropertySet& getPropertySet() {
+        return model;
+    }
+};
+
+class InjectableModel : public Model,
+                        public Injectable<InjectableModel>,
+                        public std::enable_shared_from_this<InjectableModel> {
+public:
 };

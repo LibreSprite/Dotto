@@ -157,4 +157,10 @@ namespace script {
         inject<InternalScriptObject> m_internal;
     };
 
+    class ScriptTarget : public Injectable<ScriptTarget> {
+    public:
+        Provides provides{this};
+        void* target;
+        ScriptTarget(void* target) : target{target} {}
+    };
 }

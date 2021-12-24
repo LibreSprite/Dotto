@@ -91,7 +91,7 @@ void ui::Node::reattach() {
 
     controller = inject<Controller>{controllerName};
     if (controller)
-        controller->init(model);
+        controller->init(getPropertySet());
 }
 
 void ui::Node::reattachWidget() {
@@ -107,5 +107,5 @@ void ui::Node::reattachWidget() {
 
     widget = inject<Controller>{widgetName};
     if (widget)
-        widget->init(model);
+        widget->init(getPropertySet());
 }
