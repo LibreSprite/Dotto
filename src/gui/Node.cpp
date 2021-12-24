@@ -49,8 +49,8 @@ static void loadChildNodes(ui::Node* parent, XMLElement* element) {
         if (!child)
             continue;
 
-        loadNodeProperties(child.get(), childElement.get());
         loadChildNodes(child.get(), childElement.get());
+        loadNodeProperties(child.get(), childElement.get());
     }
 }
 
@@ -72,8 +72,8 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
         return nullptr;
     }
 
-    loadNodeProperties(widget.get(), element.get());
     loadChildNodes(widget.get(), element.get());
+    loadNodeProperties(widget.get(), element.get());
 
     return widget;
 }

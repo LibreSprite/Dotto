@@ -131,6 +131,9 @@ class Serializable {
 
     Vector<PropertySerializer> propertySerializers;
 
+public:
+    virtual ~Serializable() {}
+
 protected:
     template<typename _Type>
     class Property {

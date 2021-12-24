@@ -159,6 +159,15 @@ public:
             };
         }
 
+        if (local->IsObject()) {
+            auto obj = local.As<v8::Object>();
+            auto prop = ToLocal(obj->Get(isolate->GetCurrentContext(),
+                                         ToLocal(v8::String::NewFromUtf8(isolate, "_this_"))));
+            if (prop->IsExternal()) {
+                return getScriptObject(prop.As<v8::External>()->Value());
+            }
+        }
+
         v8::String::Utf8Value utf8(isolate, local->TypeOf(isolate));
         printf("Unknown type: [%s]\n", *utf8);
 
@@ -252,6 +261,10 @@ public:
     void pushProperties(v8::Local<v8::Object>& object) {
         auto& isolate = engine.get<V8Engine>()->m_isolate;
         auto context = engine.get<V8Engine>()->context();
+
+        Check(object->Set(context,
+                          ToLocal(v8::String::NewFromUtf8(isolate, "_this_")),
+                          v8::External::New(isolate, this)));
 
         for (auto& entry : properties) {
             auto getterTpl = v8::FunctionTemplate::New(isolate, callFunc, v8::External::New(isolate, &entry.second.getter));

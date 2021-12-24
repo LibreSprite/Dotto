@@ -2,50 +2,37 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include <common/PropertySet.hpp>
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
 #include <log/Log.hpp>
-#include <script/ScriptObject.hpp>
+#include <script/api/ModelScriptObject.hpp>
 #include <tools/Tool.hpp>
-
-class ModelScriptObject : public script::ScriptObject {
-    Model* model;
-public:
-    void setWrapped(void* vmodel) {
-        model = static_cast<Model*>(vmodel);
-        for (auto& entry : model->getPropertySet().getMap()) {
-            auto& name = entry.first;
-            auto& ptr = entry.second;
-            addProperty(name,
-                        [=]{return script::Value{}.set(*ptr);},
-                        [=](const script::Value& value){
-                            model->set(name, value.get());
-                            return value;
-                        });
-        }
-    }
-};
-
-static script::ScriptObject::Shared<ModelScriptObject> mso{"ModelScriptObject"};
 
 class ScriptController : public ui::Controller {
 public:
     std::shared_ptr<script::Engine> engine;
     Property<String> script{this, "script", "", &ScriptController::loadScript};
+    PubSub<msg::Flush> pub{this};
 
     void loadScript() {
         engine.reset();
         if (!script->empty()) {
-            script::ScriptTarget target{static_cast<Model*>(node())};
+            script::ScriptTarget target{node()->shared_from_this(), "NodeScriptObject"};
             engine = FileSystem::parse(script);
         }
     }
 
+    void on(msg::Flush& flush) {
+        flush.hold(engine);
+    }
+
     void attach() override {
         logI("Script attached ", script);
+
     }
 
     void eventHandler(const ui::KeyDown& event) {
@@ -56,3 +43,4 @@ public:
 };
 
 static ui::Controller::Shared<ScriptController> scriptController{"script"};
+static script::ScriptObject::Shared<ModelScriptObject> mso{"ModelScriptObject"};

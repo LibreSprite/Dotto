@@ -162,6 +162,9 @@ public:
         flush();
     }
 
+    U32 currentBufferSize = 0;
+    U32 currentShader = 0;
+
     void flush() {
         if (vertices.empty())
             return;
@@ -170,16 +173,23 @@ public:
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_DYNAMIC_DRAW);
+        U32 requiredSize = vertices.size() * sizeof(vertices[0]);
+        if (requiredSize > currentBufferSize) {
+            glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW);
+            currentBufferSize = requiredSize;
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+        } else {
+            glBufferSubData(GL_ARRAY_BUFFER, 0, requiredSize, vertices.data());
+        }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+        if (currentShader != shader) {
+            currentShader = shader;
+            glUseProgram(shader);
+        }
 
-        glUseProgram(shader);
-
-        glBindVertexArray(VAO);
         activeTexture->bind(GL_TEXTURE_2D);
         glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 5);
 

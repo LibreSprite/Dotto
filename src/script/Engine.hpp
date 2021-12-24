@@ -19,12 +19,34 @@ namespace script {
                 listener(success);
             }
             afterEvalListeners.clear();
+            for (auto it = objectMap.begin(); it != objectMap.end();) {
+                auto& pair = it->second;
+                if (pair.object.expired()) {
+                    it = objectMap.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            holdList.clear();
         }
 
     public:
         void initGlobals() {
-            if (scriptObjects.empty())
-                scriptObjects = ScriptObject::getAllWithFlag("global");
+            if (globalScriptObjects.empty())
+                globalScriptObjects = ScriptObject::getAllWithFlag("global");
+        }
+
+        ScriptObject* getScriptObject(std::shared_ptr<void> object, const String& injectionName) {
+            if (!object)
+                return nullptr;
+            holdList.insert(object);
+            auto it = objectMap.find(object.get());
+            if (it != objectMap.end())
+                return it->second.wrapper.get();
+            inject<ScriptObject> wrapper{injectionName};
+            wrapper->setWrapped(object);
+            objectMap[object.get()] = {object, wrapper};
+            return wrapper.get();
         }
 
         virtual bool eval(const std::string& code) = 0;
@@ -36,7 +58,14 @@ namespace script {
 
     private:
         Provides provides{this};
-        Vector<inject<ScriptObject>> scriptObjects;
+        Vector<inject<ScriptObject>> globalScriptObjects;
         Vector<std::function<void(bool)>> afterEvalListeners;
+
+        struct WrapperPair {
+            std::weak_ptr<void> object;
+            std::shared_ptr<ScriptObject> wrapper;
+        };
+        HashMap<void*, WrapperPair> objectMap;
+        HashSet<std::shared_ptr<void>> holdList;
     };
 }

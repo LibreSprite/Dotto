@@ -88,11 +88,6 @@ public:
                 log->write(Log::Level::ERROR, "Error: [", duk_safe_to_string(handle, -1), "]");
                 success = false;
             }
-
-            if (!duk_is_null_or_undefined(handle, -1)) {
-                logI(duk_safe_to_string(handle, -1));
-            }
-
             duk_pop(handle);
         } catch (const std::exception& ex) {
             log->write(Log::Level::ERROR, ex.what());
@@ -122,6 +117,9 @@ public:
             void* buffer = duk_get_buffer_data(ctx, id, &size);
             if (buffer)
                 return {buffer, size, false};
+            if (duk_get_prop_string(ctx, id, "\0xFFthis")) {
+                return getScriptObject(duk_get_pointer(ctx, -1));
+            }
         } else if (type == DUK_TYPE_BUFFER) {
             duk_size_t size = 0;
             void* buffer = duk_get_buffer_data(ctx, id, &size);
@@ -211,6 +209,9 @@ public:
 
     void pushProperties() {
         auto handle = static_cast<DukEngine*>(engine.get())->handle;
+        duk_push_pointer(handle, this);
+        duk_put_prop_string(handle, -2, "\0xFFthis");
+
         for (auto& entry : properties) {
             duk_push_string(handle, entry.first.c_str());
             auto& prop = entry.second;

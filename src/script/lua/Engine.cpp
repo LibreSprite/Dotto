@@ -144,7 +144,13 @@ public:
                 return {array->values, array->size, false};
             }
         }
-        printf("Unknown value type: %d\n", type);
+        if (type == LUA_TTABLE) {
+            int idx = lua_getfield(L, index, "_this_");
+            if (lua_islightuserdata(L, idx)) {
+                return getScriptObject(lua_touserdata(L, idx));
+            }
+        }
+        logE("Unknown value type: ", type);
         // LUA_TTABLE, LUA_TFUNCTION, LUA_TTHREAD, and LUA_TLIGHTUSERDATA
         return {};
     }
@@ -217,6 +223,9 @@ public:
     }
 
     void pushProperties(lua_State* L) {
+        lua_pushlightuserdata(L, this);
+        lua_setfield(L, -2, "_this_");
+
         for (auto& entry : properties) {
             lua_pushlightuserdata(L, &entry.second);
             lua_pushcclosure(L, getset, 1);

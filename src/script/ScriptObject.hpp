@@ -54,6 +54,14 @@ namespace script {
 
     class InternalScriptObject : public Injectable<InternalScriptObject> {
     public:
+        InternalScriptObject();
+        ~InternalScriptObject();
+
+        static ScriptObject* getScriptObject(void* internal) {
+            auto it = liveInstances.find(static_cast<InternalScriptObject*>(internal));
+            return it != liveInstances.end() ? (*it)->scriptObject : nullptr;
+        }
+
         virtual void makeGlobal(const String& name) = 0;
 
         virtual ObjectProperty& addProperty(const String& name, const Function& get, const Function& set) {
@@ -67,30 +75,37 @@ namespace script {
             return functions.emplace(name, func).first->second;
         }
 
+        ScriptObject* scriptObject;
         inject<script::Engine> engine;
         HashMap<String, ObjectProperty> properties;
         HashMap<String, DocumentedFunction> functions;
+        static inline HashSet<InternalScriptObject*> liveInstances;
     };
 
-    class ScriptObject : public Injectable<ScriptObject> {
+    class ScriptObject : public Injectable<ScriptObject>, public std::enable_shared_from_this<ScriptObject> {
     public:
-        InternalScriptObject* getInternalScriptObject() {return m_internal;};
+        InternalScriptObject* getInternalScriptObject() {return internal;};
+
+        ScriptObject() {
+            internal->scriptObject = this;
+        }
 
         virtual void* getWrapped(){return nullptr;}
-        virtual void setWrapped(void*){}
+        virtual void setWrapped(std::shared_ptr<void>){}
+        script::Engine& getEngine() {return *internal->engine;}
 
         template <typename Type = Value>
         Type get(const String& name) {
-            auto it = m_internal->properties.find(name);
-            if (it == m_internal->properties.end())
+            auto it = internal->properties.find(name);
+            if (it == internal->properties.end())
                 return Value{};
             it->second.getter();
             return it->second.getter.result;
         }
 
         void set(const String& name, const Value& value) {
-            auto it = m_internal->properties.find(name);
-            if (it != m_internal->properties.end()) {
+            auto it = internal->properties.find(name);
+            if (it != internal->properties.end()) {
                 auto& setter = it->second.setter;
                 setter.arguments.emplace_back(value);
                 setter();
@@ -99,8 +114,8 @@ namespace script {
 
         template <typename RetType = Value, typename ... Args>
         RetType call(const String& name, Args ... args) {
-            auto it = m_internal->functions.find(name);
-            if (it == m_internal->functions.end())
+            auto it = internal->functions.find(name);
+            if (it == internal->functions.end())
                 return Value{};
             auto& func = it->second;
             func.arguments = {args...};
@@ -113,15 +128,15 @@ namespace script {
 
     protected:
         void makeGlobal(const String& name) {
-            m_internal->makeGlobal(name);
+            internal->makeGlobal(name);
         }
 
         ObjectProperty& addProperty(const String& name, const Function& get = []{return Value{};}, const Function &set = [](const Value&){return Value{};}) {
-            return m_internal->addProperty(name, get, set);
+            return internal->addProperty(name, get, set);
         }
 
         DocumentedFunction& addFunction(const String& name, const Function& func) {
-            return m_internal->addFunction(name, func);
+            return internal->addFunction(name, func);
         }
 
         template<typename Class, typename Ret, typename ... Args>
@@ -154,13 +169,16 @@ namespace script {
             });
         }
 
-        inject<InternalScriptObject> m_internal;
+        inject<InternalScriptObject> internal;
     };
 
     class ScriptTarget : public Injectable<ScriptTarget> {
     public:
         Provides provides{this};
-        void* target;
-        ScriptTarget(void* target) : target{target} {}
+        std::shared_ptr<void> target;
+        String wrapperName;
+        ScriptTarget(std::shared_ptr<void> target, const String& wrapperName) :
+            target{target},
+            wrapperName{wrapperName} {}
     };
 }

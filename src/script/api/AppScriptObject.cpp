@@ -9,12 +9,12 @@
 
 class AppScriptObject : public script::ScriptObject {
 public:
-    inject<script::ScriptObject> target{"ModelScriptObject"};
+    script::ScriptObject* target;
 
     AppScriptObject() {
         inject<script::ScriptTarget> scriptTarget;
-        target->setWrapped(scriptTarget->target);
-        addProperty("target", [this]{return target.get();});
+        target = getEngine().getScriptObject(scriptTarget->target, scriptTarget->wrapperName);
+        addProperty("target", [this]{return target;});
         makeGlobal("app");
     }
 
