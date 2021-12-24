@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <inject.hpp>
+#include <common/inject.hpp>
 
 class Log : public Injectable<Log> {
 public:

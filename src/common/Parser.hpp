@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <common/inject.hpp>
+#include <common/Value.hpp>
 #include <fs/File.hpp>
-#include <inject.hpp>
-#include <Value.hpp>
 
 class Parser : public Injectable<Parser> {
 public:

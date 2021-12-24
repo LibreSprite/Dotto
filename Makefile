@@ -35,18 +35,21 @@ else
     #     CCFLAGS += -D ARM
     # endif
 
+    LIB_DIRS := $(shell find libs -type d)
+    CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
+
     SRC_DIRS += $(shell find src -type d)
-    SRC_DIRS += $(shell find libs -type d)
+    SRC_DIRS += $(LIB_DIRS)
+    CPP_FLAGS += -Isrc
 
     CPP_FLAGS += -MMD -MP
-    CPP_FLAGS += $(patsubst %,-I%,$(SRC_DIRS))
     CPP_FLAGS += $(shell sdl2-config --cflags)
     CPP_FLAGS += $(shell pkg-config --cflags freetype2)
 
     CPP_FILES += $(shell find src -type f -name '*.cpp')
     CPP_FILES += $(shell find libs -type f -name '*.cpp')
 
-    C_FLAGS = $(CPP_FLAGS)
+    C_FLAGS := $(CPP_FLAGS)
     C_FILES += $(shell find src -type f -name '*.c')
     C_FILES += $(shell find libs -type f -name '*.c')
 

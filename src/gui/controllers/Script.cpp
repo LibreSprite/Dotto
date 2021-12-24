@@ -8,8 +8,8 @@
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
 #include <log/Log.hpp>
-#include <tools/Tool.hpp>
 #include <script/ScriptObject.hpp>
+#include <tools/Tool.hpp>
 
 class ModelScriptObject : public script::ScriptObject {
     Model* model;
