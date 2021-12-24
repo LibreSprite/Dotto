@@ -142,6 +142,25 @@ namespace script {
             return *this;
         }
 
+        ::Value get() const {
+            switch (type) {
+            case Type::UNDEFINED:
+                return ::Value{};
+            case Type::INT:
+                return data.int_v;
+            case Type::DOUBLE:
+                return data.double_v;
+            case Type::STRING:
+                return *data.string_v;
+            case Type::OBJECT:
+                return data.object_v;
+            case Type::BUFFER:
+                return data.buffer_v;
+            default:
+                return {};
+            }
+        }
+
         Value& operator = (const Value& other) {
             makeUndefined();
             type = other.type;

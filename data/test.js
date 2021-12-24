@@ -1,1 +1,1 @@
-console.log("Hello world! " + app.target.src);
+app.target.text = "Hello world from test.js";

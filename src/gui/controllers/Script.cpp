@@ -12,14 +12,19 @@
 #include <script/ScriptObject.hpp>
 
 class ModelScriptObject : public script::ScriptObject {
-    const PropertySet* model;
+    Model* model;
 public:
     void setWrapped(void* vmodel) {
-        model = &static_cast<Model*>(vmodel)->getPropertySet();
-        for (auto& entry : model->getMap()) {
+        model = static_cast<Model*>(vmodel);
+        for (auto& entry : model->getPropertySet().getMap()) {
             auto& name = entry.first;
             auto& ptr = entry.second;
-            addProperty(name, [=]{return script::Value{}.set(*ptr);});
+            addProperty(name,
+                        [=]{return script::Value{}.set(*ptr);},
+                        [=](const script::Value& value){
+                            model->set(name, value.get());
+                            return value;
+                        });
         }
     }
 };
