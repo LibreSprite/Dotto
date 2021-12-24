@@ -1,13 +1,11 @@
 ifeq ($(OS),Windows_NT)
     # CCFLAGS += -D WIN32
     # ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
-    #     CCFLAGS += -D AMD64
+        # CPP_FLAGS += -DV8_COMPRESS_POINTERS
     # else
     #     ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-    #         CCFLAGS += -D AMD64
     #     endif
     #     ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-    #         CCFLAGS += -D IA32
     #     endif
     # endif
 else
@@ -19,20 +17,20 @@ else
 
     ifeq ($(UNAME_S),Linux)
         CCFLAGS += -D LINUX
-    endif
-    ifeq ($(UNAME_S),Darwin)
-	CPP_FILES += $(shell find src -type f -name '*.mm')
+        BITS := $(shell getconf LONG_BIT)
+        ifeq ($(BITS),64)
+            CPP_FLAGS += -DV8_COMPRESS_POINTERS
+        endif
     endif
 
-    # UNAME_P := $(shell uname -p)
-    # ifeq ($(UNAME_P),x86_64)
-    #     CCFLAGS += -D AMD64
-    # endif
+    ifeq ($(UNAME_S),Darwin)
+	CPP_FILES += $(shell find src -type f -name '*.mm')
+        CPP_FLAGS += -DV8_COMPRESS_POINTERS # just assume OSX is 64-bit
+    endif
+
     # ifneq ($(filter %86,$(UNAME_P)),)
-    #     CCFLAGS += -D IA32
     # endif
     # ifneq ($(filter arm%,$(UNAME_P)),)
-    #     CCFLAGS += -D ARM
     # endif
 
     LIB_DIRS := $(shell find libs -type d)
@@ -56,6 +54,10 @@ else
     LN_FLAGS += $(shell sdl2-config --libs)
     LN_FLAGS += $(shell pkg-config --libs freetype2)
 endif
+
+CPP_FLAGS += -DSCRIPT_ENGINE_V8
+LN_FLAGS += $(shell pkg-config --libs v8)
+LN_FLAGS += $(shell pkg-config --libs v8_libplatform)
 
 ODIR = build
 

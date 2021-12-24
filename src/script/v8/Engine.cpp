@@ -4,7 +4,9 @@
 
 #if SCRIPT_ENGINE_V8
 
+#include <cstring>
 #include <iostream>
+
 #include <v8.h>
 #include <libplatform/libplatform.h>
 
@@ -29,7 +31,6 @@ void Check(const T&){}
 
 class V8Engine : public Engine {
 public:
-    inject<EngineDelegate> m_delegate;
     v8::Global<v8::Context> m_context;
     v8::Isolate* m_isolate = nullptr;
 
@@ -97,26 +98,20 @@ public:
                     auto trace = trycatch.StackTrace(context());
 
                     v8::String::Utf8Value utf8(m_isolate, exception);
-                    m_delegate->onConsolePrint(*utf8);
+                    log->write(Log::Level::ERROR, *utf8);
 
                     if (!trace.IsEmpty()){
                         v8::String::Utf8Value utf8Trace(m_isolate, ToLocal(trace));
-                        m_delegate->onConsolePrint(*utf8Trace);
+                        log->write(Log::Level::ERROR, *utf8Trace);
                     }
 
-                    std::cout << "Error: [" << *utf8 << "]" << std::endl;
+                    log->write(Log::Level::ERROR, "Error: [", *utf8, "]");
                     success = false;
                 }
-            } else if (m_printLastResult) {
-                v8::String::Utf8Value utf8(m_isolate, result.ToLocalChecked());
-                m_delegate->onConsolePrint(*utf8);
             }
         } catch (const std::exception& ex) {
-            String err = "Error: ";
-            err += ex.what();
-            m_delegate->onConsolePrint(err.c_str());
+            log->write(Log::Level::ERROR, ex.what());
             success = false;
-            std::cout << "Error: [" << err << "]" << std::endl;
         }
         execAfterEval(success);
         return success;
@@ -128,7 +123,7 @@ static Engine::Shared<V8Engine> registration("js", {"js"});
 class V8ScriptObject : public InternalScriptObject {
 public:
 
-    static Value getValue(v8::Isolate *isolate, v8::Local<v8::Value> local) {
+    static script::Value getValue(v8::Isolate *isolate, v8::Local<v8::Value> local) {
         if (local->IsNullOrUndefined())
             return {};
 
@@ -170,27 +165,27 @@ public:
         return {};
     }
 
-    static v8::Local<v8::Value> returnValue(v8::Isolate* isolate, const Value& value) {
+    static v8::Local<v8::Value> returnValue(v8::Isolate* isolate, const script::Value& value) {
         switch (value.type) {
-        case Value::Type::UNDEFINED:
+        case script::Value::Type::UNDEFINED:
             return v8::Local<v8::Value>();
 
-        case Value::Type::INT:
+        case script::Value::Type::INT:
             return v8::Int32::New(isolate, value);
 
-        case Value::Type::DOUBLE:
+        case script::Value::Type::DOUBLE:
             return v8::Number::New(isolate, value);
 
-        case Value::Type::STRING:
+        case script::Value::Type::STRING:
             return ToLocal(v8::String::NewFromUtf8(isolate, value));
 
-        case Value::Type::OBJECT:
+        case script::Value::Type::OBJECT:
             if (auto object = static_cast<ScriptObject*>(value)) {
                 return static_cast<V8ScriptObject*>(object->getInternalScriptObject())->makeLocal();
             }
             return {};
 
-        case Value::Type::BUFFER: {
+        case script::Value::Type::BUFFER: {
             auto& buffer = value.buffer();
             if (buffer.canSteal()) {
 #if V8_MAJOR_VERSION > 7
@@ -243,8 +238,8 @@ public:
     }
 
     void pushFunctions(v8::Local<v8::Object>& object) {
-        auto isolate = m_engine.get<V8Engine>()->m_isolate;
-        auto context = m_engine.get<V8Engine>()->context();
+        auto isolate = engine.get<V8Engine>()->m_isolate;
+        auto context = engine.get<V8Engine>()->context();
         for (auto& entry : functions) {
             auto tpl = v8::FunctionTemplate::New(isolate, callFunc, v8::External::New(isolate, &entry.second));
             auto func = tpl->GetFunction(context).ToLocalChecked();
@@ -255,8 +250,8 @@ public:
     }
 
     void pushProperties(v8::Local<v8::Object>& object) {
-        auto& isolate = m_engine.get<V8Engine>()->m_isolate;
-        auto context = m_engine.get<V8Engine>()->context();
+        auto& isolate = engine.get<V8Engine>()->m_isolate;
+        auto context = engine.get<V8Engine>()->context();
 
         for (auto& entry : properties) {
             auto getterTpl = v8::FunctionTemplate::New(isolate, callFunc, v8::External::New(isolate, &entry.second.getter));
@@ -273,7 +268,7 @@ public:
     }
 
     v8::Local<v8::Object> makeLocal() {
-        auto isolate = m_engine.get<V8Engine>()->m_isolate;
+        auto isolate = engine.get<V8Engine>()->m_isolate;
         auto local = v8::Object::New(isolate);
         pushFunctions(local);
         pushProperties(local);
@@ -281,8 +276,8 @@ public:
     }
 
     void makeGlobal(const String& name) override {
-        auto& isolate = m_engine.get<V8Engine>()->m_isolate;
-        auto context = m_engine.get<V8Engine>()->context();
+        auto& isolate = engine.get<V8Engine>()->m_isolate;
+        auto context = engine.get<V8Engine>()->context();
         Check(context->Global()->Set(context,
                                      ToLocal(v8::String::NewFromUtf8(isolate, name.c_str())),
                                      makeLocal()));
