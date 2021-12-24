@@ -42,7 +42,11 @@ else
 
     CPP_FLAGS += -MMD -MP
     CPP_FLAGS += $(shell sdl2-config --cflags)
+
+#BEGIN FREETYPE2
     CPP_FLAGS += $(shell pkg-config --cflags freetype2)
+    LN_FLAGS += $(shell pkg-config --libs freetype2)
+#END
 
     CPP_FILES += $(shell find src -type f -name '*.cpp')
     CPP_FILES += $(shell find libs -type f -name '*.cpp')
@@ -52,12 +56,18 @@ else
     C_FILES += $(shell find libs -type f -name '*.c')
 
     LN_FLAGS += $(shell sdl2-config --libs)
-    LN_FLAGS += $(shell pkg-config --libs freetype2)
-endif
 
-CPP_FLAGS += -DSCRIPT_ENGINE_V8
-LN_FLAGS += $(shell pkg-config --libs v8)
-LN_FLAGS += $(shell pkg-config --libs v8_libplatform)
+#BEGIN V8 SUPPORT
+    CPP_FLAGS += -DSCRIPT_ENGINE_V8
+    LN_FLAGS += $(shell pkg-config --libs v8)
+    LN_FLAGS += $(shell pkg-config --libs v8_libplatform)
+#END
+
+#BEGIN LUA SUPPORT
+    CPP_FLAGS += -DSCRIPT_ENGINE_LUA
+    LN_FLAGS += $(shell pkg-config --libs lua)
+#END
+endif
 
 ODIR = build
 

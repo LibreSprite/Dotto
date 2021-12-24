@@ -84,7 +84,6 @@ using namespace script;
 
 class LuaEngine : public Engine {
 public:
-    inject<EngineDelegate> m_delegate;
     lua_State* L = nullptr;
 
     LuaEngine() {
@@ -117,9 +116,7 @@ public:
             } else throw std::runtime_error(lua_tostring(L, -1));
 
         } catch (const std::exception& ex) {
-            std::string err = "Error: ";
-            err += ex.what();
-            m_delegate->onConsolePrint(err.c_str());
+            log->write(Log::Level::ERROR, ex.what());
             success = false;
         }
         execAfterEval(success);
@@ -132,7 +129,7 @@ static Engine::Shared<LuaEngine> registration("lua", {"lua"});
 class LuaScriptObject : public InternalScriptObject {
 public:
 
-    static Value getValue(lua_State* L, int index) {
+    static script::Value getValue(lua_State* L, int index) {
         auto type = lua_type(L, index);
         if (type == LUA_TNIL) return {};
         if (type == LUA_TNUMBER) return lua_tonumber(L, index);
@@ -140,7 +137,7 @@ public:
         if (type == LUA_TSTRING) {
             size_t len;
             const char* str = lua_tolstring(L, index, &len);
-            return {(void*)str, len, false};
+            return String{str, len};
         }
         if (type == LUA_TUSERDATA) {
             if (auto array = checkarray(L, true)) {
@@ -152,31 +149,31 @@ public:
         return {};
     }
 
-    static int returnValue(lua_State* L, const Value& value) {
+    static int returnValue(lua_State* L, const script::Value& value) {
         switch (value.type) {
-        case Value::Type::UNDEFINED:
+        case script::Value::Type::UNDEFINED:
             return 0;
 
-        case Value::Type::INT:
+        case script::Value::Type::INT:
             lua_pushinteger(L, (int) value);
             return 1;
 
-        case Value::Type::DOUBLE:
+        case script::Value::Type::DOUBLE:
             lua_pushnumber(L, value);
             return 1;
 
-        case Value::Type::STRING:
+        case script::Value::Type::STRING:
             lua_pushlstring(L, value, value.size());
             return 1;
 
-        case Value::Type::OBJECT:
+        case script::Value::Type::OBJECT:
             if (auto object = static_cast<ScriptObject*>(value)) {
                 static_cast<LuaScriptObject*>(object->getInternalScriptObject())->makeLocal(L);
                 return 1;
             }
             return 0;
 
-        case Value::Type::BUFFER:
+        case script::Value::Type::BUFFER:
             std::memcpy(createArray(L, value.size())->values, static_cast<uint8_t*>(value), value.size());
             return 1;
         }
@@ -236,7 +233,7 @@ public:
     }
 
     void makeGlobal(const std::string& name) override {
-        auto L = m_engine.get<LuaEngine>()->L;
+        auto L = engine.get<LuaEngine>()->L;
         lua_pushvalue(L, makeLocal(L));
         lua_setglobal(L, name.c_str());
     }
