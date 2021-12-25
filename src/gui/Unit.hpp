@@ -24,6 +24,13 @@ namespace ui {
 
         Unit(const String& str) {*this = str;}
 
+        constexpr Unit(S32 pixel) {*this = pixel;}
+
+        constexpr Unit& operator = (S32 pixel) {
+            setPixel(pixel);
+            return *this;
+        }
+
         constexpr Unit& operator = (const Unit& other) {
             value = other.value;
             type = other.type;
@@ -75,7 +82,7 @@ namespace ui {
             return other.type == type && other.value == value;
         }
 
-        operator String () {
+        operator String () const {
             switch (type) {
             case Type::Default: return "";
             case Type::Percent: return std::to_string(value * 100) + "%";
@@ -84,7 +91,12 @@ namespace ui {
             return "0";
         }
 
-        S32 toPixel(S32 parent) {
+        constexpr void setPixel(S32 pixel) {
+            type = Type::Pixel;
+            value = pixel;
+        }
+
+        S32 toPixel(S32 parent) const {
             switch (type) {
             case Type::Default:
                 return 0;
@@ -114,7 +126,7 @@ namespace ui {
             return 0;
         }
 
-        Type getType() {
+        Type getType() const {
             return type;
         }
 
