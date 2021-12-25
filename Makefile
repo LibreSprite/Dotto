@@ -20,6 +20,9 @@ else
         BITS := $(shell getconf LONG_BIT)
         ifeq ($(BITS),64)
             CPP_FLAGS += -DV8_COMPRESS_POINTERS
+	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
+	    LIB_DIRS := $(shell find linux-x64 -type d)
+	    SO_FILES := $(shell find linux-x64 -type f -name '*.so')
         endif
     endif
 
@@ -33,7 +36,7 @@ else
     # ifneq ($(filter arm%,$(UNAME_P)),)
     # endif
 
-    LIB_DIRS := $(shell find libs -type d)
+    LIB_DIRS += $(shell find libs -type d)
     CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
 
     SRC_DIRS += $(shell find src -type d)
@@ -56,13 +59,14 @@ else
     C_FILES += $(shell find libs -type f -name '*.c')
 
     LN_FLAGS += $(shell sdl2-config --libs)
+    LN_FLAGS += $(SO_FILES)
 
 #BEGIN V8 SUPPORT
-    CPP_FLAGS += -DSCRIPT_ENGINE_V8
-    CPP_FLAGS += $(shell pkg-config --cflags v8)
-    CPP_FLAGS += $(shell pkg-config --cflags v8_libplatform)
-    LN_FLAGS += $(shell pkg-config --libs v8)
-    LN_FLAGS += $(shell pkg-config --libs v8_libplatform)
+    # CPP_FLAGS += -DSCRIPT_ENGINE_V8
+    # CPP_FLAGS += $(shell pkg-config --cflags v8)
+    # CPP_FLAGS += $(shell pkg-config --cflags v8_libplatform)
+    # LN_FLAGS += $(shell pkg-config --libs v8)
+    # LN_FLAGS += $(shell pkg-config --libs v8_libplatform)
 #END
 
 #BEGIN LUA SUPPORT
