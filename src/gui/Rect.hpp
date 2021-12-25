@@ -61,8 +61,8 @@ namespace ui {
         }
 
         bool overlaps(const Rect& other) const {
-            bool xoverlaps = !((other.x >= x + width) || (other.x + other.width <= x));
-            bool yoverlaps = !((other.y >= y + height) || (other.y + other.height <= y));
+            bool xoverlaps = !((other.x >= S32(x + width)) || (S32(other.x + other.width) <= x));
+            bool yoverlaps = !((other.y >= S32(y + height)) || (S32(other.y + other.height) <= y));
             return xoverlaps && yoverlaps;
         }
 
