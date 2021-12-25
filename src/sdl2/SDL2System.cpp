@@ -61,10 +61,10 @@ public:
                 pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y, event.motion.state});
                 break;
             case SDL_MOUSEBUTTONUP:
-                pub(msg::MouseUp{event.button.windowID, event.button.x, event.button.y, 1U << event.button.button});
+                pub(msg::MouseUp{event.button.windowID, event.button.x, event.button.y, 1U << (event.button.button - 1)});
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, 1U << event.button.button});
+                pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, 1U << (event.button.button - 1)});
                 break;
             case SDL_KEYUP:
                 pub(msg::KeyUp{event.key.windowID, event.key.keysym.scancode, static_cast<U32>(event.key.keysym.sym)});
