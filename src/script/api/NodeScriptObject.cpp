@@ -7,19 +7,27 @@
 #include <script/Engine.hpp>
 
 class NodeScriptObject : public ModelScriptObject {
+    std::weak_ptr<ui::Node> weak;
+
 public:
+    ~NodeScriptObject() {
+        if (auto node = weak.lock()) {
+            node->removeEventListeners(this);
+        }
+    }
+
     void setWrapped(std::shared_ptr<void> vmodel) {
         auto sharednode = std::static_pointer_cast<ui::Node>(vmodel);
         auto weak = std::weak_ptr(sharednode);
+        this->weak = weak;
+
         ModelScriptObject::setWrapped(std::static_pointer_cast<Model>(sharednode));
 
-        addFunction("findChildById", [=](const String& id){
-            script::ScriptObject* so = nullptr;
+        addFunction("findChildById", [=](const String& id) -> script::Value {
             if (auto node = weak.lock()) {
-                auto child = node->findChildById(id);
-                so = getEngine().getScriptObject(child, "NodeScriptObject");
+                return getEngine().toValue(node->findChildById(id));
             }
-            return so;
+            return nullptr;
         });
 
         addFunction("remove", [=]() {
@@ -48,7 +56,22 @@ public:
             }
             return 0;
         });
+
+        addFunction("addEventListener", [=](const String& name) {
+            if (auto node = weak.lock()) {
+                auto handler = [=](const auto& event) {
+                    getEngine().raiseEvent(event.toStrings(name));
+                };
+                if (name == "mousemove")
+                    node->addEventListener<ui::MouseMove>(this, handler);
+                else if (name == "mouseup")
+                    node->addEventListener<ui::MouseUp>(this, handler);
+                else if (name == "mousedown")
+                    node->addEventListener<ui::MouseDown>(this, handler);
+            }
+            return 0;
+        });
     }
 };
 
-static script::ScriptObject::Shared<NodeScriptObject> nso{"NodeScriptObject"};
+static script::ScriptObject::Shared<NodeScriptObject> nsoType{typeid(std::shared_ptr<ui::Node>).name()};

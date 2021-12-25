@@ -13,13 +13,16 @@ namespace ui {
     class Event {
     public:
         virtual ~Event() = default;
+
         mutable Node* target = nullptr;
+
         enum class Bubble {
             None,
             Up,
             Down
         };
         Bubble bubble = Bubble::None;
+
         bool cascade = true;
         mutable bool cancel = false;
 
@@ -28,6 +31,7 @@ namespace ui {
 
         virtual S32 targetX() const;
         virtual S32 targetY() const;
+        virtual Vector<String> toStrings(const String& name) const;
     };
 
     struct AddToScene : public Event {

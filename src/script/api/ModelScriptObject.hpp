@@ -5,6 +5,7 @@
 #pragma once
 
 #include <common/PropertySet.hpp>
+#include <script/Engine.hpp>
 #include <script/ScriptObject.hpp>
 
 class ModelScriptObject : public script::ScriptObject {
@@ -22,8 +23,8 @@ public:
             auto& name = entry.first;
             auto& ptr = entry.second;
             addProperty(name,
-                        [=]{return script::Value{}.set(*ptr);},
-                        [=](const script::Value& value){
+                        [=]{return getEngine().toValue(*ptr);},
+                        [=](const script::Value& value) {
                             if (auto model = this->model.lock()) {
                                 model->set(name, value.get());
                             }

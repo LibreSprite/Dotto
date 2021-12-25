@@ -12,6 +12,7 @@
 #include <duk_config.h>
 #include <duktape.h>
 
+#include <common/String.hpp>
 #include <script/Engine.hpp>
 
 class ScriptException : public std::exception {
@@ -76,8 +77,8 @@ public:
         }
     }
 
-    bool raiseEvent(const String& event) override {
-        return eval("if (typeof onEvent === \"function\") onEvent(\"" + event + "\");");
+    bool raiseEvent(const Vector<String>& event) override {
+        return eval("if (typeof onEvent === \"function\") onEvent(\"" + join(event, "\",\"") + "\");");
     }
 
     bool eval(const String& code) override {
@@ -89,7 +90,11 @@ public:
                 success = false;
             }
             duk_pop(handle);
+#ifdef _DEBUG
+        } catch (const ScriptException& ex) {
+#else
         } catch (const std::exception& ex) {
+#endif
             log->write(Log::Level::ERROR, ex.what());
             success = false;
         }

@@ -5,12 +5,23 @@
 #pragma once
 
 #include <any>
+#include <memory>
+#include <type_traits>
 
 #include <common/types.hpp>
+
+
+template<class T>
+struct is_shared_ptr : std::false_type {};
+
+template<class T>
+struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
+
 
 class Value {
     std::any value;
     bool (*equal)(const std::any& left, const std::any& right);
+    std::shared_ptr<void> (*shared)(const std::any&);
 
 public:
     Value() : equal{nullptr} {}
@@ -45,6 +56,10 @@ public:
         return std::any_cast<Type>(value);
     }
 
+    std::shared_ptr<void> getShared() const {
+        return shared(value);
+    }
+
     Value& operator = (Value&& other) = default;
     Value& operator = (Value& other) = default;
     Value& operator = (const Value& other) = default;
@@ -55,6 +70,15 @@ public:
         equal = +[](const std::any& left, const std::any& right) {
             return std::any_cast<Type>(left) == std::any_cast<Type>(right);
         };
+        if constexpr (is_shared_ptr<Type>::value) {
+            shared = +[](const std::any& value) {
+                return std::static_pointer_cast<void>(std::any_cast<Type>(value));
+            };
+        } else {
+            shared = +[](const std::any& value) -> std::shared_ptr<void> {
+                return {};
+            };
+        }
         return *this;
     }
 

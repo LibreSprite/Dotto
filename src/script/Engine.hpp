@@ -36,6 +36,13 @@ namespace script {
                 globalScriptObjects = ScriptObject::getAllWithFlag("global");
         }
 
+        script::Value toValue(const ::Value& value) {
+            script::Value out;
+            if (!out.set(value))
+                out = getScriptObject(value.getShared(), value.typeName());
+            return out;
+        }
+
         ScriptObject* getScriptObject(std::shared_ptr<void> object, const String& injectionName) {
             if (!object)
                 return nullptr;
@@ -50,7 +57,7 @@ namespace script {
         }
 
         virtual bool eval(const std::string& code) = 0;
-        virtual bool raiseEvent(const std::string& event) = 0;
+        virtual bool raiseEvent(const Vector<String>& event) = 0;
 
         void afterEval(std::function<void(bool)>&& callback) {
             afterEvalListeners.emplace_back(std::move(callback));

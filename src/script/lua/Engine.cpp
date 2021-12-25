@@ -19,6 +19,7 @@ extern "C" {
 
 }
 
+#include <common/String.hpp>
 #include <script/Engine.hpp>
 
 struct NumArray {
@@ -42,7 +43,7 @@ static NumArray* checkarray(lua_State *L, bool opt = false) {
 }
 
 static int32_t& getelem(lua_State *L) {
-    static std::string errMessage;
+    static String errMessage;
     NumArray *a = checkarray(L);
     int index = luaL_checkinteger(L, 2);
     if (index < 1 || index > static_cast<int>(a->size)) {
@@ -101,11 +102,11 @@ public:
             lua_close(L);
     }
 
-    bool raiseEvent(const std::string& event) override {
-        return eval("if onEvent~=nil then onEvent(\"" + event + "\") end");
+    bool raiseEvent(const Vector<String>& event) override {
+        return eval("if onEvent~=nil then onEvent(\"" + join(event, "\",\"") + "\") end");
     }
 
-    bool eval(const std::string& code) override {
+    bool eval(const String& code) override {
         bool success = true;
         try {
 
@@ -241,7 +242,7 @@ public:
         return tableIndex;
     }
 
-    void makeGlobal(const std::string& name) override {
+    void makeGlobal(const String& name) override {
         auto L = engine.get<LuaEngine>()->L;
         lua_pushvalue(L, makeLocal(L));
         lua_setglobal(L, name.c_str());

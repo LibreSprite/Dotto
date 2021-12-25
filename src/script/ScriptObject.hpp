@@ -175,10 +175,8 @@ namespace script {
     class ScriptTarget : public Injectable<ScriptTarget> {
     public:
         Provides provides{this};
-        std::shared_ptr<void> target;
-        String wrapperName;
-        ScriptTarget(std::shared_ptr<void> target, const String& wrapperName) :
-            target{target},
-            wrapperName{wrapperName} {}
+        ::Value target;
+        ScriptTarget(::Value target) :
+            target{target} {}
     };
 }

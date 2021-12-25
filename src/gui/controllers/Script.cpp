@@ -21,7 +21,7 @@ public:
     void loadScript() {
         engine.reset();
         if (!script->empty()) {
-            script::ScriptTarget target{node()->shared_from_this(), "NodeScriptObject"};
+            script::ScriptTarget target{node()->shared_from_this()};
             engine = FileSystem::parse(script);
         }
     }
@@ -43,4 +43,4 @@ public:
 };
 
 static ui::Controller::Shared<ScriptController> scriptController{"script"};
-static script::ScriptObject::Shared<ModelScriptObject> mso{"ModelScriptObject"};
+static script::ScriptObject::Shared<ModelScriptObject> msoType{typeid(std::shared_ptr<script::ScriptObject>).name()};

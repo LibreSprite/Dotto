@@ -23,7 +23,7 @@ public:
             logE("Error parsing script");
             return nullptr;
         }
-        engine->raiseEvent("init");
+        engine->raiseEvent({"init"});
         return engine;
     }
 };

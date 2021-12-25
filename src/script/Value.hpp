@@ -10,6 +10,7 @@
 #include <string>
 
 #include <common/Value.hpp>
+#include <log/Log.hpp>
 
 namespace script {
     class ScriptObject;
@@ -104,7 +105,7 @@ namespace script {
         Value(Value&& other) {*this = std::move(other);}
         ~Value() {makeUndefined();}
 
-        Value& set(const ::Value& other) {
+        bool set(const ::Value& other) {
             makeUndefined();
 
             if (other.has<String>()) {
@@ -135,11 +136,10 @@ namespace script {
                 type = Type::OBJECT;
                 data.object_v = other.get<std::shared_ptr<ScriptObject>>().get();
             } else {
-                type = Type::STRING;
-                data.string_v = new String(other.typeName());
+                return false;
             }
 
-            return *this;
+            return true;
         }
 
         ::Value get() const {
@@ -283,7 +283,9 @@ namespace script {
             if (type == Type::INT) return std::to_string(data.int_v);
             if (type == Type::DOUBLE) return std::to_string(data.double_v);
             if (type == Type::BUFFER) return String(data.buffer_v->data(), data.buffer_v->end());
-            return type == Type::STRING ? *data.string_v : String{};
+            if (type == Type::STRING) return *data.string_v;
+            logV("Could not convert ", (int) type, " into string");
+            return String{};
         }
 
         operator String () const {
@@ -295,6 +297,7 @@ namespace script {
                 return data.string_v->c_str();
             if (type == Type::BUFFER)
                 return reinterpret_cast<char*>(data.buffer_v->data());
+            logV("Could not convert ", (int) type, " into char*");
             return "";
         }
 

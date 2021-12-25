@@ -16,4 +16,13 @@ namespace ui {
         return target ? globalY - target->globalRect.y : globalY;
     }
 
+    Vector<String> Event::toStrings(const String& name) const {
+        return {
+            name,
+            target ? *target->id : "",
+            std::to_string(targetX()),
+            std::to_string(targetY())
+        };
+    }
+
 }

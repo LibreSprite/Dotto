@@ -10,6 +10,7 @@
 #include <v8.h>
 #include <libplatform/libplatform.h>
 
+#include <common/String.hpp>
 #include <fs/FileSystem.hpp>
 #include <script/Engine.hpp>
 
@@ -63,8 +64,8 @@ public:
         m_context = v8::Global<v8::Context>(m_isolate, v8::Context::New(m_isolate));
     }
 
-    bool raiseEvent(const String& event) override {
-        return eval("if (typeof onEvent === \"function\") onEvent(\"" + event + "\");");
+    bool raiseEvent(const Vector<String>& event) override {
+        return eval("if (typeof onEvent === \"function\") onEvent(\"" + join(event, "\",\"") + "\");");
     }
 
     bool eval(const String& code) override {

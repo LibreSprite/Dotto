@@ -4,10 +4,13 @@
 
 #pragma once
 
+#include <functional>
 #include <typeinfo>
 #include <typeindex>
+
 #include <common/types.hpp>
 #include <gui/Events.hpp>
+#include <log/Log.hpp>
 
 namespace ui {
 
@@ -17,7 +20,13 @@ namespace ui {
             void (*call)(void* target, const Event& event);
         };
 
+        struct StringListener {
+            void* target;
+            std::function<void(const void* arg)> call;
+        };
+
         HashMap<std::type_index, Vector<Listener>> handlers;
+        HashMap<String, Vector<StringListener>> stringHandlers;
 
         template<typename Type, typename Target>
         void addSingleEventListener(Target* target) {
@@ -45,8 +54,29 @@ namespace ui {
             (addSingleEventListener<Type>(target),...);
         }
 
+        template<typename Arg, typename Target>
+        void addEventListener(Target* target, const std::function<void(const Arg&)>& func) {
+            auto wrapper = [=](const void* arg){func(*static_cast<const Arg*>(arg));};
+            auto& list = stringHandlers[typeid(Arg).name()];
+            for (auto& entry : list) {
+                if (entry.target == nullptr) {
+                    entry = {target, wrapper};
+                    return;
+                }
+            }
+            list.push_back({target, wrapper});
+        }
+
         void removeEventListeners(void* target) {
             for (auto& entry : handlers) {
+                for (auto& listener : entry.second) {
+                    if (listener.target == target) {
+                        listener.target = nullptr;
+                        listener.call = nullptr;
+                    }
+                }
+            }
+            for (auto& entry : stringHandlers) {
                 for (auto& listener : entry.second) {
                     if (listener.target == target) {
                         listener.target = nullptr;
@@ -57,11 +87,24 @@ namespace ui {
         }
 
         virtual void processEvent(const Event& event) {
-            auto it = handlers.find(std::type_index(typeid(event)));
-            if (it != handlers.end()) {
-                for (auto& listener : it->second) {
-                    if (event.cancel) break;
-                    listener.call(listener.target, event);
+            {
+                auto it = handlers.find(std::type_index(typeid(event)));
+                if (it != handlers.end()) {
+                    for (auto& listener : it->second) {
+                        if (event.cancel) break;
+                        listener.call(listener.target, event);
+                    }
+                }
+            }
+            {
+                auto name = typeid(event).name();
+                // logI("Event:{", name, "}");
+                auto it = stringHandlers.find(name);
+                if (it != stringHandlers.end()) {
+                    for (auto& listener : it->second) {
+                        if (event.cancel) break;
+                        listener.call(&event);
+                    }
                 }
             }
         }
