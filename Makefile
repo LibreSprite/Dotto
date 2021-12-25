@@ -22,7 +22,7 @@ else
             CPP_FLAGS += -DV8_COMPRESS_POINTERS
 	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
 	    LIB_DIRS := $(shell find linux-x64 -type d)
-	    SO_FILES := $(shell find linux-x64 -type f -name '*.so')
+	    SO_FILES := $(shell find linux-x64 -type f -name '*.so*')
         endif
     endif
 
