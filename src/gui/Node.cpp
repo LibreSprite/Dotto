@@ -79,33 +79,13 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
 }
 
 void ui::Node::reattach() {
-    if (controller) {
-        auto copy = controller;
-        controller.reset();
-        copy->detach();
-        removeEventListeners(copy.get());
+    for (auto name : split(controllerName, ",")) {
+        auto clean = trim(name);
+        if (clean.empty() || controllers.find(clean) != controllers.end())
+            continue;
+        if (auto controller = inject<Controller>{clean}.shared()) {
+            controllers[clean] = controller;
+            controller->init(getPropertySet());
+        }
     }
-
-    if (controllerName->empty())
-        return;
-
-    controller = inject<Controller>{controllerName};
-    if (controller)
-        controller->init(getPropertySet());
-}
-
-void ui::Node::reattachWidget() {
-    if (widget) {
-        auto copy = widget;
-        widget.reset();
-        copy->detach();
-        removeEventListeners(copy.get());
-    }
-
-    if (widgetName->empty())
-        return;
-
-    widget = inject<Controller>{widgetName};
-    if (widget)
-        widget->init(getPropertySet());
 }

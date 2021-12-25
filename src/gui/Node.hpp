@@ -28,8 +28,7 @@ namespace ui {
         bool isInScene = false;
         bool isDirty = true;
         std::shared_ptr<Flow> flowInstance;
-        std::shared_ptr<Controller> widget;
-        std::shared_ptr<Controller> controller;
+        HashMap<String, std::shared_ptr<Controller>> controllers;
 
         void reflow() {
             flowInstance = inject<Flow>{*flow};
@@ -37,7 +36,6 @@ namespace ui {
         }
 
         void reattach();
-        void reattachWidget();
 
     protected:
         void forwardToChildren(const Event& event) {
@@ -60,7 +58,6 @@ namespace ui {
         Rect localRect, globalRect;
 
         Property<String> id{this, "id", ""};
-        Property<String> widgetName{this, "widget", "", &Node::reattachWidget};
         Property<String> controllerName{this, "controller", "", &Node::reattach};
         Property<bool> visible{this, "visible"};
 
