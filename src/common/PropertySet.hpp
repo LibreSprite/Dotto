@@ -168,11 +168,11 @@ protected:
             return value;
         }
 
-        Type* operator -> () {
+        const Type* operator -> () {
             return &value;
         }
 
-        operator Type& () {
+        operator const Type& () {
             return value;
         }
     };
