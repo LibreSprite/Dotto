@@ -6,6 +6,10 @@
 
 #include <common/Value.hpp>
 
+namespace ui {
+    class Node;
+}
+
 namespace msg {
 
     class BootComplete{};
@@ -61,4 +65,14 @@ namespace msg {
         U32 scancode;
         U32 keycode;
     };
+
+    struct BeginDrag {
+        std::shared_ptr<ui::Node> target;
+        S32 anchorX, anchorY;
+    };
+
+    struct EndDrag {
+        std::shared_ptr<ui::Node> target;
+    };
+
 }

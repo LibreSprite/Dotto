@@ -21,9 +21,18 @@ protected:
            msg::MouseDown,
            msg::KeyDown,
            msg::KeyUp,
-           msg::WindowClosed> pub{this};
+           msg::WindowClosed,
+           msg::BeginDrag,
+           msg::EndDrag> pub{this};
     std::weak_ptr<ui::Node> mouseOverTarget;
     std::weak_ptr<ui::Node> focusTarget;
+
+    static inline ui::Window* hoverWindow = nullptr;
+    static inline std::weak_ptr<ui::Node> dragTarget;
+    static inline ui::Drag dragEvent;
+    static inline S32 mouseX = 0;
+    static inline S32 mouseY = 0;
+    static inline U32 mouseButtons = 0;
 
     ui::Node* findEventTarget(const ui::Event& event);
 
@@ -46,6 +55,8 @@ public:
     void on(msg::KeyDown& event);
     void on(msg::KeyUp& event);
     void on(msg::WindowClosed& event);
+    void on(msg::BeginDrag& event);
+    void on(msg::EndDrag& event);
 };
 
 }

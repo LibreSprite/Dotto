@@ -103,4 +103,18 @@ namespace ui {
     struct KeyUp : public KeyEvent {
         KeyUp(U32 scancode, U32 keycode) : KeyEvent{scancode, keycode} {}
     };
+
+    struct Drag : public Event {
+        U32 buttons;
+        S32 x, y;
+        S32 initialX, initialY;
+        S32 anchorX, anchorY;
+    };
+
+    struct Drop : public Event {
+        Drop(S32 x, S32 y) {
+            globalX = x;
+            globalY = y;
+        }
+    };
 }

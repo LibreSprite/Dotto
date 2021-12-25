@@ -6,5 +6,7 @@ app.target.addEventListener("mousemove");
 
 function onEvent(event) {
     if (event == "mousemove")
-        surface.setPixel(Math.random() * width, Math.random() * height, (Math.random() * 0xFFFFFF) | 0xFF000000);
+        surface.setPixel(Math.random() * width,
+                         Math.random() * height,
+                         Math.random() * 0xFFFFFF | 0xFF000000);
 }

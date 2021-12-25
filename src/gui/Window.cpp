@@ -24,6 +24,25 @@ namespace ui {
 
     void Window::on(msg::MouseMove& event) {
         if (event.windowId == id) {
+            mouseButtons = event.buttons;
+            mouseX = event.x;
+            mouseY = event.y;
+
+            if (hoverWindow == this) {
+                if (auto target = dragTarget.lock()) {
+                    if ((dragEvent.buttons & event.buttons) != dragEvent.buttons) {
+                        pub(msg::EndDrag{});
+                    } else {
+                        dragEvent.x = dragEvent.anchorX + (event.x - dragEvent.initialX);
+                        dragEvent.y = dragEvent.anchorY + (event.y - dragEvent.initialY);
+                        dragEvent.globalX = event.x;
+                        dragEvent.globalY = event.y;
+                        target->processEvent(dragEvent);
+                    }
+                }
+            }
+
+            hoverWindow = this;
             ui::MouseMove guiEvent{event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
@@ -46,6 +65,10 @@ namespace ui {
 
     void Window::on(msg::MouseDown& event) {
         if (event.windowId == id) {
+            mouseButtons = event.buttons;
+            mouseX = event.x;
+            mouseY = event.y;
+            hoverWindow = this;
             ui::MouseDown guiEvent{event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
@@ -69,6 +92,17 @@ namespace ui {
 
     void Window::on(msg::MouseUp& event) {
         if (event.windowId == id) {
+            mouseButtons = event.buttons;
+            mouseX = event.x;
+            mouseY = event.y;
+
+            if (auto target = dragTarget.lock()) {
+                if ((dragEvent.buttons & ~event.buttons) != dragEvent.buttons)
+                    pub(msg::EndDrag{});
+            }
+
+            hoverWindow = this;
+
             ui::MouseUp guiEvent{event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
@@ -99,6 +133,29 @@ namespace ui {
     void Window::on(msg::WindowClosed& event) {
         if (event.windowId == id) {
             remove();
+        }
+    }
+
+    void Window::on(msg::BeginDrag& event) {
+        if (this == hoverWindow) {
+            dragEvent.anchorX = event.anchorX;
+            dragEvent.anchorY = event.anchorY;
+            dragEvent.initialX = mouseX;
+            dragEvent.initialY = mouseY;
+            dragEvent.globalX = mouseX;
+            dragEvent.globalY = mouseY;
+            dragEvent.cancel = false;
+            dragEvent.target = event.target.get();
+            dragEvent.buttons = mouseButtons;
+            dragTarget = event.target;
+        }
+    }
+
+    void Window::on(msg::EndDrag& event) {
+        if (this == hoverWindow) {
+            if (auto target = dragTarget.lock())
+                target->processEvent(ui::Drop{dragEvent.globalX, dragEvent.globalY});
+            dragTarget.reset();
         }
     }
 
