@@ -125,6 +125,10 @@ namespace ui {
             return true;
         }
 
+        Node* getParent() {
+            return parent;
+        }
+
         virtual void resize() {
             if (parent)
                 parent->resize();
