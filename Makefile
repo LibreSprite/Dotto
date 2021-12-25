@@ -59,12 +59,15 @@ else
 
 #BEGIN V8 SUPPORT
     CPP_FLAGS += -DSCRIPT_ENGINE_V8
+    CPP_FLAGS += $(shell pkg-config --cflags v8)
+    CPP_FLAGS += $(shell pkg-config --cflags v8_libplatform)
     LN_FLAGS += $(shell pkg-config --libs v8)
     LN_FLAGS += $(shell pkg-config --libs v8_libplatform)
 #END
 
 #BEGIN LUA SUPPORT
     CPP_FLAGS += -DSCRIPT_ENGINE_LUA
+    CPP_FLAGS += $(shell pkg-config --cflags lua)
     LN_FLAGS += $(shell pkg-config --libs lua)
 #END
 endif
@@ -81,6 +84,7 @@ FLAGS += -Og -g -D_DEBUG # debug build
 LN_FLAGS += -lGL
 LN_FLAGS += -lpng
 LN_FLAGS += -lm
+# LN_FLAGS += -fsanitize=leak
 
 OBJ = $(patsubst %,$(ODIR)/%.o,$(CPP_FILES))
 OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
