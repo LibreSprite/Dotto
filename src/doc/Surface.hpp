@@ -46,17 +46,13 @@ public:
     void setPixel(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
         if (index < _width * _height) {
-            pixels[index] = pixel;
             setDirty();
+            pixels[index] = pixel;
         }
     }
 
     void setPixel(U32 x, U32 y, const Color& color) {
-        U32 index = x + y * _width;
-        if (index < _width * _height) {
-            setDirty();
-            pixels[index] = color.toU32();
-        }
+        setPixel(x, y, color.toU32());
     }
 
     Color getColor(PixelType pixel) {

@@ -11,12 +11,16 @@
 class Color {
 public:
     U8 r = 0, g = 0, b = 0, a = 255;
+    static inline constexpr const U32 Rshift = 0;
+    static inline constexpr const U32 Gshift = 8;
+    static inline constexpr const U32 Bshift = 16;
+    static inline constexpr const U32 Ashift = 24;
 
-    Color() = default;
+    constexpr Color() = default;
 
-    Color(const Color& other) = default;
+    constexpr Color(const Color& other) = default;
 
-    Color(U32 rgba) {
+    constexpr Color(U32 rgba) {
         fromU32(rgba);
     }
 
@@ -24,7 +28,7 @@ public:
         fromString(color);
     }
 
-    Color(U8 r, U8 g, U8 b, U8 a = 255) : r{r}, g{g}, b{b}, a{a} {}
+    constexpr Color(U8 r, U8 g, U8 b, U8 a = 255) : r{r}, g{g}, b{b}, a{a} {}
 
     operator String () const {
         return "rgba{" + std::to_string(r) +
@@ -62,22 +66,22 @@ public:
         }
     }
 
-    Color& fromU32(U32 rgba) {
-        r = static_cast<U8>(rgba >> 24);
-        g = static_cast<U8>(rgba >> 16);
-        b = static_cast<U8>(rgba >> 8);
-        a = static_cast<U8>(rgba);
+    constexpr Color& fromU32(U32 rgba) {
+        r = static_cast<U8>(rgba >> Rshift);
+        g = static_cast<U8>(rgba >> Gshift);
+        b = static_cast<U8>(rgba >> Bshift);
+        a = static_cast<U8>(rgba >> Ashift);
         return *this;
     }
 
-    U32 toU32() const {
-        return (U32{r} << 24) |
-            (U32{g} << 16) |
-            (U32{b} << 8) |
-            U32{a};
+    constexpr U32 toU32() const {
+        return (U32{a} << Ashift) |
+            (U32{b} << Bshift) |
+            (U32{g} << Gshift) |
+            (U32{r} << Rshift);
     }
 
-    U32 distanceSquared(const Color& other) const {
+    constexpr U32 distanceSquared(const Color& other) const {
         S32 dr = S32{r} - S32{other.r};
         S32 dg = S32{g} - S32{other.g};
         S32 db = S32{b} - S32{other.b};
@@ -85,14 +89,14 @@ public:
         return dr*dr + dg*dg + db*db + da*da;
     }
 
-    bool operator == (const Color& other) const {
+    constexpr bool operator == (const Color& other) const {
         return r == other.r &&
             g == other.g &&
             b == other.b &&
             a == other.a;
     }
 
-    bool operator != (const Color& other) const {
+    constexpr bool operator != (const Color& other) const {
         return !(*this == other);
     }
 };
