@@ -31,6 +31,10 @@ public:
     constexpr Color(U8 r, U8 g, U8 b, U8 a = 255) : r{r}, g{g}, b{b}, a{a} {}
 
     operator String () const {
+        return toString();
+    }
+
+    String toString() const {
         return "rgba{" + std::to_string(r) +
             "," + std::to_string(g) +
             "," + std::to_string(b) +
