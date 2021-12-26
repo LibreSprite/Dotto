@@ -75,4 +75,7 @@ namespace msg {
         std::shared_ptr<ui::Node> target;
     };
 
+    struct ActivateTool {
+        const String& tool;
+    };
 }
