@@ -6,17 +6,29 @@
 
 #include <cmd/Command.hpp>
 #include <common/PropertySet.hpp>
+#include <fs/FileSystem.hpp>
+#include <gui/Node.hpp>
 #include <script/Engine.hpp>
 #include <script/Function.hpp>
 #include <script/ScriptObject.hpp>
+#include <tools/Tool.hpp>
+#include <script/api/AppScriptObject.hpp>
 
-class AppScriptObject : public script::ScriptObject {
+class AppScriptObjectImpl : public AppScriptObject {
 public:
     script::Value target;
 
-    AppScriptObject() {
-        target = getEngine().toValue(inject<script::ScriptTarget>{}->target);
+    void setTarget(const ::Value& target) override {
+        this->target = getEngine().toValue(target);
+    }
+
+    AppScriptObjectImpl() {
+        if (auto scripttarget = inject<script::ScriptTarget>{InjectSilent::Yes}) {
+            setTarget(scripttarget->target);
+        }
+
         addProperty("target", [this]{return target;});
+
         addFunction("command", [](const String& name){
             inject<Command> command{name};
             if (!command)
@@ -35,4 +47,4 @@ public:
 
 };
 
-static script::ScriptObject::Regular<AppScriptObject> reg("AppScriptObject", {"global"});
+static script::ScriptObject::Shared<AppScriptObjectImpl> reg("AppScriptObject", {"global"});
