@@ -76,6 +76,7 @@ namespace ui {
 
         Property<String> flow{this, "flow", "column", &Node::reflow};
         Property<S32> zIndex{this, "z", 0};
+        Property<String> forward{this, "forward"};
 
         Node() {
             addEventListener<AddToScene, RemoveFromScene>(this);

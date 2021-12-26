@@ -25,6 +25,27 @@ void ui::Node::load(const PropertySet& set) {
     for (auto& entry : controllers) {
         entry.second->init(set);
     }
+    if (!forward->empty()) {
+        for (const auto& forward : split(this->forward, ",")) {
+            auto parts = split(forward, "=");
+            if (parts.size() != 2)
+                continue;
+
+            Value value;
+            if (!set.get(trim(parts[1]), value))
+                continue;
+
+            auto target = split(parts[0], ".");
+            if (target.size() != 2)
+                continue;
+
+            auto child = findChildById(trim(target[0]));
+            if (!child)
+                continue;
+
+            child->load({{target[1], value}});
+        }
+    }
 }
 
 static void loadNodeProperties(ui::Node* node, XMLElement* element) {
