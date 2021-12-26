@@ -28,4 +28,4 @@ public:
     virtual void end(Surface* surface, const Vector<Point>& points) {};
 };
 
-static Tool::Shared<Pencil> pencil{"pencil"};
+static Tool::Shared<Pencil> pencil{"brush"};

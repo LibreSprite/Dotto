@@ -5,11 +5,12 @@
 #pragma once
 
 #include <common/Color.hpp>
+#include <common/PropertySet.hpp>
 #include <common/inject.hpp>
 
 class Surface;
 
-class Tool : public Injectable<Tool>, public std::enable_shared_from_this<Tool> {
+class Tool : public Injectable<Tool>, public Model, public std::enable_shared_from_this<Tool> {
 public:
     static inline HashMap<String, std::shared_ptr<Tool>> instances;
     static inline std::weak_ptr<Tool> active;
@@ -18,11 +19,20 @@ public:
     static void boot() {
         for (auto& entry : Tool::createAll()) {
             instances.insert({entry.first, entry.second});
+            entry.second->init(entry.first);
         }
     }
 
     using Path = Vector<Point>;
-    std::shared_ptr<Surface> getIcon() {return nullptr;}
+    bool enabled = true;
+
+    virtual void init(const String& name) {
+        load({
+                {"icon", "%appdata/skins/default/" + name + ".png"},
+                {"tool", name}
+            });
+    }
+
     virtual void begin(Surface* surface, const Vector<Point>& points) {}
     virtual void update(Surface* surface, const Vector<Point>& points) {}
     virtual void end(Surface* surface, const Vector<Point>& points) {}
