@@ -1,5 +1,6 @@
 <window controller="main" id="mainwindow" width="800px" height="600px" flow="column" background="rgb{64,32,32}">
   <image src="%appdata/skins/default/skin.png" height="25%"/>
+
   <image controller="script, draggable, shortcut" id="editor" script="%appdata/test.js" handle="titlebar" src="%appdata/skins/default/window.png" height="90%" width="90%" x="5%" y="10px" absolute="true" slice="7 30" overflow-hidden="true">
     <node id="titlebar">
       <span controller="script" script="%appdata/test2.js" id="title" font="%appdata/skins/default/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
@@ -17,4 +18,14 @@
       </button>
     </node>
   </image>
+
+  <image controller="draggable, shortcut, script" script="%appdata/colorpicker.js" handle="titlebar" src="%appdata/skins/default/window.png" height="180px" width="150px" x="0px" y="100%-180px" absolute="true" slice="7 30" overflow-hidden="true">
+    <node id="titlebar">
+      <span id="title" font="%appdata/skins/default/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
+        Color Picker
+      </span>
+    </node>
+    <image id="sample" src="%appdata/skins/default/colorpicker.png" absolute="true" y="30px" height="100%-35px" x="4px" width="100%-9px"/>
+  </image>
+
 </window>
