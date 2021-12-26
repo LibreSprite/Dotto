@@ -21,3 +21,5 @@ Vector<String> inline split(const String& str, const std::regex& expr) {
 Vector<String> split(const String& str, const String& sep);
 
 String join(const Vector<String>& str, const String& sep);
+
+bool startsWith(const String& str, const String& prefix);

@@ -78,3 +78,13 @@ String join(const Vector<String>& string, const String& sep) {
 
     return acc;
 }
+
+bool startsWith(const String& str, const String& prefix) {
+    if (str.size() < prefix.size())
+        return false;
+    for (std::size_t i = 0, size = prefix.size(); i < size; ++i) {
+        if (str[i] != prefix[i])
+            return false;
+    }
+    return true;
+}
