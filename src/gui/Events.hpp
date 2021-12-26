@@ -79,13 +79,8 @@ namespace ui {
         MouseUp(S32 globalX, S32 globalY, U32 buttons) : MouseEvent{globalX, globalY, buttons} {}
     };
 
-    struct Click : public Event {
-        U32 buttons;
-        Click(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
-            bubble = Bubble::Up;
-            this->globalX = globalX;
-            this->globalY = globalY;
-        }
+    struct Click : public MouseEvent {
+        Click(S32 globalX, S32 globalY, U32 buttons) : MouseEvent{globalX, globalY, buttons} {}
     };
 
     struct KeyEvent : public Event {

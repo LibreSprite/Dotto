@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <gui/Events.hpp>
 #include <gui/Node.hpp>
 #include <script/api/ModelScriptObject.hpp>
 #include <script/Engine.hpp>
@@ -79,18 +80,42 @@ public:
 
         addFunction("addEventListener", [=](const String& name) {
             if (auto node = weak.lock()) {
-                auto handler = [=](const auto& event) {
-                    getEngine().raiseEvent(event.toStrings(name));
-                };
-                if (name == "mousemove")
-                    node->addEventListener<ui::MouseMove>(this, handler);
-                else if (name == "mouseup")
-                    node->addEventListener<ui::MouseUp>(this, handler);
-                else if (name == "mousedown")
-                    node->addEventListener<ui::MouseDown>(this, handler);
+                auto it = eventBinders.find(trim(tolower(name)));
+                if (it == eventBinders.end())
+                    return 0;
+                it->second(node.get(), name);
+                eventBinders.erase(it);
+                return 1;
             }
             return 0;
         });
+
+        createEventBinder<ui::AddToScene>("addtoscene");
+        createEventBinder<ui::Blur>("blur");
+        createEventBinder<ui::Focus>("focus");
+        createEventBinder<ui::RemoveFromScene>("removefromscene");
+        createEventBinder<ui::MouseEnter>("mouseenter");
+        createEventBinder<ui::MouseLeave>("mouseleave");
+        createEventBinder<ui::MouseMove>("mousemove");
+        createEventBinder<ui::MouseUp>("mouseup");
+        createEventBinder<ui::MouseDown>("mousedown");
+        createEventBinder<ui::Click>("click");
+        createEventBinder<ui::KeyDown>("keydown");
+        createEventBinder<ui::KeyUp>("keyup");
+        createEventBinder<ui::Drag>("drag");
+        createEventBinder<ui::Drop>("drop");
+    }
+
+    HashMap<String, std::function<void(ui::Node*, const String&)>> eventBinders;
+
+    template <typename Type>
+    void createEventBinder(const String& name) {
+        eventBinders[name] = [=](ui::Node* node, const String& name) {
+            auto handler = [=](const auto& event) {
+                getEngine().raiseEvent(event.toStrings(name));
+            };
+            node->addEventListener<Type>(this, handler);
+        };
     }
 };
 

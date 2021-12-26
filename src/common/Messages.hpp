@@ -5,13 +5,21 @@
 #pragma once
 
 #include <common/Value.hpp>
+#include <common/Color.hpp>
 
 namespace ui {
     class Node;
 }
-class Color;
 
 namespace msg {
+
+    class Message {
+    public:
+        virtual ~Message() = default;
+        virtual Vector<String> toStrings(const String& name) {
+            return {name};
+        }
+    };
 
     class BootComplete{};
     class Shutdown{};
@@ -78,11 +86,19 @@ namespace msg {
         std::shared_ptr<ui::Node> target;
     };
 
-    struct ActivateTool {
+    struct ActivateTool : public Message {
         const String& tool;
+        ActivateTool(const String& tool) : tool{tool} {}
+        Vector<String> toStrings(const String& name) {return {name, tool};}
     };
 
-    struct ActivateColor {
-        const Color& tool;
+    struct ActivateColor : public Message {
+        const Color& color;
+        ActivateColor(const Color& color) : color{color} {}
+        Vector<String> toStrings(const String& name) {return {name, color};}
+    };
+
+    struct ActivateLayer : public Message {
+        //TODO: implement layers support
     };
 }
