@@ -15,7 +15,6 @@ class Button : public ui::Controller {
 public:
     Property<String> state{this, "state", "enabled", &Button::changeState};
     void changeState() {
-        logI("State: ", *state);
         if (*state == "pressed" || *state == "active")
             node()->set("surface", *pressedSurface);
         if (*state == "enabled")
@@ -58,7 +57,6 @@ public:
             node()->set("state", "pressed");
             set("state", "pressed");
         }
-        logE("Down State: ", *state);
     }
 
     void eventHandler(const ui::MouseUp& event) {

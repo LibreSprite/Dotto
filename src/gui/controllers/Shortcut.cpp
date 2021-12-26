@@ -2,13 +2,12 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include "cmd/Command.hpp"
-#include "common/PropertySet.hpp"
-#include "common/String.hpp"
+#include <cmd/Command.hpp>
 #include <common/Config.hpp>
 #include <common/Messages.hpp>
+#include <common/PropertySet.hpp>
+#include <common/String.hpp>
 #include <common/PubSub.hpp>
-#include <cstdint>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
