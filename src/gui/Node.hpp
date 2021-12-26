@@ -94,7 +94,7 @@ namespace ui {
 
         std::shared_ptr<Node> findChildById(const String& targetId);
 
-        virtual void processEvent(const Event& event) {
+        void processEvent(const Event& event) override {
             EventHandler::processEvent(event);
             if (event.bubble == Event::Bubble::Down && !event.cancel)
                 forwardToChildren(event);

@@ -45,8 +45,8 @@ public:
     void eventHandler(const ui::MouseDown& event) {
         pub(msg::BeginDrag{
                 target.lock(),
-                node()->x->toPixel(node()->getParent()->localRect.width),
-                node()->y->toPixel(node()->getParent()->localRect.height)
+                node()->localRect.x,
+                node()->localRect.y
             });
     }
 

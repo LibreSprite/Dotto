@@ -94,6 +94,8 @@ namespace ui {
         constexpr void setPixel(S32 pixel) {
             type = Type::Pixel;
             value = pixel;
+            referenceType = Type::Default;
+            reference = 0;
         }
 
         S32 toPixel(S32 parent) const {

@@ -29,6 +29,7 @@ namespace ui {
                 logE("Could not load image ", src);
             else
                 logI("Loaded ", src);
+            load({{"surface", surface}});
         }
 
     public:
