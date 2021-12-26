@@ -13,6 +13,17 @@ class Button : public ui::Controller {
     PubSub<msg::Flush> pub{this};
 
 public:
+    Property<String> state{this, "state", "enabled", &Button::changeState};
+    void changeState() {
+        logI("State: ", *state);
+        if (*state == "pressed" || *state == "active")
+            node()->set("surface", *pressedSurface);
+        if (*state == "enabled")
+            node()->set("surface", *normalSurface);
+        if (*state == "disabled")
+            node()->set("surface", *disabledSurface);
+    }
+
     Property<String> pressed{this, "down-src", "", &Button::reloadPressed};
     Property<std::shared_ptr<Surface>> pressedSurface{this, "down-surface"};
     void reloadPressed() {
@@ -43,11 +54,18 @@ public:
     }
 
     void eventHandler(const ui::MouseDown& event) {
-        node()->set("surface", *pressedSurface);
+        if (*state == "enabled") {
+            node()->set("state", "pressed");
+            set("state", "pressed");
+        }
+        logE("Down State: ", *state);
     }
 
     void eventHandler(const ui::MouseUp& event) {
-        node()->set("surface", *normalSurface);
+        if (*state == "pressed") {
+            node()->set("state", "enabled");
+            set("state", "enabled");
+        }
     }
 };
 

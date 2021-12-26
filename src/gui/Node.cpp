@@ -20,6 +20,12 @@ std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
     return nullptr;
 }
 
+void ui::Node::load(const PropertySet& set) {
+    Model::load(set);
+    for (auto& entry : controllers) {
+        entry.second->init(set);
+    }
+}
 
 static void loadNodeProperties(ui::Node* node, XMLElement* element) {
     PropertySet props;

@@ -177,6 +177,11 @@ protected:
         }
     };
 
+    void set(const String& key, const Value& value) {
+        Value copy = value;
+        set(key, copy);
+    }
+
     void set(const String& key, Value& value) {
         for (auto& serializer : propertySerializers) {
             if (key == *serializer.key) {
@@ -187,7 +192,7 @@ protected:
         }
     }
 
-    void load(const PropertySet& set) {
+    virtual void load(const PropertySet& set) {
         Vector<std::function<void()>*> queue;
         for (auto& serializer : propertySerializers) {
             auto it = set.properties.find(*serializer.key);

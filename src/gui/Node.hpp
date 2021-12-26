@@ -90,6 +90,8 @@ namespace ui {
             return true;
         }
 
+        void load(const PropertySet& set) override;
+
         std::shared_ptr<Node> findChildById(const String& targetId);
 
         virtual void processEvent(const Event& event) {
