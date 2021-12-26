@@ -87,7 +87,10 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
     if (nodeRegistry.find(widgetName) != nodeRegistry.end())
         return inject<ui::Node>{widgetName};
 
-    std::shared_ptr<XMLNode> xml = inject<FileSystem>{}->parse("%appdata/gui/" + widgetName + ".xml");
+    inject<FileSystem> fs;
+    std::shared_ptr<XMLNode> xml = fs->parse("%skin/gui/" + widgetName + ".xml");
+    if (!xml || !xml->isElement())
+        xml = fs->parse("%appdata/skins/default/gui/" + widgetName + ".xml");
     if (!xml || !xml->isElement())
         return nullptr;
 

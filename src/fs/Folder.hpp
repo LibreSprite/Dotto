@@ -19,7 +19,7 @@ class Folder : public FSEntity {
     String path;
 
 public:
-    void init(const Value& resource) {
+    void init(const Value& resource) override {
         if (resource.has<String>()) {
             path = resource.get<String>();
         } else {
