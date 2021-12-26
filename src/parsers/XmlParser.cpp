@@ -36,7 +36,7 @@ public:
     Value parseFile(std::shared_ptr<File> file) override {
         tinyxml2::XMLDocument doc;
         if (doc.Parse(file->readTextFile().c_str()) != tinyxml2::XMLError::XML_SUCCESS) {
-            logE("Error parsing XML file");
+            logE("Error parsing XML file ", file->getUID());
             return nullptr;
         }
         return recurse(doc.FirstChild());
