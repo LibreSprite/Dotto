@@ -64,6 +64,7 @@ public:
             }
             return;
         }
+        fromU32(std::atof(color.c_str()));
     }
 
     constexpr Color& fromU32(U32 rgba) {
