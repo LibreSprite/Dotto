@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include <memory>
 #include <variant>
 
 #include <common/Color.hpp>
 #include <common/types.hpp>
 #include <gui/Texture.hpp>
 
-class Surface {
+class Surface : public std::enable_shared_from_this<Surface> {
     using PixelType = U32;
 
 public:

@@ -42,6 +42,14 @@ public:
             command->run();
             return true;
         });
+
+        addFunction("addTool", [=](const String& name) {
+            script::Engine::Provides engine{getEngine().shared_from_this(), "toolengine"};
+            script::ScriptObject::Provides app{shared_from_this(), "toolapp"};
+            inject<Tool>{"script"}->init(name);
+            return true;
+        });
+
         addFunction("parse", [=](const String& path) {
             return FileSystem::parse(path);
         });
