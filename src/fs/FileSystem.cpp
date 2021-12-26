@@ -53,7 +53,7 @@ Vector<String> FileSystem::splitPath(const String& path) {
     return parts;
 }
 
-std::shared_ptr<FSEntity> FileSystem::find(const String& path) {
+std::shared_ptr<FSEntity> FileSystem::find(const String& path, const String& missingType) {
     auto parts = splitPath(path);
     std::shared_ptr<FSEntity> node = root;
     for (std::size_t index = 0, max = parts.size(); node && index < max; ++index) {
@@ -65,7 +65,7 @@ std::shared_ptr<FSEntity> FileSystem::find(const String& path) {
             break;
         }
         auto parent = std::static_pointer_cast<Folder>(node);
-        node = parent->getChild(part, isFilePart ? "std" : "dir");
+        node = parent->getChild(part, isFilePart ? missingType : "dir");
         if (isFilePart && node->isFile()) {
             break;
         }

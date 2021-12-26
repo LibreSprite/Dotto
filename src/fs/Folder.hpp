@@ -30,6 +30,8 @@ public:
     virtual bool isFolder() {return true;}
     virtual bool isFile() {return false;}
 
+    void forEach(std::function<void(std::shared_ptr<FSEntity>)>);
+
     std::shared_ptr<FSEntity> getChild(const String& name, const String& missingDriver) {
         std::shared_ptr<FSEntity> driver;
         auto it = children.find(name);

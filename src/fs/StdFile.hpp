@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <common/String.hpp>
 #include <common/types.hpp>
 #include <common/Value.hpp>
 #include <fs/File.hpp>
@@ -42,6 +43,10 @@ public:
 
     String type() override {
         return inject<FileSystem>{}->extension(path);
+    }
+
+    String name() override {
+        return split(path, separator).back();
     }
 
     bool isOpen() override {
