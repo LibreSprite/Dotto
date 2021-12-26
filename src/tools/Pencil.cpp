@@ -10,8 +10,6 @@ class Surface;
 
 class Pencil : public  Tool {
 public:
-    std::shared_ptr<Surface> getIcon() {return nullptr;}
-
     virtual void begin(Surface* surface, const Vector<Point>& points) {
         auto& point = points.back();
         surface->setPixel(point.x, point.y, color);
@@ -23,9 +21,9 @@ public:
         line(begin, end, [=](Point point){
             surface->setPixel(point.x, point.y, color);
         });
-    };
+    }
 
-    virtual void end(Surface* surface, const Vector<Point>& points) {};
+    virtual void end(Surface* surface, const Vector<Point>& points) {}
 };
 
 static Tool::Shared<Pencil> pencil{"brush"};

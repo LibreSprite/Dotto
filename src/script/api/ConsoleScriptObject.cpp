@@ -36,4 +36,4 @@ public:
     }
 };
 
-static script::ScriptObject::Regular<ConsoleScriptObject> reg("ConsoleScriptObject", {"global"});
+static script::ScriptObject::Shared<ConsoleScriptObject> reg("ConsoleScriptObject", {"global"});

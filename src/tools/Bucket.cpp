@@ -10,8 +10,6 @@ class Surface;
 
 class Bucket : public  Tool {
 public:
-    std::shared_ptr<Surface> getIcon() {return nullptr;}
-
     virtual void begin(Surface* surface, const Vector<Point>& points) {
         auto targetColor = surface->getPixel(points.back().x, points.back().y);
         if (targetColor == color)
@@ -32,9 +30,9 @@ public:
         }
     }
 
-    virtual void update(Surface* surface, const Vector<Point>& points) {};
+    virtual void update(Surface* surface, const Vector<Point>& points) {}
 
-    virtual void end(Surface* surface, const Vector<Point>& points) {};
+    virtual void end(Surface* surface, const Vector<Point>& points) {}
 };
 
 static Tool::Shared<Bucket> bucket{"bucket"};

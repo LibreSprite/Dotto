@@ -304,6 +304,24 @@ public:
         return all;
     }
 
+    static Vector<std::pair<String, inject<BaseClass>>> getAllWithoutFlag(const String& flag) {
+        Vector<String> temp;
+        Vector<std::pair<String, inject<BaseClass>>> all;
+        auto& registry = getRegistry();
+
+        temp.reserve(registry.size());
+        for (auto& entry : registry) {
+            if (!entry.first.empty() && !entry.second.hasFlag(flag))
+                temp.emplace_back(entry.first);
+        }
+
+        all.reserve(temp.size());
+        for (auto& entry : temp) {
+            all.emplace_back(entry, entry);
+        }
+        return all;
+    }
+
     static Vector<std::pair<String, inject<BaseClass>>> createAll() {
         Vector<String> temp;
         Vector<std::pair<String, inject<BaseClass>>> all;
@@ -448,6 +466,17 @@ public:
             this->name = name;
             Injectable<BaseClass>::getRegistry()[name] = {
                 [&] {return instance.get();},
+                [](BaseClass* ptr) {},
+                [](BaseClass*){return false;},
+                this,
+                flags
+            };
+        }
+
+        Provides(const std::shared_ptr<BaseClass>& instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
+            this->name = name;
+            Injectable<BaseClass>::getRegistry()[name] = {
+                [=] {return instance.get();},
                 [](BaseClass* ptr) {},
                 [](BaseClass*){return false;},
                 this,

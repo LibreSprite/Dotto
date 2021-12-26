@@ -17,8 +17,7 @@ public:
     static inline Color color;
 
     static void boot() {
-        for (auto& entry : Tool::createAll()) {
-            instances.insert({entry.first, entry.second});
+        for (auto& entry : Tool::getAllWithoutFlag("noauto")) {
             entry.second->init(entry.first);
         }
     }
@@ -27,6 +26,7 @@ public:
     bool enabled = true;
 
     virtual void init(const String& name) {
+        instances.insert({name, shared_from_this()});
         load({
                 {"icon", "%appdata/skins/default/" + name + ".png"},
                 {"tool", name}
