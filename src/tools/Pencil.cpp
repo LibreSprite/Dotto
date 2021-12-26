@@ -14,14 +14,14 @@ public:
 
     virtual void begin(Surface* surface, const Vector<Point>& points) {
         auto& point = points.back();
-        surface->setPixel(point.x, point.y, Color{0xFF, 0, 0, 0xFF});
+        surface->setPixel(point.x, point.y, color);
     }
 
     virtual void update(Surface* surface, const Vector<Point>& points) {
         auto& end = points[points.size() - 1];
         auto& begin = points[points.size() - 2];
         line(begin, end, [=](Point point){
-            surface->setPixel(point.x, point.y, Color{0, 0xFF, 0, 0xFF});
+            surface->setPixel(point.x, point.y, color);
         });
     };
 

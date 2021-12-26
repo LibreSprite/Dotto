@@ -13,9 +13,8 @@ public:
     std::shared_ptr<Surface> getIcon() {return nullptr;}
 
     virtual void begin(Surface* surface, const Vector<Point>& points) {
-        Color fillColor{U8(rand()), U8(rand()), U8(rand()), 0xFF};
         auto targetColor = surface->getPixel(points.back().x, points.back().y);
-        if (targetColor == fillColor)
+        if (targetColor == color)
             return;
         S32 width = surface->width();
         S32 height = surface->height();
@@ -24,7 +23,7 @@ public:
             S32 x = queue.back().x;
             S32 y = queue.back().y;
             queue.pop_back();
-            surface->setPixelUnsafe(x, y, fillColor.toU32());
+            surface->setPixelUnsafe(x, y, color.toU32());
 
             if (x > 0 && surface->getPixel(x - 1, y) == targetColor) queue.push_back({x - 1, y});
             if (y > 0 && surface->getPixel(x, y - 1) == targetColor) queue.push_back({x, y - 1});

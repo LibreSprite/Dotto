@@ -9,6 +9,7 @@
 namespace ui {
     class Node;
 }
+class Color;
 
 namespace msg {
 
@@ -79,5 +80,9 @@ namespace msg {
 
     struct ActivateTool {
         const String& tool;
+    };
+
+    struct ActivateColor {
+        const Color& tool;
     };
 }
