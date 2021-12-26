@@ -13,7 +13,9 @@
 #include <common/System.hpp>
 #include <fs/Cache.hpp>
 #include <fs/FileSystem.hpp>
+#include <fs/Folder.hpp>
 #include <log/Log.hpp>
+#include <script/Engine.hpp>
 
 class AppImpl : public App {
 public:
@@ -43,7 +45,22 @@ public:
         fs->boot();
         config->boot();
         system->boot();
-        ui::Node::fromXML("MainWindow");
+        if (auto autorun = fs->find("%appdata/autorun", "dir")->get<Folder>()) {
+            Vector<std::pair<S32, std::shared_ptr<File>>> files;
+            autorun->forEach([&](std::shared_ptr<FSEntity> child) {
+                if (child->isFile()) {
+                    auto file = child->get<File>();
+                    S32 priority = atoi(file->name().c_str());
+                    if (priority)
+                        files.emplace_back(priority, file);
+                }
+            });
+            std::sort(files.begin(), files.end(), [](auto& left, auto& right) {
+                return left.first < right.first;
+            });
+            for (auto& entry : files)
+                entry.second->parse();
+        }
         pub(msg::BootComplete{});
     }
 

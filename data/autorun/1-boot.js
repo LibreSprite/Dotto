@@ -1,0 +1,1 @@
+app.createNode("MainWindow");
