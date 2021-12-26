@@ -32,7 +32,9 @@ class Shortcut : public ui::Controller {
                     auto keyCode = std::to_string(shortcut->lastKeyDown->keycode);
                     auto it = childMap->find(keyCode);
                     if (it == childMap->end())
-                        logI("KeyCode: ", keyCode);
+                        it = childMap->find(tolower(shortcut->lastKeyDown->keyname));
+                    if (it == childMap->end())
+                        logI("Key name: ", shortcut->lastKeyDown->keyname);
                     shortcut->currentMap = (it != childMap->end()) ? it->second.get() : &shortcut->defaultMap;
                     if (!shortcut->currentMap->childMap || shortcut->currentMap->childMap->empty()) {
                         shortcut->currentMap->activate();
@@ -78,7 +80,7 @@ class Shortcut : public ui::Controller {
             currentMap = &defaultMap;
             for (auto& chord : chords) {
                 auto& map = *currentMap->getChildMap(this);
-                auto& ptr = map[trim(chord)];
+                auto& ptr = map[tolower(trim(chord))];
                 if (!ptr)
                     ptr = std::make_shared<KeyEntry>();
                 currentMap = ptr.get();

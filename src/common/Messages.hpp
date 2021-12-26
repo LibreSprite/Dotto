@@ -57,12 +57,14 @@ namespace msg {
     struct KeyUp {
         const U32 windowId;
         U32 scancode;
+        const char* keyName;
         U32 keycode;
     };
 
     struct KeyDown {
         const U32 windowId;
         U32 scancode;
+        const char* keyName;
         U32 keycode;
     };
 

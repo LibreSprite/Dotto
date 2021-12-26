@@ -91,17 +91,21 @@ namespace ui {
 
     struct KeyEvent : public Event {
         U32 scancode, keycode;
-        KeyEvent(U32 scancode, U32 keycode) : scancode{scancode}, keycode{keycode} {
+        const char* keyname;
+        KeyEvent(U32 scancode, U32 keycode, const char* keyname) :
+            scancode{scancode},
+            keycode{keycode},
+            keyname{keyname} {
             bubble = Bubble::Up;
         }
     };
 
     struct KeyDown : public KeyEvent {
-        KeyDown(U32 scancode, U32 keycode) : KeyEvent{scancode, keycode} {}
+        KeyDown(U32 scancode, U32 keycode, const char* keyname) : KeyEvent{scancode, keycode, keyname} {}
     };
 
     struct KeyUp : public KeyEvent {
-        KeyUp(U32 scancode, U32 keycode) : KeyEvent{scancode, keycode} {}
+        KeyUp(U32 scancode, U32 keycode, const char* keyname) : KeyEvent{scancode, keycode, keyname} {}
     };
 
     struct Drag : public Event {

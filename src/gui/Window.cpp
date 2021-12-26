@@ -120,13 +120,13 @@ namespace ui {
 
     void Window::on(msg::KeyDown& event) {
         if (auto focus = focusTarget.lock()) {
-            focus->processEvent(ui::KeyDown{event.scancode, event.keycode});
+            focus->processEvent(ui::KeyDown{event.scancode, event.keycode, event.keyName});
         }
     }
 
     void Window::on(msg::KeyUp& event) {
         if (auto focus = focusTarget.lock()) {
-            focus->processEvent(ui::KeyUp{event.scancode, event.keycode});
+            focus->processEvent(ui::KeyUp{event.scancode, event.keycode, event.keyName});
         }
     }
 

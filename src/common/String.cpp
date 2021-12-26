@@ -24,7 +24,7 @@ String toupper(const String& string) {
 
 String trim(const String& input) {
     std::size_t start = 0;
-    std::size_t end = input.size() - 1;
+    std::size_t end = input.size();
     for (auto c : input) {
         if (c > ' ')
             break;
@@ -34,10 +34,10 @@ String trim(const String& input) {
     if (start == end)
         return "";
 
-    while (input[end] <= ' ')
+    while (input[end - 1] <= ' ')
         end--;
 
-    return input.substr(start, end - start + 1);
+    return input.substr(start, end - start);
 }
 
 Vector<String> split(const String& str, const String& sep) {
