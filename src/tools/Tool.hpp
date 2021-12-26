@@ -28,7 +28,7 @@ public:
     virtual void init(const String& name) {
         instances.insert({name, shared_from_this()});
         load({
-                {"icon", "%appdata/skins/default/" + name + ".png"},
+                {"icon", "%skin/" + name + ".png"},
                 {"tool", name}
             });
     }

@@ -27,8 +27,9 @@ public:
         }
     }
 
-    virtual bool isFolder() {return true;}
-    virtual bool isFile() {return false;}
+    String getUID() override {return path;}
+    bool isFolder() override {return true;}
+    bool isFile() override {return false;}
 
     void forEach(std::function<void(std::shared_ptr<FSEntity>)>);
 
