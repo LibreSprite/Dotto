@@ -42,6 +42,14 @@ public:
             command->run();
             return true;
         });
+        addFunction("parse", [=](const String& path) {
+            return FileSystem::parse(path);
+        });
+
+        addFunction("createNode", [=](const String& name) {
+            return ::Value{ui::Node::fromXML(name)};
+        });
+
         makeGlobal("app");
     }
 
