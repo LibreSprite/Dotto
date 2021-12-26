@@ -23,6 +23,26 @@ public:
 
         ModelScriptObject::setWrapped(std::static_pointer_cast<Model>(sharednode));
 
+        addProperty("globalX", [=]()->script::Value {
+            if (auto node = weak.lock()) return node->globalRect.x;
+            return 0;
+        });
+
+        addProperty("globalY", [=]()->script::Value {
+            if (auto node = weak.lock()) return node->globalRect.y;
+            return 0;
+        });
+
+        addProperty("globalWidth", [=]()->script::Value {
+            if (auto node = weak.lock()) return node->globalRect.width;
+            return 0;
+        });
+
+        addProperty("globalHeight", [=]()->script::Value {
+            if (auto node = weak.lock()) return node->globalRect.height;
+            return 0;
+        });
+
         addFunction("findChildById", [=](const String& id) -> script::Value {
             if (auto node = weak.lock()) {
                 return getEngine().toValue(node->findChildById(id));
