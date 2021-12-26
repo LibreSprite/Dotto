@@ -53,31 +53,30 @@ namespace ui {
 
     struct MouseLeave : public Event {};
 
-    struct MouseMove : public Event {
+    struct MouseEvent : public Event {
         U32 buttons;
-        MouseMove(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
+        MouseEvent(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
             bubble = Bubble::Up;
             this->globalX = globalX;
             this->globalY = globalY;
+        }
+        virtual Vector<String> toStrings(const String& name) const {
+            auto ret = Event::toStrings(name);
+            ret.push_back(std::to_string(buttons));
+            return ret;
         }
     };
 
-    struct MouseDown : public Event {
-        U32 buttons;
-        MouseDown(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
-            bubble = Bubble::Up;
-            this->globalX = globalX;
-            this->globalY = globalY;
-        }
+    struct MouseMove : public MouseEvent {
+        MouseMove(S32 globalX, S32 globalY, U32 buttons) : MouseEvent{globalX, globalY, buttons} {}
     };
 
-    struct MouseUp : public Event {
-        U32 buttons;
-        MouseUp(S32 globalX, S32 globalY, U32 buttons) : buttons{buttons} {
-            bubble = Bubble::Up;
-            this->globalX = globalX;
-            this->globalY = globalY;
-        }
+    struct MouseDown : public MouseEvent {
+        MouseDown(S32 globalX, S32 globalY, U32 buttons) : MouseEvent{globalX, globalY, buttons} {}
+    };
+
+    struct MouseUp : public MouseEvent {
+        MouseUp(S32 globalX, S32 globalY, U32 buttons) : MouseEvent{globalX, globalY, buttons} {}
     };
 
     struct Click : public Event {
