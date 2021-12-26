@@ -92,7 +92,7 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
         return nullptr;
 
     auto element = std::static_pointer_cast<XMLElement>(xml);
-    auto widget = inject<ui::Node>{element->tag}.shared();
+    auto widget = inject<ui::Node>{InjectSilent::Yes, element->tag}.shared();
     if (!widget) widget = fromXML(element->tag);
     if (!widget) {
         logE("Unknown widget: ", element->tag);

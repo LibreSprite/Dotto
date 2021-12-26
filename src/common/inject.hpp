@@ -160,9 +160,14 @@ to delete AccountManager. Perfectly balanced...
 #define HAS_DEMANGLE
 #endif
 
+enum class InjectSilent {
+    No = 0,
+    Yes
+};
+
 template<typename BaseClass_>
 class inject {
-    void doInjection(const String& name);
+    void doInjection(const String& name, bool silent);
 
 public:
     using BaseClass = BaseClass_;
@@ -171,7 +176,15 @@ public:
 
     template<typename...Args>
     inject(const String& name = "", Args&& ... args) {
-        doInjection(name);
+        doInjection(name, false);
+        if (ptr) {
+            ptr->postInject(std::forward<Args>(args)...);
+        }
+    }
+
+    template<typename...Args>
+    inject(InjectSilent silent, const String& name = "", Args&& ... args) {
+        doInjection(name, silent == InjectSilent::Yes);
         if (ptr) {
             ptr->postInject(std::forward<Args>(args)...);
         }
@@ -457,14 +470,14 @@ public:
 };
 
 template<typename BaseClass_>
-void inject<BaseClass_>::doInjection(const String& name) {
+void inject<BaseClass_>::doInjection(const String& name, bool silent) {
     auto& registry = Injectable<BaseClass>::getRegistry();
     auto it = registry.find(name);
     if (it != registry.end()) {
         auto& registryEntry = it->second;
         onDetach = registryEntry.detach;
         ptr = registryEntry.attach();
-    } else {
-        std::cout << "Could not create " << name << std::endl;
+    } else if (!silent) {
+        std::cout << "Could not create " << typeid(BaseClass_).name() << " instance " << name << std::endl;
     }
 }

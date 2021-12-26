@@ -96,6 +96,11 @@ public:
                 }
                 break;
 
+            case SDL_TEXTINPUT:
+            case SDL_TEXTEDITING:
+            case SDL_KEYMAPCHANGED:
+                break;
+
             default:
                 logV("Unknown SDL2 event: ", event.type);
                 break;
