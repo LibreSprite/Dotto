@@ -1,1 +1,1 @@
-app.createNode("MainWindow");
+app.openWindow("MainWindow");

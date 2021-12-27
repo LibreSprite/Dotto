@@ -47,6 +47,14 @@ public:
             return 0;
         });
 
+        addProperty("parent", [=]() -> script::Value {
+            if (auto node = weak.lock()) {
+                if (auto parent = node->getParent())
+                    return getEngine().toValue(parent->shared_from_this());
+            }
+            return nullptr;
+        });
+
         addFunction("findChildById", [=](const String& id) -> script::Value {
             if (auto node = weak.lock()) {
                 return getEngine().toValue(node->findChildById(id));
@@ -68,6 +76,17 @@ public:
                     node->removeChild(child->shared_from_this());
             }
             return 0;
+        });
+
+        addFunction("createChild", [=](const String& name) -> script::Value {
+            if (auto node = weak.lock()) {
+                auto child = ui::Node::fromXML(name);
+                if (child) {
+                    node->addChild(child);
+                    return getEngine().toValue(child);
+                }
+            }
+            return nullptr;
         });
 
         addFunction("addChild", [=](script::ScriptObject* obj) {

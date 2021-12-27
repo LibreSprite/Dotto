@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <common/types.hpp>
 #include <regex>
+
+#include <common/Value.hpp>
 
 namespace ui {
     class Unit {
@@ -24,7 +25,22 @@ namespace ui {
 
         Unit(const String& str) {*this = str;}
 
+        Unit(const char* str) {*this = str;}
+
         constexpr Unit(S32 pixel) {*this = pixel;}
+
+        constexpr Unit(const Value& pixel) {
+            if (pixel.has<U32>())
+                *this = static_cast<U32>(pixel);
+            else if (pixel.has<S32>())
+                *this = static_cast<S32>(pixel);
+            else if (pixel.has<F32>())
+                *this = U32(F32(pixel));
+            else if (pixel.has<F64>())
+                *this = U32(F64(pixel));
+            else if (pixel.has<String>())
+                *this = pixel.get<String>();
+        }
 
         constexpr Unit& operator = (S32 pixel) {
             setPixel(pixel);
@@ -48,6 +64,14 @@ namespace ui {
         }
 
         Unit& operator = (const String& str) {
+            return *this = str.c_str();
+        }
+
+        Unit& operator = (char* str) {
+            return *this = const_cast<const char*>(str);
+        }
+
+        Unit& operator = (const char* str) {
             auto load = +[](const String& str, F32& value, Type& type){
                 if (str.empty()) {
                     type = Type::Default;
@@ -63,7 +87,7 @@ namespace ui {
                 }
             };
             std::cmatch match;
-            std::regex_match(str.c_str(), match, std::regex("(?:([0-9]*(?:px|%?))(\\s*[+-]\\s*))?([0-9]+(?:px|%?))"));
+            std::regex_match(str, match, std::regex("(?:([0-9]*(?:px|%?))(\\s*[+-]\\s*))?([0-9]+(?:px|%?))"));
 
             if (match.empty()) {
                 type = Type::Default;
