@@ -23,6 +23,7 @@ namespace msg {
 
     class BootComplete{};
     class Shutdown{};
+    class Tick{};
 
     class Flush{
         const Value& resource;

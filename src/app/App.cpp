@@ -69,6 +69,7 @@ public:
     }
 
     bool run() override {
+        pub(msg::Tick{});
         if (!system->run())
             return false;
         clock::time_point now = clock::now();

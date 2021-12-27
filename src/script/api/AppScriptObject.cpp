@@ -3,8 +3,11 @@
 // Read LICENSE.txt for more information.
 
 #include <sstream>
+#include <optional>
 
 #include <cmd/Command.hpp>
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Node.hpp>
@@ -17,6 +20,7 @@
 class AppScriptObjectImpl : public AppScriptObject {
 public:
     script::Value target;
+    std::optional<PubSub<msg::Tick>> tick;
 
     void setTarget(const ::Value& target) override {
         this->target = getEngine().toValue(target);
@@ -50,6 +54,14 @@ public:
             return true;
         });
 
+        addFunction("addEventListener", [=](const String& name) {
+            if (name == "tick") {
+                if (!tick)
+                    tick = this;
+            }
+            return true;
+        });
+
         addFunction("parse", [=](const String& path) {
             return FileSystem::parse(path);
         });
@@ -61,6 +73,7 @@ public:
         makeGlobal("app");
     }
 
+    void on(msg::Tick&) {getEngine().raiseEvent({"tick"});}
 };
 
 static script::ScriptObject::Shared<AppScriptObjectImpl> reg("AppScriptObject", {"global"});
