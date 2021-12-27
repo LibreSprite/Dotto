@@ -39,6 +39,7 @@ public:
     clock::time_point referenceTime;
 
     void boot(int argc, const char* argv[]) override {
+        auto lock = cache->lock();
         referenceTime = clock::now();
         log->setGlobal();
         log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args

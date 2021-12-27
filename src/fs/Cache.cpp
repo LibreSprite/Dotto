@@ -13,6 +13,9 @@ public:
     PubSub<> pub{this};
 
     void flush() override {
+        if (locked())
+            return;
+
         for (auto it = index.begin(); it != index.end();) {
             if (pub(msg::Flush{it->second}).isHeld()) {
                 ++it;
