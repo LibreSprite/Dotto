@@ -8,6 +8,7 @@
 #include <common/types.hpp>
 #include <common/Value.hpp>
 #include <fs/File.hpp>
+#include <fs/FileSystem.hpp>
 
 class StdFile : public File {
 public:

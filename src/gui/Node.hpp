@@ -95,6 +95,8 @@ namespace ui {
 
         std::shared_ptr<Node> findChildById(const String& targetId);
 
+        void bringToFront(std::shared_ptr<Node> child);
+
         void processEvent(const Event& event) override {
             EventHandler::processEvent(event);
             if (event.bubble == Event::Bubble::Down && !event.cancel)

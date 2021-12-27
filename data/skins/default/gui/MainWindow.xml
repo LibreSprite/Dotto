@@ -1,9 +1,9 @@
 <window id="mainwindow" width="800px" height="600px" flow="column" background="rgb{64,32,32}">
   <image src="%skin/skin.png" height="25%"/>
 
-  <image controller="draggable, shortcut" id="editor" handle="titlebar" src="%skin/window.png" height="90%" width="90%" x="5%" y="10px" absolute="true" slice="7 30" overflow-hidden="true">
+  <image controller="draggable, shortcut, focusfront" id="editor" handle="titlebar" src="%skin/window.png" height="90%" width="90%" x="5%" y="10px" absolute="true" slice="7 30" overflow-hidden="true">
     <node id="titlebar">
-      <span controller="script" script="%appdata/test2.js" id="title" font="%skin/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
+      <span id="title" font="%skin/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
         LibreSprite Dotto!
       </span>
     </node>
@@ -14,7 +14,7 @@
     <image id="draw" controller="canvas" absolute="true" y="30px" height="100%-35px" x="7px" width="100%-43px"/>
   </image>
 
-  <image controller="draggable, shortcut, script" script="%appdata/colorpicker.js" handle="titlebar" src="%skin/window.png" height="180px" width="150px" x="0px" y="100%-180px" absolute="true" slice="7 30" overflow-hidden="true">
+  <image controller="draggable, shortcut, script, focusfront" script="%appdata/colorpicker.js" handle="titlebar" src="%skin/window.png" height="180px" width="150px" x="0px" y="100%-180px" absolute="true" slice="7 30" overflow-hidden="true">
     <node id="titlebar">
       <span id="title" font="%skin/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
         Color Picker

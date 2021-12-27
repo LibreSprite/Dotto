@@ -20,6 +20,14 @@ std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
     return nullptr;
 }
 
+void ui::Node::bringToFront(std::shared_ptr<ui::Node> child) {
+    auto it = std::find(children.begin(), children.end(), child);
+    if (it == children.end())
+        return;
+    children.erase(it);
+    children.push_back(child);
+}
+
 void ui::Node::load(const PropertySet& set) {
     Model::load(set);
     for (auto& entry : controllers) {
