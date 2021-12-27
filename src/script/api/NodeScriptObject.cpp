@@ -17,12 +17,15 @@ public:
         }
     }
 
-    void setWrapped(std::shared_ptr<void> vmodel) {
-        auto sharednode = std::static_pointer_cast<ui::Node>(vmodel);
-        auto weak = std::weak_ptr(sharednode);
-        this->weak = weak;
+    Value getWrapped() override {
+        return weak.lock();
+    }
 
-        ModelScriptObject::setWrapped(std::static_pointer_cast<Model>(sharednode));
+    void setWrapped(const Value& vmodel) override {
+        std::shared_ptr<ui::Node> node = vmodel;
+        ModelScriptObject::setWrapped(std::static_pointer_cast<Model>(node));
+        auto weak = std::weak_ptr(node);
+        this->weak = weak;
 
         addProperty("globalX", [=]()->script::Value {
             if (auto node = weak.lock()) return node->globalRect.x;

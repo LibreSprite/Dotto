@@ -123,7 +123,9 @@ public:
             if (buffer)
                 return {buffer, size, false};
             if (duk_get_prop_string(ctx, id, "\0xFFthis")) {
-                return getScriptObject(duk_get_pointer(ctx, -1));
+                auto iso = duk_get_pointer(ctx, -1);
+                auto so = getScriptObject(iso);
+                return so;
             }
         } else if (type == DUK_TYPE_BUFFER) {
             duk_size_t size = 0;

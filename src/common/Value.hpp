@@ -57,7 +57,7 @@ public:
     }
 
     std::shared_ptr<void> getShared() const {
-        return shared(value);
+        return shared ? shared(value) : nullptr;
     }
 
     Value& operator = (Value&& other) = default;
@@ -75,9 +75,7 @@ public:
                 return std::static_pointer_cast<void>(std::any_cast<Type>(value));
             };
         } else {
-            shared = +[](const std::any& value) -> std::shared_ptr<void> {
-                return {};
-            };
+            shared = nullptr;
         }
         return *this;
     }

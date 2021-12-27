@@ -7,6 +7,7 @@
 #pragma once
 
 #include <common/inject.hpp>
+#include <common/Value.hpp>
 #include <script/Function.hpp>
 
 namespace script {
@@ -90,8 +91,8 @@ namespace script {
             internal->scriptObject = this;
         }
 
-        virtual void* getWrapped(){return nullptr;}
-        virtual void setWrapped(std::shared_ptr<void>){}
+        virtual ::Value getWrapped(){return nullptr;}
+        virtual void setWrapped(const ::Value&){}
         script::Engine& getEngine() {return *internal->engine;}
 
         template <typename Type = Value>
@@ -122,9 +123,6 @@ namespace script {
             func();
             return func.result;
         }
-
-        template<typename Type>
-        Type* getWrapped(){ return static_cast<Type*>(getWrapped()); }
 
     protected:
         void makeGlobal(const String& name) {

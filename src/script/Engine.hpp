@@ -39,11 +39,12 @@ namespace script {
         script::Value toValue(const ::Value& value) {
             script::Value out;
             if (!out.set(value))
-                out = getScriptObject(value.getShared(), value.typeName());
+                out = getScriptObject(value, value.typeName());
             return out;
         }
 
-        ScriptObject* getScriptObject(std::shared_ptr<void> object, const String& injectionName) {
+        ScriptObject* getScriptObject(const ::Value& value, const String& injectionName) {
+            auto object = value.getShared();
             if (!object)
                 return nullptr;
             holdList.insert(object);
@@ -51,7 +52,7 @@ namespace script {
             if (it != objectMap.end())
                 return it->second.wrapper.get();
             inject<ScriptObject> wrapper{injectionName};
-            wrapper->setWrapped(object);
+            wrapper->setWrapped(value);
             objectMap[object.get()] = {object, wrapper};
             return wrapper.get();
         }

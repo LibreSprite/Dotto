@@ -32,8 +32,12 @@ public:
         addMethod("getPixel", this, &SurfaceScriptObject::getPixel);
     }
 
-    void setWrapped(std::shared_ptr<void> ptr) override {
-        surface = std::static_pointer_cast<Surface>(ptr);
+    Value getWrapped() override {
+        return surface;
+    }
+
+    void setWrapped(const Value& value) override {
+        surface = value;
     }
 
     void setPixel(S32 x, S32 y, U32 color) {

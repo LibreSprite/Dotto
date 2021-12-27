@@ -63,11 +63,11 @@ public:
         });
 
         addFunction("parse", [=](const String& path) {
-            return FileSystem::parse(path);
+            return getEngine().toValue(FileSystem::parse(path));
         });
 
-        addFunction("createNode", [=](const String& name) {
-            return ::Value{ui::Node::fromXML(name)};
+        addFunction("openWindow", [=](const String& name) -> script::Value {
+            return ui::Node::fromXML(name) != nullptr;
         });
 
         makeGlobal("app");

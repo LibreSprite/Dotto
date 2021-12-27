@@ -9,24 +9,42 @@
 #include <script/ScriptObject.hpp>
 
 class ModelScriptObject : public script::ScriptObject {
-    std::weak_ptr<Model> model;
+    std::weak_ptr<Model> weak;
 public:
-    virtual void* getWrapped(){
-        return model.lock().get();
+    Value getWrapped() override {
+        return weak.lock();
     }
 
-    void setWrapped(std::shared_ptr<void> vmodel) {
+    void setWrapped(const Value& vmodel) override {
         script::ScriptObject::setWrapped(vmodel);
-        auto model = std::static_pointer_cast<Model>(vmodel);
-        this->model = model;
-        for (auto& entry : model->getPropertySet().getMap()) {
-            auto& name = entry.first;
-            auto& ptr = entry.second;
+        std::shared_ptr<Model> model = vmodel;
+        weak = model;
+
+        addFunction("apply", [=](){
+            if (auto model = weak.lock())
+                model->load(model->getPropertySet());
+            return 0;
+        });
+
+        for (auto& name : model->getPropertyNames()) {
             addProperty(name,
-                        [=]{return getEngine().toValue(*ptr);},
+                        [=]()->script::Value {
+                            if (auto model = weak.lock()) {
+                                if (auto value = model->get(name))
+                                    return getEngine().toValue(*value);
+                            } else {
+                                logE("Model expired, could not get ", name, ".");
+                            }
+                            return nullptr;
+                        },
                         [=](const script::Value& value) {
-                            if (auto model = this->model.lock()) {
-                                model->set(name, value.get());
+                            if (auto model = weak.lock()) {
+                                if (value.type == script::Value::Type::OBJECT && value.data.object_v) {
+                                    model->set(name, value.data.object_v->getWrapped());
+                                } else
+                                    model->set(name, value.get());
+                            } else {
+                                logE("Model expired, could not get ", name, ".");
                             }
                             return value;
                         });

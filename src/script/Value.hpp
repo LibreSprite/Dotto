@@ -105,6 +105,31 @@ namespace script {
         Value(Value&& other) {*this = std::move(other);}
         ~Value() {makeUndefined();}
 
+        String debug() const {
+            switch (type) {
+            case Type::UNDEFINED:
+                return "[Undefined]";
+
+            case Type::INT:
+                return "[INT:" + std::to_string(data.int_v) + "]";
+
+            case Type::DOUBLE:
+                return "[DOUBLE:" + std::to_string(data.double_v) + "]";
+
+            case Type::STRING:
+                return "[STRING:" + *data.string_v + "]";
+
+            case Type::OBJECT:
+                return "[OBJECT:" + std::to_string((uintptr_t)data.object_v) + "]";
+
+            case Type::BUFFER:
+                return "[BUFFER:" + std::to_string((uintptr_t)data.buffer_v) + "]";
+
+            default:
+                return "[INVALID]";
+            }
+        }
+
         bool set(const ::Value& other) {
             makeUndefined();
 
