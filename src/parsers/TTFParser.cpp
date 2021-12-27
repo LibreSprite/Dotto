@@ -122,6 +122,8 @@ public:
     }
 
     virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& text) {
+        if (text.empty())
+            return nullptr;
         auto surface = std::make_shared<Surface>();
         setSize(size);
         Vector<Glyph*> glyphs;
