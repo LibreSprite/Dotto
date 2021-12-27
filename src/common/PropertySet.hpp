@@ -14,6 +14,7 @@
 class PropertySet {
     friend class Serializable;
     mutable HashMap<String, std::shared_ptr<Value>> properties;
+    static inline bool debug = false;
 
 public:
     PropertySet() = default;
@@ -43,11 +44,20 @@ public:
             if (from.has<String>()) {
                 String str = tolower(from.get<String>());
                 out = str.size() && (str[0] == 't' || str[0] == 'y');
-            } else out = false;
+            } else if (from.has<U32>()) {
+                out = from.get<U32>();
+            } else if (from.has<S32>()) {
+                out = from.get<S32>();
+            } else return false;
         } else if constexpr (std::is_integral_v<Type>) {
-            if (!from.has<String>())
-                return false;
-            out = std::atol(from.get<String>().c_str());
+            if (from.has<F32>()) out = from.get<F32>();
+            else if (from.has<S32>()) out = from.get<S32>();
+            else if (from.has<U32>()) out = from.get<U32>();
+            else if (from.has<U64>()) out = from.get<U64>();
+            else if (from.has<S64>()) out = from.get<S64>();
+            else if (from.has<double>()) out = from.get<double>();
+            else if (from.has<String>()) out = std::atol(from.get<String>().c_str());
+            else return false;
         } else if constexpr (std::is_floating_point_v<Type>) {
             if (!from.has<String>())
                 return false;
@@ -81,7 +91,10 @@ public:
         auto it = properties.find(tolower(key));
         if (it == properties.end())
             return false;
-        return assignProperty(*it->second, out);
+        bool success = assignProperty(*it->second, out);
+        if (!success && debug)
+            logE("Could not assign ", it->second->typeName(), " to ", typeid(Type).name());
+        return success;
     }
 
     template<typename Type>
@@ -155,7 +168,18 @@ protected:
                         auto prop = static_cast<Property<Type>*>(data);
                         auto oldValue = prop->value;
                         bool didAssign = PropertySet::assignProperty(value, prop->value);
-                        return (didAssign && prop->change && !(prop->value == oldValue)) ? &prop->change : nullptr;
+                        bool didChange = !(prop->value == oldValue);
+                        if (PropertySet::debug) {
+                            if (!didAssign)
+                                logE("Assign to ", prop->name, ": Could not assign ", value.typeName(), " to ", typeid(Type).name());
+                            else if (!didChange)
+                                logE("Assign to ", prop->name, ": Value did not change");
+                            else if (!prop->change)
+                                logE("Assign to ", prop->name, ": No trigger");
+                            else
+                                logE("Assign to ", prop->name, ": triggered");
+                        }
+                        return (didAssign && prop->change && didChange) ? &prop->change : nullptr;
                     },
                     +[](void* data, PropertySet& set) {
                         auto prop = static_cast<Property<Type>*>(data);
@@ -177,16 +201,18 @@ protected:
         }
     };
 
-    void set(const String& key, const Value& value) {
+    void set(const String& key, const Value& value, bool debug = false) {
         Value copy = value;
-        set(key, copy);
+        set(key, copy, debug);
     }
 
-    void set(const String& key, Value& value) {
+    void set(const String& key, Value& value, bool debug = false) {
+        PropertySet::debug = debug;
         for (auto& serializer : propertySerializers) {
             if (key == *serializer.key) {
-                if (auto trigger = serializer.load(serializer.property, value))
+                if (auto trigger = serializer.load(serializer.property, value)) {
                     (*trigger)();
+                }
                 return;
             }
         }
@@ -214,13 +240,22 @@ protected:
         }
     }
 
+public:
+    const Vector<String> getPropertyNames() {
+        Vector<String> names;
+        names.resize(propertySerializers.size());
+        for (auto& serializer : propertySerializers)
+            names.push_back(*serializer.key);
+        return names;
+    }
 };
 
 class Model : public Serializable {
     PropertySet model;
 protected:
     void loadSilent(const PropertySet& set) {
-        model.append(set);
+        if (&set != &model)
+            model.append(set);
     }
 
 public:
@@ -229,14 +264,22 @@ public:
         Serializable::load(set);
     }
 
-    void set(const String& key, const Value& value) {
-        Value copy = value;
-        set(key, copy);
+    std::shared_ptr<Value> get(const String& key) {
+        auto& map = model.getMap();
+        auto it = map.find(key);
+        if (it == map.end())
+            return nullptr;
+        return it->second;
     }
 
-    void set(const String& key, Value& value) {
+    void set(const String& key, const Value& value, bool debug = false) {
+        Value copy = value;
+        set(key, copy, debug);
+    }
+
+    void set(const String& key, Value& value, bool debug = false) {
         model.set(key, value);
-        Serializable::set(key, value);
+        Serializable::set(key, value, debug);
     }
 
     const PropertySet& getPropertySet() {

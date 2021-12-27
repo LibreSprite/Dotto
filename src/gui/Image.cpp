@@ -27,8 +27,6 @@ namespace ui {
             surface = FileSystem::parse(*src);
             if (!surface)
                 logE("Could not load image ", src);
-            else
-                logI("Loaded ", src);
             load({{"surface", surface}});
         }
 

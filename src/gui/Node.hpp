@@ -60,6 +60,7 @@ namespace ui {
         Property<String> id{this, "id", ""};
         Property<String> controllerName{this, "controller", "", &Node::reattach};
         Property<bool> visible{this, "visible"};
+        Property<bool> debug{this, "debug"};
 
         Property<bool> hideOverflow{this, "overflow-hidden", false};
         Property<bool> absolute{this, "absolute", false, &Node::resize};
