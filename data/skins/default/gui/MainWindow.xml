@@ -1,7 +1,7 @@
 <window id="mainwindow" width="800px" height="600px" flow="column" background="rgb{64,32,32}">
   <image src="%skin/skin.png" height="25%"/>
 
-  <image controller="draggable, shortcut, focusfront" id="editor" handle="titlebar" src="%skin/window.png" height="90%" width="90%" x="5%" y="10px" absolute="true" slice="7 30" overflow-hidden="true">
+  <image controller="draggable, shortcut, focusfront, script" script="%appdata/test.js" id="editor" handle="titlebar" src="%skin/window.png" height="90%" width="90%" x="5%" y="10px" absolute="true" slice="7 30" overflow-hidden="true">
     <node id="titlebar">
       <span id="title" font="%skin/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
         LibreSprite Dotto!
