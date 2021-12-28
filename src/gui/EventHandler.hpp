@@ -98,7 +98,6 @@ namespace ui {
             }
             {
                 auto name = typeid(event).name();
-                // logI("Event:{", name, "}");
                 auto it = stringHandlers.find(name);
                 if (it != stringHandlers.end()) {
                     for (auto& listener : it->second) {

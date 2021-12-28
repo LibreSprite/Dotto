@@ -29,17 +29,6 @@ public:
     void on(msg::Flush& flush) {
         flush.hold(engine);
     }
-
-    void attach() override {
-        logI("Script attached ", script);
-
-    }
-
-    void eventHandler(const ui::KeyDown& event) {
-    }
-
-    void eventHandler(const ui::KeyUp& event) {
-    }
 };
 
 static ui::Controller::Shared<ScriptController> scriptController{"script"};

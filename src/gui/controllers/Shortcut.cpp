@@ -33,7 +33,7 @@ class Shortcut : public ui::Controller {
                     if (it == childMap->end())
                         it = childMap->find(tolower(shortcut->lastKeyDown->keyname));
                     if (it == childMap->end())
-                        logI("Key name: ", shortcut->lastKeyDown->keyname);
+                        logV("Key name: ", shortcut->lastKeyDown->keyname);
                     shortcut->currentMap = (it != childMap->end()) ? it->second.get() : &shortcut->defaultMap;
                     if (!shortcut->currentMap->childMap || shortcut->currentMap->childMap->empty()) {
                         shortcut->currentMap->activate();

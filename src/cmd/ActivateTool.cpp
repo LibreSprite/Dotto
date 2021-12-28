@@ -11,6 +11,7 @@
 class ActivateTool : public Command {
     Property<String> tool{this, "tool"};
     PubSub<> pub{this};
+
 public:
     void run() override {
         auto it = Tool::instances.find(tolower(tool));
@@ -20,7 +21,7 @@ public:
         }
 
         if (Tool::active.lock() == it->second) {
-            logI("Tool already active");
+            logV("Tool already active");
             return;
         }
 

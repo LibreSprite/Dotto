@@ -42,7 +42,11 @@ public:
         auto lock = cache->lock();
         referenceTime = clock::now();
         log->setGlobal();
+#ifdef _DEBUG
         log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args
+#else
+        log->setLevel(Log::Level::INFO); // TODO: Configure level using args
+#endif
         fs->boot();
         config->boot();
         auto skin = config->properties->get<String>("skin");
@@ -80,7 +84,7 @@ public:
     }
 
     void on(msg::Shutdown&) {
-        logI("Shutting down");
+        logV("Shutting down");
     }
 
     ~AppImpl() {
