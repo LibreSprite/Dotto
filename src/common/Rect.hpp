@@ -72,6 +72,37 @@ struct Rect {
             py < static_cast<S32>(y + height);
     }
 
+    bool expand(S32 px, S32 py) {
+        bool changed = false;
+        if (width == 0) {
+            x = px;
+            y = py;
+            width = 1;
+            height = 1;
+            changed = true;
+        } else {
+            if (x > px) {
+                width += x - px;
+                x = px;
+                changed = true;
+            }
+            if (x + width <= px) {
+                width = (px - x) + 1;
+                changed = true;
+            }
+            if (y > py) {
+                height += y - py;
+                y = py;
+                changed = true;
+            }
+            if (y + height <= py) {
+                height = (py - y) + 1;
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
     S32 right() const {return x + width;}
     S32 bottom() const {return y + height;}
     S32 top() const {return y;}

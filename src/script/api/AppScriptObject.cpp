@@ -9,13 +9,15 @@
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
+#include <doc/Document.hpp>
+#include <doc/Selection.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Node.hpp>
+#include <script/api/AppScriptObject.hpp>
 #include <script/Engine.hpp>
 #include <script/Function.hpp>
 #include <script/ScriptObject.hpp>
 #include <tools/Tool.hpp>
-#include <script/api/AppScriptObject.hpp>
 
 class AppScriptObjectImpl : public AppScriptObject {
 public:
@@ -34,13 +36,17 @@ public:
         addProperty("target", [this]{return target;});
 
         addFunction("command", [](const String& name){
-            inject<Command> command{name};
+            inject<Command> command{tolower(name)};
             if (!command)
                 return false;
             PropertySet properties;
             auto& args = script::Function::varArgs();
             for (std::size_t i = 1, size = args.size(); i + 1 < size; i += 2) {
-                properties.set(args[i], args[i + 1].str());
+                auto& argv = args[i + 1];
+                if (argv.type == script::Value::Type::OBJECT)
+                    properties.set(args[i], argv.data.object_v->getWrapped());
+                else
+                    properties.set(args[i], argv.get());
             }
             command->load(properties);
             command->run();
@@ -68,6 +74,10 @@ public:
 
         addFunction("openWindow", [=](const String& name) -> script::Value {
             return ui::Node::fromXML(name) != nullptr;
+        });
+
+        addFunction("newSelection", [=]() -> script::Value {
+            return getEngine().toValue(inject<Selection>{"new"}.shared());
         });
 
         addFunction("hold", [=](ScriptObject* obj) {

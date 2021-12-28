@@ -67,9 +67,14 @@ public:
         } else if constexpr (std::is_assignable_v<Type, std::shared_ptr<Value>>) {
             out = Type{from};
         } else if constexpr (std::is_assignable_v<Type, String>) {
-            if (!from.has<String>())
-                return false;
-            out = from.get<String>();
+            if (from.has<String>()) out = from.get<String>();
+            else if (from.has<F32>()) out = std::to_string(from.get<F32>());
+            else if (from.has<S32>()) out = std::to_string(from.get<S32>());
+            else if (from.has<U32>()) out = std::to_string(from.get<U32>());
+            else if (from.has<U64>()) out = std::to_string(from.get<U64>());
+            else if (from.has<S64>()) out = std::to_string(from.get<S64>());
+            else if (from.has<double>()) out = std::to_string(from.get<double>());
+            else return false;
         } else if constexpr (std::is_constructible_v<Type, String>) {
             if (!from.has<String>())
                 return false;
@@ -148,7 +153,7 @@ public:
     virtual ~Serializable() {}
 
 protected:
-    template<typename _Type>
+    template<typename _Type, bool Debug = false>
     class Property {
     public:
         using Type = _Type;
@@ -169,7 +174,7 @@ protected:
                         auto oldValue = prop->value;
                         bool didAssign = PropertySet::assignProperty(value, prop->value);
                         bool didChange = !(prop->value == oldValue);
-                        if (PropertySet::debug) {
+                        if (Debug || PropertySet::debug) {
                             if (!didAssign)
                                 logE("Assign to ", prop->name, ": Could not assign ", value.typeName(), " to ", typeid(Type).name());
                             else if (!didChange)

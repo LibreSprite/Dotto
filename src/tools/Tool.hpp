@@ -23,7 +23,7 @@ public:
     }
 
     using Path = Vector<Point>;
-    bool enabled = true;
+    Property<bool> enabled{this, "enabled", true};
 
     virtual void init(const String& name) {
         instances.insert({name, shared_from_this()});

@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <doc/Cell.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
@@ -9,23 +10,25 @@
 
 class Canvas : public ui::Controller {
 public:
-    std::shared_ptr<Surface> surface = std::make_shared<Surface>();
+    inject<Cell> cell{"temporary"};
+    Cell::Provides tmp{cell.shared(), "activecell"};
+
     std::shared_ptr<Tool> activeTool;
     Tool::Path points;
 
-    Canvas() {
-        surface->resize(128, 128);
-        memset(surface->data(), 0xFF, surface->dataSize());
-    }
-
     void attach() override {
-        node()->addEventListener<ui::MouseMove, ui::MouseDown>(this);
+        auto surface = cell->getComposite()->shared_from_this();
+        node()->addEventListener<ui::MouseMove, ui::MouseDown, ui::MouseUp>(this);
         node()->set("surface", surface);
     }
 
     void eventHandler(const ui::MouseDown& event) {
         end();
         paint(event.targetX(), event.targetY());
+    }
+
+    void eventHandler(const ui::MouseUp& event) {
+        end();
     }
 
     void eventHandler(const ui::MouseMove& event) {
@@ -40,11 +43,12 @@ public:
         if (points.empty())
             return;
         if (activeTool)
-            activeTool->end(surface.get(), points);
+            activeTool->end(cell->getComposite(), points);
         points.clear();
     }
 
     void paint(S32 tx, S32 ty) {
+        auto surface = cell->getComposite();
         S32 x = (tx * surface->width()) / node()->localRect.width;
         S32 y = (ty * surface->height()) / node()->localRect.height;
         bool begin = points.empty();
@@ -55,9 +59,9 @@ public:
             activeTool = Tool::active.lock();
             if (!activeTool)
                 return;
-            activeTool->begin(surface.get(), points);
+            activeTool->begin(surface, points);
         } else if (activeTool) {
-            activeTool->update(surface.get(), points);
+            activeTool->update(surface, points);
         }
     }
 };

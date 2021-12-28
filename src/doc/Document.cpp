@@ -10,6 +10,7 @@
 
 class DocumentImpl : public Document {
     HashMap<String, std::shared_ptr<Timeline>> guidToTimeline;
+    String GUID = getGUID();
 
 public:
     String getGUID() {
