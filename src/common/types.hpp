@@ -7,9 +7,10 @@
 #include <cstdint>
 #include <string>
 #include <memory>
-#include <vector>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 using U64 = std::uint64_t;
 using S64 = std::int64_t;
@@ -37,3 +38,10 @@ struct Point {
     S32 x;
     S32 y;
 };
+
+
+template<class T>
+struct is_shared_ptr : std::false_type {};
+
+template<class T>
+struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};

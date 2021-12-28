@@ -5,18 +5,8 @@
 #pragma once
 
 #include <any>
-#include <memory>
-#include <type_traits>
 
 #include <common/types.hpp>
-
-
-template<class T>
-struct is_shared_ptr : std::false_type {};
-
-template<class T>
-struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
-
 
 class Value {
     std::any value;

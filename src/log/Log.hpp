@@ -51,6 +51,8 @@ private:
     void writeArg(Arg value) {
         if constexpr (std::is_convertible_v<Arg, String>) {
             internalWrite(static_cast<String>(value).c_str());
+        } else if constexpr (is_shared_ptr<Arg>::value) {
+            internalWrite(std::to_string((uintptr_t)value.get()).c_str());
         } else {
             internalWrite(std::to_string(value).c_str());
         }

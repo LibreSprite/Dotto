@@ -79,7 +79,7 @@ public:
     }
 
     Vector<U32> read(Surface*) override {
-        logE("Not implemented");
+        // logE("Not implemented"); // too verbose
         return {};
     }
 
