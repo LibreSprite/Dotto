@@ -8,7 +8,7 @@
 
 class Surface;
 
-class Pencil : public  Tool {
+class Pencil : public Tool {
 public:
     virtual void begin(Surface* surface, const Vector<Point>& points) {
         auto& point = points.back();

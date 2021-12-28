@@ -70,6 +70,20 @@ public:
             return ui::Node::fromXML(name) != nullptr;
         });
 
+        addFunction("hold", [=](ScriptObject* obj) {
+            if (obj)
+                getEngine().hold(obj->shared_from_this());
+            else
+                logE("Script requesting null hold");
+            return nullptr;
+        });
+
+        addFunction("release", [=](ScriptObject* obj) {
+            if (obj)
+                getEngine().release(obj->shared_from_this());
+            return nullptr;
+        });
+
         makeGlobal("app");
     }
 

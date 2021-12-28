@@ -84,6 +84,9 @@ namespace script {
     };
 
     class ScriptObject : public Injectable<ScriptObject>, public std::enable_shared_from_this<ScriptObject> {
+        std::shared_ptr<void> held;
+        U32 holdCount = 0;
+
     public:
         InternalScriptObject* getInternalScriptObject() {return internal;};
 
@@ -92,7 +95,28 @@ namespace script {
         }
 
         virtual ::Value getWrapped(){return nullptr;}
-        virtual void setWrapped(const ::Value&){}
+
+        virtual void setWrapped(const ::Value& wrapped){
+            if (holdCount)
+                held = getWrapped().getShared();
+            else
+                held.reset();
+        }
+
+        void hold(){
+            if (!holdCount)
+                held = getWrapped().getShared();
+            holdCount++;
+        }
+
+        void release() {
+            if (holdCount) {
+                holdCount--;
+                if (!holdCount)
+                    held.reset();
+            }
+        }
+
         script::Engine& getEngine() {return *internal->engine;}
 
         template <typename Type = Value>

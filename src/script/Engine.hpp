@@ -27,7 +27,7 @@ namespace script {
                     ++it;
                 }
             }
-            holdList.clear();
+            autoHoldList.clear();
         }
 
     public:
@@ -47,7 +47,7 @@ namespace script {
             auto object = value.getShared();
             if (!object)
                 return nullptr;
-            holdList.insert(object);
+            autoHoldList.insert(object);
             auto it = objectMap.find(object.get());
             if (it != objectMap.end())
                 return it->second.wrapper.get();
@@ -55,6 +55,22 @@ namespace script {
             wrapper->setWrapped(value);
             objectMap[object.get()] = {object, wrapper};
             return wrapper.get();
+        }
+
+        void hold(std::shared_ptr<ScriptObject> obj) {
+            obj->hold();
+            holdList.insert(obj);
+        }
+
+        void release(std::shared_ptr<ScriptObject> obj) {
+            auto it = holdList.find(obj);
+            if (it != holdList.end()) {
+                autoHoldList.insert(obj);
+                holdList.erase(it);
+                obj->release();
+            } else {
+                logI("Missing ", obj);
+            }
         }
 
         virtual bool eval(const std::string& code) = 0;
@@ -74,6 +90,7 @@ namespace script {
             std::shared_ptr<ScriptObject> wrapper;
         };
         HashMap<void*, WrapperPair> objectMap;
+        HashSet<std::shared_ptr<void>> autoHoldList;
         HashSet<std::shared_ptr<void>> holdList;
     };
 }

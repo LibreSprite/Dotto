@@ -29,10 +29,6 @@ public:
             if (x < width - 1 && surface->getPixel(x + 1, y) == targetColor) queue.push_back({x + 1, y});
         }
     }
-
-    virtual void update(Surface* surface, const Vector<Point>& points) {}
-
-    virtual void end(Surface* surface, const Vector<Point>& points) {}
 };
 
 static Tool::Shared<Bucket> bucket{"bucket"};

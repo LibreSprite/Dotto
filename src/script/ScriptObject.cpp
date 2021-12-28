@@ -14,5 +14,4 @@ namespace script {
     InternalScriptObject::~InternalScriptObject() {
         liveInstances.erase(this);
     }
-
 }
