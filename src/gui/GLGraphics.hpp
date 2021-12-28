@@ -8,7 +8,7 @@
 #include <GLES3/gl3.h>
 
 #include <common/match.hpp>
-#include <doc/Surface.hpp>
+#include <common/Surface.hpp>
 #include <gui/Graphics.hpp>
 #include <gui/Rect.hpp>
 #include <gui/Texture.hpp>

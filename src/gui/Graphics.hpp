@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <doc/Surface.hpp>
+#include <common/Surface.hpp>
 #include <gui/Rect.hpp>
 
 class Graphics {

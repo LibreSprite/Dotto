@@ -7,7 +7,7 @@
 #include <png.h>
 
 #include <common/Parser.hpp>
-#include <doc/Surface.hpp>
+#include <common/Surface.hpp>
 
 class PNG {
 public:

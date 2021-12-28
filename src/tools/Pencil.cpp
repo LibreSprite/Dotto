@@ -3,7 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <common/line.hpp>
-#include <doc/Surface.hpp>
+#include <common/Surface.hpp>
 #include <tools/Tool.hpp>
 
 class Surface;

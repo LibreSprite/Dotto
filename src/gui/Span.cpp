@@ -7,8 +7,8 @@
 #include <common/Messages.hpp>
 #include <common/Parser.hpp>
 #include <common/PubSub.hpp>
+#include <common/Surface.hpp>
 #include <common/System.hpp>
-#include <doc/Surface.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Graphics.hpp>
 #include <gui/Node.hpp>

@@ -5,7 +5,7 @@
 #include <memory>
 #include <sstream>
 
-#include <doc/Surface.hpp>
+#include <common/Surface.hpp>
 #include <script/Engine.hpp>
 #include <script/ScriptObject.hpp>
 

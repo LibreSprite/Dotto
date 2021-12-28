@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <doc/Surface.hpp>
 #include <common/inject.hpp>
+#include <common/Surface.hpp>
 
 class Font {
 public:

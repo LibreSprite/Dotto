@@ -3,8 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <common/line.hpp>
-#include <doc/Surface.hpp>
-#include <memory>
+#include <common/Surface.hpp>
 #include <script/ScriptObject.hpp>
 #include <tools/Tool.hpp>
 #include <script/api/AppScriptObject.hpp>
