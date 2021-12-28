@@ -6,6 +6,7 @@
 
 #include <limits.h>
 #include <unistd.h>
+#include <mach-o/dyld.h>
 
 #include <common/String.hpp>
 #include <fs/FileSystem.hpp>

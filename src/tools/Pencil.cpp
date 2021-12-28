@@ -10,20 +10,20 @@ class Surface;
 
 class Pencil : public Tool {
 public:
-    virtual void begin(Surface* surface, const Vector<Point>& points) {
+    virtual void begin(Surface* surface, const Vector<Point2D>& points) {
         auto& point = points.back();
         surface->setPixel(point.x, point.y, color);
     }
 
-    virtual void update(Surface* surface, const Vector<Point>& points) {
+    virtual void update(Surface* surface, const Vector<Point2D>& points) {
         auto& end = points[points.size() - 1];
         auto& begin = points[points.size() - 2];
-        line(begin, end, [=](Point point){
+        line(begin, end, [=](const Point2D& point){
             surface->setPixel(point.x, point.y, color);
         });
     }
 
-    virtual void end(Surface* surface, const Vector<Point>& points) {}
+    virtual void end(Surface* surface, const Vector<Point2D>& points) {}
 };
 
 static Tool::Shared<Pencil> pencil{"brush"};

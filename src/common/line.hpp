@@ -7,7 +7,7 @@
 #include <common/types.hpp>
 
 template<typename Func>
-void line(Point a, Point b, Func func) {
+void line(Point2D a, Point2D b, Func func) {
     S32 x0 = a.x;
     S32 y0 = a.y;
     S32 x1 = b.x;

@@ -11,7 +11,7 @@
 
 class ToolScriptObject : public script::ScriptObject {
 public:
-    const Vector<Point>* points;
+    const Vector<Point2D>* points;
     std::shared_ptr<script::ScriptObject> surface;
 
     ToolScriptObject() {
@@ -42,21 +42,21 @@ public:
         {
     }
 
-    virtual void begin(Surface* surface, const Vector<Point>& points) {
+    virtual void begin(Surface* surface, const Vector<Point2D>& points) {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));
         engine->raiseEvent({"toolstart"});
     }
 
-    virtual void update(Surface* surface, const Vector<Point>& points) {
+    virtual void update(Surface* surface, const Vector<Point2D>& points) {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));
         engine->raiseEvent({"toolupdate"});
     }
 
-    virtual void end(Surface* surface, const Vector<Point>& points) {
+    virtual void end(Surface* surface, const Vector<Point2D>& points) {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));

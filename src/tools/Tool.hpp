@@ -22,7 +22,7 @@ public:
         }
     }
 
-    using Path = Vector<Point>;
+    using Path = Vector<Point2D>;
     Property<bool> enabled{this, "enabled", true};
 
     virtual void init(const String& name) {
@@ -33,7 +33,7 @@ public:
             });
     }
 
-    virtual void begin(Surface* surface, const Vector<Point>& points) {}
-    virtual void update(Surface* surface, const Vector<Point>& points) {}
-    virtual void end(Surface* surface, const Vector<Point>& points) {}
+    virtual void begin(Surface* surface, const Vector<Point2D>& points) {}
+    virtual void update(Surface* surface, const Vector<Point2D>& points) {}
+    virtual void end(Surface* surface, const Vector<Point2D>& points) {}
 };

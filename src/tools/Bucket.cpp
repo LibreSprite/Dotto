@@ -10,13 +10,13 @@ class Surface;
 
 class Bucket : public  Tool {
 public:
-    virtual void begin(Surface* surface, const Vector<Point>& points) {
+    virtual void begin(Surface* surface, const Vector<Point2D>& points) {
         auto targetColor = surface->getPixel(points.back().x, points.back().y);
         if (targetColor == color)
             return;
         S32 width = surface->width();
         S32 height = surface->height();
-        Vector<Point> queue = points;
+        Vector<Point2D> queue = points;
         while (!queue.empty()) {
             S32 x = queue.back().x;
             S32 y = queue.back().y;

@@ -34,7 +34,7 @@ using HashMap = std::unordered_map<Key, Value>;
 template<typename Key>
 using HashSet = std::unordered_set<Key>;
 
-struct Point {
+struct Point2D {
     S32 x;
     S32 y;
 };
