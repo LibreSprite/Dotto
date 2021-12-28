@@ -83,7 +83,7 @@ public:
                 Vector<v8::Local<v8::Value>> argv;
                 argv.reserve(event.size());
                 for (auto& str : event) {
-                    argv.emplace_back(ToLocal(v8::String::NewFromUtf8(m_isolate, "onEvent")));
+                    argv.emplace_back(ToLocal(v8::String::NewFromUtf8(m_isolate, str.c_str())));
                 }
                 Check(onEvent.As<v8::Function>()->Call(context(), global, event.size(), argv.data()));
             }
