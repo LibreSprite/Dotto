@@ -65,7 +65,50 @@ public:
     }
 
     bool raiseEvent(const Vector<String>& event) override {
-        return eval("if (typeof onEvent === \"function\") onEvent(\"" + join(event, "\",\"") + "\");");
+        bool success = true;
+        try {
+            v8::Isolate::Scope isolatescope(m_isolate);
+            // Create a stack-allocated handle scope.
+            v8::HandleScope handle_scope(m_isolate);
+
+            // Enter the context for compiling and running the hello world script.
+            v8::Context::Scope context_scope(context());
+
+            v8::TryCatch trycatch(m_isolate);
+
+            auto global = context()->Global();
+
+            auto onEvent = ToLocal(global->Get(context(), ToLocal(v8::String::NewFromUtf8(m_isolate, "onEvent"))));
+            if (!onEvent.IsEmpty() && onEvent->IsFunction()) {
+                Vector<v8::Local<v8::Value>> argv;
+                argv.reserve(event.size());
+                for (auto& str : event) {
+                    argv.emplace_back(ToLocal(v8::String::NewFromUtf8(m_isolate, "onEvent")));
+                }
+                Check(onEvent.As<v8::Function>()->Call(context(), global, event.size(), argv.data()));
+            }
+
+            if (trycatch.HasCaught()) {
+                v8::Local<v8::Value> exception = trycatch.Exception();
+                auto trace = trycatch.StackTrace(context());
+
+                v8::String::Utf8Value utf8(m_isolate, exception);
+
+                if (!trace.IsEmpty()){
+                    v8::String::Utf8Value utf8Trace(m_isolate, ToLocal(trace));
+                    log->write(Log::Level::ERROR, *utf8Trace);
+                } else {
+                    log->write(Log::Level::ERROR, *utf8);
+                }
+                success = false;
+            }
+
+        } catch (const std::exception& ex) {
+            log->write(Log::Level::ERROR, ex.what());
+            success = false;
+        }
+        execAfterEval(success);
+        return success;
     }
 
     bool eval(const String& code) override {
@@ -99,14 +142,14 @@ public:
                     auto trace = trycatch.StackTrace(context());
 
                     v8::String::Utf8Value utf8(m_isolate, exception);
-                    log->write(Log::Level::ERROR, *utf8);
 
                     if (!trace.IsEmpty()){
                         v8::String::Utf8Value utf8Trace(m_isolate, ToLocal(trace));
                         log->write(Log::Level::ERROR, *utf8Trace);
+                    } else {
+                        log->write(Log::Level::ERROR, *utf8);
                     }
 
-                    log->write(Log::Level::ERROR, "Error: [", *utf8, "]");
                     success = false;
                 }
             }
@@ -281,12 +324,17 @@ public:
         }
     }
 
+    v8::Global<v8::Object> local;
+
     v8::Local<v8::Object> makeLocal() {
         auto isolate = engine.get<V8Engine>()->m_isolate;
-        auto local = v8::Object::New(isolate);
-        pushFunctions(local);
-        pushProperties(local);
-        return local;
+        if (!local.IsEmpty())
+            return local.Get(isolate);
+        auto obj = v8::Object::New(isolate);
+        pushFunctions(obj);
+        pushProperties(obj);
+        local.Reset(isolate, obj);
+        return obj;
     }
 
     void makeGlobal(const String& name) override {

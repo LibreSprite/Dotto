@@ -33,10 +33,8 @@ public:
 
     void on(msg::ActivateDocument& msg) {
         if (msg.doc.get() == doc.get()) {
-            logI("Activating document ", (uintptr_t) doc.get());
             provides.emplace(doc.get(), "activedocument");
         } else {
-            logI("Deactivating document ", (uintptr_t) doc.get());
             provides.reset();
         }
     }
