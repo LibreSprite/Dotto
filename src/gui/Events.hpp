@@ -43,6 +43,21 @@ namespace ui {
     struct Blur : public Event {};
     struct Focus : public Event {};
 
+    struct BlurChild : public Event {
+        BlurChild(Node* child) {
+            target = child;
+            bubble = Bubble::Up;
+        }
+    };
+
+    struct FocusChild : public Event {
+        FocusChild(Node* child) {
+            target = child;
+            bubble = Bubble::Up;
+        }
+    };
+
+
     struct RemoveFromScene : public Event {
         RemoveFromScene() {
             bubble = Bubble::Down;

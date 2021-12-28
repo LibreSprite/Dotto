@@ -54,6 +54,14 @@ namespace ui {
             isInScene = false;
         }
 
+        virtual void eventHandler(const Focus& event) {
+            parent->processEvent(FocusChild{this});
+        }
+
+        virtual void eventHandler(const Blur& event) {
+            parent->processEvent(BlurChild{this});
+        }
+
     public:
         Rect localRect, globalRect;
 
@@ -80,7 +88,7 @@ namespace ui {
         Property<String> forward{this, "forward"};
 
         Node() {
-            addEventListener<AddToScene, RemoveFromScene>(this);
+            addEventListener<AddToScene, RemoveFromScene, Focus, Blur>(this);
             loadSilent({{"node", this}});
         }
 
