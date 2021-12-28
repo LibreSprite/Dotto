@@ -5,7 +5,7 @@
 #pragma once
 
 #include <common/inject.hpp>
-#include <gui/Rect.hpp>
+#include <common/Rect.hpp>
 #include <gui/Unit.hpp>
 
 namespace ui {
@@ -13,8 +13,8 @@ namespace ui {
 
     class Flow : public Injectable<Flow>, public std::enable_shared_from_this<Flow> {
     protected:
-        virtual void absolute(std::shared_ptr<Node> child, ui::Rect& parentRect);
+        virtual void absolute(std::shared_ptr<Node> child, Rect& parentRect);
     public:
-        virtual void update(Vector<std::shared_ptr<Node>>&, ui::Rect& parentRect) = 0;
+        virtual void update(Vector<std::shared_ptr<Node>>&, Rect& parentRect) = 0;
     };
 }

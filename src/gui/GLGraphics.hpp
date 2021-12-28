@@ -8,9 +8,9 @@
 #include <GLES3/gl3.h>
 
 #include <common/match.hpp>
+#include <common/Rect.hpp>
 #include <common/Surface.hpp>
 #include <gui/Graphics.hpp>
-#include <gui/Rect.hpp>
 #include <gui/Texture.hpp>
 #include <log/Log.hpp>
 
@@ -144,7 +144,7 @@ public:
             glDeleteProgram(shader);
     }
 
-    void begin(ui::Rect& globalRect, Color& clearColor) {
+    void begin(Rect& globalRect, Color& clearColor) {
         clip = globalRect;
         width = globalRect.width;
         iwidth = 2.0f / width;
@@ -346,14 +346,14 @@ public:
         push(texture, settings);
     }
 
-    ui::Rect pushClipRect(const ui::Rect& rect) override {
+    Rect pushClipRect(const Rect& rect) override {
         auto copy = clip;
         flush();
         clip.intersect(rect);
         return copy;
     }
 
-    void setClipRect(const ui::Rect& rect) override {
+    void setClipRect(const Rect& rect) override {
         flush();
         clip = rect;
     }

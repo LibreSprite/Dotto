@@ -6,7 +6,7 @@
 #include <gui/Node.hpp>
 
 namespace ui {
-    void Flow::absolute(std::shared_ptr<Node> child, ui::Rect& parentRect) {
+    void Flow::absolute(std::shared_ptr<Node> child, Rect& parentRect) {
         child->localRect.x = child->x->toPixel(parentRect.width);
         child->localRect.y = child->y->toPixel(parentRect.height);
         child->localRect.width = child->width->toPixel(parentRect.width);
@@ -19,7 +19,7 @@ namespace ui {
 
     class FlowFill : public Flow {
     public:
-        void update(Vector<std::shared_ptr<Node>>& children, ui::Rect& parentRect) override {
+        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             for (auto& child : children) {
                 if (*child->absolute) {
                     absolute(child, parentRect);
@@ -50,7 +50,7 @@ namespace ui {
             U32 offset;
         };
 
-        void update(Vector<std::shared_ptr<Node>>& children, ui::Rect& parentRect) override {
+        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
                 if (*child->absolute) {
@@ -134,7 +134,7 @@ namespace ui {
 
     class FlowColumn : public FlowRow {
     public:
-        void update(Vector<std::shared_ptr<Node>>& children, ui::Rect& parentRect) override {
+        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
                 if (*child->absolute) {

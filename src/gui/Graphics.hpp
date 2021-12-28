@@ -4,25 +4,25 @@
 
 #pragma once
 
+#include <common/Rect.hpp>
 #include <common/Surface.hpp>
-#include <gui/Rect.hpp>
 
 class Graphics {
 protected:
-    ui::Rect clip;
+    Rect clip;
 
 public:
     struct BlitSettings {
         std::shared_ptr<Surface> surface;
-        const ui::Rect& source;
-        const ui::Rect& destination;
-        const ui::Rect& nineSlice;
+        const Rect& source;
+        const Rect& destination;
+        const Rect& nineSlice;
         S32 zIndex;
     };
 
     virtual void blit(const BlitSettings& settings){}
-    virtual ui::Rect pushClipRect(const ui::Rect& rect){return clip;}
-    virtual void setClipRect(const ui::Rect& rect){}
+    virtual Rect pushClipRect(const Rect& rect){return clip;}
+    virtual void setClipRect(const Rect& rect){}
 
     bool isEmptyClipRect() {
         return clip.empty();

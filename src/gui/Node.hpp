@@ -6,11 +6,11 @@
 
 #include <common/inject.hpp>
 #include <common/PropertySet.hpp>
+#include <common/Rect.hpp>
 #include <gui/Events.hpp>
 #include <gui/EventHandler.hpp>
 #include <gui/Flow.hpp>
 #include <gui/Graphics.hpp>
-#include <gui/Rect.hpp>
 #include <gui/Unit.hpp>
 #include <log/Log.hpp>
 
