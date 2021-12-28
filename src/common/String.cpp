@@ -6,6 +6,19 @@
 
 #include <common/String.hpp>
 
+String tostring(U64 n, U32 base) {
+    if (!n)
+        return "0";
+    if (base > 36)
+        base = 36;
+    String ret;
+    while (n) {
+        ret += "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"[n % base];
+        n /= base;
+    }
+    return ret;
+}
+
 String tolower(const String& string) {
     String out;
     out.reserve(string.size());

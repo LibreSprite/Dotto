@@ -8,6 +8,8 @@
 
 #include <common/types.hpp>
 
+String tostring(U64 n, U32 base = 10);
+
 String tolower(const String& string);
 
 String toupper(const String& string);
