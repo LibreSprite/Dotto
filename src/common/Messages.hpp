@@ -11,6 +11,8 @@ namespace ui {
     class Node;
 }
 
+class Document;
+
 namespace msg {
 
     class Message {
@@ -101,5 +103,10 @@ namespace msg {
 
     struct ActivateLayer : public Message {
         //TODO: implement layers support
+    };
+
+    struct ActivateDocument : public Message {
+        std::shared_ptr<Document> doc;
+        ActivateDocument(std::shared_ptr<Document> doc) : doc{doc} {}
     };
 }
