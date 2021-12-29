@@ -12,9 +12,9 @@
 #include <gui/Texture.hpp>
 
 class Surface : public std::enable_shared_from_this<Surface> {
+public:
     using PixelType = U32;
 
-public:
     U32 width() const {return _width;}
     U32 height() const {return _height;}
 

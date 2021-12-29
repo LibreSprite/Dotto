@@ -17,7 +17,10 @@ public:
 
     virtual void begin(Surface* surface, const Vector<Point2D>& points) {
         paint = inject<Command>{"paint"}.shared();
-        paint->load({{"selection", selection.shared()}});
+        paint->load({
+                {"selection", selection.shared()},
+                {"preview", true}
+            });
         selection->add(points.back().x, points.back().y, 255);
     }
 
@@ -31,6 +34,7 @@ public:
     }
 
     virtual void end(Surface* surface, const Vector<Point2D>& points) {
+        paint->load({{"preview", false}});
         paint->run();
     }
 };
