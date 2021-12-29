@@ -31,10 +31,13 @@ public:
 
         backup->resize(surface->width(), surface->height());
         auto surfaceData = surface->data();
-        if (surfaceData == backupSurface)
+        if (surfaceData == backupSurface) {
+            backupSelection->blend(*selection->get());
             return;
+        }
 
         backupSelection->clear();
+        backupSelection->add(*selection->get());
         backupSurface = surfaceData;
         auto backupData = backup->data();
         for (std::size_t i = 0, size = surface->width() * surface->height(); i < size; ++i) {
@@ -49,16 +52,13 @@ public:
             return;
         }
 
-        auto maskRect = selection->getBounds();
-        if (maskRect.empty())
-            return;
-
         auto surface = cell->getComposite();
         auto writeData = surface->data();
         auto readData = writeData;
 
         if (!preview) {
             if (backupSurface == readData) {
+                backupSelection->blend(*selection);
                 readData = backup->data();
                 selection = backupSelection.get();
                 std::swap(*this->selection, backupSelection);
@@ -67,6 +67,10 @@ public:
         } else {
             setupPreview();
         }
+
+        auto maskRect = selection->getBounds();
+        if (maskRect.empty())
+            return;
 
         F32 alpha = color.a / 255.0f / 255.0f;
         undoData = selection->read(surface);

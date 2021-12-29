@@ -37,6 +37,47 @@ public:
         bounds = rect;
     }
 
+    void add(const Selection& other) override {
+        Rect otherBounds = other.getBounds();
+        Rect newBounds = bounds;
+        bool grew = newBounds.expand(otherBounds.x, otherBounds.y);
+        grew |= newBounds.expand(otherBounds.right(), otherBounds.bottom());
+        if (grew)
+            expand(newBounds);
+        auto& otherData = other.getData();
+        for (U32 y = 0; y < otherBounds.height; ++y) {
+            for (U32 x = 0; x < otherBounds.width; ++x) {
+                U32 amount = otherData[y * otherBounds.width + x];
+                if (!amount)
+                    continue;
+                U32 index = (y + (otherBounds.y - bounds.y)) * bounds.width + x + (otherBounds.x - bounds.x);
+                U32 acc = data[index];
+                acc += amount;
+                data[index] = acc > 0xFF ? 0xFF : acc;
+            }
+        }
+    }
+
+    void blend(const Selection& other) override {
+        Rect otherBounds = other.getBounds();
+        Rect newBounds = bounds;
+        bool grew = newBounds.expand(otherBounds.x, otherBounds.y);
+        grew |= newBounds.expand(otherBounds.right(), otherBounds.bottom());
+        if (grew)
+            expand(newBounds);
+        auto& otherData = other.getData();
+        for (U32 y = 0; y < otherBounds.height; ++y) {
+            for (U32 x = 0; x < otherBounds.width; ++x) {
+                U32 amount = otherData[y * otherBounds.width + x];
+                if (!amount)
+                    continue;
+                U32 index = (y + (otherBounds.y - bounds.y)) * bounds.width + x + (otherBounds.x - bounds.x);
+                U32 old = data[index];
+                data[index] = old + amount * (255 - old) / 255.0f;
+            }
+        }
+    }
+
     void add(S32 x, S32 y, U32 amount) override {
         if (x < 0 || y < 0)
             return;
