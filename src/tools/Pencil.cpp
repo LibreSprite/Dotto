@@ -13,15 +13,17 @@ class Surface;
 class Pencil : public Tool {
 public:
     inject<Selection> selection{"new"};
+
     std::shared_ptr<Command> paint;
 
     virtual void begin(Surface* surface, const Vector<Point2D>& points) {
-        paint = inject<Command>{"paint"}.shared();
+        paint = inject<Command>{"paint"};
+        selection->add(points.back().x, points.back().y, 255);
         paint->load({
                 {"selection", selection.shared()},
                 {"preview", true}
             });
-        selection->add(points.back().x, points.back().y, 255);
+        paint->run();
     }
 
     virtual void update(Surface* surface, const Vector<Point2D>& points) {

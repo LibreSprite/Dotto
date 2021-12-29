@@ -62,6 +62,7 @@ public:
                 readData = backup->data();
                 selection = backupSelection.get();
                 std::swap(*this->selection, backupSelection);
+                backupSelection->clear();
             }
             backupSurface = nullptr;
         } else {
@@ -103,6 +104,8 @@ public:
         surface->setDirty();
         if (preview)
             this->selection->get()->clear();
+        else
+            backup.reset();
     }
 };
 
