@@ -4,9 +4,11 @@
 
 #ifdef __APPLE__
 
+#include <array>
 #include <limits.h>
 #include <unistd.h>
 #include <mach-o/dyld.h>
+#include <Foundation/Foundation.h>
 
 #include <common/String.hpp>
 #include <fs/FileSystem.hpp>
@@ -53,14 +55,14 @@ public:
         {
             String exePath;
             exePath.resize(MAXPATHLEN);
-            uint32_t size = path.size();
+            uint32_t size = exePath.size();
             while (_NSGetExecutablePath(&exePath[0], &size) == -1)
                 exePath.resize(size);
             auto parts = split(exePath, separator);
             parts.pop_back();
             appdir = join(parts, separator);
             mount("%appdir", "dir", appdir);
-            mount("%appdata", "dir", appdir + "/../Resources/data");
+            mount("%appdata", "dir", appdir + separator + "data");
         }
 
         {

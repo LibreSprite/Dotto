@@ -24,11 +24,14 @@ else
 	    # LIB_DIRS := $(shell find linux-x64 -type d)
 	    # SO_FILES := $(shell find linux-x64 -type f -name '*.so*')
         endif
+	LN_FLAGS += -lGL
     endif
 
     ifeq ($(UNAME_S),Darwin)
 	CPP_FILES += $(shell find src -type f -name '*.mm')
         CPP_FLAGS += -DV8_COMPRESS_POINTERS # just assume OSX is 64-bit
+	LN_FLAGS += -framework OpenGL
+	LN_FLAGS += -framework Foundation
     endif
 
     # ifneq ($(filter %86,$(UNAME_P)),)
@@ -84,8 +87,6 @@ CPP_FLAGS += --std=c++17
 FLAGS += -Og -g -D_DEBUG # debug build
 # FLAGS += -O3 # release build
 
-
-LN_FLAGS += -lGL
 LN_FLAGS += -lpng
 LN_FLAGS += -lm
 # LN_FLAGS += -fsanitize=leak
