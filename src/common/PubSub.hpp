@@ -14,14 +14,17 @@ namespace internal {
     };
 
     template<typename Message>
-    Vector<Listener>& channel() {
+    Vector<Listener>* channel() {
         static std::unique_ptr<Vector<Listener>> ptr{new Vector<Listener>()};
-        return *ptr;
+        return ptr.get();
     }
 
     template <typename Message, typename Object>
     void sub(Object* obj, void* key) {
-        auto& ch = channel<Message>();
+        auto ch = channel<Message>();
+        if (!ch)
+            return;
+
         Listener listener{
             obj,
             key,
@@ -30,20 +33,22 @@ namespace internal {
             }
         };
 
-        for (auto& slot : ch) {
+        for (auto& slot : *ch) {
             if (!slot.key) {
                 slot = listener;
                 return;
             }
         }
 
-        ch.push_back(listener);
+        ch->push_back(listener);
     }
 
     template <typename Message>
     void unsub(void* key) {
-        auto& ch = channel<Message>();
-        for (auto it = ch.begin(); it != ch.end(); ++it) {
+        auto ch = channel<Message>();
+        if (!ch)
+            return;
+        for (auto it = ch->begin(); it != ch->end(); ++it) {
             if (it->key == key) {
                 it->key = nullptr;
                 it->call = nullptr;
@@ -52,8 +57,10 @@ namespace internal {
         }
     }
 
-    inline void pub(Vector<Listener>& listeners, void* msg) {
-        for (auto& listener : listeners) {
+    inline void pub(Vector<Listener>* listeners, void* msg) {
+        if (!listeners)
+            return;
+        for (auto& listener : *listeners) {
             if (listener.call) {
                 listener.call(listener.object, msg);
             }
@@ -67,6 +74,12 @@ public:
     template<typename Object>
     PubSub(Object* obj) {
         (internal::sub<Messages>(obj, this),...);
+    }
+
+    template<typename Message>
+    static Message& pub(Message&& msg) {
+        internal::pub(internal::channel<Message>(), &msg);
+        return msg;
     }
 
     ~PubSub() {
