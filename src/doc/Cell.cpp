@@ -4,14 +4,8 @@
 
 #include <doc/Cell.hpp>
 
-class CellImpl  : public Cell {
+class BitmapCell  : public Cell {
 public:
-    CellImpl() {
-        composite = std::make_shared<Surface>();
-        composite->resize(512, 512);
-        memset(composite->data(), 0xFF, composite->dataSize());
-    }
-
     Vector<U8> serialize() override {
         return {};
     }
@@ -21,4 +15,4 @@ public:
     }
 };
 
-static Cell::Shared<CellImpl> temporary{"temporary"};
+static Cell::Shared<BitmapCell> reg{"bitmap"};

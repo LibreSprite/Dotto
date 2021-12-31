@@ -9,16 +9,26 @@ class TimelineImpl : public Timeline {
 public:
     Vector<Vector<std::shared_ptr<Cell>>> data;
 
-    U32 frameCount() override {
+    U32 frameCount() const override {
         return data.size();
     }
 
-    U32 layerCount() override {
+    U32 layerCount() const override {
         if (data.empty()) return 0;
         return data[0].size();
     }
 
-    std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop) override {
+    void setFrameCount(U32 count) {
+        data.resize(count);
+    }
+
+    void setLayerCount(U32 count) {
+        for (auto& layer : data) {
+            layer.resize(count);
+        }
+    }
+
+    std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop) const override {
         if (data.empty())
             return nullptr;
         if (loop) {
@@ -33,6 +43,14 @@ public:
                 return nullptr;
         }
         return data[frame][layer];
+    }
+
+    void setCell(U32 frame, U32 layer, std::shared_ptr<Cell> cell) override {
+        if (frame >= frameCount())
+            setFrameCount(frame + 1);
+        if (layer >= layerCount())
+            setLayerCount(layer + 1);
+        data[frame][layer] = cell;
     }
 };
 

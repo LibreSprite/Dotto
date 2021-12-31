@@ -16,7 +16,7 @@ protected:
     friend class Document;
     String type;
     String GUID;
-    std::shared_ptr<Surface> composite;
+    std::shared_ptr<Surface> composite = std::make_shared<Surface>();
     std::shared_ptr<Selection> mask;
 
 public:

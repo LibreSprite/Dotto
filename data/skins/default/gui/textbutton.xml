@@ -1,0 +1,3 @@
+<image controller="button" forward="labelspan.text=label" up-src="%skin/button-up.png" down-src="%skin/button-down.png"  slice="4 4">
+  <span id="labelspan" font="%skin/DejaVuSans.ttf" color="rgb{0,0,0}" size="20px" x="8px" y="4px" absolute="true"/>
+</image>

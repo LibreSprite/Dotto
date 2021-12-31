@@ -10,16 +10,13 @@
 
 class Canvas : public ui::Controller {
 public:
-    inject<Cell> cell{"temporary"};
-    Cell::Provides tmp{cell.shared(), "activecell"};
-
+    inject<Cell> cell;
     std::shared_ptr<Tool> activeTool;
     Tool::Path points;
 
     void attach() override {
-        auto surface = cell->getComposite()->shared_from_this();
         node()->addEventListener<ui::MouseMove, ui::MouseDown, ui::MouseUp>(this);
-        node()->set("surface", surface);
+        node()->set("surface", cell->getComposite()->shared_from_this());
     }
 
     void eventHandler(const ui::MouseDown& event) {

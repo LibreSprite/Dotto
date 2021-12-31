@@ -179,6 +179,12 @@ namespace ui {
                 parent->removeChild(shared_from_this());
         }
 
+        void removeAllChildren() {
+            while (!children.empty()) {
+                removeChild(children.back());
+            }
+        }
+
         virtual void addChild(std::shared_ptr<Node> child) {
             if (!child)
                 return;

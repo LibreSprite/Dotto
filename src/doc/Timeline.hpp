@@ -15,7 +15,8 @@ class Timeline : public Injectable<Timeline>, public Serializable, public std::e
     String GUID;
 
 public:
-    virtual U32 frameCount() = 0;
-    virtual U32 layerCount() = 0;
-    virtual std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop = false) = 0;
+    virtual U32 frameCount() const = 0;
+    virtual U32 layerCount() const = 0;
+    virtual std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop = false) const = 0;
+    virtual void setCell(U32 frame, U32 layer, std::shared_ptr<Cell> cell) = 0;
 };

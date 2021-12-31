@@ -1,7 +1,16 @@
 <window width="1000" height="1000" flow="column" background="rgb{32,32,32}">
-  <node id="editor" controller="shortcut, editor, draggable" draggable="false" absolute="true" y="0px" x="0px" height="512px" width="512px">
-    <image id="draw" controller="canvas" width="100%" height="100%" scale="1"/>
-  </node>
+  <editor/>
+
+  <textbutton controller="script" type="duk" label="Open" absolute="true" x="0" y="100%-35px" width="70px" height="35px">
+    app.target.addEventListener("click");
+    function onEvent(name){
+      if (name == "click") {
+        var pick = app.open('*.png', 'Open image');
+        if (pick)
+          app.window.findChildById("editor").set("file", pick);
+      }
+    }
+  </textbutton>
 
   <image controller="focusfront" handle="titlebar" src="%skin/window.png" height="213px" width="40px" x="100%-40px" y="50%-100px" absolute="true" slice="7 30" overflow-hidden="true">
     <node controller="toolbox" id="toolbox" absolute="true" width="30px" y="30px" height="100%-35px" x="100%-37px"/>

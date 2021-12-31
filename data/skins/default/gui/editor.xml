@@ -1,0 +1,1 @@
+<node id="editor" controller="shortcut, editor, draggable" draggable="false" absolute="true" y="0px" x="0px" height="512px" width="512px" scale="4"/>
