@@ -1,7 +1,9 @@
-<window id="editor" controller="shortcut, editor" width="1000" height="1000" flow="column" background="rgb{64,32,32}">
-  <image id="draw" controller="canvas" absolute="true" y="0px" x="0px" height="100%" width="100%" scale="1"/>
+<window width="1000" height="1000" flow="column" background="rgb{32,32,32}">
+  <node id="editor" controller="shortcut, editor, draggable" draggable="false" absolute="true" y="0px" x="0px" height="512px" width="512px">
+    <image id="draw" controller="canvas" width="100%" height="100%" scale="1"/>
+  </node>
 
-  <image controller="focusfront" handle="titlebar" src="%skin/window.png" height="90%" width="40px" x="100%-40px" y="10px" absolute="true" slice="7 30" overflow-hidden="true">
+  <image controller="focusfront" handle="titlebar" src="%skin/window.png" height="213px" width="40px" x="100%-40px" y="50%-100px" absolute="true" slice="7 30" overflow-hidden="true">
     <node controller="toolbox" id="toolbox" absolute="true" width="30px" y="30px" height="100%-35px" x="100%-37px"/>
   </image>
 

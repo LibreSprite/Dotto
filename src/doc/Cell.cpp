@@ -8,7 +8,7 @@ class CellImpl  : public Cell {
 public:
     CellImpl() {
         composite = std::make_shared<Surface>();
-        composite->resize(1024, 1024);
+        composite->resize(512, 512);
         memset(composite->data(), 0xFF, composite->dataSize());
     }
 
