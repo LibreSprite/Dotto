@@ -12,6 +12,9 @@ class Value {
     std::any value;
     bool (*equal)(const std::any& left, const std::any& right);
     std::shared_ptr<void> (*shared)(const std::any&);
+#ifdef _DEBUG
+    String (*str)(const std::any&);
+#endif
 
 public:
     Value() : equal{nullptr} {}
@@ -67,6 +70,25 @@ public:
         } else {
             shared = nullptr;
         }
+#ifdef _DEBUG
+        if constexpr (std::is_convertible_v<Type, String>) {
+            str = +[](const std::any& value) {
+                return String(std::any_cast<Type>(value));
+            };
+        } else if constexpr (std::is_same_v<Type, bool> ||
+                             std::is_same_v<Type, F32> ||
+                             std::is_same_v<Type, F64> ||
+                             std::is_same_v<Type, U32> ||
+                             std::is_same_v<Type, S32> ||
+                             std::is_same_v<Type, U64> ||
+                             std::is_same_v<Type, S64>) {
+            str = +[](const std::any& value) {
+                return std::to_string(std::any_cast<Type>(value));
+            };
+        } else {
+            str = nullptr;
+        }
+#endif
         return *this;
     }
 
@@ -79,6 +101,12 @@ public:
             return false;
         return equal(value, other.value);
     }
+
+#ifdef _DEBUG
+    String toString() const {
+        return str ? str(value) : String("[not convertible: ") + typeName() + "]";
+    }
+#endif
 
     const char* typeName() const {
         return value.type().name();

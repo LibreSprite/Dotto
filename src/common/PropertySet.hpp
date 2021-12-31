@@ -48,6 +48,14 @@ public:
                 out = from.get<U32>();
             } else if (from.has<S32>()) {
                 out = from.get<S32>();
+            } else if (from.has<U64>()) {
+                out = from.get<U64>();
+            } else if (from.has<S64>()) {
+                out = from.get<S64>();
+            } else if (from.has<F32>()) {
+                out = from.get<F32>();
+            } else if (from.has<F64>()) {
+                out = from.get<F64>();
             } else return false;
         } else if constexpr (std::is_integral_v<Type>) {
             if (from.has<F32>()) out = from.get<F32>();
@@ -111,7 +119,13 @@ public:
 
     template<typename Type>
     void set(const String& key, Type&& value) {
-        properties.insert({tolower(key), std::make_shared<Value>(std::forward<Type>(value))});
+        auto lower = tolower(key);
+        auto it = properties.find(key);
+        if (it == properties.end()) {
+            properties.insert({lower, std::make_shared<Value>(std::forward<Type>(value))});
+        } else {
+            *it->second = value;
+        }
     }
 
     void append(const PropertySet& other) {
@@ -174,16 +188,18 @@ protected:
                         auto oldValue = prop->value;
                         bool didAssign = PropertySet::assignProperty(value, prop->value);
                         bool didChange = !(prop->value == oldValue);
+#ifdef _DEBUG
                         if (Debug || PropertySet::debug) {
                             if (!didAssign)
                                 logE("Assign to ", prop->name, ": Could not assign ", value.typeName(), " to ", typeid(Type).name());
                             else if (!didChange)
-                                logE("Assign to ", prop->name, ": Value did not change");
+                                logE("Assign to ", prop->name, ": Value did not change (", value.toString(), ")");
                             else if (!prop->change)
                                 logE("Assign to ", prop->name, ": No trigger");
                             else
                                 logE("Assign to ", prop->name, ": triggered");
                         }
+#endif
                         return (didAssign && prop->change && didChange) ? &prop->change : nullptr;
                     },
                     +[](void* data, PropertySet& set) {
@@ -206,12 +222,13 @@ protected:
         }
     };
 
+public:
     void set(const String& key, const Value& value, bool debug = false) {
         Value copy = value;
         set(key, copy, debug);
     }
 
-    void set(const String& key, Value& value, bool debug = false) {
+    virtual void set(const String& key, Value& value, bool debug = false) {
         PropertySet::debug = debug;
         for (auto& serializer : propertySerializers) {
             if (key == *serializer.key) {
@@ -220,6 +237,9 @@ protected:
                 }
                 return;
             }
+        }
+        if (debug) {
+            logI("Could not set ", key, " to [", value.toString(), "]");
         }
     }
 
@@ -245,7 +265,6 @@ protected:
         }
     }
 
-public:
     const Vector<String> getPropertyNames() {
         Vector<String> names;
         names.resize(propertySerializers.size());
