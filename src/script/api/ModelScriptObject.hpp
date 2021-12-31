@@ -26,6 +26,28 @@ public:
             return 0;
         });
 
+        addFunction("set", [=](const String& name, const script::Value& value) {
+            if (auto model = weak.lock()) {
+                if (value.type == script::Value::Type::OBJECT && value.data.object_v) {
+                    model->set(name, value.data.object_v->getWrapped());
+                } else
+                    model->set(name, value.get());
+            } else {
+                logE("Model expired, could not set ", name, ".");
+            }
+            return value;
+        });
+
+        addFunction("get", [=](const String& name) -> script::Value {
+            if (auto model = weak.lock()) {
+                auto value = model->get(name);
+                return getEngine().toValue(value ? *value : Value{nullptr});
+            } else {
+                logE("Model expired, could not get ", name, ".");
+            }
+            return nullptr;
+        });
+
         for (auto& name : model->getPropertyNames()) {
             addProperty(name,
                         [=]()->script::Value {

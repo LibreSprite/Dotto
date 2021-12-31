@@ -106,6 +106,8 @@ namespace ui {
         }
 
         void load(const PropertySet& set) override;
+        using Model::set;
+        void set(const String& key, Value& value, bool debug = false) override;
 
         std::shared_ptr<Node> findChildById(const String& targetId);
 

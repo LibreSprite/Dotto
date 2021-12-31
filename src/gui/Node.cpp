@@ -56,6 +56,34 @@ void ui::Node::load(const PropertySet& set) {
     }
 }
 
+void ui::Node::set(const String& key, Value& value, bool debug) {
+    Model::set(key, value, debug);
+    for (auto& entry : controllers) {
+        entry.second->set(key, value, debug);
+    }
+    if (!forward->empty()) {
+        for (const auto& forward : split(this->forward, ",")) {
+            auto parts = split(forward, "=");
+            if (parts.size() != 2)
+                continue;
+
+            Value value;
+            if (key != trim(parts[1]))
+                continue;
+
+            auto target = split(parts[0], ".");
+            if (target.size() != 2)
+                continue;
+
+            auto child = findChildById(trim(target[0]));
+            if (!child)
+                continue;
+
+            child->set(key, value, debug);
+        }
+    }
+}
+
 static void loadNodeProperties(ui::Node* node, XMLElement* element) {
     PropertySet props;
     if (!element->text.empty())
