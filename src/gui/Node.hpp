@@ -92,6 +92,11 @@ namespace ui {
             loadSilent({{"node", this}});
         }
 
+        ~Node() {
+            for (auto& child : children)
+                child->parent = nullptr;
+        }
+
         static std::shared_ptr<Node> fromXML(const String& widgetName);
 
         virtual bool init(const PropertySet& properties) {
