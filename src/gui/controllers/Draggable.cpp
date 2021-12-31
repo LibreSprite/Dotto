@@ -13,6 +13,7 @@
 class Draggable : public ui::Controller {
 public:
     Property<String> dragHandle{this, "handle", "", &Draggable::changeTarget};
+    Property<bool> enabled{this, "draggable", true};
     std::weak_ptr<ui::Node> target;
     PubSub<> pub{this};
 
@@ -43,6 +44,8 @@ public:
     }
 
     void eventHandler(const ui::MouseDown& event) {
+        if (!*enabled)
+            return;
         pub(msg::BeginDrag{
                 target.lock(),
                 node()->localRect.x,
@@ -51,6 +54,8 @@ public:
     }
 
     void eventHandler(const ui::Drag& event) {
+        if (!*enabled)
+            return;
         node()->load({
                 {"x", ui::Unit{event.x}},
                 {"y", ui::Unit{event.y}}
