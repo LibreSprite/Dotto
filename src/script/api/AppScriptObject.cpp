@@ -11,6 +11,7 @@
 #include <common/PropertySet.hpp>
 #include <doc/Document.hpp>
 #include <doc/Selection.hpp>
+#include <fs/FileDialog.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Node.hpp>
 #include <script/api/AppScriptObject.hpp>
@@ -75,6 +76,24 @@ public:
 
         addFunction("parse", [=](const String& path) {
             return getEngine().toValue(FileSystem::parse(path));
+        });
+
+        addFunction("open", [=](const String& filters, const String& title="Script", const String& description = ""){
+            inject<FileDialog> dialog;
+            dialog->filterDescription = description;
+            dialog->title = title;
+            dialog->filters = split(filters, "|");
+            dialog->open();
+            return join(dialog->result, "|");
+        });
+
+        addFunction("save", [=](const String& filters, const String& title="Script", const String& description = ""){
+            inject<FileDialog> dialog;
+            dialog->filterDescription = description;
+            dialog->title = title;
+            dialog->filters = split(filters, "|");
+            dialog->save();
+            return join(dialog->result, "|");
         });
 
         addFunction("openWindow", [=](const String& name) -> script::Value {
