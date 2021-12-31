@@ -56,10 +56,12 @@ public:
         points.push_back({x, y});
 
         if (begin) {
-            activeTool = Tool::active.lock();
-            if (!activeTool)
-                return;
-            activeTool->begin(surface, points);
+            do {
+                activeTool = Tool::active.lock();
+                if (!activeTool)
+                    return;
+                activeTool->begin(surface, points);
+            } while (Tool::active.lock() != activeTool);
         } else if (activeTool) {
             activeTool->update(surface, points);
         }
