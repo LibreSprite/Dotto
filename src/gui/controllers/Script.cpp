@@ -16,7 +16,6 @@ class ScriptController : public ui::Controller {
 public:
     std::shared_ptr<script::Engine> engine;
     Property<String> script{this, "script", "", &ScriptController::loadScript};
-    PubSub<msg::Flush> pub{this};
 
     void loadScript() {
         engine.reset();
@@ -24,10 +23,6 @@ public:
             script::ScriptTarget target{node()->shared_from_this()};
             engine = FileSystem::parse(script);
         }
-    }
-
-    void on(msg::Flush& flush) {
-        flush.hold(engine);
     }
 };
 
