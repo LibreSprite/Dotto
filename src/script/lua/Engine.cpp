@@ -87,13 +87,11 @@ class LuaEngine : public Engine {
 public:
     lua_State* L = nullptr;
 
-    LuaEngine() {
-        InternalScriptObject::setDefault("LuaScriptObject");
+    LuaEngine() : Engine{"LuaScriptObject"} {
         L = luaL_newstate();
         if (L) {
             luaL_openlibs(L);
             luaopen_array(L);
-            initGlobals();
         }
     }
 
@@ -107,6 +105,10 @@ public:
     }
 
     bool eval(const String& code) override {
+        PushDefault engine{this};
+        InternalScriptObject::PushDefault iso{internalScriptObjectName};
+        initGlobals();
+
         bool success = true;
         try {
 

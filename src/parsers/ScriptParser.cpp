@@ -11,6 +11,8 @@
 class ScriptParser : public Parser {
 public:
     Value parseFile(std::shared_ptr<File> file) override {
+        script::Engine::PushDefault oldEngine;
+
         auto type = file->type();
         script::Engine::setDefault(type, {type});
         std::shared_ptr<script::Engine> engine = inject<script::Engine>{};

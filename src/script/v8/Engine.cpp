@@ -35,8 +35,7 @@ public:
     v8::Global<v8::Context> m_context;
     v8::Isolate* m_isolate = nullptr;
 
-    V8Engine() {
-        InternalScriptObject::setDefault("V8ScriptObject");
+    V8Engine() : Engine{"V8ScriptObject"} {
         initV8();
     }
 
@@ -65,6 +64,10 @@ public:
     }
 
     bool raiseEvent(const Vector<String>& event) override {
+        PushDefault engine{this};
+        InternalScriptObject::PushDefault iso{internalScriptObjectName};
+
+        auto lock = shared_from_this();
         bool success = true;
         try {
             v8::Isolate::Scope isolatescope(m_isolate);
@@ -112,6 +115,10 @@ public:
     }
 
     bool eval(const String& code) override {
+        PushDefault engine{this};
+        InternalScriptObject::PushDefault iso{internalScriptObjectName};
+
+        auto lock = shared_from_this();
         bool success = true;
         try {
             v8::Isolate::Scope isolatescope(m_isolate);
@@ -214,7 +221,6 @@ public:
 
         v8::String::Utf8Value utf8(isolate, local->TypeOf(isolate));
         printf("Unknown type: [%s]\n", *utf8);
-
         return {};
     }
 

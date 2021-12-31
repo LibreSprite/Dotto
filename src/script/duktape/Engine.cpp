@@ -31,10 +31,7 @@ public:
     HashSet<void*> memory;
     duk_hthread* handle = nullptr;
 
-    DukEngine() : handle{duk_create_heap(malloc, realloc, free, this, fatal)} {
-        InternalScriptObject::setDefault("DukScriptObject");
-        initGlobals();
-    }
+    DukEngine() : Engine{"DukScriptObject"}, handle{duk_create_heap(malloc, realloc, free, this, fatal)} {}
 
     ~DukEngine() {
         duk_destroy_heap(handle);
@@ -82,7 +79,10 @@ public:
     }
 
     bool eval(const String& code) override {
-        InternalScriptObject::setDefault("DukScriptObject");
+        PushDefault engine{this};
+        InternalScriptObject::PushDefault iso{internalScriptObjectName};
+        initGlobals();
+
         bool success = true;
         try {
             if (duk_peval_string(handle, code.c_str()) != 0) {

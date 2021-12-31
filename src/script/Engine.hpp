@@ -30,6 +30,10 @@ namespace script {
             autoHoldList.clear();
         }
 
+        String internalScriptObjectName;
+
+        Engine(const String& internalScriptObjectName) : internalScriptObjectName{internalScriptObjectName} {}
+
     public:
         void initGlobals() {
             if (globalScriptObjects.empty())
@@ -51,7 +55,12 @@ namespace script {
             auto it = objectMap.find(object.get());
             if (it != objectMap.end())
                 return it->second.wrapper.get();
+
+            PushDefault engine{this};
+            InternalScriptObject::PushDefault iso{engine ? internalScriptObjectName : ""};
+
             inject<ScriptObject> wrapper{injectionName};
+            autoHoldList.insert(wrapper);
             wrapper->setWrapped(value);
             objectMap[object.get()] = {object, wrapper};
             return wrapper.get();
