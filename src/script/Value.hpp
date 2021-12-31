@@ -305,6 +305,7 @@ namespace script {
         }
 
         String str() const {
+            if (type == Type::UNDEFINED) return "undefined";
             if (type == Type::INT) return std::to_string(data.int_v);
             if (type == Type::DOUBLE) return std::to_string(data.double_v);
             if (type == Type::BUFFER) return String(data.buffer_v->data(), data.buffer_v->end());

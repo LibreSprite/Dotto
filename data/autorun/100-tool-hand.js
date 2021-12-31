@@ -3,9 +3,6 @@ app.addTool("hand")
 function onEvent(name) {
     var target = app.target;
     switch (name) {
-    case "init":
-        // nothing to do
-        break;
     case "toolstart":
         app.window.findChildById("editor").set("draggable", true);
         break;
