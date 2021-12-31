@@ -150,15 +150,16 @@ to delete AccountManager. Perfectly balanced...
 
 #include <functional>
 #include <iostream>
+#include <optional>
 #include <type_traits>
 #include <typeinfo>
-
-#include "types.hpp"
 
 #if defined(__GNUG__) && defined(_DEBUG)
 #include <cxxabi.h>
 #define HAS_DEMANGLE
 #endif
+
+#include <common/types.hpp>
 
 enum class InjectSilent {
     No = 0,
@@ -366,6 +367,64 @@ public:
         return true;
     }
 
+    class PushDefault {
+        RegistryEntry* read = nullptr;
+        RegistryEntry* write = nullptr;
+        std::optional<RegistryEntry> backup;
+        std::optional<typename BaseClass_::Provides> provides;
+
+    public:
+        PushDefault(const String& name = "") {
+            auto& registry = getRegistry();
+            auto it = registry.find(name);
+            if (it != registry.end()) {
+                // std::cout << "Provides save " << name << " for " << typeid(BaseClass).name() << std::endl;
+                if (name.empty()) {
+                    write = &registry[""];
+                    backup = *write;
+                    read = &backup.value();
+                } else {
+                    read = &it->second;
+                    write = &registry[""];
+                }
+                *write = it->second;
+            }
+        }
+
+        PushDefault(BaseClass* newDefault, const String& name = "") {
+            if (!newDefault)
+                return;
+            auto& registry = getRegistry();
+            auto it = registry.find(name);
+            if (it != registry.end()) {
+                auto old = it->second.data ? it->second.attach() : nullptr;
+                if (old != newDefault) {
+                    // std::cout << "Provides save " << name << " for " << typeid(BaseClass).name() << std::endl;
+                    write = &it->second;
+                    backup = *write;
+                    read = &backup.value();
+                } else {
+                    return;
+                }
+                if (old)
+                    it->second.detach(old);
+            }
+            provides.emplace(newDefault, name);
+        }
+
+        operator bool () {
+            return read != nullptr;
+        }
+
+        ~PushDefault() {
+            if (!read)
+                return;
+            provides.reset();
+            // std::cout << "Provides restore for " << typeid(BaseClass).name() << std::endl;
+            *write = *read;
+        }
+    };
+
     template<typename DerivedClass>
     static bool matchType(BaseClass* base) {
         return !!dynamic_cast<DerivedClass*>(base);
@@ -449,6 +508,7 @@ public:
             auto& registry = Injectable<BaseClass>::getRegistry();
             auto iterator = registry.find(name);
             if (iterator != registry.end() && iterator->second.data == this) {
+                // std::cout << "Provides erase " << name << " for " << typeid(BaseClass).name() << std::endl;
                 registry.erase(iterator);
             }
         }
@@ -459,11 +519,13 @@ public:
             auto it = registry.find(name);
             if (it != registry.end()) {
                 registry[alias] = it->second;
+                // std::cout << "Provides " << name << " for " << typeid(BaseClass).name() << std::endl;
             }
         }
 
         Provides(std::shared_ptr<BaseClass>& instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
             this->name = name;
+            // std::cout << "Provides shared ref" << name << " for " << typeid(BaseClass).name() << std::endl;
             Injectable<BaseClass>::getRegistry()[name] = {
                 [&] {return instance.get();},
                 [](BaseClass* ptr) {},
@@ -475,6 +537,7 @@ public:
 
         Provides(const std::shared_ptr<BaseClass>& instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
             this->name = name;
+            // std::cout << "Provides shared " << name << " for " << typeid(BaseClass).name() << std::endl;
             Injectable<BaseClass>::getRegistry()[name] = {
                 [=] {return instance.get();},
                 [](BaseClass* ptr) {},
@@ -487,6 +550,7 @@ public:
         template<typename DerivedClass, std::enable_if_t<std::is_base_of_v<BaseClass, DerivedClass>, int> = 0>
         Provides(DerivedClass* instance, const String& name = "", const std::unordered_set<String>& flags = {}) {
             this->name = name;
+            // std::cout << "Provides raw " << name << " for " << typeid(BaseClass).name() << std::endl;
             Injectable<BaseClass>::getRegistry()[name] = {
                 [=] {return instance;},
                 [](BaseClass* ptr) {},
@@ -508,5 +572,6 @@ void inject<BaseClass_>::doInjection(const String& name, bool silent) {
         ptr = registryEntry.attach();
     } else if (!silent) {
         std::cout << "Could not create " << typeid(BaseClass_).name() << " instance " << name << std::endl;
+        // abort();
     }
 }
