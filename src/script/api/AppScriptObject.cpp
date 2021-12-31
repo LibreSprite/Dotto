@@ -35,7 +35,12 @@ public:
 
         addProperty("target", [this]{return target;});
 
-        addFunction("command", [](const String& name){
+        addProperty("window", [this]{
+            auto node = PubSub<>::pub(msg::PollActiveWindow{}).node;
+            return node ? getEngine().toValue(node->shared_from_this()) : nullptr;
+        });
+
+        addFunction("command", [this](const String& name){
             inject<Command> command{tolower(name)};
             if (!command)
                 return false;

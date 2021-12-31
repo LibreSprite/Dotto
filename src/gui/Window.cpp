@@ -108,6 +108,8 @@ namespace ui {
             if (!guiEvent.target)
                 return;
 
+            auto shared = guiEvent.target->shared_from_this();
+
             if (auto focus = focusTarget.lock()) {
                 if (focus.get() == guiEvent.target) {
                     guiEvent.target->processEvent(ui::Click{event.x, event.y, event.buttons});
@@ -157,6 +159,11 @@ namespace ui {
                 target->processEvent(ui::Drop{dragEvent.globalX, dragEvent.globalY});
             dragTarget.reset();
         }
+    }
+
+    void Window::on(msg::PollActiveWindow& event) {
+        if (this == hoverWindow)
+            event.node = this;
     }
 
     ui::Node* Window::findEventTarget(const ui::Event& event) {

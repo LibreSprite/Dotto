@@ -89,6 +89,10 @@ namespace msg {
         std::shared_ptr<ui::Node> target;
     };
 
+    struct PollActiveWindow {
+        ui::Node* node = nullptr;
+    };
+
     struct ActivateTool : public Message {
         const String& tool;
         ActivateTool(const String& tool) : tool{tool} {}

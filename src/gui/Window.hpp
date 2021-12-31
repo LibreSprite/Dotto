@@ -23,7 +23,8 @@ protected:
            msg::KeyUp,
            msg::WindowClosed,
            msg::BeginDrag,
-           msg::EndDrag> pub{this};
+           msg::EndDrag,
+           msg::PollActiveWindow> pub{this};
     std::weak_ptr<ui::Node> mouseOverTarget;
     std::weak_ptr<ui::Node> focusTarget;
 
@@ -57,6 +58,7 @@ public:
     void on(msg::WindowClosed& event);
     void on(msg::BeginDrag& event);
     void on(msg::EndDrag& event);
+    void on(msg::PollActiveWindow& event);
 };
 
 }
