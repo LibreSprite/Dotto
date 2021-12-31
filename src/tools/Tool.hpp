@@ -13,6 +13,7 @@ class Surface;
 class Tool : public Injectable<Tool>, public Model, public std::enable_shared_from_this<Tool> {
 public:
     static inline HashMap<String, std::shared_ptr<Tool>> instances;
+    static inline std::weak_ptr<Tool> previous;
     static inline std::weak_ptr<Tool> active;
     static inline Color color;
 

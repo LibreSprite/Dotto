@@ -49,6 +49,8 @@ public:
     void on(msg::ActivateTool& event) {
         if (Tool::active.lock().get() == this) {
             engine->raiseEvent({"toolactivate"});
+        } else if (Tool::previous.lock().get() == this) {
+            engine->raiseEvent({"tooldeactivate"});
         }
     }
 
