@@ -3,20 +3,23 @@
 // Read LICENSE.txt for more information.
 
 #include <common/line.hpp>
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <common/Surface.hpp>
 #include <script/ScriptObject.hpp>
 #include <tools/Tool.hpp>
 #include <script/api/AppScriptObject.hpp>
+#include <script/api/ModelScriptObject.hpp>
 #include <script/Engine.hpp>
 
-class ToolScriptObject : public script::ScriptObject {
+class ToolScriptObject : public ModelScriptObject {
 public:
     const Vector<Point2D>* points;
     std::shared_ptr<script::ScriptObject> surface;
 
     ToolScriptObject() {
         surface = inject<script::ScriptObject>{typeid(std::shared_ptr<Surface>).name()};
-        addProperty("count", [=]{return 5;});
+        addProperty("count", [=]{return U32(points->size());});
         addProperty("color", [=]{return Tool::color.toU32();});
         addProperty("surface", [=]{return surface.get();});
         addProperty("lastX", [=]{return points->back().x;});
@@ -35,11 +38,18 @@ public:
     std::shared_ptr<script::Engine> engine;
     std::shared_ptr<AppScriptObject> app;
     std::shared_ptr<ToolScriptObject> tso = std::make_shared<ToolScriptObject>();
+    PubSub<msg::ActivateTool> pub{this};
 
     Script() :
         engine{inject<script::Engine>{"toolengine"}},
         app{inject<script::ScriptObject>{"toolapp"}.shared<AppScriptObject>()}
         {
+    }
+
+    void on(msg::ActivateTool& event) {
+        if (Tool::active.lock().get() == this) {
+            engine->raiseEvent({"toolactivate"});
+        }
     }
 
     virtual void begin(Surface* surface, const Vector<Point2D>& points) {
