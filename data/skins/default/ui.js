@@ -1,9 +1,10 @@
 var views = {};
 var controllers = {
     filemenu : {
-        // blur:function(){
-        //     closeStartMenu();
-        // }
+        click:function(){
+            if (app.eventTarget == app.target)
+                closeStartMenu();
+        }
     },
 
     editor : {},
@@ -25,12 +26,12 @@ var controllers = {
     },
 
     startbutton : {
-        mousedown : function() {
+        mouseup : function() {
             var pressed = views.startbutton.get("state") != "active";
             views.filemenu.visible = pressed;
             views.startbutton.set("state", pressed ? "active" : "enabled");
             if (pressed)
-                views.filemenu.focus();
+                views.filemenu.bringToFront();
         }
     },
 
@@ -51,15 +52,13 @@ function closeStartMenu() {
     views.startbutton.set("state", "enabled");
 }
 
-function onEvent(name, target) {
-    var controller = controllers[target];
-    if (!controller) {
-        for (var k in views) {
-            if (app.target == views[k]) {
-                target = k;
-                controller = controllers[target];
-                break;
-            }
+function onEvent(name) {
+    var controller, target;
+    for (var k in views) {
+        if (app.target == views[k]) {
+            target = k;
+            controller = controllers[target];
+            break;
         }
     }
     if (!controller) {
