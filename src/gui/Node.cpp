@@ -81,7 +81,6 @@ void ui::Node::set(const String& key, Value& value, bool debug) {
             if (parts.size() != 2)
                 continue;
 
-            Value value;
             if (key != trim(parts[1]))
                 continue;
 
@@ -93,7 +92,7 @@ void ui::Node::set(const String& key, Value& value, bool debug) {
             if (!child)
                 continue;
 
-            child->set(key, value, debug);
+            child->set(target[1], value, debug);
         }
     }
 }
