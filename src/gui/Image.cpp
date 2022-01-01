@@ -15,6 +15,7 @@
 namespace ui {
     class Image : public Node {
         Property<String> src{this, "src", "", &Image::reload};
+        Property<String> fit{this, "fit"};
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
         Property<Rect> nineSlice{this, "slice"};
         PubSub<msg::Flush> pub{this};
@@ -36,10 +37,40 @@ namespace ui {
         }
 
         void draw(S32 z, Graphics& g) override {
-            if (*surface) {
+            if (*surface && (*surface)->dataSize()) {
+                U32 width = (*surface)->width();
+                U32 height = (*surface)->height();
+                Rect rect{0, 0, width, height};
+                if (*fit == "") { // stretch
+                } else if (*fit == "tile") {
+                    F32 wf = static_cast<F32>(localRect.width) / width;
+                    F32 hf = static_cast<F32>(localRect.height) / height;
+                    rect.width *= wf;
+                    rect.height *= hf;
+                } else if (*fit == "fit") {
+                    F32 wf = static_cast<F32>(width) / localRect.width;
+                    F32 hf = static_cast<F32>(height) / localRect.height;
+                    F32 f = std::max(wf, hf);
+                    rect.x = rect.width/2 - static_cast<S32>(localRect.width*f)/2;
+                    rect.y = rect.height/2 - static_cast<S32>(localRect.height*f)/2;
+                    rect.width = localRect.width * f;
+                    rect.height = localRect.height * f;
+                } else if (*fit == "cover") {
+                    F32 wf = static_cast<F32>(globalRect.width) / width;
+                    F32 hf = static_cast<F32>(globalRect.height) / height;
+                    if (wf > hf) {
+                        height = (height / wf) * hf;
+                        rect.y = rect.height/2 - height/2;
+                    } else {
+                        width = (width / hf) * wf;
+                        rect.x = rect.width/2 - width/2;
+                    }
+                    rect.width = width;
+                    rect.height = height;
+                }
                 g.blit({
                         .surface = *surface,
-                        .source = localRect,
+                        .source = rect,
                         .destination = globalRect,
                         .nineSlice = nineSlice,
                         .zIndex = z

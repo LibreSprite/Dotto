@@ -311,7 +311,11 @@ public:
             sH = texture->height - settings.nineSlice.y * 2;
 
         if (sW <= 0 || sH <= 0) {
-            push(z, {x, y, w, h, 0.0f, 0.0f, 1.0f, 1.0f});
+            push(z, {
+                    x, y,
+                    w, h,
+                    settings.source.x / F32(texture->width), settings.source.y / F32(texture->height),
+                    settings.source.right() / F32(texture->width), settings.source.bottom() / F32(texture->height)});
         } else {
             F32 sX = settings.nineSlice.x;
             F32 sY = settings.nineSlice.y;

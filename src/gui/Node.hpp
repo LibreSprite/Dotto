@@ -67,7 +67,7 @@ namespace ui {
 
         Property<String> id{this, "id", ""};
         Property<String> controllerName{this, "controller", "", &Node::reattach};
-        Property<bool> visible{this, "visible"};
+        Property<bool> visible{this, "visible", true};
         Property<bool> debug{this, "debug"};
 
         Property<bool> hideOverflow{this, "overflow-hidden", false};
@@ -164,13 +164,17 @@ namespace ui {
             if (*hideOverflow) {
                 Rect clip = gfx.pushClipRect(globalRect);
                 if (!gfx.isEmptyClipRect()) {
-                    for (auto& child : children)
-                        child->draw(z + 1 + *child->zIndex, gfx);
+                    for (auto& child : children) {
+                        if (child->visible)
+                            child->draw(z + 1 + *child->zIndex, gfx);
+                    }
                 }
                 gfx.setClipRect(clip);
             } else {
-                for (auto& child : children)
-                    child->draw(z + 1 + *child->zIndex, gfx);
+                for (auto& child : children) {
+                    if (child->visible)
+                        child->draw(z + 1 + *child->zIndex, gfx);
+                }
             }
         }
 

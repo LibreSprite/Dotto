@@ -43,6 +43,8 @@ namespace ui {
 
         void draw(S32 z, Graphics& g) override {
             if (*surface) {
+                localRect.x = 0;
+                localRect.y = 0;
                 localRect.width = globalRect.width = (*surface)->width();
                 localRect.height = globalRect.height = (*surface)->height();
                 g.blit({

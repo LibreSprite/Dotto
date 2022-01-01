@@ -26,7 +26,7 @@ public:
 
     PixelType* data() {return pixels.data();}
 
-    U32 dataSize() {return pixels.size() * sizeof(PixelType);};
+    U32 dataSize() {return _width * _height * sizeof(PixelType);};
 
     void setDirty() {
         if (textureInfo)
