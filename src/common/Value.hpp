@@ -85,8 +85,14 @@ public:
             str = +[](const std::any& value) {
                 return std::to_string(std::any_cast<Type>(value));
             };
+        } else if constexpr (is_shared_ptr<Type>::value) {
+            str = +[](const std::any& value) {
+                return "[" + String(typeid(Type).name()) + " " + std::to_string((uintptr_t)std::any_cast<Type>(value).get()) + "]";
+            };
         } else {
-            str = nullptr;
+            str = +[](const std::any& value) {
+                return "[" + String(typeid(Type).name()) + "]";
+            };
         }
 #endif
         return *this;
@@ -104,7 +110,7 @@ public:
 
 #ifdef _DEBUG
     String toString() const {
-        return str ? str(value) : String("[not convertible: ") + typeName() + "]";
+        return str ? str(value) : String("[not convertible to String: ") + typeName() + "]";
     }
 #endif
 
