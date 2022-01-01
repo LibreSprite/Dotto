@@ -37,6 +37,7 @@ public:
         duk_destroy_heap(handle);
         for (auto ptr : memory)
             ::free(ptr);
+        handle = nullptr;
     }
 
     static void fatal(void*, const char* msg) {
@@ -107,6 +108,19 @@ static Engine::Shared<DukEngine> registration("duk", {"js"});
 
 class DukScriptObject : public InternalScriptObject {
 public:
+    void* local = nullptr;
+
+    ~DukScriptObject() {
+        if (local && localToDSO()) {
+            localToDSO()->erase(local);
+        }
+    }
+
+    static HashMap<void*, std::weak_ptr<ScriptObject>>* localToDSO(){
+        static auto map = std::make_unique<HashMap<void*, std::weak_ptr<ScriptObject>>>();
+        return map.get();
+    };
+
     static script::Value getValue(duk_context* ctx, int id) {
         auto type = duk_get_type(ctx, id);
         if (type == DUK_TYPE_NUMBER) {
@@ -244,7 +258,31 @@ public:
 
     void makeLocal() {
         auto handle = static_cast<DukEngine*>(engine.get())->handle;
+        if (local) {
+            duk_push_heapptr(handle, local);
+            return;
+        }
+
         duk_push_object(handle);
+        local = duk_get_heapptr(handle, -1);
+        (*localToDSO())[local] = scriptObject->shared_from_this();
+        duk_push_c_function(handle, +[](duk_context* handle)->int{
+            auto map = localToDSO();
+            if (!map)
+                return 0;
+            auto it = map->find(duk_get_heapptr(handle, 0));
+            if (it != map->end()) {
+                if (auto so = it->second.lock()) {
+                    static_cast<DukScriptObject*>(so->getInternalScriptObject())->local = nullptr;
+                    map->erase(it);
+                    return 0;
+                }
+            }
+            logE("Duktape consistency error");
+            return 0;
+        }, 1 /*nargs*/);
+        duk_set_finalizer(handle, -2);
+
         pushFunctions();
         pushProperties();
     }
