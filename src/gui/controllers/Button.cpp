@@ -11,16 +11,20 @@
 
 class Button : public ui::Controller {
     PubSub<msg::Flush> pub{this};
+    bool isHovering = false;
 
 public:
     Property<String> state{this, "state", "enabled", &Button::changeState};
     void changeState() {
-        if (*state == "pressed" || *state == "active")
-            node()->set("surface", *pressedSurface);
-        if (*state == "enabled")
-            node()->set("surface", *normalSurface);
-        if (*state == "disabled")
-            node()->set("surface", *disabledSurface);
+        std::shared_ptr<Surface> current;
+        if (*state == "pressed" || *state == "active") {
+            current = pressedSurface;
+        } else if (*state == "enabled") {
+            current = isHovering && *hoverSurface ? hoverSurface : normalSurface;
+        } else if (*state == "disabled") {
+            current = disabledSurface;
+        }
+        node()->set("surface", current);
     }
 
     Property<String> pressed{this, "down-src", "", &Button::reloadPressed};
@@ -36,6 +40,12 @@ public:
         node()->set("surface", *normalSurface);
     }
 
+    Property<String> hover{this, "hover-src", "", &Button::reloadHover};
+    Property<std::shared_ptr<Surface>> hoverSurface{this, "hover-surface"};
+    void reloadHover() {
+        *hoverSurface = FileSystem::parse(*hover);
+    }
+
     Property<String> disabled{this, "disabled-src", "", &Button::reloadDisabled};
     Property<std::shared_ptr<Surface>> disabledSurface{this, "disabled-surface"};
     void reloadDisabled() {
@@ -49,21 +59,31 @@ public:
     }
 
     void attach() override {
-        node()->addEventListener<ui::MouseDown, ui::MouseUp>(this);
+        node()->addEventListener<ui::MouseDown, ui::MouseUp, ui::MouseEnter, ui::MouseLeave>(this);
     }
 
-    void eventHandler(const ui::MouseDown& event) {
+    void eventHandler(const ui::MouseDown&) {
         if (*state == "enabled") {
             node()->set("state", "pressed");
             set("state", "pressed");
         }
     }
 
-    void eventHandler(const ui::MouseUp& event) {
+    void eventHandler(const ui::MouseUp&) {
         if (*state == "pressed") {
             node()->set("state", "enabled");
             set("state", "enabled");
         }
+    }
+
+    void eventHandler(const ui::MouseEnter&) {
+        isHovering = true;
+        changeState();
+    }
+
+    void eventHandler(const ui::MouseLeave&) {
+        isHovering = false;
+        changeState();
     }
 };
 
