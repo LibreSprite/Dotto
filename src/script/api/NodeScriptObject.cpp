@@ -4,8 +4,10 @@
 
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
+#include <script/api/AppScriptObject.hpp>
 #include <script/api/ModelScriptObject.hpp>
 #include <script/Engine.hpp>
+#include <script/Value.hpp>
 
 class NodeScriptObject : public ModelScriptObject {
     std::weak_ptr<ui::Node> weak;
@@ -133,8 +135,12 @@ public:
     template <typename Type>
     void createEventBinder(const String& name) {
         eventBinders[name] = [=](ui::Node* node, const String& name) {
+            auto weakapp = getEngine().getGlobal("app")->weak_from_this();
             auto handler = [=](const auto& event) {
-                getEngine().raiseEvent(event.toStrings(name));
+                if (auto app = std::static_pointer_cast<AppScriptObject>(weakapp.lock())) {
+                    app->setTarget(std::static_pointer_cast<script::ScriptObject>(shared_from_this()));
+                    getEngine().raiseEvent(event.toStrings(name));
+                }
             };
             node->addEventListener<Type>(this, handler);
         };
