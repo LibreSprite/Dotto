@@ -250,6 +250,7 @@ public:
     }
 
     void makeGlobal(const String& name) override {
+        InternalScriptObject::makeGlobal(name);
         auto handle = static_cast<DukEngine*>(engine.get())->handle;
         duk_push_global_object(handle);
         duk_push_object(handle);

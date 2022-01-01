@@ -344,6 +344,7 @@ public:
     }
 
     void makeGlobal(const String& name) override {
+        InternalScriptObject::makeGlobal(name);
         auto& isolate = engine.get<V8Engine>()->m_isolate;
         auto context = engine.get<V8Engine>()->context();
         Check(context->Global()->Set(context,

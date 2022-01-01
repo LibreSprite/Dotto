@@ -14,4 +14,8 @@ namespace script {
     InternalScriptObject::~InternalScriptObject() {
         liveInstances.erase(this);
     }
+
+    void InternalScriptObject::makeGlobal(const String& name) {
+        engine->globalScriptObjectIndex[name] = scriptObject;
+    }
 }

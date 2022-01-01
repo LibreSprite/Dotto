@@ -245,6 +245,7 @@ public:
     }
 
     void makeGlobal(const String& name) override {
+        InternalScriptObject::makeGlobal(name);
         auto L = engine.get<LuaEngine>()->L;
         lua_pushvalue(L, makeLocal(L));
         lua_setglobal(L, name.c_str());

@@ -63,7 +63,7 @@ namespace script {
             return it != liveInstances.end() ? (*it)->scriptObject : nullptr;
         }
 
-        virtual void makeGlobal(const String& name) = 0;
+        virtual void makeGlobal(const String& name);
 
         virtual ObjectProperty& addProperty(const String& name, const Function& get, const Function& set) {
             auto& prop = properties[name];

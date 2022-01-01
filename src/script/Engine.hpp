@@ -89,9 +89,17 @@ namespace script {
             afterEvalListeners.emplace_back(std::move(callback));
         }
 
+        ScriptObject* getGlobal(const String& name) {
+            auto it = globalScriptObjectIndex.find(name);
+            return it == globalScriptObjectIndex.end() ? nullptr : it->second;
+        }
+
     private:
+        friend class InternalScriptObject;
+
         Provides provides{this};
         Vector<inject<ScriptObject>> globalScriptObjects;
+        HashMap<String, ScriptObject*> globalScriptObjectIndex;
         Vector<std::function<void(bool)>> afterEvalListeners;
 
         struct WrapperPair {
