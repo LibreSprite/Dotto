@@ -1,1 +1,1 @@
-<node id="editor" controller="shortcut, editor, draggable" draggable="false" absolute="true" y="0px" x="0px" height="512px" width="512px" scale="4"/>
+<image id="editor" controller="shortcut, editor, draggable" draggable="false" src="%skin/editor.png" absolute="true" y="0px" x="0px" height="512px" width="512px" scale="4" slice="1 1" visible="false"/>

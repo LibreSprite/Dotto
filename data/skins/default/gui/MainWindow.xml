@@ -1,17 +1,23 @@
 <window width="1000" height="1000" flow="column" background="rgb{32,32,32}">
+  <image src="%skin/bg.png" absolute="true" x="0" y="0" fit="cover" width="100%" height="100%"/>
+
   <editor/>
 
-  <textbutton controller="script" type="duk" label="Open" absolute="true" x="0" y="100%-35px" width="70px" height="35px">
-    app.target.addEventListener("click");
-    function onEvent(name){
-      if (name == "click") {
-        var pick = app.open('*.png', 'Open image');
-        if (pick)
-          app.window.findChildById("editor").set("file", pick);
+  <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-35px" width="100%" height="35px" flow="row">
+    <alttextbutton controller="script" type="duk" label="Open"  width="100px">
+      app.target.addEventListener("click");
+      function onEvent(name){
+        if (name == "click") {
+          var pick = app.open('*.png', 'Open image');
+          if (pick) {
+            var editor = app.window.findChildById("editor");
+            editor.set("file", pick);
+            editor.set("visible", true);
+          }
+        }
       }
-    }
-  </textbutton>
-
+    </alttextbutton>
+  </image>
   <image controller="focusfront" handle="titlebar" src="%skin/window.png" height="213px" width="40px" x="100%-40px" y="50%-100px" absolute="true" slice="7 30" overflow-hidden="true">
     <node controller="toolbox" id="toolbox" absolute="true" width="30px" y="30px" height="100%-35px" x="100%-37px"/>
   </image>
