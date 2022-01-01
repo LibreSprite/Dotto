@@ -166,9 +166,7 @@ public:
                     if (event.target == node) {
                         app->setEventTarget(target);
                     } else if (event.target) {
-                        auto shared = event.target->shared_from_this();
-                        auto so = getEngine().getScriptObject(shared, typeid(shared).name());
-                        app->setEventTarget(so);
+                        app->setEventTarget(event.target->shared_from_this());
                     } else {
                         app->setEventTarget(nullptr);
                     }

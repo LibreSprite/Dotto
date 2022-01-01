@@ -304,15 +304,7 @@ namespace script {
             return *this;
         }
 
-        String str() const {
-            if (type == Type::UNDEFINED) return "undefined";
-            if (type == Type::INT) return std::to_string(data.int_v);
-            if (type == Type::DOUBLE) return std::to_string(data.double_v);
-            if (type == Type::BUFFER) return String(data.buffer_v->data(), data.buffer_v->end());
-            if (type == Type::STRING) return *data.string_v;
-            logV("Could not convert ", (int) type, " into string");
-            return String{};
-        }
+        String str() const;
 
         operator String () const {
             return str();

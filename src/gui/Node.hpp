@@ -68,6 +68,7 @@ namespace ui {
         Property<String> id{this, "id", ""};
         Property<String> controllerName{this, "controller", "", &Node::reattach};
         Property<bool> visible{this, "visible", true};
+        Property<bool> inputEnabled{this, "inputEnabled", true};
         Property<bool> debug{this, "debug"};
 
         Property<bool> hideOverflow{this, "overflow-hidden", false};
@@ -210,7 +211,7 @@ namespace ui {
             children.push_back(child);
             child->parent = this;
             if (isInScene)
-                child->processEvent(AddToScene{});
+                child->processEvent(AddToScene{child.get()});
         }
 
         virtual void removeChild(std::shared_ptr<Node> node) {
@@ -220,7 +221,7 @@ namespace ui {
                 if (it != children.end()) {
                     node->parent = nullptr;
                     children.erase(it);
-                    node->processEvent(RemoveFromScene{});
+                    node->processEvent(RemoveFromScene{node.get()});
                 }
             }
         }

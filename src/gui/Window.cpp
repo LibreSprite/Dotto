@@ -66,7 +66,7 @@ namespace ui {
             }
 
             hoverWindow = this;
-            ui::MouseMove guiEvent{event.x, event.y, event.buttons};
+            ui::MouseMove guiEvent{nullptr, event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
@@ -74,12 +74,12 @@ namespace ui {
             if (auto over = mouseOverTarget.lock()) {
                 if (over.get() != guiEvent.target) {
                     mouseOverTarget = guiEvent.target->shared_from_this();
-                    over->processEvent(ui::MouseLeave{});
-                    guiEvent.target->processEvent(ui::MouseEnter{});
+                    over->processEvent(ui::MouseLeave{over.get()});
+                    guiEvent.target->processEvent(ui::MouseEnter{over.get()});
                 }
             } else {
                 mouseOverTarget = guiEvent.target->shared_from_this();
-                guiEvent.target->processEvent(ui::MouseEnter{});
+                guiEvent.target->processEvent(ui::MouseEnter{over.get()});
             }
 
             guiEvent.target->processEvent(guiEvent);
@@ -92,7 +92,7 @@ namespace ui {
             mouseX = event.x;
             mouseY = event.y;
             hoverWindow = this;
-            ui::MouseDown guiEvent{event.x, event.y, event.buttons};
+            ui::MouseDown guiEvent{nullptr, event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
@@ -117,7 +117,7 @@ namespace ui {
 
             hoverWindow = this;
 
-            ui::MouseUp guiEvent{event.x, event.y, event.buttons};
+            ui::MouseUp guiEvent{nullptr, event.x, event.y, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
@@ -126,7 +126,7 @@ namespace ui {
 
             if (auto focus = focusTarget.lock()) {
                 if (focus.get() == guiEvent.target) {
-                    guiEvent.target->processEvent(ui::Click{event.x, event.y, event.buttons});
+                    guiEvent.target->processEvent(ui::Click{focus.get(), event.x, event.y, event.buttons});
                 }
             }
 
@@ -136,13 +136,13 @@ namespace ui {
 
     void Window::on(msg::KeyDown& event) {
         if (auto focus = focusTarget.lock()) {
-            focus->processEvent(ui::KeyDown{event.scancode, event.keycode, event.keyName});
+            focus->processEvent(ui::KeyDown{focus.get(), event.scancode, event.keycode, event.keyName});
         }
     }
 
     void Window::on(msg::KeyUp& event) {
         if (auto focus = focusTarget.lock()) {
-            focus->processEvent(ui::KeyUp{event.scancode, event.keycode, event.keyName});
+            focus->processEvent(ui::KeyUp{focus.get(), event.scancode, event.keycode, event.keyName});
         }
     }
 
@@ -170,7 +170,7 @@ namespace ui {
     void Window::on(msg::EndDrag& event) {
         if (this == hoverWindow) {
             if (auto target = dragTarget.lock())
-                target->processEvent(ui::Drop{dragEvent.globalX, dragEvent.globalY});
+                target->processEvent(ui::Drop{target.get(), dragEvent.globalX, dragEvent.globalY});
             dragTarget.reset();
         }
     }
@@ -186,7 +186,7 @@ namespace ui {
             while (event.target != target) {
                 event.target = target;
                 for (auto& child : target->getChildren()) {
-                    if (child->globalRect.contains(event.globalX, event.globalY)) {
+                    if (child->visible && child->inputEnabled && child->globalRect.contains(event.globalX, event.globalY)) {
                         target = child.get();
                     }
                 }

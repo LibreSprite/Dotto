@@ -28,7 +28,7 @@ public:
             return false;
         }
         root = inject<ui::Node>{"node"};
-        root->processEvent(ui::AddToScene{});
+        root->processEvent(ui::AddToScene{root.get()});
         return true;
     }
 

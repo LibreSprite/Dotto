@@ -30,7 +30,7 @@ protected:
 
     static inline ui::Window* hoverWindow = nullptr;
     static inline std::weak_ptr<ui::Node> dragTarget;
-    static inline ui::Drag dragEvent;
+    static inline ui::Drag dragEvent{nullptr};
     static inline S32 mouseX = 0;
     static inline S32 mouseY = 0;
     static inline U32 mouseButtons = 0;
