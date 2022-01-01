@@ -136,9 +136,10 @@ public:
             void* buffer = duk_get_buffer_data(ctx, id, &size);
             if (buffer)
                 return {buffer, size, false};
-            if (duk_get_prop_string(ctx, id, "\0xFFthis")) {
+            if (duk_get_prop_string(ctx, id, "\x01this")) {
                 auto iso = duk_get_pointer(ctx, -1);
                 auto so = getScriptObject(iso);
+                duk_pop(ctx);
                 return so;
             }
         } else if (type == DUK_TYPE_BUFFER) {
@@ -231,7 +232,7 @@ public:
     void pushProperties() {
         auto handle = static_cast<DukEngine*>(engine.get())->handle;
         duk_push_pointer(handle, this);
-        duk_put_prop_string(handle, -2, "\0xFFthis");
+        duk_put_prop_string(handle, -2, "\x01this");
 
         for (auto& entry : properties) {
             duk_push_string(handle, entry.first.c_str());
@@ -264,6 +265,9 @@ public:
         }
 
         duk_push_object(handle);
+        pushFunctions();
+        pushProperties();
+
         local = duk_get_heapptr(handle, -1);
         (*localToDSO())[local] = scriptObject->shared_from_this();
         duk_push_c_function(handle, +[](duk_context* handle)->int{
@@ -272,9 +276,10 @@ public:
                 return 0;
             auto it = map->find(duk_get_heapptr(handle, 0));
             if (it != map->end()) {
-                if (auto so = it->second.lock()) {
+                auto so = it->second.lock();
+                map->erase(it);
+                if (so) {
                     static_cast<DukScriptObject*>(so->getInternalScriptObject())->local = nullptr;
-                    map->erase(it);
                     return 0;
                 }
             }
@@ -282,9 +287,6 @@ public:
             return 0;
         }, 1 /*nargs*/);
         duk_set_finalizer(handle, -2);
-
-        pushFunctions();
-        pushProperties();
     }
 
     void makeGlobal(const String& name) override {
