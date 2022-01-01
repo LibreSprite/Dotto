@@ -64,6 +64,24 @@ public:
             return nullptr;
         });
 
+        addFunction("bringToFront", [=](){
+            if (auto node = weak.lock()) {
+                auto& args = script::Function::varArgs();
+                if (args.empty()) {
+                    if (auto parent = node->getParent()) {
+                        parent->bringToFront(node);
+                    }
+                } else if (args[0].type == script::Value::Type::OBJECT) {
+                    auto obj = static_cast<ScriptObject*>(args[0]);
+                    if (!obj) return 0;
+                    auto child = dynamic_cast<ui::Node*>(static_cast<Model*>(obj->getWrapped()));
+                    if (child)
+                        node->bringToFront(child->shared_from_this());
+                }
+            }
+            return 0;
+        });
+
         addFunction("remove", [=]() {
             if (auto node = weak.lock())
                 node->remove();
@@ -170,6 +188,7 @@ public:
                     } else {
                         app->setEventTarget(nullptr);
                     }
+                    // logV("Event [", join(event.toStrings(name), ", "), "]");
                     getEngine().raiseEvent(event.toStrings(name));
                 }
             };
