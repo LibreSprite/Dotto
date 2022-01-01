@@ -45,9 +45,13 @@ public:
     }
 
     void paint(S32 tx, S32 ty) {
+        auto rect = node()->globalRect;
+        if (!rect.width || !rect.height)
+            return;
+
         auto surface = cell->getComposite();
-        S32 x = (tx * surface->width()) / node()->localRect.width;
-        S32 y = (ty * surface->height()) / node()->localRect.height;
+        S32 x = (tx * surface->width()) / rect.width;
+        S32 y = (ty * surface->height()) / rect.height;
         bool begin = points.empty();
 
         points.push_back({x, y});

@@ -18,6 +18,7 @@ public:
         const Rect& destination;
         const Rect& nineSlice;
         S32 zIndex;
+        bool debug;
     };
 
     virtual void blit(const BlitSettings& settings){}

@@ -48,8 +48,8 @@ public:
             return;
         pub(msg::BeginDrag{
                 target.lock(),
-                node()->localRect.x,
-                node()->localRect.y
+                node()->globalRect.x,
+                node()->globalRect.y
             });
     }
 

@@ -236,6 +236,8 @@ public:
         F32 u0, v0, u1, v1;
     };
 
+    bool debug = false;
+
     void push(F32 z, const Rectf& rect) {
         F32 x1 = rect.x,
             y1 = rect.y,
@@ -254,27 +256,26 @@ public:
 
         if (x1 < clip.x) {
             if (rect.w) {
-                u0 -= (u0 - u1) * ((clip.x - x1) / rect.w);
+                u0 += (clip.x - x1) / rect.w;
             }
             x1 = clip.x;
-
         }
         if (x2 > clip.right()) {
             if (rect.w) {
-                u1 += (u0 - u1) * ((x2 - clip.right()) / rect.w);
+                u1 -= (x2 - clip.right()) / rect.w;
             }
             x2 = clip.right();
         }
 
         if (y1 < clip.y) {
             if (rect.h) {
-                v0 -= (v0 - v1) * ((clip.y - y1) / rect.h);
+                v0 += (clip.y - y1) / rect.h;
             }
             y1 = clip.y;
         }
         if (y2 > clip.bottom()) {
             if (rect.h) {
-                v1 += (v0 - v1) * ((y2 - clip.bottom()) / rect.h);
+                v1 -= (y2 - clip.bottom()) / rect.h;
             }
             y2 = clip.bottom();
         }
@@ -288,6 +289,7 @@ public:
     }
 
     void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
+        debug = settings.debug;
         F32 x = settings.destination.x;
         F32 y = settings.destination.y;
         F32 z = settings.zIndex;

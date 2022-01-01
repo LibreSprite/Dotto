@@ -73,7 +73,8 @@ namespace ui {
                         .source = rect,
                         .destination = globalRect,
                         .nineSlice = nineSlice,
-                        .zIndex = z
+                        .zIndex = z,
+                        .debug = debug
                     });
             }
             Node::draw(z, g);
