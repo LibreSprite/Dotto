@@ -50,15 +50,7 @@ public:
             case SDL_QUIT:
                 running = false;
                 break;
-            case SDL_WINDOWEVENT_MAXIMIZED:
-                pub(msg::WindowMaximized{event.window.windowID});
-                break;
-            case SDL_WINDOWEVENT_MINIMIZED:
-                pub(msg::WindowMinimized{event.window.windowID});
-                break;
-            case SDL_WINDOWEVENT_RESTORED:
-                pub(msg::WindowMinimized{event.window.windowID});
-                break;
+
             case SDL_MOUSEMOTION:
                 pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y, event.motion.state});
                 break;
@@ -87,6 +79,22 @@ public:
 
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
+                case SDL_WINDOWEVENT_MOVED: // TODO: check ICC profile
+                case SDL_WINDOWEVENT_SHOWN:
+                case SDL_WINDOWEVENT_HIDDEN:
+                case SDL_WINDOWEVENT_EXPOSED:
+                case SDL_WINDOWEVENT_RESIZED:
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    break;
+                case SDL_WINDOWEVENT_MAXIMIZED:
+                    pub(msg::WindowMaximized{event.window.windowID});
+                    break;
+                case SDL_WINDOWEVENT_MINIMIZED:
+                    pub(msg::WindowMinimized{event.window.windowID});
+                    break;
+                case SDL_WINDOWEVENT_RESTORED:
+                    pub(msg::WindowMinimized{event.window.windowID});
+                    break;
                 case SDL_WINDOWEVENT_CLOSE:
                     pub(msg::WindowClosed{event.window.windowID});
                     break;
