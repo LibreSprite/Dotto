@@ -1,23 +1,28 @@
-<window width="1000" height="1000" flow="column" background="rgb{32,32,32}">
+<window width="1000" id="window" controller="script" script="%skin/ui.js" height="1000" flow="column" background="rgb{32,32,32}">
   <image src="%skin/bg.png" absolute="true" x="0" y="0" fit="cover" width="100%" height="100%"/>
 
   <editor/>
 
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-35px" width="100%" height="35px" flow="row">
-    <alttextbutton controller="script" type="duk" label="Open"  width="100px">
-      app.target.addEventListener("click");
-      function onEvent(name){
-        if (name == "click") {
-          var pick = app.open('*.png', 'Open image');
-          if (pick) {
-            var editor = app.window.findChildById("editor");
-            editor.set("file", pick);
-            editor.set("visible", true);
-          }
-        }
-      }
-    </alttextbutton>
+    <alttextbutton id="startbutton" label="File"  width="100px"/>
   </image>
+
+  <image src="%skin/filemenu.png" height="500px" width="380px" x="0" y="100%-535px" absolute="true" slice="2 67" visible="false" id="filemenu">
+    <node absolute="true" x="2px" y="67px" width="188px" height="100%-282px">"
+      <menubutton id="newbutton" label="New"/>
+      <menubutton id="openbutton" label="Open"/>
+      <menubutton id="savebutton" label="Save"/>
+      <menubutton id="saveAsbutton" label="Save As..."/>
+      <menubutton id="exportbutton" label="Export..."/>
+    </node>
+
+    <node controller="button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-130px" y="100%-35px" width="120px" height="24px" flow="row">
+      <image id="iconimage" height="24px" width="24px"/>
+      <node width="5px"/>
+      <span id="labelspan" font="%skin/DejaVuSans.ttf" color="rgb{255,255,255}" size="20px" width="100px">Quit</span>
+    </node>
+  </image>
+
   <image controller="focusfront" handle="titlebar" src="%skin/window.png" height="213px" width="40px" x="100%-40px" y="50%-100px" absolute="true" slice="7 30" overflow-hidden="true">
     <node controller="toolbox" id="toolbox" absolute="true" width="30px" y="30px" height="100%-35px" x="100%-37px"/>
   </image>
