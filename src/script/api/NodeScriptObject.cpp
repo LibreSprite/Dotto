@@ -80,6 +80,17 @@ public:
             return 0;
         });
 
+        addFunction("getChildSeparation", [=](script::ScriptObject* obj) -> U32 {
+            if (!obj) return 0;
+            if (auto node = weak.lock()) {
+                auto child = dynamic_cast<ui::Node*>(static_cast<Model*>(obj->getWrapped()));
+                if (!child)
+                    return 0;
+                return node->getChildSeparation(child->shared_from_this());
+            }
+            return 0;
+        });
+
         addFunction("createChild", [=](const String& name) -> script::Value {
             if (auto node = weak.lock()) {
                 auto child = ui::Node::fromXML(name);

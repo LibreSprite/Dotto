@@ -111,6 +111,8 @@ namespace ui {
 
         std::shared_ptr<Node> findChildById(const String& targetId);
 
+        U32 getChildSeparation(std::shared_ptr<Node> child);
+
         void bringToFront(std::shared_ptr<Node> child);
 
         void processEvent(const Event& event) override {

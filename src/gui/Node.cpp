@@ -28,6 +28,20 @@ void ui::Node::bringToFront(std::shared_ptr<ui::Node> child) {
     children.push_back(child);
 }
 
+U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
+    if (!child)
+        return 0;
+    auto current = child->parent;
+    U32 depth = 1;
+    while (current) {
+        if (current == this)
+            return depth;
+        depth++;
+        current = current->parent;
+    }
+    return 0;
+}
+
 void ui::Node::load(const PropertySet& set) {
     Model::load(set);
     for (auto& entry : controllers) {
