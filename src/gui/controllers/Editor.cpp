@@ -17,14 +17,19 @@
 
 class Editor : public ui::Controller {
     std::shared_ptr<Document> doc;
-    PubSub<msg::ActivateDocument> pub{this};
+    PubSub<msg::ActivateDocument, msg::ActivateEditor, msg::PollActiveEditor> pub{this};
     std::optional<Document::Provides> docProvides;
     std::optional<Cell::Provides> cellProvides;
+    std::optional<Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
     Property<F32> scale{this, "scale", 1.0f, &Editor::rezoom};
     std::shared_ptr<Cell> lastCell;
 
 public:
+    void attach() override {
+        node()->addEventListener<ui::Focus, ui::FocusChild>(this);
+        pub(msg::ActivateDocument{doc});
+    }
 
     void rezoom() {
         if (!doc)
@@ -48,20 +53,17 @@ public:
         }
 
         rezoom();
+        activate();
+        node()->focus();
     }
 
-    void attach() override {
-        node()->addEventListener<ui::Focus, ui::FocusChild>(this);
+    void activate() {
+        pub(msg::ActivateEditor{node()});
         pub(msg::ActivateDocument{doc});
     }
 
-    void eventHandler(const ui::FocusChild&) {
-        pub(msg::ActivateDocument{doc});
-    }
-
-    void eventHandler(const ui::Focus&) {
-        pub(msg::ActivateDocument{doc});
-    }
+    void eventHandler(const ui::FocusChild&) {activate();}
+    void eventHandler(const ui::Focus&) {activate();}
 
     void on(msg::ActivateDocument& msg) {
         if (msg.doc.get() == doc.get()) {
@@ -71,6 +73,18 @@ public:
             docProvides.reset();
             cellProvides.reset();
         }
+    }
+
+    void on(msg::ActivateEditor& msg) {
+        if (msg.editor == node())
+            editorProvides.emplace(this);
+        else
+            editorProvides.reset();
+    }
+
+    void on(msg::PollActiveEditor& msg) {
+        if (editorProvides.has_value())
+            msg.editor = node();
     }
 };
 

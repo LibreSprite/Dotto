@@ -93,6 +93,15 @@ namespace msg {
         ui::Node* node = nullptr;
     };
 
+    struct ActivateEditor : public Message {
+        ui::Node* editor = nullptr;
+        ActivateEditor(ui::Node* editor) : editor{editor} {}
+    };
+
+    struct PollActiveEditor : public Message {
+        ui::Node* editor = nullptr;
+    };
+
     struct ActivateTool : public Message {
         const String& tool;
         ActivateTool(const String& tool) : tool{tool} {}
