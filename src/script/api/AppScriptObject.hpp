@@ -9,4 +9,5 @@
 class AppScriptObject : public script::ScriptObject {
 public:
     virtual void setTarget(const Value& target) = 0;
+    virtual void setEventTarget(const Value& eventTarget) = 0;
 };

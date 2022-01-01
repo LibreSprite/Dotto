@@ -23,10 +23,15 @@
 class AppScriptObjectImpl : public AppScriptObject {
 public:
     script::Value target;
+    script::Value eventTarget;
     std::optional<PubSub<msg::Tick>> tick;
 
     void setTarget(const ::Value& target) override {
         this->target = getEngine().toValue(target);
+    }
+
+    void setEventTarget(const Value& eventTarget) override {
+        this->eventTarget = getEngine().toValue(eventTarget);
     }
 
     AppScriptObjectImpl() {
@@ -35,6 +40,7 @@ public:
         }
 
         addProperty("target", [this]{return target;});
+        addProperty("eventTarget", [this]{return eventTarget;});
 
         addProperty("window", [this]{
             auto node = PubSub<>::pub(msg::PollActiveWindow{}).node;

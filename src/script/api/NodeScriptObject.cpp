@@ -149,7 +149,17 @@ public:
             auto weakapp = getEngine().getGlobal("app")->weak_from_this();
             auto handler = [=](const auto& event) {
                 if (auto app = std::static_pointer_cast<AppScriptObject>(weakapp.lock())) {
-                    app->setTarget(std::static_pointer_cast<script::ScriptObject>(shared_from_this()));
+                    auto target = std::static_pointer_cast<script::ScriptObject>(shared_from_this());
+                    app->setTarget(target);
+                    if (event.target == node) {
+                        app->setEventTarget(target);
+                    } else if (event.target) {
+                        auto shared = event.target->shared_from_this();
+                        auto so = getEngine().getScriptObject(shared, typeid(shared).name());
+                        app->setEventTarget(so);
+                    } else {
+                        app->setEventTarget(nullptr);
+                    }
                     getEngine().raiseEvent(event.toStrings(name));
                 }
             };
