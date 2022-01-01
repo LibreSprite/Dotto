@@ -145,6 +145,18 @@ namespace ui {
             return true;
         }
 
+        virtual void focus(std::shared_ptr<ui::Node> child = nullptr) {
+            if (parent) {
+                parent->focus(child ?: shared_from_this());
+            }
+        }
+
+        virtual void blur(std::shared_ptr<ui::Node> child = nullptr) {
+            if (parent) {
+                parent->blur(child ?: shared_from_this());
+            }
+        }
+
         Node* getParent() {
             return parent;
         }

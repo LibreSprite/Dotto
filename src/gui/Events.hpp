@@ -40,8 +40,17 @@ namespace ui {
         }
     };
 
-    struct Blur : public Event {};
-    struct Focus : public Event {};
+    struct Blur : public Event {
+        Blur(Node* node) {
+            target = node;
+        }
+    };
+
+    struct Focus : public Event {
+        Focus(Node* node) {
+            target = node;
+        }
+    };
 
     struct BlurChild : public Event {
         BlurChild(Node* child) {

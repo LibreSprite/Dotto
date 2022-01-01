@@ -22,6 +22,29 @@ namespace ui {
         Node::doResize();
     }
 
+
+    void Window::focus(std::shared_ptr<ui::Node> child) {
+        if (auto focus = focusTarget.lock()) {
+            if (focus != child) {
+                focusTarget = child->shared_from_this();
+                focus->processEvent(ui::Blur{focus.get()});
+                child->processEvent(ui::Focus{child.get()});
+            }
+        } else {
+            focusTarget = child->shared_from_this();
+            child->processEvent(ui::Focus{child.get()});
+        }
+    }
+
+    void Window::blur(std::shared_ptr<ui::Node> child) {
+        if (auto focus = focusTarget.lock()) {
+            if (focus == child) {
+                focusTarget.reset();
+                focus->processEvent(ui::Blur{focus.get()});
+            }
+        }
+    }
+
     void Window::on(msg::MouseMove& event) {
         if (event.windowId == id) {
             mouseButtons = event.buttons;
@@ -74,16 +97,7 @@ namespace ui {
             if (!guiEvent.target)
                 return;
 
-            if (auto focus = focusTarget.lock()) {
-                if (focus.get() != guiEvent.target) {
-                    focusTarget = guiEvent.target->shared_from_this();
-                    focus->processEvent(ui::Blur{});
-                    guiEvent.target->processEvent(ui::Focus{});
-                }
-            } else {
-                focusTarget = guiEvent.target->shared_from_this();
-                guiEvent.target->processEvent(ui::Focus{});
-            }
+            focus(guiEvent.target->shared_from_this());
 
             if (guiEvent.target)
                 guiEvent.target->processEvent(guiEvent);

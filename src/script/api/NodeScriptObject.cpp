@@ -70,6 +70,18 @@ public:
             return 0;
         });
 
+        addFunction("focus", [=]() {
+            if (auto node = weak.lock())
+                node->focus();
+            return 0;
+        });
+
+        addFunction("blur", [=]() {
+            if (auto node = weak.lock())
+                node->blur();
+            return 0;
+        });
+
         addFunction("removeChild", [=](script::ScriptObject* obj) {
             if (!obj) return 0;
             if (auto node = weak.lock()) {
