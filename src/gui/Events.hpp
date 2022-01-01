@@ -73,9 +73,17 @@ namespace ui {
         }
     };
 
-    struct MouseEnter : public Event {};
+    struct MouseEnter : public Event {
+        MouseEnter() {
+            bubble = Bubble::Up;
+        }
+    };
 
-    struct MouseLeave : public Event {};
+    struct MouseLeave : public Event {
+        MouseLeave() {
+            bubble = Bubble::Up;
+        }
+    };
 
     struct MouseEvent : public Event {
         U32 buttons;
