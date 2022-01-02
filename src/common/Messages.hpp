@@ -26,6 +26,7 @@ namespace msg {
 
     class BootComplete{};
     class Shutdown{};
+    class RequestShutdown{};
     class Tick{};
 
     class Flush{

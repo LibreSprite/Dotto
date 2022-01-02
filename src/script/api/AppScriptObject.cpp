@@ -27,6 +27,7 @@ public:
     script::Value target;
     script::Value eventTarget;
     std::optional<PubSub<msg::Tick>> tick;
+    PubSub<> pub{this};
 
     void setTarget(const ::Value& target) override {
         this->target = getEngine().toValue(target);
@@ -149,6 +150,11 @@ public:
             if (obj)
                 getEngine().release(obj->shared_from_this());
             return nullptr;
+        });
+
+        addFunction("quit", [=](){
+            pub(msg::RequestShutdown{});
+            return true;
         });
 
         makeGlobal("app");

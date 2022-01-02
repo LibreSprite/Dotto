@@ -32,7 +32,7 @@ public:
     inject<Config> config{"new"};
     Config::Provides globalConfig{config.get()};
 
-    PubSub<msg::Shutdown> pub{this};
+    PubSub<msg::RequestShutdown> pub{this};
 
     using clock = std::chrono::high_resolution_clock;
 
@@ -83,8 +83,8 @@ public:
         return running;
     }
 
-    void on(msg::Shutdown&) {
-        logV("Shutting down");
+    void on(msg::RequestShutdown&) {
+        running = false;
     }
 
     ~AppImpl() {

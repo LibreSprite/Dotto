@@ -62,6 +62,12 @@ var controllers = {
                 app.write(pick, app.activeCell.composite);
             }
         }
+    },
+
+    quitbutton : {
+        click : function() {
+            app.quit();
+        }
     }
 };
 
