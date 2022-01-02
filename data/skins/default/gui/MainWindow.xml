@@ -4,11 +4,14 @@
   <editor/>
 
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-35px" width="100%" height="35px" flow="row">
-    <alttextbutton id="startbutton" label="File"  width="100px"/>
+    <alttextbutton id="startbutton" label="File" width="100px"/>
   </image>
 
   <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
     <image src="%skin/filemenu.png" height="500px" width="380px" x="0" y="100%-535px" absolute="true" slice="2 67">
+
+      <span absolute="true" x="75px" y="24px" width="100%-100px" font="%skin/DejaVuSans.ttf" color="rgb{255,255,255}" size="20px">Hello, ${username}!</span>
+
       <node absolute="true" x="2px" y="67px" width="188px" height="100%-282px">"
         <menubutton id="newbutton" label="New"/>
         <menubutton id="openbutton" label="Open"/>
@@ -22,6 +25,7 @@
         <node width="5px"/>
         <span id="labelspan" font="%skin/DejaVuSans.ttf" color="rgb{255,255,255}" size="20px" width="100px">Quit</span>
       </node>
+
     </image>
   </node>
 
