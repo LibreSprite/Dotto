@@ -83,7 +83,10 @@ public:
 
     void eventHandler(const ui::MouseLeave&) {
         isHovering = false;
-        changeState();
+        if (*state == "pressed") {
+            node()->set("state", "enabled");
+            set("state", "enabled");
+        } else changeState();
     }
 };
 
