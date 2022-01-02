@@ -2,9 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include <memory>
-
 #include <common/String.hpp>
+#include <common/Writer.hpp>
 #include <fs/File.hpp>
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>
@@ -15,6 +14,20 @@ Value FileSystem::parse(const String& path) {
     return nullptr;
 }
 
+bool FileSystem::write(const String& path, const Value& data) {
+    auto fsentity = inject<FileSystem>{}->find(path);
+    if (!fsentity)
+        return false;
+    auto file = fsentity->get<File>();
+    if (!file)
+        return false;
+    if (!file->open({.write=true, .create=true}))
+        return false;
+    inject<Writer> writer{file->type()};
+    if (!writer)
+        return false;
+    return writer->writeFile(file, data);
+}
 
 bool FileSystem::boot() {
     if (auto root = std::dynamic_pointer_cast<RootFolder>(this->root.shared())) {

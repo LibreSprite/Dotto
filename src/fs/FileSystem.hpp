@@ -19,4 +19,5 @@ public:
     virtual std::shared_ptr<FSEntity> find(const String& path, const String& missingType = "std");
     virtual bool boot();
     static Value parse(const String& path);
+    static bool write(const String& path, const Value& data);
 };
