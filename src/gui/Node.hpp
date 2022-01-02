@@ -84,6 +84,8 @@ namespace ui {
         Property<Unit> minHeight{this, "min-height", {"10px"}, &Node::resize};
         Property<Unit> maxHeight{this, "max-height", {"100%"}, &Node::resize};
 
+        Property<Rect> padding{this, "padding", Rect{}, &Node::resize};
+
         Property<String> flow{this, "flow", "column", &Node::reflow};
         Property<S32> zIndex{this, "z", 0};
         Property<String> forward{this, "forward"};
@@ -158,7 +160,7 @@ namespace ui {
             }
         }
 
-        Node* getParent() {
+        Node* getParent() const {
             return parent;
         }
 
@@ -170,10 +172,17 @@ namespace ui {
         virtual void doResize() {
             if (!parent || !flowInstance)
                 return;
-            flowInstance->update(children, globalRect);
+            auto innerRect = globalRect;
+            innerRect.x += padding->x;
+            innerRect.y += padding->y;
+            innerRect.width -= padding->x + padding->width;
+            innerRect.height -= padding->y + padding->height;
+            flowInstance->update(children, innerRect);
             for (auto& child : children)
                 child->doResize();
         }
+
+        virtual void onResize() {};
 
         virtual void draw(S32 z, Graphics& gfx) {
             if (*hideOverflow) {

@@ -41,12 +41,27 @@ namespace ui {
             flush.hold(*font);
         }
 
-        void draw(S32 z, Graphics& g) override {
+        void onResize() override {
             if (*surface) {
                 localRect.x = 0;
                 localRect.y = 0;
-                localRect.width = globalRect.width = (*surface)->width();
-                localRect.height = globalRect.height = (*surface)->height();
+                localRect.width = (*surface)->width();
+                localRect.height = (*surface)->height();
+                if (localRect.width) {
+                    F32 factor = globalRect.width / F32(localRect.width);
+                    if (factor > 1) {
+                        globalRect.width = localRect.width;
+                        globalRect.height = localRect.height;
+                    } else {
+                        globalRect.y += globalRect.height * (1 - factor) / 2;
+                        globalRect.height = localRect.height * factor;
+                    }
+                }
+            }
+        }
+
+        void draw(S32 z, Graphics& g) override {
+            if (*surface) {
                 g.blit({
                         .surface = *surface,
                         .source = localRect,

@@ -33,6 +33,7 @@ namespace ui {
                     child->globalRect.width = parentRect.width;
                     child->globalRect.height = parentRect.height;
                 }
+                child->onResize();
             }
         }
     };
@@ -55,6 +56,7 @@ namespace ui {
             for (auto& child : children) {
                 if (*child->absolute) {
                     absolute(child, parentRect);
+                    child->onResize();
                 } else {
                     sizes.push_back({
                             .child = child.get(),
@@ -76,6 +78,7 @@ namespace ui {
                 child->globalRect.y = parentRect.y;
                 child->globalRect.width = size.result;
                 child->globalRect.height = parentRect.height;
+                child->onResize();
             }
         }
 
@@ -139,6 +142,7 @@ namespace ui {
             for (auto& child : children) {
                 if (*child->absolute) {
                     absolute(child, parentRect);
+                    child->onResize();
                 } else {
                     sizes.push_back({
                             .child = child.get(),
@@ -160,6 +164,7 @@ namespace ui {
                 child->globalRect.y = parentRect.y + size.offset;
                 child->globalRect.width = parentRect.width;
                 child->globalRect.height = size.result;
+                child->onResize();
             }
         }
     };
