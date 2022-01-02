@@ -4,6 +4,7 @@
 
 #include <chrono>
 
+#include <common/PropertySet.hpp>
 #include <common/String.hpp>
 #include <common/Surface.hpp>
 #include <doc/Cell.hpp>
@@ -37,6 +38,21 @@ public:
         if (resource.has<std::shared_ptr<Surface>>()) {
             return loadFromSurface(resource);
         }
+        if (resource.has<std::shared_ptr<PropertySet>>()) {
+            return loadFromPropertySet(resource);
+        }
+        return true;
+    }
+
+    bool loadFromPropertySet(std::shared_ptr<PropertySet> properties) {
+        auto timeline = createTimeline();
+        inject<Cell> cell{"bitmap"};
+        auto surface = cell->getComposite();
+        surface->resize(properties->get<U32>("width") ?: 16,
+                        properties->get<U32>("height") ?: 16);
+        timeline->setCell(0, 0, cell);
+        docWidth = surface->width();
+        docHeight = surface->height();
         return true;
     }
 

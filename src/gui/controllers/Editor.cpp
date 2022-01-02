@@ -5,7 +5,9 @@
 #include <optional>
 
 #include <common/Messages.hpp>
+#include <common/PropertySet.hpp>
 #include <common/PubSub.hpp>
+#include <common/String.hpp>
 #include <doc/Cell.hpp>
 #include <doc/Document.hpp>
 #include <doc/Timeline.hpp>
@@ -43,7 +45,19 @@ public:
     void openFile() {
         node()->removeAllChildren();
         doc = inject<Document>{"new"};
-        doc->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
+        if (startsWith(filePath, "new:")) {
+            auto lines = split(filePath, ":");
+            auto settings = std::make_shared<PropertySet>();
+            for (auto& line : lines) {
+                auto parts = split(line, "=");
+                if (parts.size() == 2) {
+                    settings->set(trim(parts[0]), trim(parts[1]));
+                }
+            }
+            doc->load(settings);
+        } else {
+            doc->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
+        }
 
         auto timeline = doc->currentTimeline();
         for (U32 i = 0, count = timeline->layerCount(); i < count; ++i) {
