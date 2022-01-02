@@ -110,7 +110,7 @@ public:
 
 #ifdef _DEBUG
     String toString() const {
-        return str ? str(value) : String("[not convertible to String: ") + typeName() + "]";
+        return value.has_value() ? (str ? str(value) : String("[not convertible to String: ") + typeName() + "]") : "null";
     }
 #endif
 
