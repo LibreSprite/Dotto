@@ -1,4 +1,4 @@
-<image controller="draggable, shortcut, script, focusfront" script="%appdata/colorpicker.js" handle="titlebar" src="%skin/window.png" height="180px" width="150px" x="0px" y="100%-180px" absolute="true" slice="7 30" overflow-hidden="true">
+<image controller="draggable, shortcut, script, focusfront" script="%appdata/scripts/colorpicker.js" handle="titlebar" src="%skin/window.png" height="180px" width="150px" x="0px" y="100%-180px" absolute="true" slice="7 30" overflow-hidden="true">
   <node id="titlebar">
     <span id="title" font="%skin/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
       Color Picker
