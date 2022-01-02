@@ -419,9 +419,9 @@ public:
         ~PushDefault() {
             if (!read)
                 return;
-            provides.reset();
             // std::cout << "Provides restore for " << typeid(BaseClass).name() << std::endl;
             *write = *read;
+            provides.reset();
         }
     };
 

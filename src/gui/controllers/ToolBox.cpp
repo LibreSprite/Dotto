@@ -11,13 +11,17 @@
 #include <tools/Tool.hpp>
 
 class ToolBox : public ui::Controller {
-    PubSub<msg::BootComplete> pub{this};
+    PubSub<msg::BootComplete, msg::Shutdown> pub{this};
     Vector<std::shared_ptr<ui::Node>> buttonPool;
     HashMap<Tool*, std::shared_ptr<ui::Node>> toolButton;
 
 public:
     void on(msg::BootComplete&) {
         update();
+    }
+
+    void on(msg::Shutdown&) {
+        Tool::instances.clear();
     }
 
     void update() {

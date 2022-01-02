@@ -10,7 +10,7 @@
 class CacheImpl : public Cache {
 public:
     HashMap<String, Value> index;
-    PubSub<> pub{this};
+    PubSub<msg::Shutdown> pub{this};
 
     void flush() override {
         if (locked())
@@ -34,6 +34,10 @@ public:
     void set(const String& key, const Value& resource) override {
         flush();
         index[key] = resource;
+    }
+
+    void on(msg::Shutdown&) {
+        index.clear();
     }
 };
 

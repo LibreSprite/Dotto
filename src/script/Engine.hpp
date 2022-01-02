@@ -97,7 +97,6 @@ namespace script {
     private:
         friend class InternalScriptObject;
 
-        Provides provides{this};
         Vector<inject<ScriptObject>> globalScriptObjects;
         HashMap<String, ScriptObject*> globalScriptObjectIndex;
         Vector<std::function<void(bool)>> afterEvalListeners;

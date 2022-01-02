@@ -111,15 +111,14 @@ public:
     void* local = nullptr;
 
     ~DukScriptObject() {
-        if (local && localToDSO()) {
-            localToDSO()->erase(local);
+        if (local) {
+            if (auto handle = static_cast<DukEngine*>(engine.get())->handle) {
+                duk_push_heap_stash(handle);
+                duk_del_prop_heapptr(handle, -1, local);
+                duk_pop(handle);
+            }
         }
     }
-
-    static HashMap<void*, std::weak_ptr<ScriptObject>>* localToDSO(){
-        static auto map = std::make_unique<HashMap<void*, std::weak_ptr<ScriptObject>>>();
-        return map.get();
-    };
 
     static script::Value getValue(duk_context* ctx, int id) {
         auto type = duk_get_type(ctx, id);
@@ -269,24 +268,10 @@ public:
         pushProperties();
 
         local = duk_get_heapptr(handle, -1);
-        (*localToDSO())[local] = scriptObject->shared_from_this();
-        duk_push_c_function(handle, +[](duk_context* handle)->int{
-            auto map = localToDSO();
-            if (!map)
-                return 0;
-            auto it = map->find(duk_get_heapptr(handle, 0));
-            if (it != map->end()) {
-                auto so = it->second.lock();
-                map->erase(it);
-                if (so) {
-                    static_cast<DukScriptObject*>(so->getInternalScriptObject())->local = nullptr;
-                    return 0;
-                }
-            }
-            logE("Duktape consistency error");
-            return 0;
-        }, 1 /*nargs*/);
-        duk_set_finalizer(handle, -2);
+        duk_push_heap_stash(handle);
+        duk_push_heapptr(handle, local);
+        duk_put_prop_index(handle, -2, (uintptr_t)local);
+        duk_pop(handle);
     }
 
     void makeGlobal(const String& name) override {
