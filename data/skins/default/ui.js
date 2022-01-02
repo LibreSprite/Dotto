@@ -52,6 +52,16 @@ var controllers = {
                 views.editor.visible = true;
             }
         }
+    },
+
+    savebutton : {
+        click : function() {
+            closeStartMenu();
+            var pick = app.save('*.png', 'Save image', "Image format");
+            if (pick) {
+                app.write(pick, app.activeCell.composite);
+            }
+        }
     }
 };
 
