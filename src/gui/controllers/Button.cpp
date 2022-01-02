@@ -4,6 +4,7 @@
 
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
+#include <common/Surface.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>

@@ -5,10 +5,26 @@
 #include <common/XML.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
+#include <gui/Flow.hpp>
+#include <gui/Graphics.hpp>
 #include <gui/Node.hpp>
+#include <log/Log.hpp>
 
 
 static ui::Node::Shared<ui::Node> node{"node"};
+
+
+ui::Node::Node() {
+    addEventListener<AddToScene, RemoveFromScene, Focus, Blur>(this);
+    loadSilent({{"node", this}});
+}
+
+ui::Node::~Node() {
+    // logV("Deleting node ", *id);
+    for (auto& child : children)
+        child->parent = nullptr;
+}
+
 
 std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
     if (*id == targetId)
@@ -40,6 +56,38 @@ U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
         current = current->parent;
     }
     return 0;
+}
+
+void ui::Node::processEvent(const Event& event) {
+    EventHandler::processEvent(event);
+    if (event.bubble == Event::Bubble::Down && !event.cancel)
+        forwardToChildren(event);
+    if (event.bubble == Event::Bubble::Up && !event.cancel && parent)
+        parent->processEvent(event);
+}
+
+void ui::Node::setDirty() {
+    if (!isDirty) {
+        isDirty = true;
+        if (parent)
+            parent->setDirty();
+    }
+}
+
+bool ui::Node::init(const PropertySet& properties) {
+    load(properties);
+    reflow();
+    return true;
+}
+
+bool ui::Node::update() {
+    if (!isDirty)
+        return false;
+    isDirty = false;
+    for (auto& child : children) {
+        child->update();
+    }
+    return true;
 }
 
 void ui::Node::load(const PropertySet& set) {
@@ -157,6 +205,11 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
     return widget;
 }
 
+void ui::Node::reflow() {
+    flowInstance = inject<Flow>{*flow};
+    setDirty();
+}
+
 void ui::Node::reattach() {
     for (auto name : split(controllerName, ",")) {
         auto clean = trim(name);
@@ -165,6 +218,71 @@ void ui::Node::reattach() {
         if (auto controller = inject<Controller>{clean}.shared()) {
             controllers[clean] = controller;
             controller->init(getPropertySet());
+        }
+    }
+}
+
+void ui::Node::forwardToChildren(const Event& event) {
+    for (auto& child : children)
+        child->processEvent(event);
+}
+
+void ui::Node::eventHandler(const AddToScene& event) {
+    isInScene = true;
+    resize();
+    if (isDirty && parent) // parent is null for root node
+        parent->setDirty();
+}
+
+void ui::Node::doResize() {
+    if (!parent || !flowInstance)
+        return;
+    auto innerRect = globalRect;
+    innerRect.x += padding->x;
+    innerRect.y += padding->y;
+    innerRect.width -= padding->x + padding->width;
+    innerRect.height -= padding->y + padding->height;
+    flowInstance->update(children, innerRect);
+    for (auto& child : children)
+        child->doResize();
+}
+
+void ui::Node::draw(S32 z, Graphics& gfx) {
+    if (*hideOverflow) {
+        Rect clip = gfx.pushClipRect(globalRect);
+        if (!gfx.isEmptyClipRect()) {
+            for (auto& child : children) {
+                if (child->visible)
+                    child->draw(z + 1 + *child->zIndex, gfx);
+            }
+        }
+        gfx.setClipRect(clip);
+    } else {
+        for (auto& child : children) {
+            if (child->visible)
+                child->draw(z + 1 + *child->zIndex, gfx);
+        }
+    }
+}
+
+void ui::Node::addChild(std::shared_ptr<Node> child) {
+    if (!child)
+        return;
+    child->remove();
+    children.push_back(child);
+    child->parent = this;
+    if (isInScene)
+        child->processEvent(AddToScene{child.get()});
+}
+
+void ui::Node::removeChild(std::shared_ptr<Node> node) {
+    if (!node) return;
+    if (node->parent == this) {
+        auto it = std::find(children.begin(), children.end(), node);
+        if (it != children.end()) {
+            node->parent = nullptr;
+            children.erase(it);
+            node->processEvent(RemoveFromScene{node.get()});
         }
     }
 }

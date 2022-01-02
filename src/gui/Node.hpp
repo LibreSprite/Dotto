@@ -7,12 +7,11 @@
 #include <common/inject.hpp>
 #include <common/PropertySet.hpp>
 #include <common/Rect.hpp>
-#include <gui/Events.hpp>
 #include <gui/EventHandler.hpp>
-#include <gui/Flow.hpp>
-#include <gui/Graphics.hpp>
 #include <gui/Unit.hpp>
-#include <log/Log.hpp>
+
+class Flow;
+class Graphics;
 
 namespace ui {
 
@@ -30,25 +29,12 @@ namespace ui {
         std::shared_ptr<Flow> flowInstance;
         HashMap<String, std::shared_ptr<Controller>> controllers;
 
-        void reflow() {
-            flowInstance = inject<Flow>{*flow};
-            setDirty();
-        }
-
+        void reflow();
         void reattach();
 
     protected:
-        void forwardToChildren(const Event& event) {
-            for (auto& child : children)
-                child->processEvent(event);
-        }
-
-        virtual void eventHandler(const AddToScene& event) {
-            isInScene = true;
-            resize();
-            if (isDirty && parent) // parent is null for root node
-                parent->setDirty();
-        }
+        void forwardToChildren(const Event& event);
+        virtual void eventHandler(const AddToScene& event);
 
         virtual void eventHandler(const RemoveFromScene& event) {
             isInScene = false;
@@ -90,26 +76,17 @@ namespace ui {
         Property<S32> zIndex{this, "z", 0};
         Property<String> forward{this, "forward"};
 
-        Node() {
-            addEventListener<AddToScene, RemoveFromScene, Focus, Blur>(this);
-            loadSilent({{"node", this}});
-        }
-
-        ~Node() {
-            for (auto& child : children)
-                child->parent = nullptr;
-        }
+        Node();
+        ~Node();
 
         static std::shared_ptr<Node> fromXML(const String& widgetName);
 
-        virtual bool init(const PropertySet& properties) {
-            load(properties);
-            reflow();
-            return true;
-        }
+        virtual bool init(const PropertySet& properties);
 
         void load(const PropertySet& set) override;
+
         using Model::set;
+
         void set(const String& key, Value& value, bool debug = false) override;
 
         std::shared_ptr<Node> findChildById(const String& targetId);
@@ -118,35 +95,15 @@ namespace ui {
 
         void bringToFront(std::shared_ptr<Node> child);
 
-        void processEvent(const Event& event) override {
-            EventHandler::processEvent(event);
-            if (event.bubble == Event::Bubble::Down && !event.cancel)
-                forwardToChildren(event);
-            if (event.bubble == Event::Bubble::Up && !event.cancel && parent)
-                parent->processEvent(event);
-        }
+        void processEvent(const Event& event) override;
 
-        virtual void setDirty() {
-            if (!isDirty) {
-                isDirty = true;
-                if (parent)
-                    parent->setDirty();
-            }
-        }
+        virtual void setDirty();
 
         const Vector<std::shared_ptr<Node>>& getChildren() {
             return children;
         }
 
-        virtual bool update() {
-            if (!isDirty)
-                return false;
-            isDirty = false;
-            for (auto& child : children) {
-                child->update();
-            }
-            return true;
-        }
+        virtual bool update();
 
         virtual void focus(std::shared_ptr<ui::Node> child = nullptr) {
             if (parent) {
@@ -165,42 +122,16 @@ namespace ui {
         }
 
         virtual void resize() {
-            if (parent)
+            if (parent) {
                 parent->resize();
-        }
-
-        virtual void doResize() {
-            if (!parent || !flowInstance)
-                return;
-            auto innerRect = globalRect;
-            innerRect.x += padding->x;
-            innerRect.y += padding->y;
-            innerRect.width -= padding->x + padding->width;
-            innerRect.height -= padding->y + padding->height;
-            flowInstance->update(children, innerRect);
-            for (auto& child : children)
-                child->doResize();
-        }
-
-        virtual void onResize() {};
-
-        virtual void draw(S32 z, Graphics& gfx) {
-            if (*hideOverflow) {
-                Rect clip = gfx.pushClipRect(globalRect);
-                if (!gfx.isEmptyClipRect()) {
-                    for (auto& child : children) {
-                        if (child->visible)
-                            child->draw(z + 1 + *child->zIndex, gfx);
-                    }
-                }
-                gfx.setClipRect(clip);
-            } else {
-                for (auto& child : children) {
-                    if (child->visible)
-                        child->draw(z + 1 + *child->zIndex, gfx);
-                }
             }
         }
+
+        virtual void doResize();
+
+        virtual void onResize() {}
+
+        virtual void draw(S32 z, Graphics& gfx);
 
         void remove() {
             if (parent)
@@ -213,27 +144,9 @@ namespace ui {
             }
         }
 
-        virtual void addChild(std::shared_ptr<Node> child) {
-            if (!child)
-                return;
-            child->remove();
-            children.push_back(child);
-            child->parent = this;
-            if (isInScene)
-                child->processEvent(AddToScene{child.get()});
-        }
+        virtual void addChild(std::shared_ptr<Node> child);
 
-        virtual void removeChild(std::shared_ptr<Node> node) {
-            if (!node) return;
-            if (node->parent == this) {
-                auto it = std::find(children.begin(), children.end(), node);
-                if (it != children.end()) {
-                    node->parent = nullptr;
-                    children.erase(it);
-                    node->processEvent(RemoveFromScene{node.get()});
-                }
-            }
-        }
+        virtual void removeChild(std::shared_ptr<Node> node);
     };
 
 }

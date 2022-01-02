@@ -8,6 +8,7 @@
 #include <common/PubSub.hpp>
 #include <common/System.hpp>
 #include <gui/Events.hpp>
+#include <gui/Graphics.hpp>
 #include <log/Log.hpp>
 
 static const char* getKeyName(S32 code);
