@@ -82,7 +82,28 @@ public:
         }
     }
 
-    FT_UInt getGlyphIndex(char glyph) {
+    FT_UInt getGlyphIndex(const String& text, U32& offset) {
+        U32 glyph = text[offset];
+        U32 extras = 0;
+        if (glyph & 0b1000'0000) {
+            U32 max = text.size();
+            if (!(glyph & 0b0010'0000)) { // 110xxxxx 10xxxxxx
+                glyph &= 0b11111;
+                extras = 1;
+            } else if (!(glyph & 0b0001'0000)) { // 1110xxxx 10xxxxxx 10xxxxxx
+                glyph &= 0b1111;
+                extras = 2;
+            } else { // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+                glyph &= 0b111;
+                extras = 3;
+            }
+            for (U32 i = 0; i < extras; ++i) {
+                if (++offset < max) {
+                    glyph <<= 6;
+                    glyph |= text[offset] & 0b111111;
+                }
+            }
+        }
         return FT_Get_Char_Index(face, glyph); // TODO: Harfbuzz
     }
 
@@ -130,7 +151,7 @@ public:
         U32 width = 0;
         U32 height = 0;
         for (U32 i = 0, len = text.size(); i < len; ++i) {
-            if (auto glyph = loadGlyph(getGlyphIndex(text[i]))) {
+            if (auto glyph = loadGlyph(getGlyphIndex(text, i))) {
                 glyphs.push_back(glyph);
                 width += glyph->advance;
                 height = std::max(height, size + (glyph->height - glyph->bearingY));
