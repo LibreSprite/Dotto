@@ -38,7 +38,7 @@ String toupper(const String& string) {
 String trim(const String& input) {
     std::size_t start = 0;
     std::size_t end = input.size();
-    for (auto c : input) {
+    for (U8 c : input) {
         if (c > ' ')
             break;
         start++;
@@ -47,7 +47,7 @@ String trim(const String& input) {
     if (start == end)
         return "";
 
-    while (input[end - 1] <= ' ')
+    while (U8(input[end - 1]) <= ' ')
         end--;
 
     return input.substr(start, end - start);
