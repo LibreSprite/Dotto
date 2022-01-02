@@ -12,6 +12,7 @@ namespace ui {
 }
 
 class Document;
+class Cell;
 
 namespace msg {
 
@@ -121,5 +122,10 @@ namespace msg {
     struct ActivateDocument : public Message {
         std::shared_ptr<Document> doc;
         ActivateDocument(std::shared_ptr<Document> doc) : doc{doc} {}
+    };
+
+    struct ActivateCell : public Message {
+        std::shared_ptr<Cell> cell;
+        ActivateCell(std::shared_ptr<Cell> cell) : cell{cell} {}
     };
 }
