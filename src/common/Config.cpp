@@ -22,10 +22,26 @@ public:
 
         auto languageName = properties->get<String>("language");
         if (languageName.empty())
-            languageName = "english";
-        language = fs->parse("%appdata/i18n/" + languageName + ".ini");
-        if (!language)
-            language = std::make_shared<PropertySet>();
+            languageName = "en_US";
+
+        language = std::make_shared<PropertySet>();
+
+        String fullName;
+        bool first = true;
+        for (auto& part : split("all_" + languageName, "_")) {
+            if (first) languageName = "all";
+            else {
+                if (!fullName.empty())
+                    fullName += "_";
+                fullName += part;
+                languageName = fullName;
+            }
+            first = false;
+            auto add = fs->parse("%appdata/i18n/" + languageName + ".ini");
+            if (add.has<std::shared_ptr<PropertySet>>()) {
+                language->append(*add.get<std::shared_ptr<PropertySet>>());
+            }
+        }
 
         return true;
     }
