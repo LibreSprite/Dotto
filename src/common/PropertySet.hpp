@@ -306,7 +306,7 @@ public:
         Serializable::set(key, value, debug);
     }
 
-    const PropertySet& getPropertySet() {
+    const PropertySet& getPropertySet() const {
         return model;
     }
 };

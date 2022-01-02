@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/Config.hpp>
 #include <common/Font.hpp>
 #include <common/match.hpp>
 #include <common/Messages.hpp>
@@ -22,10 +23,11 @@ namespace ui {
         Property<std::shared_ptr<Font>> font{this, "font-ptr", nullptr, &Span::redraw};
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
         PubSub<msg::Flush> pub{this};
+        inject<Config> config;
 
         void redraw() {
             auto font = *this->font;
-            *surface = font ? font->print(size, *color, *text) : nullptr;
+            *surface = font ? font->print(size, *color, config->translate(*text, this)) : nullptr;
         }
 
         void reload() {

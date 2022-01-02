@@ -7,8 +7,14 @@
 #include <common/inject.hpp>
 #include <common/PropertySet.hpp>
 
+namespace ui {
+    class Node;
+}
+
 class Config : public Injectable<Config> {
 public:
     std::shared_ptr<PropertySet> properties;
+    std::shared_ptr<PropertySet> language;
     virtual bool boot() = 0;
+    virtual String translate(const String& str, const ui::Node* context = nullptr) = 0;
 };
