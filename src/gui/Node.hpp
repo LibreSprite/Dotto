@@ -62,11 +62,11 @@ namespace ui {
         Property<Unit> x{this, "x", {"0px"}, &Node::resize};
         Property<Unit> y{this, "y", {"0px"}, &Node::resize};
 
-        Property<Unit> width{this, "width", {"50px"}, &Node::resize};
+        Property<Unit> width{this, "width", {""}, &Node::resize};
         Property<Unit> minWidth{this, "min-width", {"10px"}, &Node::resize};
         Property<Unit> maxWidth{this, "max-width", {"100%"}, &Node::resize};
 
-        Property<Unit> height{this, "height", {"50px"}, &Node::resize};
+        Property<Unit> height{this, "height", {""}, &Node::resize};
         Property<Unit> minHeight{this, "min-height", {"10px"}, &Node::resize};
         Property<Unit> maxHeight{this, "max-height", {"100%"}, &Node::resize};
 

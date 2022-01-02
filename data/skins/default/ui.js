@@ -38,8 +38,7 @@ var controllers = {
     newbutton : {
         click : function() {
             closeStartMenu();
-            views.editor.set("file", "new:width=512:height=512:" + Math.random()); // TODO: Unhardcode this
-            views.editor.visible = true;
+            app.window.createChild("newfilepopup");
         }
     },
 

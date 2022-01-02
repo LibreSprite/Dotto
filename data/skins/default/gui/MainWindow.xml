@@ -1,4 +1,4 @@
-<window width="1000" id="window" controller="script" script="%skin/ui.js" height="1000" flow="column" background="rgb{32,32,32}">
+<window id="window" controller="script" script="%skin/ui.js" height="1000" width="1000" flow="column" background="rgb{32,32,32}">
   <image src="%skin/bg.png" absolute="true" x="0" y="0" fit="cover" width="100%" height="100%"/>
 
   <editor/>
