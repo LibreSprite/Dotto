@@ -10,6 +10,7 @@
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
 #include <common/Value.hpp>
+#include <doc/Cell.hpp>
 #include <doc/Document.hpp>
 #include <doc/Selection.hpp>
 #include <fs/FileDialog.hpp>
@@ -41,7 +42,12 @@ public:
         }
 
         addProperty("target", [this]{return target;});
+
         addProperty("eventTarget", [this]{return eventTarget;});
+
+        addProperty("activeCell", [this]{
+            return getEngine().toValue(inject<Cell>{"activecell"}.shared());
+        });
 
         addProperty("window", [this]{
             auto node = PubSub<>::pub(msg::PollActiveWindow{}).node;
