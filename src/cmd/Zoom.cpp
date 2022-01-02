@@ -18,6 +18,9 @@ public:
         auto editor = pub(msg::PollActiveEditor{}).editor;
         if (!editor)
             return;
+        auto& level = *this->level;
+        if (level.empty())
+            return;
 
         auto scalevalue = editor->get("scale");
         F32 value = 1.0f;
@@ -30,12 +33,15 @@ public:
                 value = atoi(scalevalue->get<String>().c_str());
         }
 
-        if (*level == "increase") {
-            value *= 2.0f;
-        } else if(*level == "decrease") {
-            value *= 0.5f;
-        } else if(F32 newValue = atof(level->c_str())) {
-            value = newValue / 100.0f;
+
+        if (level[0] == '*') {
+            value *= atof(level.c_str() + 1);
+        } else if (level[0] == '+') {
+            value += atof(level.c_str() + 1);
+        } else if (level[0] == '-') {
+            value += atof(level.c_str());
+        } else {
+            value = atof(level.c_str()) / 100.0f;
         }
 
         logV("Setting zoom level to ", value);
