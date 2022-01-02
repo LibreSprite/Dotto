@@ -2,14 +2,13 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include "log/Log.hpp"
-#include <cstring>
 #include <png.h>
 
 #include <common/Parser.hpp>
 #include <common/Surface.hpp>
+#include <log/Log.hpp>
 
-class PNG {
+class PNGReader {
 public:
 
     U32 width;
@@ -18,10 +17,10 @@ public:
     png_byte bitDepth;
     png_bytep *rowPointers = nullptr;
 
-    png_structp png;
-    png_infop info;
+    png_structp png = nullptr;
+    png_infop info = nullptr;
 
-    ~PNG() {
+    ~PNGReader() {
         if (png)
             png_destroy_read_struct(&png, &info, nullptr);
 
@@ -111,7 +110,7 @@ public:
 class PngParser : public Parser {
 public:
     Value parseFile(std::shared_ptr<File> file) override {
-        return PNG{}.read(*file);
+        return PNGReader{}.read(*file);
     }
 };
 
