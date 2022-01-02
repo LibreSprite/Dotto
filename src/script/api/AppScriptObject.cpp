@@ -9,6 +9,7 @@
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
+#include <common/Value.hpp>
 #include <doc/Document.hpp>
 #include <doc/Selection.hpp>
 #include <fs/FileDialog.hpp>
@@ -82,6 +83,26 @@ public:
 
         addFunction("parse", [=](const String& path) {
             return getEngine().toValue(FileSystem::parse(path));
+        });
+
+        addFunction("write", [=](const String& path) {
+            auto& args = script::Function::varArgs();
+            if (args.size() < 2)
+                return false;
+
+            auto& argv = args[1];
+            Value value;
+            if (argv.type == script::Value::Type::OBJECT)
+                value = argv.data.object_v->getWrapped();
+            else
+                value = argv.get();
+
+            if (!FileSystem::write(path, value)) {
+                logE("Could not save ", value.toString(), " to ", path);
+                return false;
+            }
+
+            return true;
         });
 
         addFunction("open", [=](const String& filters, const String& title="Script", const String& description = ""){

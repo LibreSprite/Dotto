@@ -34,7 +34,14 @@ public:
     }
 
     bool save() {
-
+        init();
+        if (auto chosen = tinyfd_saveFileDialog(title.c_str(),
+                                                defaultPath.c_str(),
+                                                cfilters.size(),
+                                                cfilters.data(),
+                                                filterDescription.c_str())) {
+            result = {chosen};
+        }
         return true;
     }
 };
