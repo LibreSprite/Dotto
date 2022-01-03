@@ -1,20 +1,14 @@
-<image controller="draggable, shortcut, script, focusfront" script="%appdata/scripts/newfilepopup.js" handle="titlebar" src="%skin/window.png" height="150px" width="300px" x="50%-150px" y="50%-250px" absolute="true" slice="7 30" padding="8 38 8 20" overflow-hidden="true">
-  <node id="titlebar" flow="row" padding="8 4 2 8" absolute="true" x="0" y="-38px" width="100%" height="34px">
-    <span id="title" font="%skin/DejaVuSans.ttf" size="16px" width="100%">
-      New File
-    </span>
-    <image id="close" src="%skin/close.png" height="21px" width="21px"/>
-  </node>
+<popup controller="script" script="%appdata/scripts/newfilepopup.js" title="New File">
   <row>
-    <span font="%skin/DejaVuSans.ttf" size="16px" color="#FF000000">Width:</span>
-    <span id="widthtextbox" font="%skin/DejaVuSans.ttf" size="16px" color="#FF000000">512</span>
+    <span size="16px" color="#FF000000">Width:</span>
+    <span id="widthtextbox" size="16px" color="#FF000000">512</span>
   </row>
   <row>
-    <span font="%skin/DejaVuSans.ttf" size="16px" color="#FF000000">Height:</span>
-    <span id="heighttextbox" font="%skin/DejaVuSans.ttf" size="16px" color="#FF000000">512</span>
+    <span size="16px" color="#FF000000">Height:</span>
+    <span id="heighttextbox" size="16px" color="#FF000000">512</span>
   </row>
   <row>
     <textbutton id="cancelbutton" label="Cancel"/>
     <textbutton id="okbutton" label="OK"/>
   </row>
-</image>
+</popup>

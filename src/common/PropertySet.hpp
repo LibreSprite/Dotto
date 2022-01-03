@@ -130,15 +130,13 @@ public:
 
     void append(const PropertySet& other) {
         for (auto& entry : other.properties) {
-            properties.insert({entry.first, entry.second});
+            properties.insert_or_assign(entry.first, entry.second);
         }
     }
 
     void prepend(const PropertySet& other) {
         for (auto& entry : other.properties) {
-            if (properties.find(entry.first) == properties.end()) {
-                properties.insert({entry.first, entry.second});
-            }
+            properties.insert({entry.first, entry.second});
         }
     }
 

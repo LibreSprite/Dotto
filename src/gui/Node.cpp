@@ -25,6 +25,15 @@ ui::Node::~Node() {
         child->parent = nullptr;
 }
 
+bool ui::Node::hasTag(const String& tag) {
+    return tags.find(tag) != tags.end();
+}
+
+void ui::Node::setTag(const String& tag) {
+    if (!tag.empty()) {
+        tags.insert(tag);
+    }
+}
 
 std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
     if (*id == targetId)
@@ -145,28 +154,44 @@ void ui::Node::set(const String& key, Value& value, bool debug) {
     }
 }
 
-static void loadNodeProperties(ui::Node* node, XMLElement* element) {
+static std::shared_ptr<ui::Node> fromXMLInternal(const String& widgetName);
+
+static void loadNodeProperties(ui::Node* node, XMLElement* element, const String& widgetName) {
     PropertySet props;
     if (!element->text.empty())
         props.set("text", trim(element->text));
+
+    node->setTag(widgetName);
+    node->setTag(element->tag);
+    auto it = element->attributes.find("id");
+    if (it != element->attributes.end()) {
+        node->setTag("@" + it->second);
+    }
+
     for (auto& prop : element->attributes) {
         props.set(prop.first, prop.second);
     }
+
     node->init(props);
 }
 
-static void loadChildNodes(ui::Node* parent, XMLElement* element) {
+static ui::Node* parent = nullptr;;
+static std::shared_ptr<PropertySet> style;
+
+static void loadChildNodes(ui::Node* parentNode, XMLElement* element) {
     for (auto xml : element->children) {
         if (!xml->isElement())
             continue;
 
+        parent = parentNode;
+
         auto childElement = std::static_pointer_cast<XMLElement>(xml);
-        auto child = parent->findChildById(childElement->tag);
+        auto child = parentNode->findChildById(childElement->tag);
 
         if (!child) {
-            child = ui::Node::fromXML(childElement->tag);
+            child = fromXMLInternal(childElement->tag);
             if (child) {
-                parent->addChild(child);
+                parentNode->addChild(child);
             }
         }
 
@@ -174,11 +199,56 @@ static void loadChildNodes(ui::Node* parent, XMLElement* element) {
             continue;
 
         loadChildNodes(child.get(), childElement.get());
-        loadNodeProperties(child.get(), childElement.get());
+        loadNodeProperties(child.get(), childElement.get(), childElement->tag);
     }
 }
 
+void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
+    PropertySet result;
+
+    {
+        Vector<std::pair<U32, std::shared_ptr<PropertySet>>> applicable;
+        for (auto& set : styles) {
+            auto& map = set->getMap();
+            for (auto& tag : node->getTags()) {
+                auto it = map.find(tag);
+                if (it != map.end() && it->second->has<std::shared_ptr<PropertySet>>()) {
+                    std::shared_ptr<PropertySet> childSet = *it->second;
+                    applicable.emplace_back(childSet->get<U32>("priority"), childSet);
+                }
+            }
+        }
+        std::sort(applicable.begin(), applicable.end(), [](auto& left, auto& right) {
+            return left.first < right.first;
+        });
+        for (auto& set : applicable) {
+            result.append(set.second);
+        }
+    }
+
+    node->load(result);
+    styles.push_back(&result);
+    for (auto& child : node->getChildren()) {
+        applyStyle(child, styles);
+    }
+    styles.pop_back();
+}
+
 std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
+    static U32 depth = 0;
+    depth++;
+    auto ret = fromXMLInternal(widgetName);
+    if (!--depth && ret) {
+        std::shared_ptr<PropertySet> style = inject<FileSystem>{}->parse("%skin/gui/style.ini");
+        if (style) {
+            Vector<PropertySet*> styles = {style.get()};
+            applyStyle(ret, styles);
+        }
+    }
+    return ret;
+}
+
+static std::shared_ptr<ui::Node> fromXMLInternal(const String& widgetName) {
     auto& nodeRegistry = ui::Node::getRegistry();
 
     if (nodeRegistry.find(widgetName) != nodeRegistry.end())
@@ -193,14 +263,14 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
 
     auto element = std::static_pointer_cast<XMLElement>(xml);
     auto widget = inject<ui::Node>{InjectSilent::Yes, element->tag}.shared();
-    if (!widget) widget = fromXML(element->tag);
+    if (!widget) widget = fromXMLInternal(element->tag);
     if (!widget) {
         logE("Unknown widget: ", element->tag);
         return nullptr;
     }
 
     loadChildNodes(widget.get(), element.get());
-    loadNodeProperties(widget.get(), element.get());
+    loadNodeProperties(widget.get(), element.get(), widgetName);
 
     return widget;
 }

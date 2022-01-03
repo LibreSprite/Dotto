@@ -71,7 +71,11 @@ public:
             shared = nullptr;
         }
 #ifdef _DEBUG
-        if constexpr (std::is_convertible_v<Type, String>) {
+        if constexpr (std::is_same_v<Type, String>) {
+            str = +[](const std::any& value) {
+                return std::any_cast<String>(value);
+            };
+        } else if constexpr (std::is_convertible_v<Type, String>) {
             str = +[](const std::any& value) {
                 return String(std::any_cast<Type>(value));
             };
