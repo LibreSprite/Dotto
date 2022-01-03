@@ -25,6 +25,15 @@ ui::Node::~Node() {
         child->parent = nullptr;
 }
 
+bool ui::Node::hasTag(const String& tag) {
+    return tags.find(tag) != tags.end();
+}
+
+void ui::Node::setTag(const String& tag) {
+    if (!tag.empty()) {
+        tags.insert(tag);
+    }
+}
 
 std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
     if (*id == targetId)

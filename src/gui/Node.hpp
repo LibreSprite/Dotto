@@ -28,6 +28,7 @@ namespace ui {
         bool isDirty = true;
         std::shared_ptr<Flow> flowInstance;
         HashMap<String, std::shared_ptr<Controller>> controllers;
+        HashSet<String> tags;
 
         void reflow();
         void reattach();
@@ -78,6 +79,12 @@ namespace ui {
 
         Node();
         ~Node();
+
+        bool hasTag(const String& tag);
+        void setTag(const String& tag);
+        const HashSet<String>& getTags() {
+            return tags;
+        }
 
         static std::shared_ptr<Node> fromXML(const String& widgetName);
 
