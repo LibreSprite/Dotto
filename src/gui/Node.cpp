@@ -207,14 +207,14 @@ void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
     PropertySet result;
 
     {
-        Vector<std::pair<U32, std::shared_ptr<PropertySet>>> applicable;
+        Vector<std::pair<S32, std::shared_ptr<PropertySet>>> applicable;
         for (auto& set : styles) {
             auto& map = set->getMap();
             for (auto& tag : node->getTags()) {
                 auto it = map.find(tag);
                 if (it != map.end() && it->second->has<std::shared_ptr<PropertySet>>()) {
                     std::shared_ptr<PropertySet> childSet = *it->second;
-                    applicable.emplace_back(childSet->get<U32>("priority"), childSet);
+                    applicable.emplace_back(childSet->get<S32>("priority"), childSet);
                 }
             }
         }

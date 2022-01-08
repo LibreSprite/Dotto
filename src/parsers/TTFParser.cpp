@@ -133,7 +133,7 @@ public:
 
         err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
         if (err != 0) {
-            printf("Failed to render the glyph\n");
+            logE("Failed to render the glyph\n");
             return nullptr;
         }
 

@@ -16,6 +16,7 @@
 
 namespace ui {
     class Span : public Node {
+        Property<bool> translate{this, "translate", true, &Span::redraw};
         Property<String> fontPath{this, "font", "", &Span::reload};
         Property<String> text{this, "text", "", &Span::redraw};
         Property<U32> size{this, "size", 12, &Span::redraw};
@@ -26,8 +27,11 @@ namespace ui {
         inject<Config> config;
 
         void redraw() {
-            auto font = *this->font;
-            *surface = font ? font->print(size, *color, config->translate(*text, this)) : nullptr;
+            std::shared_ptr<Surface> surface;
+            if (auto font = *this->font)
+                surface = font->print(size, *color, translate ? config->translate(*text, this) : *text);
+            set("surface", surface);
+            resize();
         }
 
         void reload() {
@@ -77,4 +81,4 @@ namespace ui {
     };
 }
 
-static ui::Node::Shared<ui::Span> img{"span"};
+static ui::Node::Shared<ui::Span> span{"span"};
