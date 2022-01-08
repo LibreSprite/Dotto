@@ -82,8 +82,8 @@ public:
         }
     }
 
-    FT_UInt getGlyphIndex(const String& text, U32& offset) {
-        U32 glyph = text[offset];
+    FT_UInt getGlyphIndex(const String& text, U32& offset, U32& glyph) {
+        glyph = text[offset];
         U32 extras = 0;
         if (glyph & 0b1000'0000) {
             U32 max = text.size();
@@ -119,7 +119,9 @@ public:
         }
     }
 
-    Glyph* loadGlyph(FT_UInt glyphIndex) {
+    Glyph* loadGlyph(const String& text, U32& offset) {
+        U32 utf8 = 0;
+        FT_UInt glyphIndex = getGlyphIndex(text, offset, utf8);
         auto it = glyphCache.find(glyphIndex);
         if (it != glyphCache.end())
             return it->second.get();
@@ -142,7 +144,8 @@ public:
         return glyph.get();
     }
 
-    virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& text) {
+    virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& text, Vector<S32>& advance) {
+        advance.clear();
         if (text.empty())
             return nullptr;
         auto surface = std::make_shared<Surface>();
@@ -151,13 +154,14 @@ public:
         U32 width = 0;
         U32 height = 0;
         for (U32 i = 0, len = text.size(); i < len; ++i) {
-            if (auto glyph = loadGlyph(getGlyphIndex(text, i))) {
+            if (auto glyph = loadGlyph(text, i)) {
                 glyphs.push_back(glyph);
+                advance.push_back(glyph->advance);
                 width += glyph->advance;
                 height = std::max(height, size + (glyph->height - glyph->bearingY));
             }
         }
-        surface->resize(width, height);
+        surface->resize(width + 1, height + 1);
         U32 x = 0, y = size;
         for (auto glyph : glyphs)
             glyph->blitTo(x, y, color, *surface);

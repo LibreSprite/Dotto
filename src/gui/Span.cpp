@@ -21,6 +21,7 @@ namespace ui {
         Property<String> text{this, "text", "", &Span::redraw};
         Property<U32> size{this, "size", 12, &Span::redraw};
         Property<Color> color{this, "color", {0xFF, 0xFF, 0xFF}, &Span::redraw};
+        Property<Vector<S32>> advance{this, "text-advance"};
         Property<std::shared_ptr<Font>> font{this, "font-ptr", nullptr, &Span::redraw};
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
         PubSub<msg::Flush> pub{this};
@@ -28,9 +29,12 @@ namespace ui {
 
         void redraw() {
             std::shared_ptr<Surface> surface;
+            Vector<S32> advance;
             if (auto font = *this->font)
-                surface = font->print(size, *color, translate ? config->translate(*text, this) : *text);
+                surface = font->print(size, *color, (translate ? config->translate(*text, this) : *text), advance);
+
             set("surface", surface);
+            set("text-advance", advance);
             resize();
         }
 

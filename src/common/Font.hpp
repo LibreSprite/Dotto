@@ -9,5 +9,5 @@
 
 class Font {
 public:
-    virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& string) = 0;
+    virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& string, Vector<S32>& advance) = 0;
 };
