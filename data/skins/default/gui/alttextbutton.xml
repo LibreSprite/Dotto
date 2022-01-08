@@ -1,3 +1,5 @@
-<image controller="button" forward="labelspan.text=label" up-src="%skin/altbutton-up.png" down-src="%skin/altbutton-down.png"  slice="10 5" padding="7 7 7 7">
+<image controller="button" forward="labelspan.text=label" up-src="%skin/altbutton-up.png" down-src="%skin/altbutton-down.png"  slice="10 5" padding="7 7 7 7" flow="row">
+  <image src="%appdata/icon.png" width="24px"/>
+  <node width="5px"/>
   <span id="labelspan"/>
 </image>
