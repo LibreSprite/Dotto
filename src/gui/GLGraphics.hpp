@@ -66,12 +66,22 @@ public:
     U32 shader = 0;
     Vector<F32> vertices;
     std::shared_ptr<GLTexture> activeTexture;
+
+    Color multiply;
+    GLint multiplyLocation;
+
     F32 iwidth, iheight;
     S32 width, height;
 
     void init() {
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        auto color = Color{0xFF, 0xFF, 0xFF, 0xFF}.toU32();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color);
 
         auto vertexShader = compile(GL_VERTEX_SHADER,
             "#version 330 core\n"
@@ -88,8 +98,9 @@ public:
             "out vec4 FragColor;\n"
             "in vec2 uv;\n"
             "uniform sampler2D surface;\n"
+            "uniform vec4 multiply;\n"
             "void main() {\n"
-            "    FragColor = texture(surface, uv);\n"
+            "    FragColor = texture(surface, uv) * multiply;\n"
             "}");
 
         shader = link(vertexShader, fragmentShader);
@@ -130,6 +141,7 @@ public:
             glGetProgramInfoLog(program, 512, NULL, infoLog);
             logE("ERROR::SHADER::LINK_FAILED ", infoLog);
         }
+        multiplyLocation = glGetUniformLocation(program, "multiply");
         return program;
     }
 
@@ -194,7 +206,18 @@ public:
             glUseProgram(shader);
         }
 
-        activeTexture->bind(GL_TEXTURE_2D);
+        GLfloat color[4];
+        color[0] = multiply.r / 255.0f;
+        color[1] = multiply.g / 255.0f;
+        color[2] = multiply.b / 255.0f;
+        color[3] = multiply.a / 255.0f;
+        glUniform4fv(multiplyLocation, 1, color);
+
+        if (activeTexture) {
+            activeTexture->bind(GL_TEXTURE_2D);
+        } else {
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
         glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 5);
 
         vertices.clear();
@@ -299,34 +322,39 @@ public:
         if (!clip.overlaps(settings.destination))
             return;
 
-        if (activeTexture != texture) {
+        if (activeTexture != texture || multiply != settings.multiply) {
             flush();
             activeTexture = texture;
+            multiply = settings.multiply;
         }
 
         F32 sW = settings.nineSlice.width;
         F32 sH = settings.nineSlice.height;
+        S32 textureWidth = texture ? texture->width : 1;
+        S32 textureHeight = texture ? texture->height : 1;
+        F32 textureIwidth = texture ? texture->iwidth : 1;
+        F32 textureIheight = texture ? texture->iheight : 1;
 
         if (sW == 0 && settings.nineSlice.x != 0)
-            sW = texture->width - settings.nineSlice.x * 2;
+            sW = textureWidth - settings.nineSlice.x * 2;
         if (sH == 0 && settings.nineSlice.y != 0)
-            sH = texture->height - settings.nineSlice.y * 2;
+            sH = textureHeight - settings.nineSlice.y * 2;
 
         if (sW <= 0 || sH <= 0) {
             push(z, {
                     x, y,
                     w, h,
-                    settings.source.x / F32(texture->width), settings.source.y / F32(texture->height),
-                    settings.source.right() / F32(texture->width), settings.source.bottom() / F32(texture->height)});
+                    settings.source.x / F32(textureWidth), settings.source.y / F32(textureHeight),
+                    settings.source.right() / F32(textureWidth), settings.source.bottom() / F32(textureHeight)});
         } else {
             F32 sX = settings.nineSlice.x;
             F32 sY = settings.nineSlice.y;
-            F32 nsX = sX * texture->iwidth;
-            F32 nsY = sY * texture->iheight;
-            F32 nsW = sW * texture->iwidth;
-            F32 nsH = sH * texture->iheight;
-            F32 rW = texture->width - sW - sX;
-            F32 rH = texture->height - sH - sY;
+            F32 nsX = sX * textureIwidth;
+            F32 nsY = sY * textureIheight;
+            F32 nsW = sW * textureIwidth;
+            F32 nsH = sH * textureIheight;
+            F32 rW = textureWidth - sW - sX;
+            F32 rH = textureHeight - sH - sY;
 
             push(z, {x, y, sX, sY, 0.0f, 0.0f, nsX, nsY});
             push(z, {x + sX, y, w - sX - rW, sY, nsX, 0.0f, nsX + nsW, nsY});
@@ -345,13 +373,19 @@ public:
     }
 
     void blit(const BlitSettings& settings) override {
-        auto& surface = *settings.surface;
-        if (!surface.textureInfo)
-            surface.textureInfo = std::make_shared<GLTextureInfo>();
-        auto texture = std::static_pointer_cast<GLTextureInfo>(surface.textureInfo)->get(shared_from_this());
+        std::shared_ptr<GLTexture> texture;
 
-        if (texture->dirty)
-            upload(surface, texture.get());
+        if (settings.surface) {
+            auto& surface = *settings.surface;
+            if (!surface.textureInfo)
+                surface.textureInfo = std::make_shared<GLTextureInfo>();
+            texture = std::static_pointer_cast<GLTextureInfo>(surface.textureInfo)->get(shared_from_this());
+
+            if (texture->dirty)
+                upload(surface, texture.get());
+        } else if (settings.multiply.a == 0) {
+            return; // no texture + no color = no op
+        }
 
         push(texture, settings);
     }
