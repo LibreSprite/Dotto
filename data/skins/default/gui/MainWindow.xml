@@ -18,7 +18,7 @@
         <menubutton id="savebutton" label="Save"/>
         <menubutton id="saveAsbutton" label="Save As..."/>
         <menubutton id="exportbutton" label="Export..."/>
-        <input>Bacon</input>
+        <number/>
       </node>
 
       <row controller="button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">

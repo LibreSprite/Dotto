@@ -10,12 +10,14 @@
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
+#include <regex>
 
 class Input : public ui::Controller {
     PubSub<> pub{this};
 
 public:
     std::size_t cursorPosition = 0;
+    Property<String> allowRegex{this, "allow", ""};
     Property<String> text{this, "text", ""};
     Property<String> spanId{this, "span", "value"};
     std::shared_ptr<ui::Node> span;
@@ -45,7 +47,7 @@ public:
         for (U32 i = 0; i < advance.size(); ++i) {
             nextCursorX += advance[i];
             if (std::abs(x - cursorX) > std::abs(x - nextCursorX)) {
-                cursorPosition = i;
+                cursorPosition = i + 1;
                 cursorX = nextCursorX;
             }
         }
@@ -59,8 +61,10 @@ public:
     }
 
     void drawCaret(std::shared_ptr<Surface> surface, S32 cursorX) {
-        for (S32 y = 0; y < surface->height(); ++y) {
-            surface->setPixel(cursorX, y, Color{0,0,0});
+        if (surface) {
+            for (S32 y = 0; y < surface->height(); ++y) {
+                surface->setPixel(cursorX, y, Color{0,0,0});
+            }
         }
     }
 
@@ -80,6 +84,9 @@ public:
                 cursorPosition--;
         } else if (event.keycode >= ' ' && event.keycode < 0x80) {
             String key(reinterpret_cast<const char*>(&event.keycode));
+            if (!allowRegex->empty() && !std::regex_match(key, std::regex(*allowRegex))) {
+                return;
+            }
             text.insert(cursorPosition++, key, 0, key.size());
         } else {
             return;
@@ -96,13 +103,14 @@ public:
             if (advanceValue && advanceValue->has<Vector<S32>>() &&
                 surfaceValue && surfaceValue->has<std::shared_ptr<Surface>>()) {
                 auto advance = advanceValue->get<Vector<S32>>();
-                auto surface = surfaceValue->get<std::shared_ptr<Surface>>();
-                auto end = std::min(cursorPosition, advance.size());
-                S32 cursorX = 0;
-                for (std::size_t i = 0; i < end; ++i) {
-                    cursorX += advance[i];
+                if (auto surface = surfaceValue->get<std::shared_ptr<Surface>>()) {
+                    auto end = std::min(cursorPosition, advance.size());
+                    S32 cursorX = 0;
+                    for (std::size_t i = 0; i < end; ++i) {
+                        cursorX += advance[i];
+                    }
+                    drawCaret(surface, cursorX);
                 }
-                drawCaret(surface, cursorX);
             }
         }
     }
