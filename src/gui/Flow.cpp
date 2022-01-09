@@ -7,10 +7,10 @@
 
 namespace ui {
     void Flow::absolute(std::shared_ptr<Node> child, Rect& parentRect) {
-        child->localRect.x = child->x->toPixel(parentRect.width);
-        child->localRect.y = child->y->toPixel(parentRect.height);
-        child->localRect.width = child->width->toPixel(parentRect.width);
-        child->localRect.height = child->height->toPixel(parentRect.height);
+        child->localRect.width = child->width->toPixel(parentRect.width, parentRect.width);
+        child->localRect.height = child->height->toPixel(parentRect.height, parentRect.height);
+        child->localRect.x = child->x->toPixel(parentRect.width, child->localRect.width);
+        child->localRect.y = child->y->toPixel(parentRect.height, child->localRect.height);
         child->globalRect.x = child->localRect.x + parentRect.x;
         child->globalRect.y = child->localRect.y + parentRect.y;
         child->globalRect.width = child->localRect.width;
@@ -125,7 +125,7 @@ namespace ui {
                 switch (size.given.getType()) {
                 case Unit::Type::Pixel: {
                     size.done = true;
-                    size.result = size.given.toPixel(parent) + size.margins;
+                    size.result = size.given.toPixel(parent, parent) + size.margins;
                     fillWidth -= size.result;
                     break;
                 }
@@ -135,7 +135,7 @@ namespace ui {
                     break;
                 }
                 case Unit::Type::Percent: {
-                    size.result = size.given.toPixel(1000) + size.margins;
+                    size.result = size.given.toPixel(1000, 1000) + size.margins;
                     totalWeight += size.result + size.margins;
                     break;
                 }
@@ -147,9 +147,9 @@ namespace ui {
                     S32 result = fillWidth * (size.result / F32(totalWeight));
                     S32 adjusted = result;
                     if (size.min.getType() != Unit::Type::Default)
-                        adjusted = std::max(adjusted, size.min.toPixel(parent));
+                        adjusted = std::max(adjusted, size.min.toPixel(parent, parent));
                     if (size.max.getType() != Unit::Type::Default)
-                        adjusted = std::min(adjusted, size.max.toPixel(parent));
+                        adjusted = std::min(adjusted, size.max.toPixel(parent, parent));
                     fillWidth -= result - adjusted;
                     size.result = adjusted;
                     size.done = true;

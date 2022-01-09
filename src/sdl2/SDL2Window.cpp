@@ -20,8 +20,8 @@ public:
             return;
         wasInit = true;
 
-        globalRect.width = width->toPixel(0);
-        globalRect.height = height->toPixel(0);
+        globalRect.width = width->toPixel(0, 0);
+        globalRect.height = height->toPixel(0, 0);
         localRect.width = globalRect.width;
         localRect.height = globalRect.height;
 

@@ -122,7 +122,7 @@ namespace ui {
             reference = 0;
         }
 
-        S32 toPixel(S32 parent) const {
+        S32 toPixel(S32 parent, S32 own) const {
             switch (type) {
             case Type::Default:
                 return 0;
@@ -134,7 +134,7 @@ namespace ui {
                 case Type::Pixel:
                     return static_cast<S32>(reference + 0.5f) + static_cast<S32>(parent * value + 0.5f);
                 case Type::Percent:
-                    return static_cast<S32>(parent * reference + 0.5f) + static_cast<S32>(parent * value + 0.5f);
+                    return static_cast<S32>(parent * reference + 0.5f) + static_cast<S32>(own * value + 0.5f);
                 }
                 return 0;
 

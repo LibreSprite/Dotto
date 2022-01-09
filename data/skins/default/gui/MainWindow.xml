@@ -2,9 +2,8 @@
   <image src="%skin/bg.png" absolute="true" x="0" y="0" fit="cover" width="100%" height="100%"/>
 
   <editor/>
-  <!-- <image id="layerlist"/> -->
 
-  <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-35px" width="100%" height="35px" flow="row">
+  <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
     <alttextbutton id="startbutton" label="File" width="100px"/>
   </image>
 
@@ -19,7 +18,6 @@
         <menubutton id="savebutton" label="Save"/>
         <menubutton id="saveAsbutton" label="Save As..."/>
         <menubutton id="exportbutton" label="Export..."/>
-        <number/>
       </node>
 
       <row controller="button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">
@@ -31,8 +29,8 @@
     </image>
   </node>
 
-  <image controller="focusfront" handle="titlebar" src="%skin/window.png" height="213px" width="40px" x="100%-40px" y="50%-100px" absolute="true" slice="7 30" overflow-hidden="true">
-    <node controller="toolbox" id="toolbox" absolute="true" width="30px" y="30px" height="100%-35px" x="100%-37px"/>
-  </image>
+  <popup controller="focusfront" height="215px" width="44px" x="100%-100%" y="50%-50%" close="false">
+    <inside controller="toolbox" id="toolbox"/>
+  </popup>
 
 </window>
