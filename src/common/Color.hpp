@@ -48,7 +48,15 @@ public:
         if (color[0] == '#') {
             U32 rgba = 0xFF;
             std::from_chars(color.c_str() + 1, color.c_str() + color.size(), rgba, 16);
-            fromU32(rgba);
+            if (color.size() == 7) {
+                rgba |= 0xFF000000;
+            } else if (color.size() == 4) {
+                rgba = 0xFF000000 |
+                    ((rgba & 0xF00) << 24) | ((rgba & 0xF00) << 16) |
+                    ((rgba & 0x0F0) << 8) | ((rgba & 0x0F0) << 4) |
+                    ((rgba & 0x00F) << 4) | (rgba & 0x00F);
+            }
+            fromABGR(rgba);
             return;
         }
         if (color.back() == '}') {
@@ -76,6 +84,14 @@ public:
         g = static_cast<U8>(rgba >> Gshift);
         b = static_cast<U8>(rgba >> Bshift);
         a = static_cast<U8>(rgba >> Ashift);
+        return *this;
+    }
+
+    constexpr Color& fromABGR(U32 rgba) {
+        r = static_cast<U8>(rgba >> 16);
+        g = static_cast<U8>(rgba >> 8);
+        b = static_cast<U8>(rgba >> 0);
+        a = static_cast<U8>(rgba >> 24);
         return *this;
     }
 
