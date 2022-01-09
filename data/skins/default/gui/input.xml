@@ -1,3 +1,3 @@
-<image src="%skin/input.png" slice="4 4" forward="value.color=color, value.text=text" controller="input">
+<image forward="value.color=color, value.text=text" controller="input">
   <span translate="false" id="value"/>
 </image>
