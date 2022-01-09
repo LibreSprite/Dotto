@@ -34,7 +34,7 @@ public:
         }
     }
 
-    void blitTo(U32& offsetX, U32& offsetY, const Color& color, Surface& target) {
+    void blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target) {
         for (U32 y = 0; y < height; ++y) {
             for (U32 x = 0; x < width; ++x) {
                 auto alpha = data[y * width + x];
@@ -144,7 +144,7 @@ public:
         return glyph.get();
     }
 
-    virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& text, Vector<S32>& advance) {
+    virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& text, const Rect& padding, Vector<S32>& advance) {
         advance.clear();
         if (text.empty())
             return nullptr;
@@ -161,8 +161,11 @@ public:
                 height = std::max(height, size + (glyph->height - glyph->bearingY));
             }
         }
-        surface->resize(width + 1, height + 1);
-        U32 x = 0, y = size;
+        if (!advance.empty()) {
+            advance[0] += padding.x;
+        }
+        surface->resize(width + padding.x + padding.width, height + padding.y + padding.height);
+        S32 x = padding.x, y = size + padding.y;
         for (auto glyph : glyphs)
             glyph->blitTo(x, y, color, *surface);
         return surface;
