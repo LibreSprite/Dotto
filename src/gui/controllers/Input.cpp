@@ -27,8 +27,19 @@ public:
     }
 
     void attach() override {
-        node()->addEventListener<ui::MouseDown, ui::KeyDown, ui::KeyUp>(this);
+        node()->addEventListener<ui::MouseDown, ui::KeyDown, ui::KeyUp, ui::Blur>(this);
         span = node()->findChildById(spanId);
+    }
+
+    void clearCaret() {
+        if (span) {
+            span->set("text", ""); // force redraw to get rid of caret
+            span->set("text", *text);
+        }
+    }
+
+    void eventHandler(const ui::Blur&) {
+        clearCaret();
     }
 
     void eventHandler(const ui::MouseDown& event) {
@@ -52,8 +63,7 @@ public:
             }
         }
 
-        span->set("text", ""); // force redraw to get rid of caret
-        span->set("text", *text);
+        clearCaret();
         auto surfaceValue = span->get("surface");
         if (surfaceValue && surfaceValue->has<std::shared_ptr<Surface>>()) {
             drawCaret(surfaceValue->get<std::shared_ptr<Surface>>(), cursorX);
