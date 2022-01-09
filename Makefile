@@ -107,7 +107,7 @@ $(ODIR)/%.mm.o: %.mm
 	@mkdir -p "$$(dirname "$@")"
 	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
 
-libresprite: $(OBJ)
+dotto: $(OBJ)
 	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
 
 .PHONY: clean
