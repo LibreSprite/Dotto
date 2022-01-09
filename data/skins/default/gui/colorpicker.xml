@@ -1,3 +1,5 @@
-<popup controller="script" script="%appdata/scripts/colorpicker.js" height="180px" width="150px" padding="4 30 4 4" title="Color Wheel">
-  <image id="sample" src="%skin/colorpicker.png"/>
+<popup controller="script" script="%appdata/scripts/colorpicker.js" height="180px" width="150px" title="Color Wheel">
+  <inside>
+    <image id="sample" src="%skin/colorpicker.png"/>
+  </inside>
 </popup>

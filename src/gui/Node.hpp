@@ -74,6 +74,7 @@ namespace ui {
         Property<Unit> maxHeight{this, "max-height", {"100%"}, &Node::resize};
 
         Property<Rect> padding{this, "padding", Rect{}, &Node::resize};
+        Property<Rect> margin{this, "margin", Rect{}, &Node::resize};
 
         Property<String> flow{this, "flow", "column", &Node::reflow};
         Property<S32> zIndex{this, "z", 0};

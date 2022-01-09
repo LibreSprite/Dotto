@@ -45,21 +45,21 @@ var controllers = {
     openbutton : {
         click : function() {
             closeStartMenu();
-            var pick = app.open('*.png', 'Open image');
-            if (pick) {
-                views.editor.set("file", pick);
-                views.editor.visible = true;
-            }
+            var pick = app.open('*.png', 'Open image'); //
+            if (pick) {                                 //
+                views.editor.set("file", pick);         // TODO: use a command instead
+                views.editor.visible = true;            //
+            }                                           //
         }
     },
 
     savebutton : {
         click : function() {
             closeStartMenu();
-            var pick = app.save('*.png', 'Save image', "Image format");
-            if (pick) {
-                app.write(pick, app.activeCell.composite);
-            }
+            var pick = app.save('*.png', 'Save image', "Image format"); //
+            if (pick) {                                                 // TODO: use a command instead
+                app.write(pick, app.activeCell.composite);              //
+            }                                                           //
         }
     },
 

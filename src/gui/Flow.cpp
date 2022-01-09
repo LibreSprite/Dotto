@@ -33,6 +33,14 @@ namespace ui {
                     child->globalRect.width = parentRect.width;
                     child->globalRect.height = parentRect.height;
                 }
+                child->localRect.x += child->margin->x;
+                child->localRect.y += child->margin->y;
+                child->globalRect.x += child->margin->x;
+                child->globalRect.y += child->margin->y;
+                child->localRect.width -= child->margin->x + S32(child->margin->width);
+                child->localRect.height -= child->margin->y + S32(child->margin->height);
+                child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 child->onResize();
             }
         }
@@ -49,6 +57,7 @@ namespace ui {
             bool done;
             U32 result;
             U32 offset;
+            S32 margins;
         };
 
         void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
@@ -56,13 +65,22 @@ namespace ui {
             for (auto& child : children) {
                 if (*child->absolute) {
                     absolute(child, parentRect);
+                    child->localRect.x += child->margin->x;
+                    child->localRect.y += child->margin->y;
+                    child->globalRect.x += child->margin->x;
+                    child->globalRect.y += child->margin->y;
+                    child->localRect.width -= child->margin->x + S32(child->margin->width);
+                    child->localRect.height -= child->margin->y + S32(child->margin->height);
+                    child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                    child->globalRect.height -= child->margin->y + S32(child->margin->height);
                     child->onResize();
                 } else {
                     sizes.push_back({
                             .child = child.get(),
                             .given = child->width,
                             .min = child->minWidth,
-                            .max = child->maxWidth
+                            .max = child->maxWidth,
+                            .margins = child->margin->x + S32(child->margin->width)
                         });
                 }
             }
@@ -78,6 +96,14 @@ namespace ui {
                 child->globalRect.y = parentRect.y;
                 child->globalRect.width = size.result;
                 child->globalRect.height = parentRect.height;
+                child->localRect.x += child->margin->x;
+                child->localRect.y += child->margin->y;
+                child->globalRect.x += child->margin->x;
+                child->globalRect.y += child->margin->y;
+                child->localRect.width -= child->margin->x + S32(child->margin->width);
+                child->localRect.height -= child->margin->y + S32(child->margin->height);
+                child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 child->onResize();
             }
         }
@@ -99,18 +125,18 @@ namespace ui {
                 switch (size.given.getType()) {
                 case Unit::Type::Pixel: {
                     size.done = true;
-                    size.result = size.given.toPixel(parent);
+                    size.result = size.given.toPixel(parent) + size.margins;
                     fillWidth -= size.result;
                     break;
                 }
                 case Unit::Type::Default: {
-                    totalWeight += 1000;
-                    size.result = 1000;
+                    totalWeight += 1000 + size.margins;
+                    size.result = 1000 + size.margins;
                     break;
                 }
                 case Unit::Type::Percent: {
-                    size.result = size.given.toPixel(1000);
-                    totalWeight += size.result;
+                    size.result = size.given.toPixel(1000) + size.margins;
+                    totalWeight += size.result + size.margins;
                     break;
                 }
                 }
@@ -142,13 +168,22 @@ namespace ui {
             for (auto& child : children) {
                 if (*child->absolute) {
                     absolute(child, parentRect);
+                    child->localRect.x += child->margin->x;
+                    child->localRect.y += child->margin->y;
+                    child->globalRect.x += child->margin->x;
+                    child->globalRect.y += child->margin->y;
+                    child->localRect.width -= child->margin->x + S32(child->margin->width);
+                    child->localRect.height -= child->margin->y + S32(child->margin->height);
+                    child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                    child->globalRect.height -= child->margin->y + S32(child->margin->height);
                     child->onResize();
                 } else {
                     sizes.push_back({
                             .child = child.get(),
                             .given = child->height,
                             .min = child->minHeight,
-                            .max = child->maxHeight
+                            .max = child->maxHeight,
+                            .margins = child->margin->y + S32(child->margin->height)
                         });
                 }
             }
@@ -164,6 +199,14 @@ namespace ui {
                 child->globalRect.y = parentRect.y + size.offset;
                 child->globalRect.width = parentRect.width;
                 child->globalRect.height = size.result;
+                child->localRect.x += child->margin->x;
+                child->localRect.y += child->margin->y;
+                child->globalRect.x += child->margin->x;
+                child->globalRect.y += child->margin->y;
+                child->localRect.width -= child->margin->x + S32(child->margin->width);
+                child->localRect.height -= child->margin->y + S32(child->margin->height);
+                child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 child->onResize();
             }
         }
