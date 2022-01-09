@@ -18,14 +18,21 @@ public:
     Property<String> state{this, "state", "enabled", &Button::changeState};
     void changeState() {
         std::shared_ptr<Surface> current;
+        Color multiply;
         if (*state == "pressed" || *state == "active") {
             current = pressedSurface;
+            multiply = pressedMultiply;
         } else if (*state == "enabled") {
             current = isHovering && *hoverSurface ? hoverSurface : normalSurface;
+            multiply = isHovering ? hoverMultiply : normalMultiply;
         } else if (*state == "disabled") {
             current = disabledSurface;
+            multiply = disabledMultiply;
         }
+        if (multiply.a == 0 && current)
+            multiply = 0xFFFFFFFF;
         node()->set("surface", current);
+        node()->set("multiply", multiply);
     }
 
     Property<String> pressed{this, "down-src", "", &Button::reloadPressed};
@@ -52,6 +59,14 @@ public:
     void reloadDisabled() {
         *disabledSurface = FileSystem::parse(*disabled);
     }
+
+    Property<Color> pressedMultiply{this, "down-multiply", {0,0,0,0}};
+    Property<Color> normalMultiply{this, "up-multiply", {0,0,0,0}, &Button::changeNormalColor};
+    void changeNormalColor() {
+        node()->set("multiply", *normalMultiply);
+    }
+    Property<Color> hoverMultiply{this, "hover-multiply", {0,0,0,0}};
+    Property<Color> disabledMultiply{this, "disabled-multiply", {0,0,0,0}};
 
     void on(msg::Flush& flush) {
         flush.hold(*pressedSurface);

@@ -173,8 +173,8 @@ protected:
         const String name;
         std::function<void()> change;
 
-        template<typename ParentType>
-        Property(ParentType* parent, const String& name, const Type& value = Type{}, void (ParentType::*change)() = nullptr) : name{name}, value{value} {
+        template<typename ParentType, typename InitType = Type>
+        Property(ParentType* parent, const String& name, InitType&& value = InitType{}, void (ParentType::*change)() = nullptr) : name{name}, value(std::forward<InitType>(value)) {
             if (change) {
                 this->change = [=]{(parent->*change)();};
             }
