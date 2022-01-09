@@ -45,6 +45,7 @@ public:
     Property<S32> y{this, "y"};
     Property<Color> background{this, "background"};
     Property<String> skin{this, "skin", "default"};
+    Property<F32> scale{this, "scale", 1.0f};
 
     void postInject() override;
     void resize() override;

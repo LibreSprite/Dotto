@@ -47,9 +47,11 @@ public:
             return false;
         int width, height;
         SDL_GetWindowSize(window, &width, &height);
-        if (width != globalRect.width || height != globalRect.height || needResize) {
-            globalRect.width = width;
-            globalRect.height = height;
+        if (width / scale != globalRect.width ||
+            height / scale != globalRect.height ||
+            needResize) {
+            globalRect.width = width / scale;
+            globalRect.height = height / scale;
             doResize();
         }
         ui::Window::update();
@@ -59,6 +61,7 @@ public:
 
     void draw(S32 z, Graphics&) override {
         SDL_GL_MakeCurrent(window, context);
+        graphics->scale = scale;
         graphics->begin(globalRect, *background);
         ui::Window::draw(z, *graphics.get());
         graphics->end();

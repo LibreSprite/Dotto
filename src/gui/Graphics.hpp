@@ -12,6 +12,8 @@ protected:
     Rect clip;
 
 public:
+    F32 scale = 1;
+
     struct BlitSettings {
         std::shared_ptr<Surface> surface;
         const Rect& source;

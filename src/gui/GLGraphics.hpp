@@ -166,7 +166,7 @@ public:
         iwidth = 2.0f / width;
         height = globalRect.height;
         iheight = 2.0f / height;
-        glViewport(0, 0, width, height);
+        glViewport(0, 0, width * scale, height * scale);
         glClearColor(clearColor.r/255.0f,
                      clearColor.g/255.0f,
                      clearColor.b/255.0f,
