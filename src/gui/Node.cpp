@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/Config.hpp>
 #include <common/XML.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
@@ -241,7 +242,7 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
     if (!--depth && ret) {
         std::shared_ptr<PropertySet> style = inject<FileSystem>{}->parse("%skin/gui/style.ini");
         if (style) {
-            Vector<PropertySet*> styles = {style.get()};
+            Vector<PropertySet*> styles = {style.get(), inject<Config>{}->properties.get()};
             applyStyle(ret, styles);
         }
     }

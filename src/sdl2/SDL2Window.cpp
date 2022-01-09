@@ -12,19 +12,22 @@ class SDL2Window : public ui::Window {
 public:
     SDL_Window* window = nullptr;
     SDL_GLContext context = nullptr;
+    bool wasInit = false;
     std::shared_ptr<GLGraphics> graphics = std::make_shared<GLGraphics>();
 
-    bool init(const PropertySet& properties) override {
-        Window::init(properties);
+    void doInit() {
+        if (wasInit)
+            return;
+        wasInit = true;
 
         globalRect.width = width->toPixel(0);
         globalRect.height = height->toPixel(0);
         localRect.width = globalRect.width;
         localRect.height = globalRect.height;
 
-        window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+        window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL/* | SDL_WINDOW_RESIZABLE*/);
         if (!window)
-            return false;
+            return;
 
         id = SDL_GetWindowID(window);
 
@@ -33,16 +36,16 @@ public:
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         context = SDL_GL_CreateContext(window);
         if (!context)
-            return false;
+            return;
 
         SDL_GL_MakeCurrent(window, context);
         graphics->init();
 
         setDirty();
-        return true;
     }
 
     bool update() override {
+        doInit();
         if (!window || !context)
             return false;
         int width, height;
