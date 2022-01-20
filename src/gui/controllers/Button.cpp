@@ -68,6 +68,8 @@ public:
     Property<Color> hoverMultiply{this, "hover-multiply", {0,0,0,0}};
     Property<Color> disabledMultiply{this, "disabled-multiply", {0,0,0,0}};
 
+    Property<FunctionRef<void()>, true> clickCallback{this, "click"};
+
     void on(msg::Flush& flush) {
         flush.hold(*pressedSurface);
         flush.hold(*normalSurface);
@@ -75,7 +77,16 @@ public:
     }
 
     void attach() override {
-        node()->addEventListener<ui::MouseDown, ui::MouseUp, ui::MouseEnter, ui::MouseLeave>(this);
+        node()->addEventListener<ui::MouseDown,
+                                 ui::MouseUp,
+                                 ui::MouseEnter,
+                                 ui::MouseLeave,
+                                 ui::Click>(this);
+    }
+
+    void eventHandler(const ui::Click&) {
+        if (*clickCallback)
+            (*clickCallback)();
     }
 
     void eventHandler(const ui::MouseDown&) {
