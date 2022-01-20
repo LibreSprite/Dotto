@@ -16,6 +16,7 @@ namespace ui {
         virtual ~Event() = default;
 
         mutable Node* target = nullptr;
+        mutable Node* currentTarget = nullptr;
 
         enum class Bubble {
             None,
