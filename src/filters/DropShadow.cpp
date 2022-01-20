@@ -15,7 +15,22 @@ public:
     Property<Color> shadowColor{this, "shadow-color", "rgba{0,0,0,255}"};
     Property<U32> blur{this, "blur", 0};
 
-    virtual void run(std::shared_ptr<Surface> surface) {
+    std::shared_ptr<PropertySet> getMetaProperties() override {
+        auto meta = Filter::getMetaProperties();
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "number"},
+                    {"label", offsetX.name},
+                    {"value", offsetX.value}
+                }));
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "number"},
+                    {"label", offsetY.name},
+                    {"value", offsetY.value}
+                }));
+        return meta;
+    }
+
+    void run(std::shared_ptr<Surface> surface) override {
         S32 offsetX = this->offsetX;
         S32 offsetY = this->offsetY;
         if (offsetX == 0 && offsetY == 0)

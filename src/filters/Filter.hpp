@@ -32,5 +32,7 @@ public:
             });
     }
 
+    virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
+
     virtual void run(std::shared_ptr<Surface> surface) = 0;
 };
