@@ -5,6 +5,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <memory>
 #include <type_traits>
@@ -45,3 +46,30 @@ struct is_shared_ptr : std::false_type {};
 
 template<class T>
 struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
+
+template<typename Func>
+class FunctionRef {
+    std::shared_ptr<std::function<Func>> func;
+
+public:
+    FunctionRef() = default;
+
+    FunctionRef(const FunctionRef& func) : func{func.func} {}
+
+    FunctionRef(const std::function<Func>& func) : func{std::make_shared<std::function<Func>>(func)} {}
+
+    FunctionRef(std::function<Func>&& func) : func{std::make_shared<std::function<Func>>(std::move(func))} {}
+
+    operator bool () {
+        return func != nullptr && *func;
+    }
+
+    bool operator == (const FunctionRef<Func>& other) {
+        return func == other.func;
+    }
+
+    template<typename ... Args>
+    auto operator () (Args&& ... args) {
+        return (*func)(std::forward<Args>(args)...);
+    }
+};
