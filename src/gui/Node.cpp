@@ -229,7 +229,9 @@ void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
 
     {
         Vector<std::pair<S32, std::shared_ptr<PropertySet>>> applicable;
-        for (auto& set : styles) {
+        for (auto set : styles) {
+            if (!set)
+                continue;
             auto& map = set->getMap();
             for (auto& tag : node->getTags()) {
                 auto it = map.find(tag);
@@ -264,6 +266,18 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
         if (style) {
             Vector<PropertySet*> styles = {style.get(), inject<Config>{}->properties.get()};
             applyStyle(ret, styles);
+        }
+        auto parentKey = ret->get("parent");
+        if (parentKey && parentKey->has<String>()) {
+            inject<ui::Node> root{"root"};
+            if (root) {
+                auto parent = root->findChildById(parentKey->get<String>());
+                if (parent) {
+                    parent->addChild(ret);
+                } else {
+                    logE("Could not add ", widgetName, " to ", parentKey->get<String>());
+                }
+            }
         }
     }
     return ret;
