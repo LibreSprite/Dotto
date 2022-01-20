@@ -21,8 +21,8 @@ var controllers = {
     okbutton : {
         click : function() {
             var editor = app.window.findChildById("editor");
-            var width = views.widthtextbox.get("text");
-            var height = views.widthtextbox.get("text");
+            var width = views.widthtextbox.findChildById("value").get("text");
+            var height = views.heighttextbox.findChildById("value").get("text");
             var properties = "new:width=" + width + ":height=" + height + ":" + Math.random();
             editor.set("file", properties);
             editor.visible = true;

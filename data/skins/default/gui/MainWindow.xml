@@ -12,7 +12,7 @@
 
       <span absolute="true" x="75px" y="24px" width="100%-100px" size="20px">Hello, ${username}!</span>
 
-      <node absolute="true" x="2px" y="67px" width="188px" height="100%-282px">"
+      <node absolute="true" x="2px" y="67px" width="188px" height="100%-110px">
         <menubutton id="newbutton" label="New"/>
         <menubutton id="openbutton" label="Open"/>
         <menubutton id="savebutton" label="Save"/>
@@ -20,11 +20,13 @@
         <menubutton id="exportbutton" label="Export..."/>
       </node>
 
-      <row controller="button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">
+      <node controller="filterlist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
+
+      <node flow="row" controller="button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">
         <image id="iconimage" height="24px" width="24px"/>
         <node width="5px"/>
         <span width="120px">Quit</span>
-      </row>
+      </node>
 
     </image>
   </node>

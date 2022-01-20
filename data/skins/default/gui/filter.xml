@@ -1,0 +1,1 @@
+<menubutton controller="activatefilter" forward="labelspan.text=filter" interactive="true"/>

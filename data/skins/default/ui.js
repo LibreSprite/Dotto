@@ -1,10 +1,7 @@
 var views = {};
 var controllers = {
     filemenu : {
-        click:function(){
-            if (app.eventTarget == app.target)
-                closeStartMenu();
-        }
+        click:closeStartMenu
     },
 
     editor : {},
@@ -37,14 +34,12 @@ var controllers = {
 
     newbutton : {
         click : function() {
-            closeStartMenu();
             app.window.createChild("newfilepopup");
         }
     },
 
     openbutton : {
         click : function() {
-            closeStartMenu();
             var pick = app.open('*.png', 'Open image'); //
             if (pick) {                                 //
                 views.editor.set("file", pick);         // TODO: use a command instead
@@ -55,7 +50,6 @@ var controllers = {
 
     savebutton : {
         click : function() {
-            closeStartMenu();
             var pick = app.save('*.png', 'Save image', "Image format"); //
             if (pick) {                                                 // TODO: use a command instead
                 app.write(pick, app.activeCell.composite);              //

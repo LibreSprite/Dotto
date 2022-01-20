@@ -1,13 +1,7 @@
 <popup controller="script" script="%appdata/scripts/newfilepopup.js" title="New File">
   <inside>
-    <row>
-      <span>Width:</span>
-      <number id="widthtextbox">512</number>
-    </row>
-    <row>
-      <span>Height:</span>
-      <number id="heighttextbox">512</number>
-    </row>
+    <number id="widthtextbox" label="Width:" value="64"/>
+    <number id="heighttextbox" label="Height:" value="64"/>
     <row>
       <textbutton id="cancelbutton" label="Cancel"/>
       <textbutton id="okbutton" label="OK"/>
