@@ -36,12 +36,31 @@ void ui::Node::setTag(const String& tag) {
     }
 }
 
-std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
-    if (*id == targetId)
+std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId, bool debug) {
+    if (debug) {
+        logV("Looking for [", targetId, "] in [", id.value, "]:", children.size());
+    }
+    if (id.value == targetId)
         return shared_from_this();
     for (auto& child : children) {
-        if (auto found = child->findChildById(targetId))
+        if (child->id.value == targetId)
+            return child;
+    }
+    for (auto& child : children) {
+        if (auto found = child->findChildById(targetId, debug))
             return found;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<ui::Node> ui::Node::findParentById(const String &targetId) {
+    if (id.value == targetId)
+        return shared_from_this();
+    auto parent = this->parent;
+    while (parent) {
+        if (parent->id.value == targetId)
+            return parent->shared_from_this();
+        parent = parent->parent;
     }
     return nullptr;
 }

@@ -99,7 +99,8 @@ namespace ui {
 
         void set(const String& key, Value& value, bool debug = false) override;
 
-        std::shared_ptr<Node> findChildById(const String& targetId);
+        std::shared_ptr<Node> findChildById(const String& targetId, bool debug = false);
+        std::shared_ptr<Node> findParentById(const String& targetId);
 
         U32 getChildSeparation(std::shared_ptr<Node> child);
 
