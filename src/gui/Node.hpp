@@ -140,7 +140,7 @@ namespace ui {
 
         virtual void doResize();
 
-        virtual void onResize() {}
+        virtual void onResize();
 
         virtual void draw(S32 z, Graphics& gfx);
 

@@ -338,6 +338,10 @@ void ui::Node::doResize() {
         child->doResize();
 }
 
+void ui::Node::onResize() {
+    processEvent(ui::Resize{this});
+}
+
 void ui::Node::draw(S32 z, Graphics& gfx) {
     if (*hideOverflow) {
         Rect clip = gfx.pushClipRect(globalRect);
@@ -357,7 +361,7 @@ void ui::Node::draw(S32 z, Graphics& gfx) {
 }
 
 void ui::Node::addChild(std::shared_ptr<Node> child) {
-    if (!child)
+    if (!child || child->parent == this)
         return;
     child->remove();
     children.push_back(child);
