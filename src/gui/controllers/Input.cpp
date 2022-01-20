@@ -94,8 +94,12 @@ public:
                 cursorPosition--;
         } else if (event.keycode >= ' ' && event.keycode < 0x80) {
             String key(reinterpret_cast<const char*>(&event.keycode));
-            if (!allowRegex->empty() && !std::regex_match(key, std::regex(*allowRegex))) {
-                return;
+            try {
+                if (!allowRegex->empty() && !std::regex_match(key, std::regex(*allowRegex))) {
+                    return;
+                }
+            } catch (std::regex_error& err) {
+                logE("Input Regex Error: ", err.what(), "\nExpression: /", *allowRegex, "/");
             }
             text.insert(cursorPosition++, key, 0, key.size());
         } else {
