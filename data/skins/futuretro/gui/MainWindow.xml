@@ -14,7 +14,6 @@
   <node id="filtermenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
     <image controller="filterlist"
            multiply="#224970"
-           height="100%-16px"
            width="221px"
            x="100%-100%"
            y="16px"

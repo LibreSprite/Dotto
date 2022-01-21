@@ -57,6 +57,8 @@ public:
             }
         }
 
+        S32 height = 0;
+
         for (auto entry : enabled) {
             std::shared_ptr<ui::Node> button;
             auto filter = entry->second;
@@ -78,7 +80,10 @@ public:
                 button->load(entry->second->getPropertySet());
             }
             node()->addChild(button);
+            height += button->height->toPixel(0, 0);
         }
+
+        node()->set("height", height);
     }
 
     void attach() override {
