@@ -155,14 +155,18 @@ void ui::Node::load(const PropertySet& set) {
                 continue;
 
             auto target = split(parts[0], ".");
-            if (target.size() != 2)
-                continue;
-
-            auto child = findChildById(trim(target[0]));
-            if (!child)
-                continue;
-
-            child->load({{target[1], value}});
+            ui::Node* child = nullptr;
+            String key;
+            if (target.size() == 2) {
+                child = findChildById(trim(target[0])).get();
+                key = target[1];
+            } else if (target.size() == 1) {
+                child = this;
+                key = target[0];
+            }
+            if (child) {
+                child->set(trim(key), value);
+            }
         }
     }
 }
@@ -182,14 +186,18 @@ void ui::Node::set(const String& key, Value& value, bool debug) {
                 continue;
 
             auto target = split(parts[0], ".");
-            if (target.size() != 2)
-                continue;
-
-            auto child = findChildById(trim(target[0]));
-            if (!child)
-                continue;
-
-            child->set(target[1], value, debug);
+            ui::Node* child = nullptr;
+            String key;
+            if (target.size() == 2) {
+                child = findChildById(trim(target[0])).get();
+                key = target[1];
+            } else if (target.size() == 1) {
+                child = this;
+                key = target[0];
+            }
+            if (child) {
+                child->set(trim(key), value);
+            }
         }
     }
 }
