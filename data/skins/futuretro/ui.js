@@ -1,17 +1,13 @@
 var views = {};
 var controllers = {
-    filemenu : {
-        click:function(){
-            if (app.eventTarget == app.target)
-                closeStartMenu();
-        }
-    },
+    filemenu : {click:clickOutsideMenu},
+    filtermenu : {click:closeMenu},
 
     editor : {},
 
     script : {
         init : function() {
-            console.log("Booting eXPerience UI");
+            console.log("Booting Futuretro UI");
 
             for (var name in controllers) {
                 var node = app.target.findChildById(name);
@@ -26,25 +22,23 @@ var controllers = {
     },
 
     startbutton : {
-        mouseup : function() {
-            var pressed = views.startbutton.get("state") != "active";
-            views.filemenu.visible = pressed;
-            views.startbutton.set("state", pressed ? "active" : "enabled");
-            if (pressed)
-                views.filemenu.bringToFront();
-        }
+        mouseup : mouseUpMenuButton.bind(null, "startbutton", "filemenu")
+    },
+
+    filterbutton : {
+        mouseup : mouseUpMenuButton.bind(null, "filterbutton", "filtermenu")
     },
 
     newbutton : {
         click : function() {
-            closeStartMenu();
+            closeMenu();
             app.window.createChild("newfilepopup");
         }
     },
 
     openbutton : {
         click : function() {
-            closeStartMenu();
+            closeMenu();
             var pick = app.open('*.png', 'Open image');
             if (pick) {
                 views.editor.set("file", pick);
@@ -55,7 +49,7 @@ var controllers = {
 
     savebutton : {
         click : function() {
-            closeStartMenu();
+            closeMenu();
             var pick = app.save('*.png', 'Save image', "Image format");
             if (pick) {
                 app.write(pick, app.activeCell.composite);
@@ -70,9 +64,30 @@ var controllers = {
     }
 };
 
-function closeStartMenu() {
-    views.filemenu.visible = false;
-    views.startbutton.set("state", "enabled");
+var openMenuButton, openMenuMenu;
+
+function clickOutsideMenu() {
+    if (app.eventTarget == app.target)
+        closeMenu();
+}
+
+function mouseUpMenuButton(button, menu) {
+    closeMenu();
+    openMenuButton = button;
+    openMenuMenu = menu;
+    var pressed = views[button].get("state") != "active";
+    views[menu].visible = pressed;
+    views[button].set("state", pressed ? "active" : "enabled");
+    if (pressed)
+        views[menu].bringToFront();
+}
+
+function closeMenu() {
+    if (!openMenuButton)
+        return;
+    views[openMenuMenu].visible = false;
+    views[openMenuButton].set("state", "enabled");
+    openMenuButton = "";
 }
 
 function onEvent(name) {

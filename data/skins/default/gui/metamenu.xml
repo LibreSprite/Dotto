@@ -1,1 +1,1 @@
-<popup controller="metamenu" container="inside" extra-height="30px"/>
+<popup controller="metamenu" container="inside"/>

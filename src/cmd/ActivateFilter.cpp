@@ -54,8 +54,7 @@ public:
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
                     {"widget", "row"},
-                    {"id", "okcancel"},
-                    {"height", "30px"}
+                    {"id", "okcancel"}
                 }));
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
