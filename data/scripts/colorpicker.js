@@ -1,7 +1,7 @@
 const sample = app.target.findChildById("sample");
 const surface = sample.surface;
 
-app.target.addEventListener("mousedown");
+sample.addEventListener("mousedown");
 
 function onEvent(event) {
     if (event == "mousedown") {
