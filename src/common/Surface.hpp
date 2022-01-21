@@ -33,6 +33,10 @@ public:
             textureInfo->setDirty();
     }
 
+    const Vector<PixelType>& getPixels() {
+        return pixels;
+    }
+
     Color getPixel(U32 x, U32 y) {
         U32 index = x + y * _width;
         return (index >= _width * _height) ? Color{} : getColor(pixels[index]);
