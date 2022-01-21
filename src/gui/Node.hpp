@@ -104,7 +104,10 @@ namespace ui {
 
         U32 getChildSeparation(std::shared_ptr<Node> child);
 
+        void bringToFront();
         void bringToFront(std::shared_ptr<Node> child);
+
+        bool isDescendantOf(std::shared_ptr<Node> other);
 
         void processEvent(const Event& event) override;
 

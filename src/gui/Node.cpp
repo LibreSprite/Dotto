@@ -65,6 +65,12 @@ std::shared_ptr<ui::Node> ui::Node::findParentById(const String &targetId) {
     return nullptr;
 }
 
+void ui::Node::bringToFront() {
+    if (parent) {
+        parent->bringToFront(shared_from_this());
+    }
+}
+
 void ui::Node::bringToFront(std::shared_ptr<ui::Node> child) {
     auto it = std::find(children.begin(), children.end(), child);
     if (it == children.end())
@@ -72,6 +78,19 @@ void ui::Node::bringToFront(std::shared_ptr<ui::Node> child) {
     children.erase(it);
     children.push_back(child);
 }
+
+bool ui::Node::isDescendantOf(std::shared_ptr<ui::Node> other) {
+    if (!other)
+        return false;
+    auto current = this;
+    while (current) {
+        if (current == other.get())
+            return true;
+        current = current->getParent();
+    }
+    return false;
+}
+
 
 U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
     if (!child)
@@ -391,6 +410,7 @@ void ui::Node::removeChild(std::shared_ptr<Node> node) {
         if (it != children.end()) {
             node->parent = nullptr;
             children.erase(it);
+            node->processEvent(Remove{node.get()});
             node->processEvent(RemoveFromScene{node.get()});
         }
     }

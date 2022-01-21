@@ -46,6 +46,10 @@ namespace ui {
         Resize(Node* target) : Event{target} {}
     };
 
+    struct Remove : public Event {
+        Remove(Node* target) : Event{target} {}
+    };
+
     struct Blur : public Event {
         Blur(Node* target) : Event{target} {}
     };
