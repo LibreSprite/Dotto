@@ -5,6 +5,7 @@
 
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
     <alttextbutton id="startbutton" label="File" width="100px"/>
+    <image controller="inputcolor" forward="multiply=value" absolute="true" x="100%-40px" width="24px" y="5px" height="24px" alwaysupdate="true"/>
   </image>
 
   <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
