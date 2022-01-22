@@ -57,21 +57,21 @@ public:
         U32 startY = 0;
         U32 endY = height;
         if (offsetY < 0) {
-            startY = -offsetY;
+            startY = -signY;
             endY = height;
         } else if (offsetY > 0) {
             startY = 0;
-            endY = height - offsetY;
+            endY = height - signY;
         }
 
         U32 startX = 0;
         U32 endX = width;
         if (offsetX < 0) {
-            startX = -offsetX;
+            startX = -signX;
             endX = width;
         } else if (offsetX > 0) {
             startX = 0;
-            endX = width - offsetX;
+            endX = width - signX;
         }
 
         Vector<Surface::PixelType> src;
