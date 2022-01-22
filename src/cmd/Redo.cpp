@@ -2,17 +2,17 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include "log/Log.hpp"
 #include <cmd/Command.hpp>
-#include <log/Log.hpp>
 
-class Print : public Command {
-    Property<String> msg{this, "msg"};
+class Redo : public Command {
 public:
     void undo() override {}
-
     void run() override {
-        logI("Print: ", msg);
+        logV("Redo");
+        if (auto doc = this->doc())
+            doc->redo();
     }
 };
 
-static Command::Shared<Print> print{"print"};
+static Command::Shared<Redo> redo{"redo"};

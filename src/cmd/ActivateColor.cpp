@@ -14,6 +14,8 @@ class ActivateColor : public Command {
     PubSub<> pub{this};
 
 public:
+    void undo() override {}
+
     void run() override {
         Tool::color = color;
         pub(msg::ActivateColor{*color});

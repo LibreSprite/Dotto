@@ -3,16 +3,15 @@
 // Read LICENSE.txt for more information.
 
 #include <cmd/Command.hpp>
-#include <log/Log.hpp>
 
-class Print : public Command {
-    Property<String> msg{this, "msg"};
+class Undo : public Command {
 public:
     void undo() override {}
-
     void run() override {
-        logI("Print: ", msg);
+        logV("Undo");
+        if (auto doc = this->doc())
+            doc->undo();
     }
 };
 
-static Command::Shared<Print> print{"print"};
+static Command::Shared<Undo> undo{"undo"};

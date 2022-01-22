@@ -4,6 +4,8 @@
 
 #include <chrono>
 
+#include <cmd/Command.hpp>
+#include <common/Config.hpp>
 #include <common/PropertySet.hpp>
 #include <common/String.hpp>
 #include <common/Surface.hpp>
@@ -17,6 +19,10 @@ class DocumentImpl : public Document {
     String currentTimelineName;
     U32 docWidth = 0;
     U32 docHeight = 0;
+
+    Vector<std::shared_ptr<Command>> history;
+    U32 historyCursor = 0;
+    U32 lockHistory = 0;
 
 public:
     String getGUID() {
@@ -89,6 +95,36 @@ public:
 
     const HashMap<String, std::shared_ptr<Timeline>>& getTimelines() override {
         return guidToTimeline;
+    }
+
+    void writeHistory(std::shared_ptr<Command> command) override {
+        if (lockHistory)
+            return;
+        if (historyCursor < history.size())
+            history.resize(historyCursor);
+        history.push_back(command);
+        historyCursor = history.size();
+        U32 maxUndoSize = inject<Config>{}->properties->get<U32>("max-undo-size");
+        if (history.size() > maxUndoSize)
+            history.erase(history.begin());
+    }
+
+    void undo() override {
+        if (historyCursor == 0)
+            return;
+        lockHistory++;
+        historyCursor--;
+        history[historyCursor]->undo();
+        lockHistory--;
+    }
+
+    void redo() override {
+        if (historyCursor == history.size())
+            return;
+        lockHistory++;
+        history[historyCursor]->redo();
+        historyCursor++;
+        lockHistory--;
     }
 };
 

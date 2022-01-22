@@ -12,14 +12,25 @@ class Command : public Injectable<Command>,
                 public Model,
                 public std::enable_shared_from_this<Command> {
     std::weak_ptr<Document> weakDoc;
+    bool wasCommitted = false;
 
 protected:
     Command() {
         weakDoc = inject<Document>{"activedocument"}.shared();
     }
 
+    void commit() {
+        if (wasCommitted)
+            return;
+        wasCommitted = true;
+        if (auto doc = weakDoc.lock())
+            doc->writeHistory(shared_from_this());
+    }
+
 public:
     std::shared_ptr<Document> doc() {return weakDoc.lock();}
 
     virtual void run() = 0;
+    virtual void undo() = 0;
+    virtual void redo() {run();}
 };

@@ -13,6 +13,8 @@ class ActivateTool : public Command {
     PubSub<> pub{this};
 
 public:
+    void undo() override {}
+
     void run() override {
         auto it = Tool::instances.find(tolower(tool));
         if (it == Tool::instances.end()) {
