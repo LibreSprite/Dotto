@@ -182,8 +182,9 @@ public:
     U32 currentShader = 0;
 
     void flush() {
-        if (vertices.empty())
+        if (vertices.empty()) {
             return;
+        }
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -243,12 +244,17 @@ public:
         F32 z;
         F32 u;
         F32 v;
+        bool flip;
     };
 
     void push(const Vertex& vtx) {
         constexpr const F32 depthFactor = 0.0000001f;
         vertices.push_back(vtx.x * iwidth - 1.0f);
-        vertices.push_back(1.0f - vtx.y * iheight);
+        if (vtx.flip) {
+            vertices.push_back(vtx.y * iheight - 1.0f);
+        } else {
+            vertices.push_back(1.0f - vtx.y * iheight);
+        }
         vertices.push_back(vtx.z * depthFactor);
         vertices.push_back(vtx.u);
         vertices.push_back(vtx.v);
@@ -257,6 +263,7 @@ public:
     struct Rectf {
         F32 x, y, w, h;
         F32 u0, v0, u1, v1;
+        bool flip;
     };
 
     bool debug = false;
@@ -274,8 +281,11 @@ public:
         if (x1 >= clip.right() ||
             x2 <= clip.x ||
             y1 >= clip.bottom() ||
-            y2 <= clip.y)
+            y2 <= clip.y) {
+            if (debug)
+                logI("Texture clipped away");
             return;
+        }
 
         if (x1 < clip.x) {
             if (rect.w) {
@@ -303,12 +313,15 @@ public:
             y2 = clip.bottom();
         }
 
-        push({x1, y1, z, u0, v0});
-        push({x1, y2, z, u0, v1});
-        push({x2, y1, z, u1, v0});
-        push({x1, y2, z, u0, v1});
-        push({x2, y2, z, u1, v1});
-        push({x2, y1, z, u1, v0});
+        if (debug)
+            logI("Pushing ", x1, " ", y1, " => ", x2, " ", y2);
+
+        push({x1, y1, z, u0, v0, rect.flip});
+        push({x1, y2, z, u0, v1, rect.flip});
+        push({x2, y1, z, u1, v0, rect.flip});
+        push({x1, y2, z, u0, v1, rect.flip});
+        push({x2, y2, z, u1, v1, rect.flip});
+        push({x2, y1, z, u1, v0, rect.flip});
     }
 
     void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
@@ -319,8 +332,11 @@ public:
         F32 w = settings.destination.width;
         F32 h = settings.destination.height;
 
-        if (!clip.overlaps(settings.destination))
+        if (!clip.overlaps(settings.destination)) {
+            if (debug)
+                logI("Killed by the clip");
             return;
+        }
 
         if (activeTexture != texture || multiply != settings.multiply) {
             flush();
@@ -345,7 +361,9 @@ public:
                     x, y,
                     w, h,
                     settings.source.x / F32(textureWidth), settings.source.y / F32(textureHeight),
-                    settings.source.right() / F32(textureWidth), settings.source.bottom() / F32(textureHeight)});
+                    settings.source.right() / F32(textureWidth), settings.source.bottom() / F32(textureHeight),
+                    settings.flip
+                });
         } else {
             F32 sX = settings.nineSlice.x;
             F32 sY = settings.nineSlice.y;
@@ -381,8 +399,11 @@ public:
                 surface.textureInfo = std::make_shared<GLTextureInfo>();
             texture = std::static_pointer_cast<GLTextureInfo>(surface.textureInfo)->get(shared_from_this());
 
-            if (texture->dirty)
+            if (texture->dirty) {
+                if (settings.debug)
+                    logI("Uploading surface");
                 upload(surface, texture.get());
+            }
         } else if (settings.multiply.a == 0) {
             return; // no texture + no color = no op
         }
@@ -400,6 +421,36 @@ public:
     void setClipRect(const Rect& rect) override {
         flush();
         clip = rect;
+    }
+
+    std::shared_ptr<Surface> result;
+    Surface* read() override {
+        if (!result) {
+            result = std::make_shared<Surface>();
+        }
+        result->resize(width, height);
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, result->data());
+        result->setDirty();
+        return result.get();
+    }
+
+    void write() override {
+        if (!result)
+            return;
+        Rect rect(0, 0, width, height);
+        Rect slice;
+        setClipRect(rect);
+        blit({
+                .surface     = result,
+                .source      = rect,
+                .destination = rect,
+                .nineSlice   = slice,
+                .zIndex      = 1000000,
+                .multiply    = Color{255, 255, 255, 255},
+                .debug       = false,
+                .flip        = true
+            });
+        flush();
     }
 };
 

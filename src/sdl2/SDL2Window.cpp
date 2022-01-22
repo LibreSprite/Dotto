@@ -4,6 +4,9 @@
 
 #include <SDL2/SDL.h>
 
+#include <common/ColorProfile.hpp>
+#include <common/Config.hpp>
+#include <fs/FileSystem.hpp>
 #include <gui/GLGraphics.hpp>
 #include <gui/Window.hpp>
 #include <log/Log.hpp>
@@ -14,6 +17,7 @@ public:
     SDL_GLContext context = nullptr;
     bool wasInit = false;
     std::shared_ptr<GLGraphics> graphics = std::make_shared<GLGraphics>();
+    std::shared_ptr<ColorProfile> profile;
 
     void doInit() {
         if (wasInit)
@@ -25,7 +29,7 @@ public:
         localRect.width = globalRect.width;
         localRect.height = globalRect.height;
 
-        window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL/* | SDL_WINDOW_RESIZABLE*/);
+        window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if (!window)
             return;
 
@@ -37,6 +41,11 @@ public:
         context = SDL_GL_CreateContext(window);
         if (!context)
             return;
+
+        auto profilePath = inject<Config>{}->properties->get<String>("icc-profile");
+        if (!profilePath.empty()) {
+            profile = inject<FileSystem>{}->parse(profilePath);
+        }
 
         SDL_GL_MakeCurrent(window, context);
         graphics->init();
@@ -68,6 +77,12 @@ public:
         graphics->begin(globalRect, *background);
         ui::Window::draw(z, *graphics.get());
         graphics->end();
+        if (profile) {
+            if (auto surface = graphics->read()) {
+               if (profile->apply(surface))
+                    graphics->write();
+            }
+        }
         SDL_GL_SwapWindow(window);
     }
 

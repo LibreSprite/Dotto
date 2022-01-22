@@ -25,6 +25,7 @@ else
 	    # SO_FILES := $(shell find linux-x64 -type f -name '*.so*')
         endif
 	LN_FLAGS += -lGL
+	LN_FLAGS += -llcms2
     endif
 
     ifeq ($(UNAME_S),Darwin)
