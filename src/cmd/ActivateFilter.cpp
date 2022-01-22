@@ -18,7 +18,25 @@ class ActivateFilter : public Command {
     PubSub<> pub{this};
     std::weak_ptr<ui::Node> menu;
 
+    Vector<Surface::PixelType> undoData;
+    std::shared_ptr<Cell> cell;
+
 public:
+    void undo() override {
+        cell->getComposite()->setPixels(this->undoData);
+    }
+
+    void redo() override {
+        auto it = Filter::instances.find(tolower(filter));
+        if (it == Filter::instances.end()) {
+            logE("Invalid filter \"", *filter, "\"");
+            return;
+        }
+        auto& filter = it->second;
+        auto surface = cell->getComposite();
+        filter->run(surface->shared_from_this());
+    }
+
     void run() override {
         auto it = Filter::instances.find(tolower(filter));
         if (it == Filter::instances.end()) {
@@ -39,8 +57,12 @@ public:
         }
 
         if (!interactive) {
+            auto surface = cell->getComposite();
+            this->cell = cell;
+            this->undoData = surface->getPixels();
             filter->load(getPropertySet());
-            filter->run(cell->getComposite()->shared_from_this());
+            filter->run(surface->shared_from_this());
+            commit();
             return;
         }
 
