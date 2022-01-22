@@ -22,6 +22,15 @@ class Paint : public Command {
     Vector<U32> undoData;
 
 public:
+    void undo() override {
+        auto selection = *this->selection;
+        if (!selection) {
+            logI("No selection");
+            return;
+        }
+        selection->write(cell->getComposite(), undoData);
+    }
+
     void setupPreview() {
         auto surface = cell->getComposite();
         if (!backup) {
@@ -63,6 +72,9 @@ public:
                 selection = backupSelection.get();
                 std::swap(*this->selection, backupSelection);
                 backupSelection->clear();
+                undoData = selection->read(backup.get());
+            } else {
+                undoData = selection->read(surface);
             }
             backupSurface = nullptr;
         } else {
@@ -74,7 +86,6 @@ public:
             return;
 
         F32 alpha = color.a / 255.0f / 255.0f;
-        undoData = selection->read(surface);
         auto& mask = selection->getData();
         auto commonRect = maskRect;
         auto maskStride = maskRect.width;
@@ -104,8 +115,10 @@ public:
         surface->setDirty();
         if (preview)
             this->selection->get()->clear();
-        else
+        else {
             backup.reset();
+            commit();
+        }
     }
 };
 

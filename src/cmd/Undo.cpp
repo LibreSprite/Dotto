@@ -8,7 +8,6 @@ class Undo : public Command {
 public:
     void undo() override {}
     void run() override {
-        logV("Undo");
         if (auto doc = this->doc())
             doc->undo();
     }

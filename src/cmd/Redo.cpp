@@ -9,7 +9,6 @@ class Redo : public Command {
 public:
     void undo() override {}
     void run() override {
-        logV("Redo");
         if (auto doc = this->doc())
             doc->redo();
     }
