@@ -81,7 +81,21 @@ public:
                                  ui::MouseUp,
                                  ui::MouseEnter,
                                  ui::MouseLeave,
-                                 ui::Click>(this);
+                                 ui::Click,
+                                 ui::KeyDown,
+                                 ui::KeyUp>(this);
+    }
+
+    void eventHandler(const ui::KeyDown& event) {
+        if (event.keyname == String("RETURN"))
+            node()->processEvent(ui::MouseDown{node(), 0, 0, 1});
+    }
+
+    void eventHandler(const ui::KeyUp& event) {
+        if (event.keyname == String("RETURN")) {
+            node()->processEvent(ui::MouseUp{node(), 0, 0, 1});
+            node()->processEvent(ui::Click{node(), 0, 0, 1});
+        }
     }
 
     void eventHandler(const ui::Click&) {
