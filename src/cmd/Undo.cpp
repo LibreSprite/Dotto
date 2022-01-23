@@ -6,7 +6,6 @@
 
 class Undo : public Command {
 public:
-    void undo() override {}
     void run() override {
         if (auto doc = this->doc())
             doc->undo();

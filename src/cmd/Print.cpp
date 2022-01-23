@@ -8,8 +8,6 @@
 class Print : public Command {
     Property<String> msg{this, "msg"};
 public:
-    void undo() override {}
-
     void run() override {
         logI("Print: ", msg);
     }

@@ -12,8 +12,6 @@ class ToggleTool : public Command {
     PubSub<> pub{this};
 
 public:
-    void undo() override {}
-
     void run() override {
         std::swap(Tool::previous, Tool::active);
         if (auto tool = Tool::active.lock()) {

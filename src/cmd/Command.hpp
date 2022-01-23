@@ -31,6 +31,6 @@ public:
     std::shared_ptr<Document> doc() {return weakDoc.lock();}
 
     virtual void run() = 0;
-    virtual void undo() = 0;
+    virtual void undo() {};
     virtual void redo() {run();}
 };

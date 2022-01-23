@@ -14,8 +14,6 @@ class ZoomCommand : public Command {
     PubSub<> pub{this};
 
 public:
-    void undo() override {}
-
     void run() override {
         auto editor = pub(msg::PollActiveEditor{}).editor;
         if (!editor)
