@@ -22,6 +22,7 @@ public:
     bool running = true;
     std::shared_ptr<ui::Node> root;
     ui::Node::Provides _root{root, "root"};
+    std::unordered_set<String> pressedKeys;
 
     bool boot() override {
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -61,28 +62,47 @@ public:
             case SDL_MOUSEBUTTONDOWN:
                 pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, 1U << (event.button.button - 1)});
                 break;
-            case SDL_KEYUP:
+
+            case SDL_KEYUP: {
+                auto name = getKeyName(event.key.keysym.sym);
+                pressedKeys.erase(name);
                 pub(msg::KeyUp{
                         event.key.windowID,
                         event.key.keysym.scancode,
-                        getKeyName(event.key.keysym.sym),
-                        static_cast<U32>(event.key.keysym.sym)
+                        name,
+                        static_cast<U32>(event.key.keysym.sym),
+                        pressedKeys
                     });
                 break;
-            case SDL_KEYDOWN:
+            }
+
+            case SDL_KEYDOWN: {
+                auto name = getKeyName(event.key.keysym.sym);
+                pressedKeys.insert(name);
                 pub(msg::KeyDown{
                         event.key.windowID,
                         event.key.keysym.scancode,
-                        getKeyName(event.key.keysym.sym),
-                        static_cast<U32>(event.key.keysym.sym)
+                        name,
+                        static_cast<U32>(event.key.keysym.sym),
+                        pressedKeys
                     });
                 break;
+            }
 
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
-                case SDL_WINDOWEVENT_MOVED: // TODO: check ICC profile
-                case SDL_WINDOWEVENT_SHOWN:
+                #if SDL_MAJOR_VERSION >= 2 && SDL_MINOR_VERSION >= 0 && SDL_PATCHLEVEL >= 18
+                case SDL_WINDOWEVENT_ICCPROF_CHANGED:  // TODO: check ICC profile
+                    break;
+                #endif
+
                 case SDL_WINDOWEVENT_HIDDEN:
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    pressedKeys.clear();
+                    break;
+
+                case SDL_WINDOWEVENT_MOVED:
+                case SDL_WINDOWEVENT_SHOWN:
                 case SDL_WINDOWEVENT_EXPOSED:
                 case SDL_WINDOWEVENT_RESIZED:
                 case SDL_WINDOWEVENT_SIZE_CHANGED:

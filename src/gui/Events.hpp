@@ -126,23 +126,37 @@ namespace ui {
     struct KeyEvent : public Event {
         U32 scancode, keycode;
         const char* keyname;
-        KeyEvent(Node* target, U32 scancode, U32 keycode, const char* keyname) :
+        std::unordered_set<String>& pressedKeys;
+        KeyEvent(Node* target,
+                 U32 scancode,
+                 U32 keycode,
+                 const char* keyname,
+                 std::unordered_set<String>& pressedKeys) :
             Event{target},
             scancode{scancode},
             keycode{keycode},
-            keyname{keyname} {
+            keyname{keyname},
+            pressedKeys{pressedKeys} {
             bubble = Bubble::Up;
         }
     };
 
     struct KeyDown : public KeyEvent {
-        KeyDown(Node* target, U32 scancode, U32 keycode, const char* keyname) :
-            KeyEvent{target, scancode, keycode, keyname} {}
+        KeyDown(Node* target,
+                U32 scancode,
+                U32 keycode,
+                const char* keyname,
+                std::unordered_set<String>& pressedKeys) :
+            KeyEvent{target, scancode, keycode, keyname, pressedKeys} {}
     };
 
     struct KeyUp : public KeyEvent {
-        KeyUp(Node* target, U32 scancode, U32 keycode, const char* keyname) :
-            KeyEvent{target, scancode, keycode, keyname} {}
+        KeyUp(Node* target,
+              U32 scancode,
+              U32 keycode,
+              const char* keyname,
+              std::unordered_set<String>& pressedKeys) :
+            KeyEvent{target, scancode, keycode, keyname, pressedKeys} {}
     };
 
     struct Drag : public Event {

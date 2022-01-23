@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <unordered_set>
+
 #include <common/Value.hpp>
 #include <common/Color.hpp>
 
@@ -73,6 +75,7 @@ namespace msg {
         U32 scancode;
         const char* keyName;
         U32 keycode;
+        std::unordered_set<String>& pressedKeys;
     };
 
     struct KeyDown {
@@ -80,6 +83,7 @@ namespace msg {
         U32 scancode;
         const char* keyName;
         U32 keycode;
+        std::unordered_set<String>& pressedKeys;
     };
 
     struct BeginDrag {

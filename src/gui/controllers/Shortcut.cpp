@@ -28,8 +28,14 @@ class Shortcut : public ui::Controller {
             if (!childMap) {
                 childMap = std::make_unique<KeyMap>();
                 action = [this, shortcut]{
-                    auto keyCode = std::to_string(shortcut->lastKeyDown->keycode);
-                    auto it = childMap->find(keyCode);
+                    String keyCode;
+                    Vector<String> keys;
+                    for (auto& key : shortcut->lastKeyDown->pressedKeys)
+                        keys.push_back(key);
+                    std::sort(keys.begin(), keys.end());
+                    auto it = childMap->find(join(keys, "+"));
+                    if (it == childMap->end())
+                        it = childMap->find(std::to_string(shortcut->lastKeyDown->keycode));
                     if (it == childMap->end())
                         it = childMap->find(tolower(shortcut->lastKeyDown->keyname));
                     if (it == childMap->end())
@@ -75,11 +81,13 @@ class Shortcut : public ui::Controller {
             std::shared_ptr<PropertySet> commandList = *entry.second;
             if (!commandList)
                 continue;
-            auto chords = split(entry.first, "+");
+            auto chords = split(entry.first, " ");
             currentMap = &defaultMap;
             for (auto& chord : chords) {
                 auto& map = *currentMap->getChildMap(this);
-                auto& ptr = map[tolower(trim(chord))];
+                auto sorted = split(chord, "+");
+                std::sort(sorted.begin(), sorted.end());
+                auto& ptr = map[join(sorted, "+")];
                 if (!ptr)
                     ptr = std::make_shared<KeyEntry>();
                 currentMap = ptr.get();
