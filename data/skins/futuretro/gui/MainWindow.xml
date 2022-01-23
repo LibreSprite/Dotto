@@ -1,4 +1,4 @@
-<window id="mainwindow" controller="script" script="%skin/ui.js" flow="column" background="#142D3B">
+<window id="mainwindow" controller="script, shortcut" steal-focus="true" script="%skin/ui.js" flow="column" background="#142D3B">
   <editor/>
 
   <image multiply="#3E4556" absolute="true" x="0" y="0" width="100%" height="16px" flow="row">
