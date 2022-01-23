@@ -33,6 +33,7 @@ namespace ui {
 
         void reflow();
         void reattach();
+        void changeStealFocus();
 
     protected:
         void forwardToChildren(const Event& event);
@@ -58,6 +59,7 @@ namespace ui {
         Property<Color> multiply{this, "multiply", {"rgba{255,255,255,255}"}};
         Property<bool> visible{this, "visible", true};
         Property<bool> inputEnabled{this, "inputEnabled", true};
+        Property<bool> stealFocus{this, "steal-focus", false, &Node::changeStealFocus};
         Property<bool> debug{this, "debug"};
 
         Property<bool> hideOverflow{this, "overflow-hidden", false};

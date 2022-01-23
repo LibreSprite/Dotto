@@ -24,6 +24,8 @@ namespace ui {
 
 
     void Window::focus(std::shared_ptr<ui::Node> child) {
+        if (!child)
+            child = shared_from_this();
         if (auto focus = focusTarget.lock()) {
             if (focus != child) {
                 focusTarget = child->shared_from_this();
@@ -31,7 +33,7 @@ namespace ui {
                 child->processEvent(ui::Focus{child.get()});
             }
         } else {
-            focusTarget = child->shared_from_this();
+            focusTarget = child;
             child->processEvent(ui::Focus{child.get()});
         }
     }

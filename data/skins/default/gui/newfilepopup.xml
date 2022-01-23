@@ -4,7 +4,7 @@
     <number id="heighttextbox" label="Height:" value="64"/>
     <row>
       <textbutton id="cancelbutton" label="Cancel"/>
-      <textbutton id="okbutton" label="OK"/>
+      <textbutton id="okbutton" label="OK" steal-focus="true"/>
     </row>
   </inside>
 </popup>

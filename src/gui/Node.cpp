@@ -342,6 +342,12 @@ void ui::Node::reflow() {
     setDirty();
 }
 
+void ui::Node::changeStealFocus() {
+    if (isInScene && stealFocus) {
+        focus();
+    }
+}
+
 void ui::Node::reattach() {
     for (auto name : split(controllerName, ",")) {
         auto clean = trim(name);
@@ -364,6 +370,8 @@ void ui::Node::eventHandler(const AddToScene& event) {
     resize();
     if (isDirty && parent) // parent is null for root node
         parent->setDirty();
+    if (stealFocus)
+        focus();
 }
 
 void ui::Node::doResize() {
