@@ -32,7 +32,7 @@ var controllers = {
     newbutton : {
         click : function() {
             closeMenu();
-            app.window.createChild("newfilepopup");
+            app.command("newfile", "interactive", true);
         }
     },
 

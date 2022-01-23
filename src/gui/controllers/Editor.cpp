@@ -24,6 +24,7 @@ class Editor : public ui::Controller {
     std::optional<Cell::Provides> cellProvides;
     std::optional<Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
+    Property<std::shared_ptr<PropertySet>> newFileProperties{this, "newfile", nullptr, &Editor::newFile};
     Property<F32> scale{this, "scale", 1.0f, &Editor::rezoom};
     std::shared_ptr<Cell> lastCell;
 
@@ -37,28 +38,30 @@ public:
         if (!doc)
             return;
         node()->load({
+                {"x", "50%-50%"},
+                {"y", "50%-50%"},
                 {"width", doc->width() * scale},
                 {"height", doc->height() * scale}
             });
     }
 
+    void newFile() {
+        if (!*newFileProperties)
+            return;
+        doc = inject<Document>{"new"};
+        doc->load(*newFileProperties);
+        node()->set("visible", true);
+        showFile();
+    }
+
     void openFile() {
         node()->removeAllChildren();
         doc = inject<Document>{"new"};
-        if (startsWith(filePath, "new:")) {
-            auto lines = split(filePath, ":");
-            auto settings = std::make_shared<PropertySet>();
-            for (auto& line : lines) {
-                auto parts = split(line, "=");
-                if (parts.size() == 2) {
-                    settings->set(trim(parts[0]), trim(parts[1]));
-                }
-            }
-            doc->load(settings);
-        } else {
-            doc->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
-        }
+        doc->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
+        showFile();
+    }
 
+    void showFile() {
         auto timeline = doc->currentTimeline();
         for (U32 i = 0, count = timeline->layerCount(); i < count; ++i) {
             lastCell = timeline->getCell(0, i);
@@ -68,6 +71,7 @@ public:
 
         rezoom();
         activate();
+        node()->set("visible", true);
         node()->focus();
     }
 

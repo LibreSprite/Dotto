@@ -34,7 +34,7 @@ var controllers = {
 
     newbutton : {
         click : function() {
-            app.window.createChild("newfilepopup");
+            app.command("newfile", "interactive", true);
         }
     },
 
