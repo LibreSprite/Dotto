@@ -153,7 +153,7 @@ public:
         });
 
         addFunction("quit", [=](){
-            pub(msg::RequestShutdown{});
+            inject<Command>{"quit"}->run();
             return true;
         });
 
