@@ -2,18 +2,28 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <cmd/Command.hpp>
 #include <common/line.hpp>
 #include <common/Surface.hpp>
+#include <doc/Document.hpp>
+#include <doc/Selection.hpp>
 #include <tools/Tool.hpp>
-
-class Surface;
 
 class Bucket : public  Tool {
 public:
+    Property<S32> threshold{this, "threshold", 0};
+    Property<bool> proportional{this, "proportional", false};
+
     virtual void begin(Surface* surface, const Vector<Point2D>& points) {
         auto targetColor = surface->getPixel(points.back().x, points.back().y);
         if (targetColor == color)
             return;
+
+        S32 threshold = std::max(0, std::min<S32>(this->threshold, 255));
+        threshold *= threshold;
+
+        inject<Selection> selection{"new"};
+        selection->clear();
         S32 width = surface->width();
         S32 height = surface->height();
         Vector<Point2D> queue = points;
@@ -21,13 +31,25 @@ public:
             S32 x = queue.back().x;
             S32 y = queue.back().y;
             queue.pop_back();
-            surface->setPixelUnsafe(x, y, color.toU32());
+            if (x < 0 || y < 0 || x >= width || y >= height || selection->get(x, y))
+                continue;
 
-            if (x > 0 && surface->getPixel(x - 1, y) == targetColor) queue.push_back({x - 1, y});
-            if (y > 0 && surface->getPixel(x, y - 1) == targetColor) queue.push_back({x, y - 1});
-            if (y < height - 1 && surface->getPixel(x, y + 1) == targetColor) queue.push_back({x, y + 1});
-            if (x < width - 1 && surface->getPixel(x + 1, y) == targetColor) queue.push_back({x + 1, y});
+            auto srcPixel = surface->getPixelUnsafe(x, y);
+            S32 distance = threshold - targetColor.distanceSquared(srcPixel);
+            if (distance < 0)
+                continue;
+
+            selection->add(x, y, proportional ? distance * 255 / threshold : 255);
+
+            if (x > 0) queue.push_back({x - 1, y});
+            if (y > 0) queue.push_back({x, y - 1});
+            if (y < height - 1) queue.push_back({x, y + 1});
+            if (x < width - 1) queue.push_back({x + 1, y});
         }
+
+        inject<Command> paint{"paint"};
+        paint->set("selection", selection.shared());
+        paint->run();
     }
 };
 
