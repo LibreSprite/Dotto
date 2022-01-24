@@ -79,6 +79,7 @@ public:
     }
 
     void eventHandler(const ui::KeyDown& event) {
+        event.cancel = true;
         String keyName = event.keyname;
         String text = this->text;
         cursorPosition = std::min(text.size(), cursorPosition);
@@ -130,7 +131,7 @@ public:
     }
 
     void eventHandler(const ui::KeyUp& event) {
-
+        event.cancel = true;
     }
 };
 
