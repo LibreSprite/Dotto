@@ -103,10 +103,10 @@ public:
         if (historyCursor < history.size())
             history.resize(historyCursor);
         history.push_back(command);
-        historyCursor = history.size();
         U32 maxUndoSize = inject<Config>{}->properties->get<U32>("max-undo-size");
         if (history.size() > maxUndoSize)
             history.erase(history.begin());
+        historyCursor = history.size();
     }
 
     void undo() override {
