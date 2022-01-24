@@ -18,11 +18,34 @@ class MetaMenu : public ui::Controller {
 public:
     Property<std::shared_ptr<Vector<std::shared_ptr<ui::Node>>>> widgets{this, "widgets"};
     Property<std::shared_ptr<PropertySet>> meta{this, "meta", nullptr, &MetaMenu::changeMeta};
+    Property<std::shared_ptr<PropertySet>> result{this, "result", nullptr, &MetaMenu::readResult};
     Property<String> containerId{this, "container"};
 
     void changeMeta() {
         if (*meta)
             build();
+    }
+
+    void readResult() {
+        PropertySet& ps = **result;
+        if (!*widgets)
+            return;
+        auto& map = ps.getMap();
+        for (auto widget : **widgets) {
+            auto label = widget->get("label");
+            auto result = widget->get("result");
+            auto value = widget->get("value");
+            if (result && result->has<String>()) {
+                auto parts = split(result->get<String>(), ".");
+                if (parts.size() == 2) {
+                    auto child = widget->findChildById(trim(parts[0]));
+                    value = child->get(parts[1]);
+                }
+            }
+            if (!label || !label->has<String>() || !value)
+                continue;
+            map[label->get<String>()] = value;
+        }
     }
 
     void build() {

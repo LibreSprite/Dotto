@@ -94,31 +94,10 @@ public:
                     {"parent", "okcancel"},
                     {"label", "ok"},
                     {"click", FunctionRef<void()>([=]{
-                        logI("ok clicked");
-                        auto widgets = metamenu->getPropertySet().get<std::shared_ptr<Vector<std::shared_ptr<ui::Node>>>>("widgets");
+                        auto ps = std::make_shared<PropertySet>();
+                        metamenu->set("result", ps);
                         metamenu->remove();
-                        if (!widgets)
-                            return;
-                        logI("got widgets");
-                        PropertySet ps;
-                        auto& map = ps.getMap();
-                        for (auto widget : *widgets) {
-                            auto label = widget->get("label");
-                            auto result = widget->get("result");
-                            auto value = widget->get("value");
-                            if (result && result->has<String>()) {
-                                auto parts = split(result->get<String>(), ".");
-                                if (parts.size() == 2) {
-                                    auto child = widget->findChildById(trim(parts[0]));
-                                    value = child->get(parts[1]);
-                                }
-                            }
-                            if (!label || !label->has<String>() || !value)
-                                continue;
-                            map[label->get<String>()] = value;
-                            logV("Filter property [", label->get<String>(), "] = [", value->toString(), "]");
-                        }
-                        shared->load(ps);
+                        shared->load(*ps);
                         interactive.value = false;
                         shared->run();
                     })}
