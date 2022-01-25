@@ -28,18 +28,13 @@ var controllers = {
         activatetool : function() {
             views.toolconfigbutton.src = app.activeTool.get("icon");
             views.toolconfigmenu.set("meta", app.activeTool.get("meta"));
-            views.toolconfigmenu.set("result", null); // clean previous result
-            const result = views.toolconfigmenu.get("result"); // get current result
         }
     },
 
     toolconfigmenu : {
         change : function() {
-            console.log("Updating tool config");
             views.toolconfigmenu.set("result", null); // clean previous result
-            const result = views.toolconfigmenu.get("result"); // get current result
-            app.activeTool.apply(result);
-            console.log("Got result ", result);
+            app.activeTool.apply(views.toolconfigmenu.get("result"));
         }
     },
 

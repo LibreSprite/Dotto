@@ -18,6 +18,21 @@ var controllers = {
                     views[name] = node;
                 }
             }
+
+            for (var name in controllers.script) {
+                app.addEventListener(name);
+            }
+        },
+
+        activatetool : function() {
+            views.toolconfigmenu.set("meta", app.activeTool.get("meta"));
+        }
+    },
+
+    toolconfigmenu : {
+        change : function() {
+            views.toolconfigmenu.set("result", null); // clean previous result
+            app.activeTool.apply(views.toolconfigmenu.get("result"));
         }
     },
 
@@ -99,7 +114,7 @@ function onEvent(name) {
             break;
         }
     }
-    if (!controller) {
+    if (!controller || !controller[name]) {
         target = "script";
         controller = controllers[target];
     }

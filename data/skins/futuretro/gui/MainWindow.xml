@@ -31,6 +31,9 @@
       <menubutton id="saveAsbutton" label="Save As..."/>
       <menubutton id="exportbutton" label="Export..."/>
       <menubutton id="quitbutton" label="Quit"/>
+      <image height="1px" multiply="rgba{0,0,0,128}"/>
+      <span text="Tool Settings" height="16px" margin="0 10 0 0" align="0"/>
+      <node controller="metamenu" id="toolconfigmenu" padding="0 10 0 0"/>
       <node height="100%"/>
 
       <node height="94px" padding="0 30 0 0">

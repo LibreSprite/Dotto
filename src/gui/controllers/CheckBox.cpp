@@ -22,7 +22,7 @@ public:
         if (*value == "true") {
             current = trueSurface;
             multiply = trueMultiply;
-        } else if (*value == "false") {
+        } else {
             current = falseSurface;
             multiply = falseMultiply;
         }
@@ -36,22 +36,18 @@ public:
     Property<std::shared_ptr<Surface>> trueSurface{this, "true-surface"};
     void reloadTrue() {
         *trueSurface = FileSystem::parse(*trueSrc);
+        changeState();
     }
 
     Property<String> falseSrc{this, "false-src", "", &CheckBox::reloadFalse};
     Property<std::shared_ptr<Surface>> falseSurface{this, "false-surface"};
     void reloadFalse() {
         *falseSurface = FileSystem::parse(*falseSrc);
-        node()->set("surface", *falseSurface);
+        changeState();
     }
 
-    Property<Color> trueMultiply{this, "true-multiply", {0,0,0,0}};
-    Property<Color> falseMultiply{this, "false-multiply", {0,0,0,0}, &CheckBox::changeFalseColor};
-    void changeFalseColor() {
-        node()->set("multiply", *falseMultiply);
-    }
-    Property<Color> hoverMultiply{this, "hover-multiply", {0,0,0,0}};
-    Property<Color> disabledMultiply{this, "disabled-multiply", {0,0,0,0}};
+    Property<Color> trueMultiply{this, "true-multiply", {0,0,0,0}, &CheckBox::changeState};
+    Property<Color> falseMultiply{this, "false-multiply", {0,0,0,0}, &CheckBox::changeState};
 
     Property<FunctionRef<void()>, true> clickCallback{this, "click"};
 
@@ -68,6 +64,7 @@ public:
                                  ui::Click,
                                  ui::KeyDown,
                                  ui::KeyUp>(this);
+        changeState();
     }
 
     void eventHandler(const ui::KeyDown& event) {
@@ -88,12 +85,12 @@ public:
     }
 
     void eventHandler(const ui::MouseDown&) {
-        if (*value == "false") {
+        if (*value != "true") {
             node()->set("value", "true");
             set("value", "true");
         } else {
-            node()->set("value", "true");
-            set("value", "true");
+            node()->set("value", "false");
+            set("value", "false");
         }
         node()->processEvent(ui::Changed{node()});
     }
