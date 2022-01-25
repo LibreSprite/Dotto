@@ -1,0 +1,14 @@
+<row forward="chk-label.text=label, chk-value.text=value" result="chk-value.value" id="row">
+  <span id="chk-label" width="50%"/>
+  <node width="50%">
+    <image controller="checkbox"
+           id="chk-value"
+           absolute="true"
+           x="50%-50%"
+           y="50%-50%"
+           width="13px"
+           height="13px"
+           true-src="%skin/check-on.png"
+           false-src="%skin/frame.png"/>
+  </node>
+</row>
