@@ -19,6 +19,33 @@ var controllers = {
                     views[name] = node;
                 }
             }
+
+            for (var name in controllers.script) {
+                app.addEventListener(name);
+            }
+        },
+
+        activatetool : function() {
+            views.toolconfigbutton.src = app.activeTool.get("icon");
+            views.toolconfigmenu.set("meta", app.activeTool.get("meta"));
+            views.toolconfigmenu.set("result", null); // clean previous result
+            const result = views.toolconfigmenu.get("result"); // get current result
+        }
+    },
+
+    toolconfigmenu : {
+        change : function() {
+            console.log("Updating tool config");
+            views.toolconfigmenu.set("result", null); // clean previous result
+            const result = views.toolconfigmenu.get("result"); // get current result
+            app.activeTool.apply(result);
+            console.log("Got result ", result);
+        }
+    },
+
+    toolconfigbutton : {
+        click : function() {
+            views.toolconfigmenu.visible = !views.toolconfigmenu.visible;
         }
     },
 
@@ -78,7 +105,7 @@ function onEvent(name) {
             break;
         }
     }
-    if (!controller) {
+    if (!controller || !controller[name]) {
         target = "script";
         controller = controllers[target];
     }
