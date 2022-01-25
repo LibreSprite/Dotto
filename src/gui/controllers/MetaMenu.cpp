@@ -18,7 +18,7 @@ class MetaMenu : public ui::Controller {
 public:
     Property<std::shared_ptr<Vector<std::shared_ptr<ui::Node>>>> widgets{this, "widgets"};
     Property<std::shared_ptr<PropertySet>> meta{this, "meta", nullptr, &MetaMenu::changeMeta};
-    Property<std::shared_ptr<PropertySet>> result{this, "result", nullptr, &MetaMenu::readResult};
+    Property<std::shared_ptr<PropertySet>, true> result{this, "result", std::make_shared<PropertySet>(), &MetaMenu::readResult};
     Property<String> containerId{this, "container"};
 
     void changeMeta() {
@@ -27,6 +27,10 @@ public:
     }
 
     void readResult() {
+        if (!*result) {
+            result.value = std::make_shared<PropertySet>();
+            node()->set("result", result.value);
+        }
         PropertySet& ps = **result;
         if (!*widgets)
             return;
@@ -49,7 +53,6 @@ public:
     }
 
     void build() {
-        logV("Building metamenu");
         if (!node()) {
             logV("Bail, no node");
             return;
@@ -68,7 +71,6 @@ public:
                 if (it == meta.end() || !it->second->has<std::shared_ptr<PropertySet>>())
                     continue;
                 auto descriptor = it->second->get<std::shared_ptr<PropertySet>>();
-                logI("Got descriptor ", i, ": ", descriptor);
                 auto widgetName = descriptor->get<String>("widget");
                 if (widgetName.empty()) {
                     logE("Descriptor ", i, " without \"widget\" key.");
@@ -101,7 +103,7 @@ public:
             width = std::max(node->width->toPixel(0, 0), width);
         }
 
-        auto container = node()->findChildById(containerId);
+        auto container = containerId->empty() ? node()->shared_from_this() : node()->findChildById(containerId);
         if (!container) {
             logI("Could not find [", *containerId, "]");
             container = node()->shared_from_this();

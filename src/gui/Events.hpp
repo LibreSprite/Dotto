@@ -42,6 +42,12 @@ namespace ui {
         }
     };
 
+    struct Changed : public Event {
+        Changed(Node* target) : Event{target} {
+            bubble = Bubble::Up;
+        }
+    };
+
     struct Resize : public Event {
         Resize(Node* target) : Event{target} {}
     };

@@ -32,6 +32,7 @@ public:
     void on(msg::ActivateColor& event) {
         if (picker || alwaysUpdate) {
             node()->set("value", event.color);
+            node()->processEvent(ui::Changed{node()});
         }
     }
 };

@@ -79,6 +79,7 @@ public:
     }
 
     void eventHandler(const ui::KeyDown& event) {
+        bool changed = false;
         event.cancel = true;
         String keyName = event.keyname;
         String text = this->text;
@@ -86,6 +87,7 @@ public:
         if (keyName == "BACKSPACE") {
             if (!cursorPosition)
                 return;
+            changed = true;
             text.erase(cursorPosition - 1, 1);
             cursorPosition--;
         } else if (keyName == "RIGHT") {
@@ -103,6 +105,7 @@ public:
                 logE("Input Regex Error: ", err.what(), "\nExpression: /", *allowRegex, "/");
             }
             text.insert(cursorPosition++, key, 0, key.size());
+            changed = true;
         } else {
             return;
         }
@@ -128,6 +131,9 @@ public:
                 }
             }
         }
+
+        if (changed)
+            node()->processEvent(ui::Changed{node()});
     }
 
     void eventHandler(const ui::KeyUp& event) {
