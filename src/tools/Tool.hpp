@@ -30,11 +30,14 @@ public:
         instances.insert({name, shared_from_this()});
         load({
                 {"icon", "%appdata/tools/" + name + ".png"},
-                {"tool", name}
+                {"tool", name},
+                {"meta", getMetaProperties()}
             });
     }
 
     virtual void begin(Surface* surface, const Vector<Point2D>& points) {}
     virtual void update(Surface* surface, const Vector<Point2D>& points) {}
     virtual void end(Surface* surface, const Vector<Point2D>& points) {}
+
+    virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
 };

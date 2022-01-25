@@ -14,6 +14,21 @@ public:
     Property<S32> threshold{this, "threshold", 0};
     Property<bool> proportional{this, "proportional", false};
 
+    virtual std::shared_ptr<PropertySet> getMetaProperties() {
+        auto meta = Tool::getMetaProperties();
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "number"},
+                    {"label", threshold.name},
+                    {"value", threshold.value}
+                }));
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "checkbox"},
+                    {"label", proportional.name},
+                    {"value", proportional.value}
+                }));
+        return meta;
+    }
+
     virtual void begin(Surface* surface, const Vector<Point2D>& points) {
         auto targetColor = surface->getPixel(points.back().x, points.back().y);
         if (targetColor == color)
@@ -21,6 +36,7 @@ public:
 
         S32 threshold = std::max(0, std::min<S32>(this->threshold, 255));
         threshold *= threshold;
+        bool proportional = this->proportional && threshold;
 
         inject<Selection> selection{"new"};
         selection->clear();
