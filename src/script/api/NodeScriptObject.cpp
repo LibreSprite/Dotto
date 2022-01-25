@@ -156,6 +156,7 @@ public:
         });
 
         createEventBinder<ui::AddToScene>("addtoscene");
+        createEventBinder<ui::Changed>("change");
         createEventBinder<ui::Blur>("blur");
         createEventBinder<ui::Focus>("focus");
         createEventBinder<ui::RemoveFromScene>("removefromscene");

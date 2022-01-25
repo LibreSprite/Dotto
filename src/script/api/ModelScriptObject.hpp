@@ -21,8 +21,23 @@ public:
         weak = model;
 
         addFunction("apply", [=](){
-            if (auto model = weak.lock())
-                model->load(model->getPropertySet());
+            if (auto model = weak.lock()) {
+                auto& args = script::Function::varArgs();
+                auto ps = &model->getPropertySet();
+                if (!args.empty()) {
+                    if (args[0].type == script::Value::Type::OBJECT && args[0].data.object_v) {
+                        auto value = args[0].data.object_v->getWrapped();
+                        if (value.has<std::shared_ptr<PropertySet>>()) {
+                            ps = value.get<std::shared_ptr<PropertySet>>().get();
+                        }
+                    }
+                }
+                if (!ps) {
+                    logI("Unexpected apply type: ", args[0].str());
+                    return 0;
+                }
+                model->load(*ps);
+            }
             return 0;
         });
 
@@ -30,8 +45,9 @@ public:
             if (auto model = weak.lock()) {
                 if (value.type == script::Value::Type::OBJECT && value.data.object_v) {
                     model->set(name, value.data.object_v->getWrapped());
-                } else
-                    model->set(name, value.get());
+                } else {
+                    model->set(name, nullptr);
+                }
             } else {
                 logE("Model expired, could not set ", name, ".");
             }

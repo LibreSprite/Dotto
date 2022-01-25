@@ -51,4 +51,4 @@ public:
 };
 
 static ui::Controller::Shared<ScriptController> scriptController{"script"};
-static script::ScriptObject::Shared<ModelScriptObject> msoType{typeid(std::shared_ptr<script::ScriptObject>).name()};
+static script::ScriptObject::Shared<ModelScriptObject> msoType{typeid(std::shared_ptr<Model>).name()};
