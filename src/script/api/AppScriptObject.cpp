@@ -26,7 +26,6 @@ class AppScriptObjectImpl : public AppScriptObject {
 public:
     script::Value target;
     script::Value eventTarget;
-    std::optional<PubSub<msg::Tick>> tick;
     PubSub<> pub{this};
 
     void setTarget(const ::Value& target) override {
@@ -80,11 +79,29 @@ public:
             return true;
         });
 
+        addProperty("activeTool", [=]() -> script::Value {
+            if (auto tool = Tool::active.lock())
+                return getEngine().toValue(std::static_pointer_cast<Model>(tool));
+            return nullptr;
+        });
+
         addFunction("addEventListener", [=](const String& name) {
-            if (name == "tick") {
-                if (!tick)
-                    tick = this;
-            }
+            if (name == "tick") createMessageBinder<msg::Tick>(name);
+            else if (name == "bootcomplete") createMessageBinder<msg::BootComplete>(name);
+            else if (name == "shutdown") createMessageBinder<msg::Shutdown>(name);
+            else if (name == "requestshutdown") createMessageBinder<msg::RequestShutdown>(name);
+            else if (name == "flush") createMessageBinder<msg::Flush>(name);
+            else if (name == "windowmaximized") createMessageBinder<msg::WindowMaximized>(name);
+            else if (name == "windowminimized") createMessageBinder<msg::WindowMinimized>(name);
+            else if (name == "windowrestored") createMessageBinder<msg::WindowRestored>(name);
+            else if (name == "windowclosed") createMessageBinder<msg::WindowClosed>(name);
+            else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name);
+            else if (name == "activatetool") createMessageBinder<msg::ActivateTool>(name);
+            else if (name == "activatecolor") createMessageBinder<msg::ActivateColor>(name);
+            else if (name == "activatelayer") createMessageBinder<msg::ActivateLayer>(name);
+            else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name);
+            else if (name == "activatedocument") createMessageBinder<msg::ActivateDocument>(name);
+            else if (name == "activatecell") createMessageBinder<msg::ActivateCell>(name);
             return true;
         });
 
@@ -160,7 +177,38 @@ public:
         makeGlobal("app");
     }
 
-    void on(msg::Tick&) {getEngine().raiseEvent({"tick"});}
+    class MessageBinder {
+    public:
+        std::weak_ptr<AppScriptObject> weakapp;
+        String name;
+
+        MessageBinder(AppScriptObject* aso, const String& name) :
+            weakapp{std::static_pointer_cast<AppScriptObject>(aso->shared_from_this())},
+            name{name} {}
+
+        virtual ~MessageBinder() = default;
+    };
+
+    Vector<std::unique_ptr<MessageBinder>> boundMessages;
+
+    template <typename Type>
+    void createMessageBinder(const String& name) {
+        class Binder : public MessageBinder {
+        public:
+            PubSub<Type> pub{this};
+
+            Binder(AppScriptObject* aso, const String& name) : MessageBinder{aso, name} {}
+
+            void on(Type& message) {
+                if (auto app = weakapp.lock()) {
+                    app->getEngine().raiseEvent({name});
+                }
+            }
+        };
+        auto binder = std::make_unique<Binder>(this, name);
+        boundMessages.emplace_back(std::move(binder));
+    }
+
 };
 
 static script::ScriptObject::Shared<AppScriptObjectImpl> reg("AppScriptObject", {"global"});
