@@ -27,7 +27,14 @@ var controllers = {
 
         activatetool : function() {
             views.toolconfigbutton.src = app.activeTool.get("icon");
+            views.toolconfigbutton.visible = true;
             views.toolconfigmenu.set("meta", app.activeTool.get("meta"));
+        }
+    },
+
+    togglelayersbutton : {
+        click : function() {
+            app.command("toggleui", "id", "layersidebar")
         }
     },
 

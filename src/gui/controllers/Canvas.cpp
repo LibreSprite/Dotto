@@ -16,7 +16,11 @@ public:
 
     void attach() override {
         node()->addEventListener<ui::MouseMove, ui::MouseDown, ui::MouseUp>(this);
-        node()->set("surface", cell->getComposite()->shared_from_this());
+        auto surface = cell->getComposite()->shared_from_this();
+        if (!surface) {
+            logI("Empty cell");
+        }
+        node()->set("surface", surface);
     }
 
     void eventHandler(const ui::MouseDown& event) {

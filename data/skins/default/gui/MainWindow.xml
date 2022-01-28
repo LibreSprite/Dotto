@@ -6,7 +6,8 @@
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
     <alttextbutton id="startbutton" label="File" width="100px"/>
     <node width="100%"/>
-    <image id="toolconfigbutton" margin="4 4 4 4" width="24px"/>
+    <image id="toolconfigbutton" visible="false" margin="4 4 4 4" width="24px"/>
+    <image id="togglelayersbutton" src="%skin/layers.png" margin="4 4 4 4" width="24px"/>
     <image controller="inputcolor" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
   </image>
 
@@ -36,7 +37,22 @@
     </image>
   </node>
 
-  <popup controller="focusfront" height="215px" width="44px" x="100%-100%" y="50%-50%" close="false">
+  <image
+      id="layersidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      visible="false"
+      overflow-hidden="true">
+    <node controller="layerlist" width="200px"/>
+  </image>
+
+  <popup controller="focusfront" height="215px" width="44px" x="0px" y="50%-50%" close="false">
     <inside controller="toolbox" id="toolbox"/>
   </popup>
 

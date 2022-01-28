@@ -82,7 +82,6 @@ public:
 
     void attach() override {
         Tool::boot();
-        pub(msg::ActivateLayer{}); //TODO: implement layers support
     }
 };
 

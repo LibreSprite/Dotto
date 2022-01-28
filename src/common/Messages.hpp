@@ -120,8 +120,16 @@ namespace msg {
         Vector<String> toStrings(const String& name) {return {name, color};}
     };
 
+    struct ActivateFrame : public Message {
+        std::shared_ptr<Document> doc;
+        U32 frame;
+        ActivateFrame(std::shared_ptr<Document> doc, U32 frame) : doc{doc}, frame{frame} {}
+    };
+
     struct ActivateLayer : public Message {
-        //TODO: implement layers support
+        std::shared_ptr<Document> doc;
+        U32 layer;
+        ActivateLayer(std::shared_ptr<Document> doc, U32 layer) : doc{doc}, layer{layer} {}
     };
 
     struct ActivateDocument : public Message {

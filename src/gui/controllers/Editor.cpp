@@ -18,64 +18,123 @@
 #include <log/Log.hpp>
 
 class Editor : public ui::Controller {
-    std::shared_ptr<Document> doc;
+    Property<std::shared_ptr<Document>> doc{this, "doc"};
     PubSub<msg::ActivateDocument, msg::ActivateEditor, msg::PollActiveEditor> pub{this};
     std::optional<Document::Provides> docProvides;
     std::optional<Cell::Provides> cellProvides;
-    std::optional<Provides> editorProvides;
+    std::optional<ui::Node::Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
     Property<std::shared_ptr<PropertySet>> newFileProperties{this, "newfile", nullptr, &Editor::newFile};
     Property<F32> scale{this, "scale", 1.0f, &Editor::rezoom};
+    Property<U32> frame{this, "frame", 0, &Editor::setFrame};
+    Property<U32> layer{this, "layer", 0, &Editor::setFrame};
     std::shared_ptr<Cell> lastCell;
+    std::shared_ptr<Cell> activeCell;
+    U32 activeFrame = -1;
+    U32 activeLayer = -1;
+    Vector<std::shared_ptr<ui::Node>> cellNodes;
 
 public:
+    void setFrame() {
+        if (!*doc)
+            return;
+        auto timeline = (*doc)->currentTimeline();
+        if (frame >= timeline->frameCount()) {
+            set("frame", timeline->frameCount() - 1);
+            return;
+        }
+        if (layer >= timeline->layerCount()) {
+            set("layer", timeline->layerCount() - 1);
+            return;
+        }
+
+        auto cell = timeline->getCell(frame, layer);
+        if (activeCell == cell)
+            return;
+
+        activeCell = timeline->getCell(frame, layer);
+
+        if (frame != activeFrame || layer != activeLayer) {
+            logI("Removing layers");
+            for (auto cellNode : cellNodes)
+                cellNode->remove();
+            cellNodes.clear();
+
+            logI("Adding layers ", timeline->layerCount());
+            for (U32 i = 0, count = timeline->layerCount(); i < count; ++i) {
+                lastCell = timeline->getCell(frame, i);
+                if (!lastCell)
+                    continue;
+                logI("Adding layer ", lastCell);
+                Cell::Provides p{lastCell};
+                auto cellNode = ui::Node::fromXML("canvas");
+                cellNodes.push_back(cellNode);
+                node()->addChild(cellNode);
+            }
+        }
+
+        cellProvides.emplace(activeCell.get(), "activecell");
+
+        if (frame != activeFrame) {
+            activeFrame = frame;
+            pub(msg::ActivateFrame{doc, frame});
+            logI("Active Frame ", frame);
+        }
+
+        if (layer != activeLayer) {
+            activeLayer = layer;
+            pub(msg::ActivateLayer{doc, layer});
+            logI("Active Layer ", layer);
+        }
+    }
+
     void attach() override {
         node()->addEventListener<ui::Focus, ui::FocusChild>(this);
         pub(msg::ActivateDocument{doc});
     }
 
     void rezoom() {
-        if (!doc)
+        if (!*doc)
             return;
         node()->load({
                 {"x", "50%-50%"},
                 {"y", "50%-50%"},
-                {"width", doc->width() * scale},
-                {"height", doc->height() * scale}
+                {"width", (*doc)->width() * scale},
+                {"height", (*doc)->height() * scale}
             });
     }
 
     void newFile() {
         if (!*newFileProperties)
             return;
-        doc = inject<Document>{"new"};
-        doc->load(*newFileProperties);
+        doc.value = inject<Document>{"new"};
+        (*doc)->load(*newFileProperties);
         node()->set("visible", true);
         showFile();
     }
 
     void openFile() {
         node()->removeAllChildren();
-        doc = inject<Document>{"new"};
-        doc->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
+        *doc = inject<Document>{"new"};
+        (*doc)->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
         showFile();
     }
 
     void showFile() {
-        auto timeline = doc->currentTimeline();
-        for (U32 i = 0, count = timeline->layerCount(); i < count; ++i) {
-            lastCell = timeline->getCell(0, i);
-            Cell::Provides p{lastCell};
-            node()->addChild(ui::Node::fromXML("canvas"));
-        }
-
+        node()->load({
+                {"visible", true},
+                {"doc", *doc}
+            });
         rezoom();
+        setFrame();
         activate();
-        node()->set("visible", true);
         node()->focus();
     }
 
     void activate() {
+        editorProvides.emplace(node(), "activeeditor");
+        docProvides.emplace(doc->get(), "activedocument");
+        cellProvides.emplace(activeCell.get(), "activecell");
         pub(msg::ActivateEditor{node()});
         pub(msg::ActivateDocument{doc});
     }
@@ -84,19 +143,14 @@ public:
     void eventHandler(const ui::Focus&) {activate();}
 
     void on(msg::ActivateDocument& msg) {
-        if (msg.doc.get() == doc.get()) {
-            docProvides.emplace(doc.get(), "activedocument");
-            cellProvides.emplace(lastCell, "activecell");
-        } else {
+        if (msg.doc.get() != doc->get()) {
             docProvides.reset();
             cellProvides.reset();
         }
     }
 
     void on(msg::ActivateEditor& msg) {
-        if (msg.editor == node())
-            editorProvides.emplace(this);
-        else
+        if (msg.editor != node())
             editorProvides.reset();
     }
 
