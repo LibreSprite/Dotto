@@ -191,7 +191,6 @@ public:
                     } else {
                         app->setEventTarget(nullptr);
                     }
-                    // logV("Event [", join(event.toStrings(name), ", "), "]");
                     getEngine().raiseEvent(event.toStrings(name));
                 }
             };
