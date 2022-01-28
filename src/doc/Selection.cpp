@@ -121,10 +121,10 @@ public:
 
     Vector<U32> read(Surface* surface) override {
         Vector<U32> pixels;
-        U32 index = 0;
         U32 maxY = std::min<U32>(bounds.bottom(), surface->height());
         U32 maxX = std::min<U32>(bounds.right(), surface->width());
         for (U32 y = bounds.y; y < maxY; ++y) {
+            U32 index = (y - bounds.y) * bounds.width;
             for (U32 x = bounds.x; x < maxX; ++x) {
                 if (data[index++]) {
                     pixels.push_back(surface->getPixelUnsafe(x, y));
@@ -135,11 +135,11 @@ public:
     }
 
     void write(Surface* surface, Vector<U32>& pixels) override {
-        U32 index = 0;
         U32 maxY = std::min<U32>(bounds.bottom(), surface->height());
         U32 maxX = std::min<U32>(bounds.right(), surface->width());
         U32 cursor = 0;
         for (U32 y = bounds.y; y < maxY; ++y) {
+            U32 index = (y - bounds.y) * bounds.width;
             for (U32 x = bounds.x; x < maxX; ++x) {
                 if (data[index++]) {
                     surface->setPixelUnsafe(x, y, pixels[cursor++]);
