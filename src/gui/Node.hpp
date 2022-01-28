@@ -147,6 +147,22 @@ namespace ui {
 
         virtual void onResize();
 
+        S32 innerWidth() {
+            return width->toPixel(0, 0) - padding->x - padding->width;
+        }
+
+        S32 innerHeight() {
+            return height->toPixel(0, 0) - padding->y - padding->height;
+        }
+
+        S32 outerWidth() {
+            return width->toPixel(0, 0) + margin->x + margin->width;
+        }
+
+        S32 outerHeight() {
+            return height->toPixel(0, 0) + margin->y + margin->height;
+        }
+
         virtual void draw(S32 z, Graphics& gfx);
 
         void remove() {
