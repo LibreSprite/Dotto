@@ -36,6 +36,16 @@ void ui::Node::setTag(const String& tag) {
     }
 }
 
+std::shared_ptr<ui::Node> ui::Node::findChildByPredicate(const std::function<bool(ui::Node*)> predicate) {
+    if (predicate(this))
+        return shared_from_this();
+    for (auto& child : children) {
+        if (auto found = child->findChildByPredicate(predicate))
+            return found;
+    }
+    return nullptr;
+}
+
 std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId, bool debug) {
     if (debug) {
         logV("Looking for [", targetId, "] in [", id.value, "]:", children.size());

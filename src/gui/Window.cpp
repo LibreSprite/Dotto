@@ -22,6 +22,14 @@ namespace ui {
         Node::doResize();
     }
 
+    std::shared_ptr<ui::Node> Window::getFocused() {
+        if (focusTarget.expired()) {
+            focus(findChildByPredicate([](ui::Node* node){
+                return *node->stealFocus;
+            }));
+        }
+        return focusTarget.lock();
+    }
 
     void Window::focus(std::shared_ptr<ui::Node> child) {
         if (!child)
@@ -135,7 +143,7 @@ namespace ui {
 
             auto shared = guiEvent.target->shared_from_this();
 
-            if (auto focus = focusTarget.lock()) {
+            if (auto focus = getFocused()) {
                 if (focus.get() == guiEvent.target) {
                     guiEvent.target->processEvent(ui::Click{focus.get(), eventX, eventY, event.buttons});
                 }
@@ -146,7 +154,7 @@ namespace ui {
     }
 
     void Window::on(msg::KeyDown& event) {
-        if (auto focus = focusTarget.lock()) {
+        if (auto focus = getFocused()) {
             focus->processEvent(ui::KeyDown{
                     focus.get(),
                     event.scancode,
@@ -158,7 +166,7 @@ namespace ui {
     }
 
     void Window::on(msg::KeyUp& event) {
-        if (auto focus = focusTarget.lock()) {
+        if (auto focus = getFocused()) {
             focus->processEvent(ui::KeyUp{
                     focus.get(),
                     event.scancode,

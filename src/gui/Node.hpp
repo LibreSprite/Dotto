@@ -101,6 +101,7 @@ namespace ui {
 
         void set(const String& key, Value& value, bool debug = false) override;
 
+        std::shared_ptr<Node> findChildByPredicate(const std::function<bool(ui::Node*)> predicate);
         std::shared_ptr<Node> findChildById(const String& targetId, bool debug = false);
         std::shared_ptr<Node> findParentById(const String& targetId);
 
