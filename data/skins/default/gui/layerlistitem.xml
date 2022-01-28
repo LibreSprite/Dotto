@@ -1,0 +1,5 @@
+<node forward="preview.surface=surface" padding="5 5 5 5">
+  <image src="%skin/editor.png" slice="2 2" padding="1 1 1 1">
+    <image id="preview" fit="cover"/>
+  </image>
+</node>
