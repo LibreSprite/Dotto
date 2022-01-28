@@ -55,16 +55,16 @@ namespace ui {
         }
 
         template<typename Arg, typename Target>
-        void addEventListener(Target* target, const std::function<void(const Arg&)>& func) {
-            auto wrapper = [=](const void* arg){func(*static_cast<const Arg*>(arg));};
+        void addEventListener(Target* target, std::function<void(const Arg&)>&& func) {
+            auto wrapper = [=, func=std::move(func)](const void* arg){func(*static_cast<const Arg*>(arg));};
             auto& list = stringHandlers[typeid(Arg).name()];
             for (auto& entry : list) {
                 if (entry.target == nullptr) {
-                    entry = {target, wrapper};
+                    entry = {target, std::move(wrapper)};
                     return;
                 }
             }
-            list.push_back({target, wrapper});
+            list.push_back({target, std::move(wrapper)});
         }
 
         void removeEventListeners(void* target) {
