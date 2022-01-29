@@ -7,7 +7,7 @@
     <alttextbutton id="startbutton" label="File" width="100px"/>
     <node width="100%"/>
     <image id="toolconfigbutton" visible="false" margin="4 4 4 4" width="24px"/>
-    <image id="togglelayersbutton" src="%skin/layers.png" margin="4 4 4 4" width="24px"/>
+    <image id="togglelayersbutton" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
     <image controller="inputcolor" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
   </image>
 

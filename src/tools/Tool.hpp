@@ -29,7 +29,7 @@ public:
     virtual void init(const String& name) {
         instances.insert({name, shared_from_this()});
         load({
-                {"icon", "%appdata/tools/" + name + ".png"},
+                {"icon", "%appdata/icons/" + name + ".png"},
                 {"tool", name},
                 {"meta", getMetaProperties()}
             });
