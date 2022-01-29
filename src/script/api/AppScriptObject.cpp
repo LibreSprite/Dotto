@@ -49,6 +49,10 @@ public:
             return getEngine().toValue(inject<Cell>{"activecell"}.shared());
         });
 
+        addProperty("activeEditor", [this]{
+            return getEngine().toValue(inject<ui::Node>{"activeeditor"}.shared());
+        });
+
         addProperty("window", [this]{
             auto node = PubSub<>::pub(msg::PollActiveWindow{}).node;
             return node ? getEngine().toValue(node->shared_from_this()) : nullptr;

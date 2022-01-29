@@ -46,7 +46,7 @@ public:
                 if (value.type == script::Value::Type::OBJECT && value.data.object_v) {
                     model->set(name, value.data.object_v->getWrapped());
                 } else {
-                    model->set(name, nullptr);
+                    model->set(name, value.get());
                 }
             } else {
                 logE("Model expired, could not set ", name, ".");
