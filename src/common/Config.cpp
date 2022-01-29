@@ -39,7 +39,15 @@ public:
             first = false;
             auto add = fs->parse("%appdata/i18n/" + languageName + ".ini");
             if (add.has<std::shared_ptr<PropertySet>>()) {
-                language->append(*add.get<std::shared_ptr<PropertySet>>());
+                auto ps = add.get<std::shared_ptr<PropertySet>>();
+                language->append(ps);
+                for (auto& entry : ps->getMap()) {
+                    auto lower = tolower(entry.first);
+                    if (entry.first != lower && language->getMap().find(lower) == language->getMap().end())
+                        language->set(lower, entry.second->get<String>());
+                }
+            } else {
+                logI("Could not load language [", languageName, "]");
             }
         }
 

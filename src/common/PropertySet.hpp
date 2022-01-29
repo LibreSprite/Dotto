@@ -109,7 +109,9 @@ public:
 
     template<typename Type>
     bool get(const String& key, Type& out) const {
-        auto it = properties.find(tolower(key));
+        auto it = properties.find(key);
+        if (it == properties.end())
+            it = properties.find(tolower(key));
         if (it == properties.end())
             return false;
         bool success = assignProperty(*it->second, out);
