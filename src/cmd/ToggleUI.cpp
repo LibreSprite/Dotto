@@ -12,6 +12,8 @@
 
 class ToggleUI : public Command {
     Property<String> id{this, "id"};
+    Property<String> hide{this, "hide"};
+    Property<bool> bringToFront{this, "bringtofront"};
     Property<String> property{this, "property", "visible"};
 
 public:
@@ -21,7 +23,20 @@ public:
             if (auto node = root->findChildById(id)) {
                 auto& ps = node->getPropertySet();
                 auto current = ps.get<bool>(property);
+
+                if (!hide->empty() && !current) {
+                    logI("Searching for ", *hide);
+                    root->findChildByPredicate([&](ui::Node* child){
+                        if (child->getPropertySet().get<String>("class") == *hide) {
+                            child->set(property, false);
+                        }
+                        return false;
+                    });
+                }
+
                 node->set(property, !current);
+                if (bringToFront)
+                    node->bringToFront();
             }
         }
     }

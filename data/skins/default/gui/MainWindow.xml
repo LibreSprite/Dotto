@@ -4,12 +4,49 @@
   <editor/>
 
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
-    <alttextbutton id="startbutton" label="File" width="100px"/>
+    <alttextbutton id="_startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
     <node width="100%"/>
     <image id="toolconfigbutton" visible="false" margin="4 4 4 4" width="24px"/>
-    <image id="togglelayersbutton" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
-    <image controller="inputcolor" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
+    <image controller="button" id="_togglelayersbutton" click="ToggleUI id=layersidebar, hide=sidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
+    <image controller="button" id="_togglefiltersbutton" click="ToggleUI id=filtersidebar, hide=sidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
+    <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
   </image>
+
+  <image
+      id="layersidebar"
+      class="sidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      visible="false"
+      overflow-hidden="true">
+    <node controller="layerlist" width="200px"/>
+  </image>
+
+  <image
+      id="filtersidebar"
+      class="sidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      visible="false"
+      overflow-hidden="true">
+    <node controller="filterlist" width="200px"/>
+  </image>
+
+  <popup height="215px" width="44px" x="0px" y="50%-50%" close="false">
+    <inside controller="toolbox" id="toolbox"/>
+  </popup>
 
   <image src="%skin/frame.png" slice="2 2" controller="metamenu" id="toolconfigmenu" absolute="true" width="100px" visible="false" x="100%-100%" y="100%-100%" margin="0 0 0 36" extra-height="36px"/>
 
@@ -26,7 +63,7 @@
         <menubutton id="exportbutton" label="Export..."/>
       </node>
 
-      <node controller="filterlist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
+      <node controller="recentfileslist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
 
       <node flow="row" controller="button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">
         <image id="iconimage" height="24px" width="24px"/>
@@ -36,24 +73,4 @@
 
     </image>
   </node>
-
-  <image
-      id="layersidebar"
-      src="%skin/bar.png"
-      slice="2 8"
-      width="200px"
-      height="100%-35px"
-      absolute="true"
-      x="100%-100%"
-      y="100%-100%"
-      margin="0 0 0 35"
-      visible="false"
-      overflow-hidden="true">
-    <node controller="layerlist" width="200px"/>
-  </image>
-
-  <popup controller="focusfront" height="215px" width="44px" x="0px" y="50%-50%" close="false">
-    <inside controller="toolbox" id="toolbox"/>
-  </popup>
-
 </window>

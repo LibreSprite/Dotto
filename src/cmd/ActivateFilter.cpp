@@ -3,6 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <cmd/Command.hpp>
+#include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/String.hpp>

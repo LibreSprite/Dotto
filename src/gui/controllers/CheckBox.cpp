@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/Surface.hpp>

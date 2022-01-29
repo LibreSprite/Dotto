@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/Surface.hpp>
@@ -29,10 +30,18 @@ public:
             current = disabledSurface;
             multiply = disabledMultiply;
         }
+        if (!current)
+            current = allSurface;
         if (multiply.a == 0 && current)
             multiply = 0xFFFFFFFF;
         node()->set("surface", current);
         node()->set("multiply", multiply);
+    }
+
+    Property<String> allSrc{this, "src", "", &Button::reloadAllSrc};
+    Property<std::shared_ptr<Surface>> allSurface{this, "all-surface"};
+    void reloadAllSrc() {
+        *allSurface = FileSystem::parse(*allSrc);
     }
 
     Property<String> pressed{this, "down-src", "", &Button::reloadPressed};
@@ -71,6 +80,7 @@ public:
     Property<FunctionRef<void()>, true> clickCallback{this, "click"};
 
     void on(msg::Flush& flush) {
+        flush.hold(*allSurface);
         flush.hold(*pressedSurface);
         flush.hold(*normalSurface);
         flush.hold(*disabledSurface);

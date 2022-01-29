@@ -32,12 +32,6 @@ var controllers = {
         }
     },
 
-    togglelayersbutton : {
-        click : function() {
-            app.command("toggleui", "id", "layersidebar")
-        }
-    },
-
     toolconfigmenu : {
         change : function() {
             views.toolconfigmenu.set("result", null); // clean previous result

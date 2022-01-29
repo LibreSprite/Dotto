@@ -16,7 +16,7 @@ class Command : public Injectable<Command>,
 
 protected:
     Command() {
-        weakDoc = inject<Document>{"activedocument"}.shared();
+        weakDoc = inject<Document>{InjectSilent::Yes, "activedocument"}.shared();
     }
 
     void commit() {
