@@ -37,6 +37,8 @@ public:
                 node->set(property, !current);
                 if (bringToFront)
                     node->bringToFront();
+            } else {
+                logE("Could not find ", id, " for toggle");
             }
         }
     }

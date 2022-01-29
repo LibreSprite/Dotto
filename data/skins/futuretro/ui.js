@@ -1,4 +1,6 @@
 var views = {};
+var sidebars = [];
+
 var controllers = {
     filemenu : {click:clickOutsideMenu},
     filtermenu : {click:closeMenu},
@@ -15,6 +17,8 @@ var controllers = {
                     for (var event in controllers[name]) {
                         node.addEventListener(event.trim());
                     }
+                    if (node.get("class") == "sidebar")
+                        sidebars.push(node);
                     views[name] = node;
                 }
             }
@@ -34,14 +38,6 @@ var controllers = {
             views.toolconfigmenu.set("result", null); // clean previous result
             app.activeTool.apply(views.toolconfigmenu.get("result"));
         }
-    },
-
-    startbutton : {
-        mouseup : mouseUpMenuButton.bind(null, "startbutton", "filemenu")
-    },
-
-    filterbutton : {
-        mouseup : mouseUpMenuButton.bind(null, "filterbutton", "filtermenu")
     },
 
     newbutton : {
@@ -98,11 +94,8 @@ function mouseUpMenuButton(button, menu) {
 }
 
 function closeMenu() {
-    if (!openMenuButton)
-        return;
-    views[openMenuMenu].visible = false;
-    views[openMenuButton].set("state", "enabled");
-    openMenuButton = "";
+    for (var i = 0; i < sidebars.length; ++i)
+        sidebars[i].visible = false;
 }
 
 function onEvent(name) {

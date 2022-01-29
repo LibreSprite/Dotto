@@ -3,15 +3,49 @@
 
   <image multiply="#3E4556" absolute="true" x="0" y="0" width="100%" height="16px" flow="row">
     <node width="100%"/>
-    <image src="%skin/mainmenu.png" id="filterbutton" slice="15 15 1 1" width="70px" height="100%" padding="16" multiply="rgb{100,170,255}">
+    <image
+        src="%skin/mainmenu.png"
+        controller="button"
+        click="ToggleUI id=filtermenu, hide=sidebar"
+        slice="15 15 1 1"
+        width="70px"
+        height="100%"
+        padding="16"
+        up-multiply="rgb{100,170,255}"
+        down-multiply="rgb{50,85,128}"
+        hover-multiply="rgb{130,200,255}">
       <span text="Filters"/>
     </image>
-    <image src="%skin/mainmenu.png" id="startbutton" slice="15 15 1 1" width="150px" height="100%" padding="16">
+    <image
+        src="%skin/mainmenu.png"
+        controller="button"
+        click="ToggleUI id=filemenu, hide=sidebar"
+        slice="15 15 1 1"
+        width="150px"
+        height="100%"
+        padding="16"
+        up-multiply="rgb{255,255,255}"
+        down-multiply="rgb{200,200,200}"
+        hover-multiply="rgb{255,255,255}">
       <span text="Main Menu"/>
     </image>
   </image>
 
-  <node id="filtermenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
+  <image
+      id="layersidebar"
+      class="sidebar"
+      multiply="rgba{0,0,0,64}"
+      width="200px"
+      height="100%-16px"
+      absolute="true"
+      x="100%-100%"
+      y="16px"
+      visible="false"
+      overflow-hidden="true">
+    <node controller="layerlist" width="200px"/>
+  </image>
+
+  <node id="filtermenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false" class="sidebar">
     <image controller="filterlist"
            multiply="#224970"
            width="221px"
@@ -22,7 +56,7 @@
     </image>
   </node>
 
-  <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
+  <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false" class="sidebar">
     <image multiply="#576D70" height="100%-16px" width="151px" x="100%-100%" y="16px" absolute="true" id="filemenucontainer">
 
       <menubutton id="newbutton" label="New"/>
