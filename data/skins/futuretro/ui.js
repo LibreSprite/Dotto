@@ -48,24 +48,11 @@ var controllers = {
     },
 
     openbutton : {
-        click : function() {
-            closeMenu();
-            var pick = app.open('*.png', 'Open image');
-            if (pick) {
-                views.editor.set("file", pick);
-                views.editor.visible = true;
-            }
-        }
+        click : app.command.bind(null, "openfile")
     },
 
     savebutton : {
-        click : function() {
-            closeMenu();
-            var pick = app.save('*.png', 'Save image', "Image format");
-            if (pick) {
-                app.write(pick, app.activeCell.composite);
-            }
-        }
+        click : app.command.bind(null, "savefile")
     },
 
     quitbutton : {

@@ -2,11 +2,11 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include "common/Parser.hpp"
-#include "common/String.hpp"
-#include "fs/FileDialog.hpp"
-#include "fs/FileSystem.hpp"
 #include <cmd/Command.hpp>
+#include <common/Parser.hpp>
+#include <common/String.hpp>
+#include <fs/FileDialog.hpp>
+#include <fs/FileSystem.hpp>
 #include <gui/Node.hpp>
 
 class OpenFile : public Command {
@@ -17,7 +17,6 @@ public:
         auto& parsers = Parser::getRegistry();
         Vector<String> filters;
         for (auto& entry : parsers) {
-            logI("Found image parser [", entry.first, "] ", entry.second.hasFlag("image"));
             if (entry.first.empty() || !entry.second.hasFlag("image"))
                 continue;
             filters.push_back("*." + entry.first);
