@@ -52,10 +52,13 @@ public:
 
             auto srcPixel = surface->getPixelUnsafe(x, y);
             S32 distance = threshold - targetColor.distanceSquared(srcPixel);
-            if (distance < 0)
+            if (distance < 0 || (distance == 0 && threshold))
                 continue;
 
-            selection->add(x, y, proportional ? distance * 255 / threshold : 255);
+            U8 amount = proportional ? distance * 255 / threshold : 255;
+            if (!amount)
+                amount = 1;
+            selection->add(x, y, amount);
 
             if (x > 0) queue.push_back({x - 1, y});
             if (y > 0) queue.push_back({x, y - 1});
