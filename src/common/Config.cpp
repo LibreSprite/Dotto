@@ -3,12 +3,18 @@
 // Read LICENSE.txt for more information.
 
 #include <common/Config.hpp>
+#include <common/Messages.hpp>
 #include <common/Parser.hpp>
+#include <common/PubSub.hpp>
 #include <fs/FileSystem.hpp>
+#include <fs/Folder.hpp>
 #include <gui/Node.hpp>
 
 class ConfigImpl : public Config {
 public:
+    PubSub<msg::Flush> pub{this};
+
+    std::shared_ptr<PropertySet> style;
 
     bool boot() override {
         inject<FileSystem> fs;
@@ -20,6 +26,16 @@ public:
             return false;
         }
 
+        initLanguage(fs);
+        initStyle(fs);
+        return true;
+    }
+
+    void on(msg::Flush& flush) {
+        flush.hold(style);
+    }
+
+    void initLanguage(inject<FileSystem>& fs) {
         auto languageName = properties->get<String>("language");
         if (languageName.empty())
             languageName = "en_US";
@@ -50,8 +66,13 @@ public:
                 logI("Could not load language [", languageName, "]");
             }
         }
+    }
 
-        return true;
+    void initStyle(inject<FileSystem>& fs) {
+        auto skin = properties->get<String>("skin");
+        if (auto root = fs->getRoot()->get<Folder>())
+            root->mount("%skin", "dir", fs->find(skin, "dir")->getUID());
+        style = fs->parse("%skin/gui/style.ini");
     }
 
     String eval(const String& str, const ui::Node* context) {

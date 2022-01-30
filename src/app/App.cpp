@@ -49,9 +49,6 @@ public:
 #endif
         fs->boot();
         config->boot();
-        auto skin = config->properties->get<String>("skin");
-        if (auto root = fs->getRoot()->get<Folder>())
-            root->mount("%skin", "dir", fs->find(skin, "dir")->getUID());
         system->boot();
         if (auto autorun = fs->find("%appdata/autorun", "dir")->get<Folder>()) {
             Vector<std::pair<S32, std::shared_ptr<File>>> files;
