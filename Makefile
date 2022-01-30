@@ -63,6 +63,7 @@ else
     C_FILES += $(shell find libs -type f -name '*.c')
 
     LN_FLAGS += $(shell sdl2-config --libs)
+    LN_FLAGS += -lSDL2_image
     LN_FLAGS += $(SO_FILES)
 
 #BEGIN V8 SUPPORT
