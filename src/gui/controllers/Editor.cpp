@@ -109,7 +109,6 @@ public:
             return;
         doc.value = inject<Document>{"new"};
         (*doc)->load(*newFileProperties);
-        node()->set("visible", true);
         showFile();
     }
 

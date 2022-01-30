@@ -4,11 +4,11 @@
   <editor/>
 
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
-    <alttextbutton id="_startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
+    <alttextbutton id="startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
     <node width="100%"/>
     <image id="toolconfigbutton" visible="false" margin="4 4 4 4" width="24px"/>
-    <image controller="button" id="_togglelayersbutton" click="ToggleUI id=layersidebar, hide=sidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
-    <image controller="button" id="_togglefiltersbutton" click="ToggleUI id=filtersidebar, hide=sidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
+    <image controller="button" id="togglelayersbutton" click="ToggleUI id=layersidebar, hide=sidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
+    <image controller="button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar, hide=sidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
     <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
   </image>
 
