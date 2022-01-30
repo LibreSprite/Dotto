@@ -77,7 +77,7 @@ public:
     Property<Color> hoverMultiply{this, "hover-multiply", {0,0,0,0}};
     Property<Color> disabledMultiply{this, "disabled-multiply", {0,0,0,0}};
 
-    Property<FunctionRef<void()>, true> clickCallback{this, "click"};
+    Property<FunctionRef<void()>> clickCallback{this, "click"};
 
     void on(msg::Flush& flush) {
         flush.hold(*allSurface);

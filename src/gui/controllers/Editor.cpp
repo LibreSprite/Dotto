@@ -55,17 +55,14 @@ public:
         activeCell = timeline->getCell(frame, layer);
 
         if (frame != activeFrame || layer != activeLayer) {
-            logI("Removing layers");
             for (auto cellNode : cellNodes)
                 cellNode->remove();
             cellNodes.clear();
 
-            logI("Adding layers ", timeline->layerCount());
             for (U32 i = 0, count = timeline->layerCount(); i < count; ++i) {
                 lastCell = timeline->getCell(frame, i);
                 if (!lastCell)
                     continue;
-                logI("Adding layer ", lastCell);
                 Cell::Provides p{lastCell};
                 auto cellNode = ui::Node::fromXML("canvas");
                 cellNodes.push_back(cellNode);
@@ -78,13 +75,11 @@ public:
         if (frame != activeFrame) {
             activeFrame = frame;
             pub(msg::ActivateFrame{doc, frame});
-            logI("Active Frame ", frame);
         }
 
         if (layer != activeLayer) {
             activeLayer = layer;
             pub(msg::ActivateLayer{doc, layer});
-            logI("Active Layer ", layer);
         }
     }
 
