@@ -69,13 +69,11 @@ public:
     }
 };
 
-class PngWriter : public Writer {
+class PngWriter : public SimpleImageWriter {
 public:
     bool writeFile(std::shared_ptr<File> file, const Value& data) override {
-        if (!data.has<std::shared_ptr<Surface>>())
-            return false;
         return PNGEncoder{}.write(*file, data);
     }
 };
 
-static Writer::Shared<PngWriter> png{"png"};
+static Writer::Shared<PngWriter> png{"png", {"*.png"}};

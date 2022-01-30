@@ -72,12 +72,7 @@ var controllers = {
     },
 
     savebutton : {
-        click : function() {
-            var pick = app.save('*.png', 'Save image', "Image format"); //
-            if (pick) {                                                 // TODO: use a command instead
-                app.write(pick, app.activeCell.composite);              //
-            }                                                           //
-        }
+        click : app.command.bind(null, "savefile")
     },
 
     quitbutton : {

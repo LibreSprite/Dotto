@@ -15,18 +15,8 @@ Value FileSystem::parse(const String& path) {
 }
 
 bool FileSystem::write(const String& path, const Value& data) {
-    auto fsentity = inject<FileSystem>{}->find(path);
-    if (!fsentity)
-        return false;
-    auto file = fsentity->get<File>();
-    if (!file)
-        return false;
-    if (!file->open({.write=true, .create=true}))
-        return false;
-    inject<Writer> writer{file->type()};
-    if (!writer)
-        return false;
-    return writer->writeFile(file, data);
+    inject<Writer> writer{inject<FileSystem>{}->extension(path)};
+    return writer && writer->writeFile(path, data);
 }
 
 bool FileSystem::boot() {
