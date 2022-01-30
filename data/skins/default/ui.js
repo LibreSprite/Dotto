@@ -62,13 +62,7 @@ var controllers = {
     },
 
     openbutton : {
-        click : function() {
-            var pick = app.open('*.png', 'Open image'); //
-            if (pick) {                                 //
-                views.editor.set("file", pick);         // TODO: use a command instead
-                views.editor.visible = true;            //
-            }                                           //
-        }
+        click : app.command.bind(null, "openfile")
     },
 
     savebutton : {

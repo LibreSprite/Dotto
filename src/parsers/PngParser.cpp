@@ -114,4 +114,4 @@ public:
     }
 };
 
-static Parser::Shared<PngParser> png{"png"};
+static Parser::Shared<PngParser> png{"png", {"image"}};
