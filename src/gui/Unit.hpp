@@ -103,7 +103,8 @@ namespace ui {
         }
 
         bool operator == (const Unit& other) const {
-            return other.type == type && other.value == value;
+            return other.type == type && other.value == value &&
+                other.referenceType == referenceType && other.reference == reference;
         }
 
         operator String () const {
