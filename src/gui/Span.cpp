@@ -107,8 +107,7 @@ namespace ui {
                         .destination = globalRect,
                         .nineSlice = {},
                         .zIndex    = z,
-                        .multiply  = multiply,
-                        .alpha     = alpha
+                        .multiply  = multiply
                     });
             }
             Node::draw(z, g);

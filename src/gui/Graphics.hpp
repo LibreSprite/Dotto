@@ -13,6 +13,7 @@ protected:
 
 public:
     F32 scale = 1;
+    F32 alpha = 1.0f;
 
     struct BlitSettings {
         std::shared_ptr<Surface> surface;
@@ -21,7 +22,6 @@ public:
         const Rect& nineSlice;
         S32 zIndex;
         Color multiply;
-        F32 alpha;
         bool debug;
         bool flip;
     };

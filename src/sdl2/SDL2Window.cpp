@@ -73,6 +73,7 @@ public:
 
     void draw(S32 z, Graphics&) override {
         SDL_GL_MakeCurrent(window, context);
+        graphics->alpha = 1.0f;
         graphics->scale = scale;
         graphics->begin(globalRect, *background);
         ui::Window::draw(z, *graphics.get());

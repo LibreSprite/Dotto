@@ -402,19 +402,26 @@ void ui::Node::onResize() {
 }
 
 void ui::Node::draw(S32 z, Graphics& gfx) {
+    auto prevAlpha = gfx.alpha;
     if (*hideOverflow) {
         Rect clip = gfx.pushClipRect(globalRect);
         if (!gfx.isEmptyClipRect()) {
             for (auto& child : children) {
-                if (child->visible)
+                if (child->visible) {
+                    gfx.alpha *= child->alpha;
                     child->draw(z + 1 + *child->zIndex, gfx);
+                    gfx.alpha = prevAlpha;
+                }
             }
         }
         gfx.setClipRect(clip);
     } else {
         for (auto& child : children) {
-            if (child->visible)
+            if (child->visible) {
+                gfx.alpha *= child->alpha;
                 child->draw(z + 1 + *child->zIndex, gfx);
+                gfx.alpha = prevAlpha;
+            }
         }
     }
 }
