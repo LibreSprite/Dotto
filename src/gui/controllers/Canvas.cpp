@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <doc/Cell.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
@@ -10,17 +12,30 @@
 
 class Canvas : public ui::Controller {
 public:
+    PubSub<msg::ModifyCell> pub{this};
     inject<Cell> cell;
     std::shared_ptr<Tool> activeTool;
     Tool::Path points;
 
     void attach() override {
         node()->addEventListener<ui::MouseMove, ui::MouseDown, ui::MouseUp>(this);
+        setup();
+    }
+
+    void on(msg::ModifyCell& event) {
+        if (event.cell.get() == cell)
+            setup();
+    }
+
+    void setup() {
         auto surface = cell->getComposite()->shared_from_this();
         if (!surface) {
             logI("Empty cell");
         }
-        node()->set("surface", surface);
+        node()->load({
+                {"surface", surface},
+                {"alpha", cell->getAlpha()}
+            });
     }
 
     void eventHandler(const ui::MouseDown& event) {

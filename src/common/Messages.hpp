@@ -141,4 +141,9 @@ namespace msg {
         std::shared_ptr<Cell> cell;
         ActivateCell(std::shared_ptr<Cell> cell) : cell{cell} {}
     };
+
+    struct ModifyCell : public Message {
+        std::shared_ptr<Cell> cell;
+        ModifyCell(std::shared_ptr<Cell> cell) : cell{cell} {}
+    };
 }
