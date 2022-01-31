@@ -32,6 +32,7 @@ public:
         }
         auto& ps = editor->getPropertySet();
         auto frame = ps.get<S32>("frame");
+        auto layer = ps.get<S32>("layer");
         auto doc = ps.get<std::shared_ptr<Document>>("doc");
         if (!doc) {
             logI("No document");
@@ -68,15 +69,11 @@ public:
             auto aspect = surface ? surface->width() / F32(surface->height()) : 4.0f;
             S32 itemHeight = width / aspect;
             item->load({
-                    {"surface", surface},
-                    {"height", itemHeight}
+                    {"preview", surface},
+                    {"height", itemHeight},
+                    {"click", "ActivateLayer layer=" + std::to_string(i)},
+                    {"state", i == layer ? "active" : "enabled"}
                 });
-            item->removeEventListeners(this);
-            item->addEventListener<ui::Click>(this, [=](const auto&) {
-                inject<Command> cmd{"activatelayer"};
-                cmd->set("layer", i);
-                cmd->run();
-            });
             height += itemHeight;
         }
 
