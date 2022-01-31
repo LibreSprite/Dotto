@@ -1,5 +1,18 @@
 # LibreSprite Dotto!
 
+## Funding / Contributing
+
+For the time being, this project is fuelled purely by the power of the **stars**.
+As in, github stars.
+We use them to light and heat the crates we keep our codegnomes in. As of this
+writing, the repo has 21 stars to its 390 commits, so we still have plenty of
+gnomes coding in cold, dark crates, which is a problem in the winter.
+Since they don't want to freeze their little gnomefingers off, the exchange
+rate is currently set to *5 commits per star*.
+
+So, if you want to contribute to the project but don't know how to code, feel
+free to give the repo a star. *Think of the codegnomes.*
+
 ## Version Roadmap
 
 | Number | Notes                                                |
