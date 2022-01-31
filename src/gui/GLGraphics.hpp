@@ -69,6 +69,7 @@ public:
 
     Color multiply;
     GLint multiplyLocation;
+    F32 alpha = 1.0f;
 
     F32 iwidth, iheight;
     S32 width, height;
@@ -341,8 +342,9 @@ public:
         if (activeTexture != texture || multiply != settings.multiply) {
             flush();
             activeTexture = texture;
-            multiply = settings.multiply;
         }
+        multiply = settings.multiply;
+        multiply.a *= settings.alpha;
 
         F32 sW = settings.nineSlice.width;
         F32 sH = settings.nineSlice.height;
@@ -392,7 +394,8 @@ public:
 
     void blit(const BlitSettings& settings) override {
         std::shared_ptr<GLTexture> texture;
-
+        if (settings.alpha <= 0)
+            return;
         if (settings.surface) {
             auto& surface = *settings.surface;
             if (!surface.textureInfo)
@@ -447,6 +450,7 @@ public:
                 .nineSlice   = slice,
                 .zIndex      = 1000000,
                 .multiply    = Color{255, 255, 255, 255},
+                .alpha       = 1.0f,
                 .debug       = false,
                 .flip        = true
             });

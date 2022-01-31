@@ -75,6 +75,7 @@ namespace ui {
                         .nineSlice = nineSlice,
                         .zIndex = z,
                         .multiply = multiply,
+                        .alpha = alpha,
                         .debug = debug
                     });
             } else {
@@ -84,6 +85,7 @@ namespace ui {
                         .nineSlice = nineSlice,
                         .zIndex = z,
                         .multiply = multiply,
+                        .alpha = alpha,
                         .debug = debug
                     });
             }

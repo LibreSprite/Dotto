@@ -21,6 +21,7 @@ public:
         const Rect& nineSlice;
         S32 zIndex;
         Color multiply;
+        F32 alpha;
         bool debug;
         bool flip;
     };
