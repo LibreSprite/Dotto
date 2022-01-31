@@ -286,6 +286,10 @@ void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
         }
     }
 
+    for (auto& entry : node->getPropertySet().getMap()) {
+        result.getMap().erase(entry.first);
+    }
+
     node->load(result);
     styles.push_back(&result);
     for (auto& child : node->getChildren()) {
