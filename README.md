@@ -8,6 +8,7 @@
 | 1.0    | First stable release focused on static image editing |
 | 2.0    | Polish based on feedback from previous releases      |
 | 3.0    | Animation Support                                    |
+| 4.0    | Additional platforms support (Android / iOS)         |
 
 ## Feature Roadmap
 
@@ -18,6 +19,10 @@
 | Internationalization           | OK            | 0.5     |                                                 |
 | OpenGL Hardware acceleration   | OK            | 1.0     |                                                 |
 | Metal Hardware acceleration    | Planned       | 0.5     | Needed for OSX/iOS                              |
+| x86/64 Linux                   | OK            | 0.5     |                                                 |
+| x86/64 Windows                 | Planned       | 0.5     |                                                 |
+| x86_64 MacOS                   | Planned       | 1.0     | Needs Metal backend first                       |
+| Raspberry Pi 4 support         | Planned       | 1.0     | Needs OpenGL changes?                           |
 | Undo / Redo                    | OK            | 0.5     |                                                 |
 | Copy + Paste                   | Planned       | 0.5     |                                                 |
 | Resize Sprite                  | Planned       | 0.5     |                                                 |
@@ -38,7 +43,7 @@
 | Layer groups                   | Planned       | 2.0     |                                                 |
 | Layer masks                    | Planned       | 2.0     |                                                 |
 | Layer blending                 | Planned       | 0.5     |                                                 |
-| Layer alpha                    | Planned       | 0.5     |                                                 |
+| Layer alpha                    | Internal only | 0.5     |                                                 |
 | Image Filter support           | OK            | 0.5     |                                                 |
 | Drop Shadow filter             | OK            | 0.5     |                                                 |
 | Blur Filter                    | Planned       | 0.5     |                                                 |
@@ -60,6 +65,8 @@
 | Non-destructive Layer Filters  | Planned       | 3.0     |                                                 |
 | Commandline interface          | Planned       | 3.0     |                                                 |
 | Animation support              | Planned       | 3.0     |                                                 |
+| Android support                | Planned       | 4.0     |                                                 |
+| iOS support                    | Planned       | 4.0     |                                                 |
 
 ## Compilation
 
