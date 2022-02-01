@@ -56,7 +56,7 @@ free to give the repo a star. *Think of the codegnomes.*
 | Layer groups                   | Planned       | 2.0     |                                                 |
 | Layer masks                    | Planned       | 2.0     |                                                 |
 | Layer blending                 | Planned       | 0.5     |                                                 |
-| Layer alpha                    | Internal only | 0.5     |                                                 |
+| Layer alpha                    | OK            | 0.5     |                                                 |
 | Image Filter support           | OK            | 0.5     |                                                 |
 | Drop Shadow filter             | OK            | 0.5     |                                                 |
 | Blur Filter                    | Planned       | 0.5     |                                                 |
