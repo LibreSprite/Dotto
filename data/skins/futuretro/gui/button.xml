@@ -1,3 +1,10 @@
-<image controller="button" forward="iconimage.src=icon" padding="2 2 2 2" multiply="#20FFFFFF" up-multiply="#20FFFFFF" down-multiply="#FF576D70" hover-multiply="#80576D70">
+<image
+    controller="button"
+    forward="iconimage.src=icon"
+    padding="2 2 2 2"
+    up-src="%skin/button-up.png"
+    down-src="%skin/button-down.png"
+    hover-multiply="#DDDDDD"
+    down-multiply="#AAAAAA">
   <image id="iconimage"/>
 </image>
