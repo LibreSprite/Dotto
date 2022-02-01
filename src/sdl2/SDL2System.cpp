@@ -53,6 +53,13 @@ public:
                 running = false;
                 break;
 
+            case SDL_MOUSEWHEEL:
+                pub(msg::MouseWheel{
+                        event.wheel.windowID,
+                        event.wheel.preciseX,
+                        event.wheel.preciseY
+                    });
+                break;
             case SDL_MOUSEMOTION:
                 pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y, event.motion.state});
                 break;

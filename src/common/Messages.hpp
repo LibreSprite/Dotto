@@ -58,6 +58,11 @@ namespace msg {
         U32 buttons;
     };
 
+    struct MouseWheel {
+        const U32 windowId;
+        F32 wheelX, wheelY;
+    };
+
     struct MouseUp {
         const U32 windowId;
         S32 x, y;
