@@ -87,7 +87,7 @@ free to give the repo a star. *Think of the codegnomes.*
 
 Install dependencies:
 
-`pacman -S make sdl2 sdl2_image lua v8-r `
+`pacman -S make sdl2 sdl2_image lua v8-r lcms2`
 
 Checkout project:
 
