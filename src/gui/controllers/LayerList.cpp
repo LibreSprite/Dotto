@@ -72,7 +72,8 @@ public:
                     {"preview", surface},
                     {"height", itemHeight},
                     {"click", "ActivateLayer layer=" + std::to_string(i)},
-                    {"state", i == layer ? "active" : "enabled"}
+                    {"state", i == layer ? "active" : "enabled"},
+                    {"cell", cell},
                 });
             height += itemHeight;
         }
