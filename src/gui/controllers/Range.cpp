@@ -20,13 +20,24 @@ public:
     Property<F32> max{this, "max", 1.0f, &Range::changeValue};
     Property<F32> resolution{this, "resolution", 0.01f, &Range::changeValue};
     Property<bool> percent{this, "percent", false};
-    std::weak_ptr<ui::Node> parent;
+    Property<String> handleName{this, "handle", "", &Range::setHandle};
+    std::shared_ptr<ui::Node> handle;
 
     ~Range() {
-        if (auto parent = this->parent.lock())
-            parent->removeEventListeners(this);
-        if (auto node = this->node())
-            node->removeEventListeners(this);
+        if (handle)
+            handle->removeEventListeners(this);
+    }
+
+    void setHandle() {
+        if (handle)
+            handle->removeEventListeners(this);
+        handle = node()->findChildById(handleName);
+        if (handle) {
+            handle->addEventListener<ui::Drag,
+                                     ui::Drop,
+                                     ui::MouseDown,
+                                     ui::Resize>(this);
+        }
     }
 
     void changeValue() {
@@ -37,30 +48,21 @@ public:
         }
         if (*min >= *max)
             return;
-        v = ((v - min) * 100.0f) / (max - min);
-        node()->set("x", ui::Unit{std::to_string(S32(v)) + "%-50%"});
+        if (handle) {
+            v = ((v - min) * 100.0f) / (max - min);
+            handle->set("x", ui::Unit{std::to_string(S32(v)) + "%"});
+        }
+        node()->processEvent(ui::Changed{node()});
     }
 
     void attach() override {
-        node()->addEventListener<ui::Drag,
-                                 ui::Drop,
-                                 ui::Resize,
-                                 ui::AddToScene>(this);
+        node()->addEventListener<ui::MouseWheel,
+                                 ui::KeyDown>(this);
         changeValue();
     }
 
     void eventHandler(const ui::Resize&) {
         changeValue();
-    }
-
-    void eventHandler(const ui::AddToScene&) {
-        if (auto parent = this->parent.lock())
-            parent->removeEventListeners(this);
-        auto parent = node()->getParent()->shared_from_this();
-        this->parent = parent;
-        parent->addEventListener<ui::MouseWheel,
-                                 ui::MouseDown,
-                                 ui::KeyDown>(this);
     }
 
     void eventHandler(const ui::KeyDown& event) {
@@ -79,9 +81,9 @@ public:
 
     void eventHandler(const ui::MouseDown&) {
         pub(msg::BeginDrag{
-                node()->shared_from_this(),
-                node()->globalRect.x,
-                node()->globalRect.y
+                handle->shared_from_this(),
+                handle->globalRect.x,
+                handle->globalRect.y
             });
     }
 
@@ -90,19 +92,17 @@ public:
     }
 
     void eventHandler(const ui::Drag& event) {
-        auto parent = node()->getParent();
-        F32 width = parent->globalRect.width - parent->padding->x - parent->padding->width;
-        F32 start = parent->globalRect.x + parent->padding->x;
+        F32 width = node()->globalRect.width - node()->padding->x - node()->padding->width;
+        F32 start = node()->globalRect.x + node()->padding->x;
         F32 value = std::clamp<F32>((event.x - start) / width * (max - min), min, max);
         if (value != this->value) {
             this->value.value = value;
             changeValue();
             value = this->value.value;
             node()->load({
-                    {"value", value},
+                    {"value", tostring(value)},
                     {"drag-value", percent ? std::to_string(S32(value*100)) + "%" : tostring(value) }
                 });
-            node()->processEvent(ui::Changed{node()});
         }
     }
 };
