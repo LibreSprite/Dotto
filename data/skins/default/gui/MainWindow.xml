@@ -44,9 +44,7 @@
     <node controller="filterlist" width="200px"/>
   </image>
 
-  <popup height="215px" width="44px" x="0px" y="50%-50%" close="false">
-    <inside controller="toolbox" id="toolbox"/>
-  </popup>
+  <popup controller="toolbox" container="inside" width="45px" x="0px" y="50%-50%" close="false" extra-height="35"/>
 
   <image src="%skin/frame.png" slice="2 2" controller="metamenu" id="toolconfigmenu" absolute="true" width="100px" visible="false" x="100%-100%" y="100%-100%" margin="0 0 0 36" extra-height="36px"/>
 

@@ -78,8 +78,6 @@
     </image>
   </node>
 
-  <node controller="focusfront,toolbox" id="toolbox" absolute="true" height="260px" width="40px" x="0" y="50%-50%" flow="column">
-    <image controller="inputcolor" forward="multiply=value" alwaysupdate="true" height="36px" width="36px" margin="2 2 2 2"/>
-  </node>
+  <node controller="focusfront,toolbox" id="toolbox" absolute="true" height="260px" width="40px" x="0" y="50%-50%" flow="column" />
 
 </window>
