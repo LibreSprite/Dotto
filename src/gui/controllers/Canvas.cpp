@@ -12,7 +12,7 @@
 
 class Canvas : public ui::Controller {
 public:
-    PubSub<msg::ModifyCell> pub{this};
+    PubSub<msg::ModifyCell, msg::ActivateCell> pub{this};
     inject<Cell> cell;
     std::shared_ptr<Tool> activeTool;
     Tool::Path points;
@@ -25,6 +25,10 @@ public:
     void on(msg::ModifyCell& event) {
         if (event.cell.get() == cell)
             setup();
+    }
+
+    void on(msg::ActivateCell& event) {
+        node()->set("inputEnabled", event.cell.get() == cell);
     }
 
     void setup() {

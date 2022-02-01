@@ -71,6 +71,7 @@ public:
         }
 
         cellProvides.emplace(activeCell.get(), "activecell");
+        pub(msg::ActivateCell{activeCell});
 
         if (frame != activeFrame) {
             activeFrame = frame;
@@ -131,6 +132,7 @@ public:
         cellProvides.emplace(activeCell.get(), "activecell");
         pub(msg::ActivateEditor{node()});
         pub(msg::ActivateDocument{doc});
+        pub(msg::ActivateCell{activeCell});
     }
 
     void eventHandler(const ui::FocusChild&) {activate();}
