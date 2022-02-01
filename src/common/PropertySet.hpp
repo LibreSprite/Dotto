@@ -75,9 +75,14 @@ public:
             else if (from.has<String>()) out = std::atol(from.get<String>().c_str());
             else return false;
         } else if constexpr (std::is_floating_point_v<Type>) {
-            if (!from.has<String>())
-                return false;
-            out = std::atof(from.get<String>().c_str());
+            if (from.has<F32>()) out = from.get<F32>();
+            else if (from.has<S32>()) out = from.get<S32>();
+            else if (from.has<U32>()) out = from.get<U32>();
+            else if (from.has<U64>()) out = from.get<U64>();
+            else if (from.has<S64>()) out = from.get<S64>();
+            else if (from.has<double>()) out = from.get<double>();
+            else if (from.has<String>()) out = std::atof(from.get<String>().c_str());
+            else return false;
         } else if constexpr (std::is_constructible_v<Type, std::shared_ptr<Value>>) {
             out = Type{from};
         } else if constexpr (std::is_assignable_v<Type, std::shared_ptr<Value>>) {

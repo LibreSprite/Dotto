@@ -15,10 +15,10 @@
 class Range : public ui::Controller {
 public:
     PubSub<> pub{this};
-    Property<F32> value{this, "value", 0.0f, &Range::changeValue};
-    Property<F32> min{this, "min", 0.0f, &Range::changeValue};
-    Property<F32> max{this, "max", 1.0f, &Range::changeValue};
-    Property<F32> resolution{this, "resolution", 0.01f, &Range::changeValue};
+    Property<F64> value{this, "value", 0.0, &Range::changeValue};
+    Property<F64> min{this, "min", 0.0, &Range::changeValue};
+    Property<F64> max{this, "max", 1.0, &Range::changeValue};
+    Property<F64> resolution{this, "resolution", 0.01, &Range::changeValue};
     Property<bool> percent{this, "percent", false};
     Property<String> handleName{this, "handle", "", &Range::setHandle};
     std::shared_ptr<ui::Node> handle;
@@ -41,7 +41,7 @@ public:
     }
 
     void changeValue() {
-        F32 v = std::clamp(std::round(value / resolution) * resolution, *min, *max);
+        F64 v = std::clamp(std::round(value / resolution) * resolution, *min, *max);
         if (v != value) {
             node()->set("value", v);
             return;
@@ -49,7 +49,7 @@ public:
         if (*min >= *max)
             return;
         if (handle) {
-            v = ((v - min) * 100.0f) / (max - min);
+            v = ((v - min) * 100.0) / (max - min);
             handle->set("x", ui::Unit{std::to_string(S32(v)) + "%"});
         }
         node()->processEvent(ui::Changed{node()});
@@ -73,8 +73,8 @@ public:
     }
 
     void eventHandler(const ui::MouseWheel& event) {
-        F32 offset = event.wheelX + event.wheelY;
-        F32 newValue = *value + *resolution * offset;
+        F64 offset = event.wheelX + event.wheelY;
+        F64 newValue = *value + *resolution * offset;
         value.value = newValue;
         changeValue();
     }
@@ -92,9 +92,9 @@ public:
     }
 
     void eventHandler(const ui::Drag& event) {
-        F32 width = node()->globalRect.width - node()->padding->x - node()->padding->width;
-        F32 start = node()->globalRect.x + node()->padding->x;
-        F32 value = std::clamp<F32>((event.x - start) / width * (max - min), min, max);
+        F64 width = node()->globalRect.width - node()->padding->x - node()->padding->width;
+        F64 start = node()->globalRect.x + node()->padding->x;
+        F64 value = std::clamp<F64>((event.x - start) / width * (max - min), min, max);
         if (value != this->value) {
             this->value.value = value;
             changeValue();
