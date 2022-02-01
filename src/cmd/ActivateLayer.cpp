@@ -34,8 +34,10 @@ public:
             layer = ~U32{};
         if (layer == ~U32{})
             layer = prevLayer + navigate;
-        editor->set("layer", layer);
-        commit();
+        if (layer != prevLayer) {
+            editor->set("layer", layer);
+            commit();
+        }
     }
 };
 
