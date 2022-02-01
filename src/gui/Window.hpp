@@ -19,6 +19,7 @@ protected:
     PubSub<msg::MouseMove,
            msg::MouseUp,
            msg::MouseDown,
+           msg::MouseWheel,
            msg::KeyDown,
            msg::KeyUp,
            msg::WindowClosed,
@@ -57,6 +58,7 @@ public:
     void on(msg::MouseMove& event);
     void on(msg::MouseDown& event);
     void on(msg::MouseUp& event);
+    void on(msg::MouseWheel& event);
     void on(msg::KeyDown& event);
     void on(msg::KeyUp& event);
     void on(msg::WindowClosed& event);

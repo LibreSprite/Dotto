@@ -153,6 +153,16 @@ namespace ui {
         }
     }
 
+    void Window::on(msg::MouseWheel& event) {
+        if (event.windowId == id) {
+            hoverWindow = this;
+            ui::MouseWheel guiEvent{nullptr, mouseX, mouseY, mouseButtons, event.wheelX, event.wheelY};
+            guiEvent.target = findEventTarget(guiEvent);
+            if (guiEvent.target)
+                guiEvent.target->processEvent(guiEvent);
+        }
+    }
+
     void Window::on(msg::KeyDown& event) {
         if (auto focus = getFocused()) {
             focus->processEvent(ui::KeyDown{
