@@ -60,7 +60,7 @@ namespace msg {
 
     struct MouseWheel {
         const U32 windowId;
-        F32 wheelX, wheelY;
+        S32 wheelX, wheelY;
     };
 
     struct MouseUp {

@@ -56,8 +56,8 @@ public:
             case SDL_MOUSEWHEEL:
                 pub(msg::MouseWheel{
                         event.wheel.windowID,
-                        event.wheel.preciseX,
-                        event.wheel.preciseY
+                        event.wheel.x,
+                        event.wheel.y
                     });
                 break;
             case SDL_MOUSEMOTION:

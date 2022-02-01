@@ -115,8 +115,8 @@ namespace ui {
     };
 
     struct MouseWheel : public MouseEvent {
-        F32 wheelX, wheelY;
-        MouseWheel(Node* target, S32 globalX, S32 globalY, U32 buttons, F32 wheelX, F32 wheelY) :
+        S32 wheelX, wheelY;
+        MouseWheel(Node* target, S32 globalX, S32 globalY, U32 buttons, S32 wheelX, S32 wheelY) :
             MouseEvent{target, globalX, globalY, buttons},
             wheelX{wheelX},
             wheelY{wheelY}{}
