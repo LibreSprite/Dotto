@@ -19,6 +19,7 @@ public:
     virtual std::shared_ptr<Timeline> currentTimeline() = 0;
     virtual std::shared_ptr<Timeline> createTimeline() = 0;
     virtual const HashMap<String, std::shared_ptr<Timeline>>& getTimelines() = 0;
+    virtual std::shared_ptr<Command> getLastCommand() = 0;
     virtual void writeHistory(std::shared_ptr<Command> command) = 0;
     virtual void undo() = 0;
     virtual void redo() = 0;

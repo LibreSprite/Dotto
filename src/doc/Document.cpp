@@ -97,11 +97,16 @@ public:
         return guidToTimeline;
     }
 
+    std::shared_ptr<Command> getLastCommand() override {
+        return historyCursor == 0 ? nullptr : history[historyCursor - 1];
+    }
+
     void writeHistory(std::shared_ptr<Command> command) override {
         if (lockHistory)
             return;
         if (historyCursor < history.size())
             history.resize(historyCursor);
+        logV("Commit: ", command->getName());
         history.push_back(command);
         U32 maxUndoSize = inject<Config>{}->properties->get<U32>("max-undo-size");
         if (history.size() > maxUndoSize)
