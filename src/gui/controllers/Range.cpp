@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <cmath>
 #include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
@@ -19,9 +20,17 @@ public:
     Property<F32> max{this, "max", 1.0f, &Range::changeValue};
     Property<F32> resolution{this, "resolution", 0.01f, &Range::changeValue};
     Property<bool> percent{this, "percent", false};
+    std::weak_ptr<ui::Node> parent;
+
+    ~Range() {
+        if (auto parent = this->parent.lock())
+            parent->removeEventListeners(this);
+        if (auto node = this->node())
+            node->removeEventListeners(this);
+    }
 
     void changeValue() {
-        F32 v = std::clamp(S32(value / resolution) * resolution, *min, *max);
+        F32 v = std::clamp(std::round(value / resolution) * resolution, *min, *max);
         if (v != value) {
             node()->set("value", v);
             return;
@@ -33,11 +42,10 @@ public:
     }
 
     void attach() override {
-        node()->addEventListener<ui::MouseDown,
-                                 ui::Drag,
+        node()->addEventListener<ui::Drag,
                                  ui::Drop,
-                                 ui::KeyDown,
-                                 ui::Resize>(this);
+                                 ui::Resize,
+                                 ui::AddToScene>(this);
         changeValue();
     }
 
@@ -45,11 +53,28 @@ public:
         changeValue();
     }
 
+    void eventHandler(const ui::AddToScene&) {
+        if (auto parent = this->parent.lock())
+            parent->removeEventListeners(this);
+        auto parent = node()->getParent()->shared_from_this();
+        this->parent = parent;
+        parent->addEventListener<ui::MouseWheel,
+                                 ui::MouseDown,
+                                 ui::KeyDown>(this);
+    }
+
     void eventHandler(const ui::KeyDown& event) {
         if (event.keyname == String("LEFT"))
             node()->set("value", value - resolution);
         if (event.keyname == String("RIGHT"))
             node()->set("value", value + resolution);
+    }
+
+    void eventHandler(const ui::MouseWheel& event) {
+        F32 offset = event.wheelX + event.wheelY;
+        F32 newValue = *value + *resolution * offset;
+        value.value = newValue;
+        changeValue();
     }
 
     void eventHandler(const ui::MouseDown&) {
