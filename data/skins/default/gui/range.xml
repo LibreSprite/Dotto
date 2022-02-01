@@ -1,0 +1,13 @@
+<image slice="3 3"
+       forward="num-label.text=label, num-value.value=value, num-value.min=min, num-value.max=max, num-value.percent=percent"
+       result="num-value.value"
+       id="row">
+  <span id="num-label" alpha="0.75"/>
+  <image id="num-value"
+         controller="range"
+         absolute="true"
+         x="50%-50%"
+         forward="lbl.text=drag-value">
+    <span id="lbl" absolute="true" y="-20px" width="50px" x="50%-50%"/>
+  </image>
+</image>
