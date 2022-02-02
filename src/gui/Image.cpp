@@ -79,6 +79,7 @@ namespace ui {
                     });
             } else {
                 g.blit({
+                        .surface = nullptr,
                         .source = localRect,
                         .destination = globalRect,
                         .nineSlice = nineSlice,

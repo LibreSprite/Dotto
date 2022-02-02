@@ -29,7 +29,8 @@ public:
     }
 
     void setWrapped(const Value& vmodel) override {
-        weak = static_cast<std::shared_ptr<Selection>>(vmodel);
+        if (vmodel.has<std::shared_ptr<Selection>>())
+            weak = vmodel.get<std::shared_ptr<Selection>>();
     }
 };
 

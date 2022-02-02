@@ -15,6 +15,10 @@ else
     LN = g++
     UNAME_S := $(shell uname -s)
 
+    # uncomment if you get a linker error due to GCC 8
+    # LN_FLAGS += -lstdc++fs
+
+
     ifeq ($(UNAME_S),Linux)
         CCFLAGS += -D LINUX
         BITS := $(shell getconf LONG_BIT)
