@@ -8,16 +8,13 @@ class Surface;
 
 class Eraser : public Pencil {
 public:
-    void begin(Surface* surface, const Vector<Point2D>& points) override {
-        selection = inject<Selection>{"new"};
+    virtual void initPaint() {
         paint = inject<Command>{"paint"};
-        selection->add(points.back().x, points.back().y, 255);
         paint->load({
                 {"selection", selection},
                 {"mode", "erase"},
                 {"preview", true}
             });
-        paint->run();
     }
 };
 
