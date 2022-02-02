@@ -84,7 +84,7 @@ public:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color);
 
         auto vertexShader = compile(GL_VERTEX_SHADER,
-            "#version 330 core\n"
+            "#version 310 es\n"
             "in vec3 position;\n"
             "in vec2 srcUV;\n"
             "out vec2 uv;\n"
@@ -94,7 +94,8 @@ public:
             "}");
 
         auto fragmentShader = compile(GL_FRAGMENT_SHADER,
-            "#version 330 core\n"
+            "#version 310 es\n"
+            "precision mediump float;"
             "out vec4 FragColor;\n"
             "in vec2 uv;\n"
             "uniform sampler2D surface;\n"
@@ -117,11 +118,12 @@ public:
         int  success;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
-            glDeleteShader(shader);
-            shader = 0;
             char infoLog[512];
+            infoLog[0] = 0;
             glGetShaderInfoLog(shader, 512, NULL, infoLog);
             logE("ERROR::SHADER::COMPILATION_FAILED ", type, " ", infoLog);
+            glDeleteShader(shader);
+            shader = 0;
         }
 
         return shader;
