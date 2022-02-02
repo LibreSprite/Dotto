@@ -27,17 +27,20 @@ public:
     Property<String> shapeName{this, "shape", "%appdata/brushes/square.png", &Pencil::changeShape};
     std::shared_ptr<Surface> shape;
     F32 scale;
-    Property<S32> size{this, "size", 1};
-    Property<F32> interval{this, "interval", 1.0f};
+    Property<S32> size{this, "size", 1, &Pencil::invalidateMetaMenu};
+    Property<F32> interval{this, "interval", 1.0f, &Pencil::invalidateMetaMenu};
     Property<bool> HQ{this, "high-quality", false};
     bool wasInit = false;
     S32 prevPlotX = 0, prevPlotY = 0;
 
+    void invalidateMetaMenu() override {
+        Tool::invalidateMetaMenu();
+    }
+
     void changeShape() {
         wasInit = true;
         shape = FileSystem::parse(shapeName);
-        if (interval <= 0)
-            *interval = shape->width() / 8.0f * scale;
+        invalidateMetaMenu();
     }
 
     void on(msg::Flush& flush) {
@@ -182,7 +185,11 @@ public:
             changeShape();
         if (!shape)
             return;
+        if (size < 1)
+            *size = 1;
         scale = F32(size) / shape->width();
+        if (interval <= 0)
+            set("interval", shape->width() / 8.0f * scale);
         selection = inject<Selection>{"new"};
         initPaint();
         plot(points.back().x, points.back().y, true);

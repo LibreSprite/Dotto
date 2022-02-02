@@ -16,14 +16,25 @@
 
 class MetaMenu : public ui::Controller {
 public:
+    PubSub<msg::InvalidateMetaMenu> pub{this};
+
     Property<std::shared_ptr<Vector<std::shared_ptr<ui::Node>>>> widgets{this, "widgets"};
     Property<std::shared_ptr<PropertySet>> meta{this, "meta", nullptr, &MetaMenu::changeMeta};
     Property<std::shared_ptr<PropertySet>> result{this, "result", std::make_shared<PropertySet>(), &MetaMenu::readResult};
     Property<String> containerId{this, "container"};
-
+    bool ignoreChange = false;
     void changeMeta() {
         if (*meta)
             build();
+    }
+
+    void on(msg::InvalidateMetaMenu& event) {
+        if (event.oldMeta != *meta)
+            return;
+        if (ignoreChange)
+            *meta = event.newMeta;
+        set("meta", event.newMeta);
+        ignoreChange = false;
     }
 
     void readResult() {
@@ -31,6 +42,7 @@ public:
             result.value = std::make_shared<PropertySet>();
             node()->set("result", result.value);
         }
+        ignoreChange = true;
         PropertySet& ps = **result;
         if (!*widgets)
             return;

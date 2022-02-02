@@ -15,6 +15,7 @@ namespace ui {
 
 class Document;
 class Cell;
+class PropertySet;
 
 namespace msg {
 
@@ -98,6 +99,11 @@ namespace msg {
 
     struct EndDrag {
         std::shared_ptr<ui::Node> target;
+    };
+
+    struct InvalidateMetaMenu {
+        std::shared_ptr<PropertySet> oldMeta;
+        std::shared_ptr<PropertySet> newMeta;
     };
 
     struct PollActiveWindow {
