@@ -37,8 +37,14 @@ public:
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         context = SDL_GL_CreateContext(window);
+        String version = "310 core";
+        if (!context) {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+            context = SDL_GL_CreateContext(window);
+            version = "310 es";
+        }
         if (!context)
             return;
 
@@ -48,7 +54,7 @@ public:
         }
 
         SDL_GL_MakeCurrent(window, context);
-        graphics->init();
+        graphics->init(version);
 
         setDirty();
     }

@@ -73,7 +73,7 @@ public:
     F32 iwidth, iheight;
     S32 width, height;
 
-    void init() {
+    void init(const String& version) {
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
 
@@ -84,7 +84,7 @@ public:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &color);
 
         auto vertexShader = compile(GL_VERTEX_SHADER,
-            "#version 310 es\n"
+            "#version " + version + "\n"
             "in vec3 position;\n"
             "in vec2 srcUV;\n"
             "out vec2 uv;\n"
@@ -94,7 +94,7 @@ public:
             "}");
 
         auto fragmentShader = compile(GL_FRAGMENT_SHADER,
-            "#version 310 es\n"
+            "#version " + version + "\n"
             "precision mediump float;"
             "out vec4 FragColor;\n"
             "in vec2 uv;\n"
@@ -110,9 +110,10 @@ public:
         glDeleteShader(fragmentShader);
     }
 
-    U32 compile(U32 type, const char* source) {
+    U32 compile(U32 type, const String& source) {
         U32 shader = glCreateShader(type);
-        glShaderSource(shader, 1, &source, NULL);
+        auto str = source.c_str();
+        glShaderSource(shader, 1, &str, NULL);
         glCompileShader(shader);
 
         int  success;
