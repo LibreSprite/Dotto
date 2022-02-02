@@ -18,7 +18,7 @@ class MetaMenu : public ui::Controller {
 public:
     Property<std::shared_ptr<Vector<std::shared_ptr<ui::Node>>>> widgets{this, "widgets"};
     Property<std::shared_ptr<PropertySet>> meta{this, "meta", nullptr, &MetaMenu::changeMeta};
-    Property<std::shared_ptr<PropertySet>, true> result{this, "result", std::make_shared<PropertySet>(), &MetaMenu::readResult};
+    Property<std::shared_ptr<PropertySet>> result{this, "result", std::make_shared<PropertySet>(), &MetaMenu::readResult};
     Property<String> containerId{this, "container"};
 
     void changeMeta() {

@@ -16,7 +16,6 @@ public:
     }
 
     void setWrapped(const Value& vmodel) override {
-        logI("Setting wrapped ", vmodel.typeName());
         script::ScriptObject::setWrapped(vmodel);
         std::shared_ptr<PropertySet> model = vmodel;
         weak = model;
