@@ -15,8 +15,14 @@ namespace internal {
 
     template<typename Message>
     Vector<Listener>* channel() {
-        static std::unique_ptr<Vector<Listener>> ptr{new Vector<Listener>()};
-        return ptr.get();
+        static Vector<Listener>* ptr = ([]{
+           atexit(+[]{
+                      delete ptr;
+                      ptr = nullptr;
+                  });
+           return new Vector<Listener>();
+        })();
+        return ptr;
     }
 
     template <typename Message, typename Object>
