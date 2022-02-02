@@ -19,6 +19,7 @@ class DocumentImpl : public Document {
     String currentTimelineName;
     U32 docWidth = 0;
     U32 docHeight = 0;
+    String filepath;
 
     Vector<std::shared_ptr<Command>> history;
     U32 historyCursor = 0;
@@ -130,6 +131,14 @@ public:
         history[historyCursor]->redo();
         historyCursor++;
         lockHistory--;
+    }
+
+    String path() override {
+        return filepath;
+    }
+
+    void setPath(const String& path) override {
+        filepath = path;
     }
 };
 

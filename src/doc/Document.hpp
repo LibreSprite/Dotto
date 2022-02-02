@@ -23,4 +23,6 @@ public:
     virtual void writeHistory(std::shared_ptr<Command> command) = 0;
     virtual void undo() = 0;
     virtual void redo() = 0;
+    virtual String path() = 0;
+    virtual void setPath(const String&) = 0;
 };

@@ -55,20 +55,6 @@ var controllers = {
         }
     },
 
-    newbutton : {
-        click : function() {
-            app.command("newfile", "interactive", true);
-        }
-    },
-
-    openbutton : {
-        click : app.command.bind(null, "openfile")
-    },
-
-    savebutton : {
-        click : app.command.bind(null, "savefile")
-    },
-
     quitbutton : {
         click : function() {
             app.quit();

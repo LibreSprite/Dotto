@@ -25,7 +25,7 @@ public:
     FunctionRef(const String& commands) : FunctionRef([=]{
         for (auto& command : split(commands, ";")) {
             std::cmatch match;
-            std::regex_match(command.c_str(), match, std::regex("^\\s*([^\\s]+)\\s+(.*)$"));
+            std::regex_match(command.c_str(), match, std::regex("^\\s*([^\\s]+)\\s*(.*)$"));
             if (match.empty()) {
                 logI("Invalid command [", command, "]");
                 return;

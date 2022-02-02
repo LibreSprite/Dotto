@@ -12,6 +12,8 @@
 class SaveFile : public Command {
 public:
     Property<String> fileName{this, "filename"};
+    Property<bool> saveAs{this, "saveas", false};
+    Property<bool> exportAs{this, "export", false};
 
     void showSaveDialog() {
         auto& writers = Writer::getRegistry();
@@ -32,10 +34,16 @@ public:
     }
 
     void run() override {
-        if (fileName->empty())
+        if (*saveAs || doc()->path().empty()) {
             showSaveDialog();
-        if (!fileName->empty())
-            FileSystem::write(fileName, doc());
+            if (fileName->empty())
+                return;
+        } else if (fileName->empty()) {
+            *fileName = doc()->path();
+        }
+        if (!*exportAs)
+            doc()->setPath(fileName);
+        FileSystem::write(fileName, doc());
     }
 };
 

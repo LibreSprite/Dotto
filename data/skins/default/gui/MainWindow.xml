@@ -54,11 +54,11 @@
       <span absolute="true" x="75px" y="24px" width="100%-100px" size="20px">Hello, ${username}!</span>
 
       <node absolute="true" x="2px" y="67px" width="188px" height="100%-110px">
-        <menubutton id="newbutton" label="New"/>
-        <menubutton id="openbutton" label="Open"/>
-        <menubutton id="savebutton" label="Save"/>
-        <menubutton id="saveAsbutton" label="Save As..."/>
-        <menubutton id="exportbutton" label="Export..."/>
+        <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
+        <menubutton id="openbutton" click="openfile" label="Open"/>
+        <menubutton id="savebutton" click="savefile" label="Save"/>
+        <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
+        <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
       </node>
 
       <node controller="recentfileslist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>

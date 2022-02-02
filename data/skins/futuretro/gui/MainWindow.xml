@@ -59,11 +59,11 @@
   <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false" class="sidebar">
     <image multiply="#576D70" height="100%-16px" width="151px" x="100%-100%" y="16px" absolute="true" id="filemenucontainer">
 
-      <menubutton id="newbutton" label="New"/>
-      <menubutton id="openbutton" label="Open"/>
-      <menubutton id="savebutton" label="Save"/>
-      <menubutton id="saveAsbutton" label="Save As..."/>
-      <menubutton id="exportbutton" label="Export..."/>
+      <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
+      <menubutton id="openbutton" click="openfile" label="Open"/>
+      <menubutton id="savebutton" click="savefile" label="Save"/>
+      <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
+      <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
       <menubutton id="quitbutton" label="Quit"/>
       <image height="1px" multiply="rgba{0,0,0,128}"/>
       <span text="Tool Settings" height="16px" margin="0 10 0 0" align="0"/>

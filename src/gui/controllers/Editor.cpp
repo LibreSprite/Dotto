@@ -112,6 +112,7 @@ public:
         node()->removeAllChildren();
         *doc = inject<Document>{"new"};
         (*doc)->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
+        (*doc)->setPath(filePath);
         showFile();
     }
 
