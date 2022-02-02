@@ -35,6 +35,9 @@ public:
             });
     }
 
+    virtual void onActivate() {
+        set("meta", getMetaProperties());
+    }
     virtual void begin(Surface* surface, const Vector<Point2D>& points) {}
     virtual void update(Surface* surface, const Vector<Point2D>& points) {}
     virtual void end(Surface* surface, const Vector<Point2D>& points) {}

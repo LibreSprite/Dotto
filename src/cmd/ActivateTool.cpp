@@ -27,6 +27,7 @@ public:
 
         Tool::previous = Tool::active;
         Tool::active = it->second;
+        it->second->onActivate();
         pub(msg::ActivateTool{*tool});
     }
 };
