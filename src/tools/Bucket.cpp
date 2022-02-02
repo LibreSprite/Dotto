@@ -13,6 +13,7 @@ class Bucket : public  Tool {
 public:
     Property<S32> threshold{this, "threshold", 0};
     Property<bool> proportional{this, "proportional", false};
+    Property<bool> contiguous{this, "contiguous", true};
 
     virtual std::shared_ptr<PropertySet> getMetaProperties() {
         auto meta = Tool::getMetaProperties();
@@ -25,6 +26,11 @@ public:
                     {"widget", "checkbox"},
                     {"label", proportional.name},
                     {"value", proportional.value}
+                }));
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "checkbox"},
+                    {"label", contiguous.name},
+                    {"value", contiguous.value}
                 }));
         return meta;
     }
@@ -42,28 +48,45 @@ public:
         selection->clear();
         S32 width = surface->width();
         S32 height = surface->height();
-        Vector<Point2D> queue = points;
-        while (!queue.empty()) {
-            S32 x = queue.back().x;
-            S32 y = queue.back().y;
-            queue.pop_back();
-            if (x < 0 || y < 0 || x >= width || y >= height || selection->get(x, y))
-                continue;
 
-            auto srcPixel = surface->getPixelUnsafe(x, y);
-            S32 distance = threshold - targetColor.distanceSquared(srcPixel);
-            if (distance < 0 || (distance == 0 && threshold))
-                continue;
+        if (*contiguous) {
+            Vector<Point2D> queue = points;
+            while (!queue.empty()) {
+                S32 x = queue.back().x;
+                S32 y = queue.back().y;
+                queue.pop_back();
+                if (x < 0 || y < 0 || x >= width || y >= height || selection->get(x, y))
+                    continue;
 
-            U8 amount = proportional ? distance * 255 / threshold : 255;
-            if (!amount)
-                amount = 1;
-            selection->add(x, y, amount);
+                auto srcPixel = surface->getPixelUnsafe(x, y);
+                S32 distance = threshold - targetColor.distanceSquared(srcPixel);
+                if (distance < 0 || (distance == 0 && threshold))
+                    continue;
 
-            if (x > 0) queue.push_back({x - 1, y});
-            if (y > 0) queue.push_back({x, y - 1});
-            if (y < height - 1) queue.push_back({x, y + 1});
-            if (x < width - 1) queue.push_back({x + 1, y});
+                U8 amount = proportional ? distance * 255 / threshold : 255;
+                if (!amount)
+                    amount = 1;
+                selection->add(x, y, amount);
+
+                if (x > 0) queue.push_back({x - 1, y});
+                if (y > 0) queue.push_back({x, y - 1});
+                if (y < height - 1) queue.push_back({x, y + 1});
+                if (x < width - 1) queue.push_back({x + 1, y});
+            }
+        } else {
+            for (U32 y = 0; y < height; ++y) {
+                for (U32 x = 0; x < width; ++x) {
+                    auto srcPixel = surface->getPixelUnsafe(x, y);
+                    S32 distance = threshold - targetColor.distanceSquared(srcPixel);
+                    if (distance < 0 || (distance == 0 && threshold))
+                        continue;
+
+                    U8 amount = proportional ? distance * 255 / threshold : 255;
+                    if (!amount)
+                        amount = 1;
+                    selection->add(x, y, amount);
+                }
+            }
         }
 
         inject<Command> paint{"paint"};
