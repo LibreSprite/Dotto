@@ -95,6 +95,7 @@ public:
             else if (from.has<U64>()) out = std::to_string(from.get<U64>());
             else if (from.has<S64>()) out = std::to_string(from.get<S64>());
             else if (from.has<double>()) out = std::to_string(from.get<double>());
+            else if (from.has<bool>()) out = String(from.get<bool>() ? "true" : "false");
             else return false;
         } else if constexpr (std::is_constructible_v<Type, String>) {
             if (!from.has<String>())
