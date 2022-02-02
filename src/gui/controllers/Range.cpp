@@ -99,9 +99,23 @@ public:
             this->value.value = value;
             changeValue();
             value = this->value.value;
+            String drag;
+            if (S32(resolution) == resolution) {
+                if (percent) {
+                    drag = std::to_string(S32(value * 100)) + "%";
+                } else {
+                    drag = std::to_string(S32(value));
+                }
+            } else {
+                if (percent) {
+                    drag = std::to_string(value * 100) + "%";
+                } else {
+                    drag = tostring(value);
+                }
+            }
             node()->load({
                     {"value", tostring(value)},
-                    {"drag-value", percent ? std::to_string(S32(value*100)) + "%" : tostring(value) }
+                    {"drag-value", drag}
                 });
         }
     }
