@@ -26,8 +26,10 @@ public:
 
     Property<String> shapeName{this, "shape", "%appdata/brushes/square.png", &Pencil::changeShape};
     std::shared_ptr<Surface> shape;
-    Property<F32> scale{this, "scale", 1.0f};
+    F32 scale;
+    Property<S32> size{this, "size", 1};
     Property<F32> interval{this, "interval", 1.0f};
+    Property<bool> HQ{this, "high-quality", false};
     bool wasInit = false;
     S32 prevPlotX = 0, prevPlotY = 0;
 
@@ -100,13 +102,20 @@ public:
                     {"max", 100.0f},
                     {"resolution", 1.0f}
                 }));
+
         meta->push(std::make_shared<PropertySet>(PropertySet{
                     {"widget", "range"},
-                    {"label", scale.name},
-                    {"value", scale.value},
-                    {"min", 0.01f},
-                    {"max", 4.0f},
-                    {"resolution", 0.01f}
+                    {"label", size.name},
+                    {"value", size.value},
+                    {"min", 1},
+                    {"max", 128},
+                    {"resolution", 1}
+                }));
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "checkbox"},
+                    {"label", HQ.name},
+                    {"value", HQ.value}
                 }));
         return meta;
     }
@@ -126,11 +135,20 @@ public:
         S32 hsw = sw / 2;
         S32 hsh = sh / 2;
         if (scale < 1) {
-            S32 step = 1 / scale;
-            for (S32 sy = step/2; sy < sh; sy += step) {
-                for (S32 sx = step/2; sx < sw; sx += step) {
-                    color = shape->getPixelUnsafe(sx, sy);
-                    selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a);
+            if (!*HQ) {
+                S32 step = 1 / scale;
+                for (S32 sy = step/2; sy < sh; sy += step) {
+                    for (S32 sx = step/2; sx < sw; sx += step) {
+                        color = shape->getPixelUnsafe(sx, sy);
+                        selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a);
+                    }
+                }
+            } else {
+                for (S32 sy = 0; sy < sh; ++sy) {
+                    for (S32 sx = 0; sx < sw; ++sx) {
+                        color = shape->getPixelUnsafe(sx, sy);
+                        selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a * scale);
+                    }
                 }
             }
         } else {
@@ -164,6 +182,7 @@ public:
             changeShape();
         if (!shape)
             return;
+        scale = F32(size) / shape->width();
         selection = inject<Selection>{"new"};
         initPaint();
         plot(points.back().x, points.back().y, true);
