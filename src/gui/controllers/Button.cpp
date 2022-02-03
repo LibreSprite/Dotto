@@ -24,8 +24,16 @@ public:
             current = pressedSurface;
             multiply = pressedMultiply;
         } else if (*state == "enabled") {
-            current = isHovering && *hoverSurface ? hoverSurface : normalSurface;
-            multiply = isHovering ? hoverMultiply : normalMultiply;
+            if (isHovering) {
+                current = *hoverSurface ? hoverSurface : normalSurface;
+                multiply = hoverMultiply;
+            } else if (node()->hasFocus()) {
+                current = *focusSurface ? focusSurface : normalSurface;
+                multiply = focusMultiply;
+            } else {
+                current = normalSurface;
+                multiply = normalMultiply;
+            }
         } else if (*state == "disabled") {
             current = disabledSurface;
             multiply = disabledMultiply;
@@ -63,6 +71,12 @@ public:
         *hoverSurface = FileSystem::parse(*hover);
     }
 
+    Property<String> focus{this, "focus-src", "", &Button::reloadFocus};
+    Property<std::shared_ptr<Surface>> focusSurface{this, "focus-surface"};
+    void reloadFocus() {
+        *focusSurface = FileSystem::parse(*focus);
+    }
+
     Property<String> disabled{this, "disabled-src", "", &Button::reloadDisabled};
     Property<std::shared_ptr<Surface>> disabledSurface{this, "disabled-surface"};
     void reloadDisabled() {
@@ -75,6 +89,7 @@ public:
         node()->set("multiply", *normalMultiply);
     }
     Property<Color> hoverMultiply{this, "hover-multiply", {0,0,0,0}};
+    Property<Color> focusMultiply{this, "focus-multiply", {0,0,0,0}};
     Property<Color> disabledMultiply{this, "disabled-multiply", {0,0,0,0}};
 
     Property<FunctionRef<void()>> clickCallback{this, "click"};
@@ -84,6 +99,8 @@ public:
         flush.hold(*pressedSurface);
         flush.hold(*normalSurface);
         flush.hold(*disabledSurface);
+        flush.hold(*hoverSurface);
+        flush.hold(*focusSurface);
     }
 
     void attach() override {
@@ -93,7 +110,17 @@ public:
                                  ui::MouseLeave,
                                  ui::Click,
                                  ui::KeyDown,
-                                 ui::KeyUp>(this);
+                                 ui::KeyUp,
+                                 ui::Focus,
+                                 ui::Blur>(this);
+    }
+
+    void eventHandler(const ui::Focus&) {
+        changeState();
+    }
+
+    void eventHandler(const ui::Blur&) {
+        changeState();
     }
 
     void eventHandler(const ui::KeyDown& event) {
