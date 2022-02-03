@@ -31,6 +31,10 @@ namespace ui {
         return focusTarget.lock();
     }
 
+    bool Window::hasFocus(std::shared_ptr<ui::Node> child) {
+        return child == focusTarget.lock();
+    }
+
     void Window::focus(std::shared_ptr<ui::Node> child) {
         if (!child)
             child = shared_from_this();

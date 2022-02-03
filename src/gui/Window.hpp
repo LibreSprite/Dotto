@@ -52,6 +52,7 @@ public:
     void postInject() override;
     void resize() override;
     void doResize() override;
+    bool hasFocus(std::shared_ptr<ui::Node> child) override;
     void focus(std::shared_ptr<ui::Node> child) override;
     void blur(std::shared_ptr<ui::Node> child) override;
 
