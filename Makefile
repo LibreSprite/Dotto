@@ -23,11 +23,19 @@ else
         CCFLAGS += -D LINUX
         BITS := $(shell getconf LONG_BIT)
         ifeq ($(BITS),64)
-            # CPP_FLAGS += -DV8_COMPRESS_POINTERS
+            CPP_FLAGS += -DV8_COMPRESS_POINTERS
 	    # CPP_FLAGS += -DSCRIPT_ENGINE_V8
 	    # LIB_DIRS := $(shell find linux-x64 -type d)
 	    # SO_FILES := $(shell find linux-x64 -type f -name '*.so*')
         endif
+
+	ifeq ($(filter arm%,$(UNAME_P)),)
+	    CPP_FLAGS += -I/usr/include/nodejs/deps/v8/include
+	    LN_FLAGS += -L/usr/lib/arm-linux-gnueabihf
+	    LN_FLAGS += -lv8
+	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
+	endif
+
 	LN_FLAGS += -lGL
 	LN_FLAGS += -llcms2
     endif
@@ -40,8 +48,6 @@ else
     endif
 
     # ifneq ($(filter %86,$(UNAME_P)),)
-    # endif
-    # ifneq ($(filter arm%,$(UNAME_P)),)
     # endif
 
     LIB_DIRS += $(shell find libs -type d)
