@@ -94,7 +94,7 @@ public:
     void eventHandler(const ui::Drag& event) {
         F64 width = node()->globalRect.width - node()->padding->x - node()->padding->width;
         F64 start = node()->globalRect.x + node()->padding->x;
-        F64 value = std::clamp<F64>((event.x - start) / width * (max - min), min, max);
+        F64 value = std::clamp<F64>((event.x - start) / width * (max - min) + min, min, max);
         if (value != this->value) {
             this->value.value = value;
             changeValue();
