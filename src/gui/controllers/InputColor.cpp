@@ -18,7 +18,7 @@ public:
     void attach() override {
         node()->addEventListener<ui::Click>(this);
         if (alwaysUpdate)
-            node()->set("value", Tool::color);
+            node()->set("value", Tool::color.toString());
     }
 
     void eventHandler(const ui::Click&) {
@@ -31,7 +31,7 @@ public:
 
     void on(msg::ActivateColor& event) {
         if (picker || alwaysUpdate) {
-            node()->set("value", event.color);
+            node()->set("value", event.color.toString());
             node()->processEvent(ui::Changed{node()});
         }
     }

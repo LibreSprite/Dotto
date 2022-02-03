@@ -10,6 +10,13 @@
     <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar, hide=sidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
     <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar, hide=sidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
     <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
+    <span controller="inputcolor"
+          forward="text=value"
+          width="100px"
+          margin="4 8 4 4"
+          match="rgba\{([0-9]+),([0-9]+),([0-9]+),([0-9]+)\}"
+          replacement="$1:$2:$3:$4"
+          alwaysupdate="true"/>
   </image>
 
   <image
