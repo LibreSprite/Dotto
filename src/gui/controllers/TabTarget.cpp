@@ -18,23 +18,30 @@ public:
             return;
         inject<ui::Node> root{"root"};
         bool foundNode = false;
-        std::shared_ptr<ui::Node> first, previous;
-        auto next = root->findChildByPredicate([&](ui::Node* child){
-                        auto& ps = child->getPropertySet();
-                        if (!ps.get<bool>("IsTabTarget"))
-                            return false;
-                        if (!first)
-                            first = child->shared_from_this();
-                        if (child == node()) {
-                            foundNode = true;
-                            return false;
-                        }
-                        if (!foundNode)
-                            previous = child->shared_from_this();
-                        return foundNode;
-                    });
+        std::shared_ptr<ui::Node> first, previous, next, last;
+        root->findChildByPredicate([&](ui::Node* child){
+            auto& ps = child->getPropertySet();
+            if (!ps.get<bool>("IsTabTarget"))
+                return false;
+            last = child->shared_from_this();
+            if (!first)
+                first = last;
+            if (child == node()) {
+                foundNode = true;
+                return false;
+            }
+            if (!foundNode)
+                previous = last;
+            else if (!next)
+                next = last;
+            return false;
+        });
         if (!next)
             next = first;
+        if (!previous)
+            previous = last;
+        if (event.pressedKeys.find("LSHIFT") != event.pressedKeys.end())
+            next = previous;
         if (next)
             next->focus();
     }
