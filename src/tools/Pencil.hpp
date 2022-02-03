@@ -29,6 +29,7 @@ public:
     F32 scale;
     Property<S32> size{this, "size", 1, &Pencil::invalidateMetaMenu};
     Property<F32> interval{this, "interval", 1.0f, &Pencil::invalidateMetaMenu};
+    Property<F32> smoothing{this, "smoothing", 0.0f, &Pencil::invalidateMetaMenu};
     Property<bool> HQ{this, "high-quality", false};
     bool wasInit = false;
     S32 prevPlotX = 0, prevPlotY = 0;
@@ -116,6 +117,15 @@ public:
                 }));
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "range"},
+                    {"label", smoothing.name},
+                    {"value", smoothing.value},
+                    {"min", -1.0f},
+                    {"max", 1.0f},
+                    {"resolution", 0.1}
+                }));
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
                     {"widget", "checkbox"},
                     {"label", HQ.name},
                     {"value", HQ.value}
@@ -130,8 +140,15 @@ public:
             if (dx*dx+dy*dy < interval*interval)
                 return;
         }
+
         prevPlotX = x;
         prevPlotY = y;
+
+        if (smoothing < 0) {
+            x += (rand() / F32(RAND_MAX) * 2.0f - 1.0f) * size * -smoothing;
+            y += (rand() / F32(RAND_MAX) * 2.0f - 1.0f) * size * -smoothing;
+        }
+
         Color color;
         U32 sw = shape->width();
         U32 sh = shape->height();
@@ -170,6 +187,53 @@ public:
                 }
             }
         }
+    }
+
+    void applySmoothing(Surface* surface, const Vector<Point2D>& points) {
+        if (!points.size())
+            return;
+        Vector<Point2D> smooth;
+        smooth.reserve(points.size() * 2 - 1);
+        smooth.push_back(points[0]);
+        auto ref = points[0];
+        for (U32 i = 1, size = points.size(); i < size; ++i) {
+            auto& prev = ref;
+            auto current = points[i];
+            if (std::abs(prev.x - current.x) + std::abs(prev.y - current.y) < 2)
+                continue;
+            ref = current;
+            Point2D midpoint{
+                (prev.x + current.x) / 2,
+                (prev.y + current.y) / 2
+            };
+            smooth.push_back(midpoint);
+            smooth.push_back(current);
+        }
+
+        auto current = smooth[0];
+        auto next = smooth[1];
+        for (U32 i = 1, size = smooth.size(); i < size - 1; ++i) {
+            auto prev = current;
+            current = next;
+            next = smooth[i + 1];
+
+            Point2D tween{
+                (prev.x + next.x) / 2,
+                (prev.y + next.y) / 2
+            };
+
+            smooth[i].x = current.x * (1.0f - smoothing) + tween.x * smoothing;
+            smooth[i].y = current.y * (1.0f - smoothing) + tween.y * smoothing;
+        }
+
+        Vector<Point2D> segment;
+        segment.push_back(smooth[0]);
+        begin(surface, segment);
+        for (U32 i = 1, size = smooth.size(); i < size; ++i) {
+            segment.push_back(smooth[i]);
+            update(surface, segment);
+        }
+        end(nullptr, segment);
     }
 
     virtual void initPaint() {
@@ -212,5 +276,9 @@ public:
             return;
         paint->load({{"preview", false}});
         paint->run();
+        if (surface && smoothing > 0 && points.size() > 2) {
+            paint->undo();
+            applySmoothing(surface, points);
+        }
     }
 };
