@@ -1,4 +1,4 @@
-<image controller="button"
+<image controller="tabtarget, button"
        forward="labelspan.text=label"
        multiply="#00000000"
        up-multiply="#00000000"
