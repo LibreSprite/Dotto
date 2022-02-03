@@ -32,7 +32,7 @@ else
 	ifeq ($(filter arm%,$(UNAME_P)),)
 	    CPP_FLAGS += -I/usr/include/nodejs/deps/v8/include
 	    LN_FLAGS += -L/usr/lib/arm-linux-gnueabihf
-	    LN_FLAGS += -lv8
+	    LN_FLAGS += -lv8 -lv8_libplatform
 	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
 	endif
 
@@ -86,8 +86,9 @@ else
 
 #BEGIN LUA SUPPORT
     CPP_FLAGS += -DSCRIPT_ENGINE_LUA
-    CPP_FLAGS += $(shell pkg-config --cflags lua)
-    LN_FLAGS += $(shell pkg-config --libs lua)
+    LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+    CPP_FLAGS += $(shell pkg-config --cflags $(LUAPKG))
+    LN_FLAGS += $(shell pkg-config --libs $(LUAPKG))
 #END
 endif
 
