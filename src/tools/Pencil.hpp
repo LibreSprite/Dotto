@@ -192,17 +192,30 @@ public:
     void applySmoothing(Surface* surface, const Vector<Point2D>& points) {
         if (!points.size())
             return;
-        Vector<Point2D> smooth;
+
+        struct Point2DF {
+            F32 x, y;
+
+            Point2DF(const Point2D& p) : x(p.x), y(p.y) {}
+
+            Point2DF(F32 x, F32 y) : x{x}, y{y} {}
+
+            Point2D round() {
+                return {S32(x + 0.5f), S32(y + 0.5f)};
+            }
+        };
+
+        Vector<Point2DF> smooth;
         smooth.reserve(points.size() * 2 - 1);
         smooth.push_back(points[0]);
         auto ref = points[0];
         for (U32 i = 1, size = points.size(); i < size; ++i) {
-            auto& prev = ref;
-            auto current = points[i];
+            Point2DF prev = ref;
+            Point2D current = points[i];
             if (std::abs(prev.x - current.x) + std::abs(prev.y - current.y) < 2)
                 continue;
             ref = current;
-            Point2D midpoint{
+            Point2DF midpoint{
                 (prev.x + current.x) / 2,
                 (prev.y + current.y) / 2
             };
@@ -217,7 +230,7 @@ public:
             current = next;
             next = smooth[i + 1];
 
-            Point2D tween{
+            Point2DF tween{
                 (prev.x + next.x) / 2,
                 (prev.y + next.y) / 2
             };
@@ -227,10 +240,10 @@ public:
         }
 
         Vector<Point2D> segment;
-        segment.push_back(smooth[0]);
+        segment.push_back(smooth[0].round());
         begin(surface, segment);
         for (U32 i = 1, size = smooth.size(); i < size; ++i) {
-            segment.push_back(smooth[i]);
+            segment.push_back(smooth[i].round());
             update(surface, segment);
         }
         end(nullptr, segment);
