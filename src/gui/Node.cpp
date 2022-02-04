@@ -397,8 +397,10 @@ void ui::Node::doResize() {
     innerRect.width -= padding->x + padding->width;
     innerRect.height -= padding->y + padding->height;
     flowInstance->update(children, innerRect);
-    for (auto& child : children)
-        child->doResize();
+    for (auto& child : children) {
+        if (child->visible)
+            child->doResize();
+    }
 }
 
 void ui::Node::onResize() {

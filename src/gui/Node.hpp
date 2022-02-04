@@ -58,7 +58,7 @@ namespace ui {
         Property<String> controllerName{this, "controller", "", &Node::reattach};
         Property<Color> multiply{this, "multiply", {"rgba{255,255,255,255}"}};
         Property<F32> alpha{this, "alpha", 1.0f};
-        Property<bool> visible{this, "visible", true};
+        Property<bool> visible{this, "visible", true, &Node::resize};
         Property<bool> inputEnabled{this, "inputEnabled", true};
         Property<bool> stealFocus{this, "steal-focus", false, &Node::changeStealFocus};
         Property<bool> debug{this, "debug"};
@@ -148,7 +148,7 @@ namespace ui {
 
         virtual void resize() {
             if (parent) {
-                parent->resize();
+                parent->doResize();
             }
         }
 

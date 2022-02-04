@@ -23,6 +23,8 @@ namespace ui {
     public:
         void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             for (auto& child : children) {
+                if (!*child->visible)
+                    continue;
                 if (*child->absolute) {
                     absolute(child, parentRect);
                 } else {
@@ -65,6 +67,8 @@ namespace ui {
         void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
+                if (!*child->visible)
+                    continue;
                 if (*child->absolute) {
                     absolute(child, parentRect);
                     child->localRect.x += child->margin->x;
@@ -164,6 +168,8 @@ namespace ui {
         void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
+                if (!*child->visible)
+                    continue;
                 if (*child->absolute) {
                     absolute(child, parentRect);
                     child->localRect.x += child->margin->x;
