@@ -29,12 +29,12 @@ else
 	    # SO_FILES := $(shell find linux-x64 -type f -name '*.so*')
         endif
 
-	ifneq ("$(wildcard $(/usr/lib/arm-linux-gnueabihf))","")
+        ifneq ("$(wildcard /usr/lib/arm-linux-gnueabihf/libv8.so)","")
 	    CPP_FLAGS += -I/usr/include/nodejs/deps/v8/include
 	    LN_FLAGS += -L/usr/lib/arm-linux-gnueabihf
 	    LN_FLAGS += -lv8 -lv8_libplatform
 	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
-	endif
+        endif
 
 	LN_FLAGS += -lGL
 	LN_FLAGS += -llcms2
