@@ -1,7 +1,7 @@
 <image slice="3 3"
        forward="num-label.text=label, lbl.text=drag-value"
        result="value"
-       controller="range"
+       controller="tabtarget, range"
        handle="num-value"
        id="row">
   <span id="num-label" alpha="0.75" align="0"/>
