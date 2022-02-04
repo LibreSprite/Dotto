@@ -25,7 +25,6 @@ namespace ui {
         };
         Bubble bubble = Bubble::None;
 
-        bool cascade = true;
         mutable bool cancel = false;
 
         S32 globalX;
