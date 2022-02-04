@@ -16,6 +16,7 @@ public:
     void eventHandler(const ui::KeyDown& event) {
         if (event.keyname != String("TAB"))
             return;
+        event.cancel = true;
         inject<ui::Node> root{"root"};
         bool foundNode = false;
         std::shared_ptr<ui::Node> first, previous, next, last;
