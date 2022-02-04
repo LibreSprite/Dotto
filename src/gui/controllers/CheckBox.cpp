@@ -69,12 +69,12 @@ public:
     }
 
     void eventHandler(const ui::KeyDown& event) {
-        if (event.keyname == String("RETURN"))
+        if (event.keyname == String("RETURN") || event.keyname == String("SPACE"))
             node()->processEvent(ui::MouseDown{node(), 0, 0, 1});
     }
 
     void eventHandler(const ui::KeyUp& event) {
-        if (event.keyname == String("RETURN")) {
+        if (event.keyname == String("RETURN") || event.keyname == String("SPACE")) {
             node()->processEvent(ui::MouseUp{node(), 0, 0, 1});
             node()->processEvent(ui::Click{node(), 0, 0, 1});
         }
