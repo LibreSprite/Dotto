@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <cmd/Command.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <doc/Cell.hpp>
@@ -18,7 +19,10 @@ public:
     Tool::Path points;
 
     void attach() override {
-        node()->addEventListener<ui::MouseMove, ui::MouseDown, ui::MouseUp>(this);
+        node()->addEventListener<ui::MouseMove,
+                                 ui::MouseDown,
+                                 ui::MouseUp,
+                                 ui::MouseWheel>(this);
         setup();
     }
 
@@ -57,6 +61,12 @@ public:
         } else {
             end();
         }
+    }
+
+    void eventHandler(const ui::MouseWheel& event) {
+        inject<Command> zoom{"zoom"};
+        zoom->set("level", "*" + tostring(1 + 0.2 * event.wheelY));
+        zoom->run();
     }
 
     void end() {
