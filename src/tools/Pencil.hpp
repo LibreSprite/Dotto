@@ -69,32 +69,30 @@ public:
 
         U32 rowCount = ~U32{};
         for (auto& brush : getBrushes()) {
-            if (rowCount >= 5) {
+            if (rowCount >= 4) {
                 meta->push(std::make_shared<PropertySet>(PropertySet{
-                            {"widget", "row"},
-                            {"id", "brushrow"},
-                            {"height", "64px"}
+                            {"widget", "brushrow"}
                         }));
                 meta->push(std::make_shared<PropertySet>(PropertySet{
                             {"widget", "node"},
                             {"parent", "brushrow"},
-                            {"width", "100%"}
+                            {"width", "100%"},
+                            {"min-width", "0px"}
                         }));
                 rowCount = 0;
             }
             rowCount++;
             meta->push(std::make_shared<PropertySet>(PropertySet{
-                        {"widget", "button"},
+                        {"widget", "brushbutton"},
                         {"icon", brush},
-                        {"icon-multiply", "rgb{64,128,255}"},
-                        {"width", "64px"},
                         {"parent", "brushrow"},
                         {"click", FunctionRef<void()>([=]{set("shape", brush);})}
                     }));
             meta->push(std::make_shared<PropertySet>(PropertySet{
                         {"widget", "node"},
                         {"parent", "brushrow"},
-                        {"width", "100%"}
+                        {"width", "100%"},
+                        {"min-width", "0px"}
                     }));
         }
 
