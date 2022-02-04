@@ -20,6 +20,7 @@ public:
     Property<String> allowRegex{this, "allow", ""};
     Property<String> text{this, "text", ""};
     Property<String> spanId{this, "span", "value"};
+    Color color;
     std::shared_ptr<ui::Node> span;
 
     Property<String> state{this, "state", "enabled", &Input::changeState};
@@ -88,8 +89,10 @@ public:
 
     void drawCaret(std::shared_ptr<Surface> surface, S32 cursorX) {
         if (surface) {
+            if (span)
+                color = span->getPropertySet().get<Color>("color");
             for (S32 y = 0; y < surface->height(); ++y) {
-                surface->setPixel(cursorX, y, Color{0,0,0});
+                surface->setPixel(cursorX, y, color);
             }
         }
     }
