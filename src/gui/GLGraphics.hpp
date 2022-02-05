@@ -433,8 +433,8 @@ public:
         if (!result) {
             result = std::make_shared<Surface>();
         }
-        result->resize(width, height);
-        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, result->data());
+        result->resize(width * scale, height * scale);
+        glReadPixels(0, 0, width * scale, height * scale, GL_RGBA, GL_UNSIGNED_BYTE, result->data());
         result->setDirty();
         return result.get();
     }
@@ -442,14 +442,15 @@ public:
     void write() override {
         if (!result)
             return;
-        Rect rect(0, 0, width, height);
+        Rect rect(0, 0, width * scale, height * scale);
+        Rect dest(0, 0, width, height);
         Rect slice;
         setClipRect(rect);
         alpha = 1.0f;
         blit({
                 .surface     = result,
                 .source      = rect,
-                .destination = rect,
+                .destination = dest,
                 .nineSlice   = slice,
                 .zIndex      = 1000000,
                 .multiply    = Color{255, 255, 255, 255},
