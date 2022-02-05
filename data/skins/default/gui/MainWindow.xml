@@ -38,6 +38,7 @@
       margin="0 0 0 35"
       visible="false"
       overflow-hidden="true">
+    <layercontrols/>
     <node controller="layerlist" width="200px"/>
   </image>
 
