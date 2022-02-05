@@ -59,8 +59,12 @@ namespace script {
         ~InternalScriptObject();
 
         static ScriptObject* getScriptObject(void* internal) {
-            auto it = liveInstances.find(static_cast<InternalScriptObject*>(internal));
-            return it != liveInstances.end() ? (*it)->scriptObject : nullptr;
+            if (auto liveInstances = getLiveInstances()) {
+                auto it = liveInstances->find(static_cast<InternalScriptObject*>(internal));
+                if (it != liveInstances->end())
+                    return (*it)->scriptObject;
+            }
+            return nullptr;
         }
 
         virtual void makeGlobal(const String& name);
@@ -80,7 +84,17 @@ namespace script {
         inject<script::Engine> engine;
         HashMap<String, ObjectProperty> properties;
         HashMap<String, DocumentedFunction> functions;
-        static inline HashSet<InternalScriptObject*> liveInstances;
+
+        static HashSet<InternalScriptObject*>* getLiveInstances() {
+            static HashSet<InternalScriptObject*>* liveInstances = (+[]{
+                atexit(+[]{
+                    delete liveInstances;
+                    liveInstances = nullptr;
+                });
+                return new HashSet<InternalScriptObject*>();
+            })();
+            return liveInstances;
+        }
     };
 
     class ScriptObject : public Injectable<ScriptObject>, public std::enable_shared_from_this<ScriptObject> {
