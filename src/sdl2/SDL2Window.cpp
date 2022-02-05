@@ -57,7 +57,7 @@ public:
 
         SDL_GL_MakeCurrent(window, context);
         graphics->init(version);
-
+        resize();
         setDirty();
     }
 
