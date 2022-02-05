@@ -93,8 +93,8 @@ public:
         if (!*doc)
             return;
         node()->load({
-                {"x", "50%-50%"},
-                {"y", "50%-50%"},
+                {"x", "center"},
+                {"y", "center"},
                 {"width", (*doc)->width() * scale},
                 {"height", (*doc)->height() * scale}
             });

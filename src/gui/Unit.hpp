@@ -5,6 +5,7 @@
 #pragma once
 
 #include <regex>
+#include <string_view>
 
 #include <common/Value.hpp>
 
@@ -72,6 +73,14 @@ namespace ui {
         }
 
         Unit& operator = (const char* str) {
+            std::string_view view = str;
+            if (view == "center")
+                str = "50%-50%";
+            else if (view == "top" || view == "left")
+                str = "0px";
+            else if (view == "bottom" || view == "right")
+                str = "100%-100%";
+
             auto load = +[](const String& str, F32& value, Type& type){
                 if (str.empty()) {
                     type = Type::Default;
