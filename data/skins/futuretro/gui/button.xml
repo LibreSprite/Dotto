@@ -1,7 +1,7 @@
 <image
     controller="button, tabtarget"
     forward="iconimage.src=icon, iconimage.multiply=icon-multiply"
-    padding="6 4 6 8"
+    padding="3 2 3 4"
     up-src="%skin/button-up.png"
     down-src="%skin/button-down.png"
     hover-multiply="#DDDDDD"
