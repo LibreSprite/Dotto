@@ -5,6 +5,7 @@
 #include <cmd/Command.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
+#include <common/System.hpp>
 #include <doc/Cell.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
@@ -16,13 +17,15 @@ public:
     PubSub<msg::ModifyCell, msg::ActivateCell> pub{this};
     inject<Cell> cell;
     std::shared_ptr<Tool> activeTool;
+    std::shared_ptr<ui::Node> cursor;
     Tool::Path points;
 
     void attach() override {
         node()->addEventListener<ui::MouseMove,
                                  ui::MouseDown,
                                  ui::MouseUp,
-                                 ui::MouseWheel>(this);
+                                 ui::MouseWheel,
+                                 ui::MouseLeave>(this);
         setup();
     }
 
@@ -55,12 +58,57 @@ public:
         end();
     }
 
+    void eventHandler(const ui::MouseLeave&) {
+        system->setMouseCursorVisible(true);
+        if (cursor)
+            cursor->visible.value = false;
+    }
+
+    inject<System> system;
     void eventHandler(const ui::MouseMove& event) {
         if (event.buttons) {
             paint(event.targetX(), event.targetY(), event.buttons);
         } else {
             end();
         }
+
+        Tool::Preview* preview = nullptr;
+        if (activeTool)
+            preview = activeTool->getPreview();
+        if (!preview) {
+            system->setMouseCursorVisible(true);
+            if (cursor)
+                cursor->visible.value = false;
+            return;
+        }
+        if (preview->global) {
+            if (cursor)
+                cursor->visible.value = false;
+            return;
+        }
+
+        system->setMouseCursorVisible(!preview->hideCursor);
+
+        if (!cursor) {
+            cursor = ui::Node::fromXML("image");
+            cursor->absolute.value = true;
+            cursor->inputEnabled.value = false;
+        }
+
+        auto surface = cell->getComposite();
+        auto rect = node()->globalRect;
+        F32 scale = F32(rect.width) / surface->width();
+
+        cursor->set("surface", preview->surface);
+        cursor->multiply.value = preview->multiply;
+        cursor->width.value.setPixel(preview->surface->width() * scale * preview->scale);
+        cursor->height.value.setPixel(preview->surface->height() * scale * preview->scale);
+        cursor->y.value = event.targetY() + preview->y * scale;
+        cursor->set("x", event.targetX() + preview->x * scale);
+        cursor->visible.value = true;
+
+        if (!cursor->getParent())
+            node()->addChild(cursor);
     }
 
     void eventHandler(const ui::MouseWheel& event) {

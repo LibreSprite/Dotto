@@ -34,6 +34,7 @@ public:
     bool wasInit = false;
     S32 prevPlotX = 0, prevPlotY = 0;
     U32 which;
+    Preview preview;
 
     void invalidateMetaMenu() override {
         Tool::invalidateMetaMenu();
@@ -262,6 +263,25 @@ public:
                     {"preview", true}
                 });
         }
+    }
+
+    Preview* getPreview() override {
+        if (!wasInit)
+            changeShape();
+        if (!shape)
+            return nullptr;
+        if (size < 1)
+            *size = 1;
+        scale = F32(size) / shape->width();
+        preview.scale = scale;
+
+        preview.x = -(shape->width() * scale)/2;
+        preview.y = -(shape->height() * scale)/2;
+        preview.global = false;
+        preview.hideCursor = true;
+        preview.surface = shape;
+        preview.multiply = Tool::color;
+        return &preview;
     }
 
     void begin(Surface* surface, const Vector<Point2D>& points, U32 which) override {

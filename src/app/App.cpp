@@ -21,7 +21,8 @@ class AppImpl : public App {
 public:
     bool running = true;
     inject<Log> log;
-    inject<System> system;
+    inject<System> system{"new"};
+    System::Provides globalSystem{system.get()};
 
     inject<Cache> cache{"new"};
     Cache::Provides globalCache{cache.get()};

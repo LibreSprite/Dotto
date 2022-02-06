@@ -9,6 +9,7 @@
 
 class System : public Injectable<System> {
 public:
+    virtual void setMouseCursorVisible(bool) = 0;
     virtual bool boot() = 0;
     virtual bool run() = 0;
 };

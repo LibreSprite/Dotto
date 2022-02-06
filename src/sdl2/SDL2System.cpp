@@ -45,6 +45,10 @@ public:
         return running;
     }
 
+    void setMouseCursorVisible(bool visible) override {
+        SDL_ShowCursor(visible);
+    }
+
     void pumpEvents() {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
