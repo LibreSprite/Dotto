@@ -49,7 +49,7 @@ public:
         S32 width = surface->width();
         S32 height = surface->height();
 
-        if (*contiguous ^ (which == 1)) {
+        if (*contiguous ^ (which != 1)) {
             Vector<Point2D> queue = points;
             while (!queue.empty()) {
                 S32 x = queue.back().x;
