@@ -44,6 +44,8 @@ public:
             if (loop >= data[frame].size())
                 return nullptr;
         }
+        if (layer >= data[frame].size())
+            return nullptr;
         return data[frame][layer];
     }
 

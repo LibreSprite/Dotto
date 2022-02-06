@@ -29,11 +29,12 @@ public:
         auto& ps = editor->getPropertySet();
         if (prevLayer == -1)
             prevLayer = ps.get<U32>("layer");
-        auto layer = *this->layer;
-        if (layer >= timeline->layerCount())
-            layer = ~U32{};
-        if (layer == ~U32{})
+        U32 layer = *this->layer;
+        auto layerCount = timeline->layerCount();
+        if (navigate)
             layer = prevLayer + navigate;
+        if (layer >= layerCount)
+            layer = prevLayer;
         if (layer != prevLayer) {
             editor->set("layer", layer);
             commit();

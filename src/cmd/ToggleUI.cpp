@@ -25,7 +25,6 @@ public:
                 auto current = ps.get<bool>(property);
 
                 if (!hide->empty() && !current) {
-                    logI("Searching for ", *hide);
                     root->findChildByPredicate([&](ui::Node* child){
                         if (child->getPropertySet().get<String>("class") == *hide) {
                             child->set(property, false);
