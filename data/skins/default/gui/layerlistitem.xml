@@ -1,0 +1,20 @@
+<image
+    controller="button"
+    forward="preview.surface=preview, alpha.cell=cell"
+    padding="5 5 5 5"
+    multiply="rgba{0, 0, 0, 0}"
+    normal-multiply="rgba{0, 0, 0, 0}"
+    hover-multiply="rgba{255, 255, 255, 100}"
+    down-multiply="rgba{255, 255, 255, 200}">
+  <image src="%skin/editor.png" slice="2 2" padding="1 1 1 1">
+    <image id="preview" fit="cover"/>
+    <range controller="hover-reveal, cellpropertymodifier"
+           property="alpha"
+           label="Transparency:"
+           id="alpha"
+           percent="true"
+           absolute="true"
+           y="100%-100%"
+           width="100%"/>
+  </image>
+</image>

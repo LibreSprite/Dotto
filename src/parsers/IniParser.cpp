@@ -16,8 +16,6 @@ public:
             return nullptr;
         }
 
-        logV("Parsing ini file");
-
         String domain = "global";
         auto subset = set;
         for (auto& rawline : split(file->readTextFile(), std::regex("[\n\r]+"))) {
@@ -34,7 +32,6 @@ public:
             if (line.front() == '[' && line.back() == ']') {
                 domain = trim(line.substr(1, line.size() - 2));
                 auto parent = set;
-                logV("Section [", domain, "]");
                 for (auto& part : split(domain, ":")) {
                     if (!parent->get(part, subset)) {
                         subset = std::make_shared<PropertySet>();
@@ -51,8 +48,6 @@ public:
 
             auto key = trim(line.substr(0, sep));
             auto value = trim(line.substr(sep + 1));
-            logV(domain, "[", key, "] = [", value, "]");
-
             subset->set(key, value);
         }
 

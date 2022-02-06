@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <unordered_set>
+
 #include <common/Value.hpp>
 #include <common/Color.hpp>
 
@@ -13,6 +15,7 @@ namespace ui {
 
 class Document;
 class Cell;
+class PropertySet;
 
 namespace msg {
 
@@ -56,6 +59,11 @@ namespace msg {
         U32 buttons;
     };
 
+    struct MouseWheel {
+        const U32 windowId;
+        S32 wheelX, wheelY;
+    };
+
     struct MouseUp {
         const U32 windowId;
         S32 x, y;
@@ -73,6 +81,7 @@ namespace msg {
         U32 scancode;
         const char* keyName;
         U32 keycode;
+        std::unordered_set<String>& pressedKeys;
     };
 
     struct KeyDown {
@@ -80,6 +89,7 @@ namespace msg {
         U32 scancode;
         const char* keyName;
         U32 keycode;
+        std::unordered_set<String>& pressedKeys;
     };
 
     struct BeginDrag {
@@ -89,6 +99,11 @@ namespace msg {
 
     struct EndDrag {
         std::shared_ptr<ui::Node> target;
+    };
+
+    struct InvalidateMetaMenu {
+        std::shared_ptr<PropertySet> oldMeta;
+        std::shared_ptr<PropertySet> newMeta;
     };
 
     struct PollActiveWindow {
@@ -116,8 +131,16 @@ namespace msg {
         Vector<String> toStrings(const String& name) {return {name, color};}
     };
 
+    struct ActivateFrame : public Message {
+        std::shared_ptr<Document> doc;
+        U32 frame;
+        ActivateFrame(std::shared_ptr<Document> doc, U32 frame) : doc{doc}, frame{frame} {}
+    };
+
     struct ActivateLayer : public Message {
-        //TODO: implement layers support
+        std::shared_ptr<Document> doc;
+        U32 layer;
+        ActivateLayer(std::shared_ptr<Document> doc, U32 layer) : doc{doc}, layer{layer} {}
     };
 
     struct ActivateDocument : public Message {
@@ -128,5 +151,10 @@ namespace msg {
     struct ActivateCell : public Message {
         std::shared_ptr<Cell> cell;
         ActivateCell(std::shared_ptr<Cell> cell) : cell{cell} {}
+    };
+
+    struct ModifyCell : public Message {
+        std::shared_ptr<Cell> cell;
+        ModifyCell(std::shared_ptr<Cell> cell) : cell{cell} {}
     };
 }

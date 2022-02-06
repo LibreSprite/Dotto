@@ -16,6 +16,7 @@ namespace ui {
         virtual ~Event() = default;
 
         mutable Node* target = nullptr;
+        mutable Node* currentTarget = nullptr;
 
         enum class Bubble {
             None,
@@ -24,7 +25,6 @@ namespace ui {
         };
         Bubble bubble = Bubble::None;
 
-        bool cascade = true;
         mutable bool cancel = false;
 
         S32 globalX;
@@ -39,6 +39,20 @@ namespace ui {
         AddToScene(Node* target) : Event{target} {
             bubble = Bubble::Down;
         }
+    };
+
+    struct Changed : public Event {
+        Changed(Node* target) : Event{target} {
+            bubble = Bubble::Up;
+        }
+    };
+
+    struct Resize : public Event {
+        Resize(Node* target) : Event{target} {}
+    };
+
+    struct Remove : public Event {
+        Remove(Node* target) : Event{target} {}
     };
 
     struct Blur : public Event {
@@ -99,6 +113,14 @@ namespace ui {
             MouseEvent{target, globalX, globalY, buttons} {}
     };
 
+    struct MouseWheel : public MouseEvent {
+        S32 wheelX, wheelY;
+        MouseWheel(Node* target, S32 globalX, S32 globalY, U32 buttons, S32 wheelX, S32 wheelY) :
+            MouseEvent{target, globalX, globalY, buttons},
+            wheelX{wheelX},
+            wheelY{wheelY}{}
+    };
+
     struct MouseDown : public MouseEvent {
         MouseDown(Node* target, S32 globalX, S32 globalY, U32 buttons) :
             MouseEvent{target, globalX, globalY, buttons} {}
@@ -117,23 +139,37 @@ namespace ui {
     struct KeyEvent : public Event {
         U32 scancode, keycode;
         const char* keyname;
-        KeyEvent(Node* target, U32 scancode, U32 keycode, const char* keyname) :
+        std::unordered_set<String>& pressedKeys;
+        KeyEvent(Node* target,
+                 U32 scancode,
+                 U32 keycode,
+                 const char* keyname,
+                 std::unordered_set<String>& pressedKeys) :
             Event{target},
             scancode{scancode},
             keycode{keycode},
-            keyname{keyname} {
+            keyname{keyname},
+            pressedKeys{pressedKeys} {
             bubble = Bubble::Up;
         }
     };
 
     struct KeyDown : public KeyEvent {
-        KeyDown(Node* target, U32 scancode, U32 keycode, const char* keyname) :
-            KeyEvent{target, scancode, keycode, keyname} {}
+        KeyDown(Node* target,
+                U32 scancode,
+                U32 keycode,
+                const char* keyname,
+                std::unordered_set<String>& pressedKeys) :
+            KeyEvent{target, scancode, keycode, keyname, pressedKeys} {}
     };
 
     struct KeyUp : public KeyEvent {
-        KeyUp(Node* target, U32 scancode, U32 keycode, const char* keyname) :
-            KeyEvent{target, scancode, keycode, keyname} {}
+        KeyUp(Node* target,
+              U32 scancode,
+              U32 keycode,
+              const char* keyname,
+              std::unordered_set<String>& pressedKeys) :
+            KeyEvent{target, scancode, keycode, keyname, pressedKeys} {}
     };
 
     struct Drag : public Event {

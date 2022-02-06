@@ -22,8 +22,22 @@ namespace ui {
         Node::doResize();
     }
 
+    std::shared_ptr<ui::Node> Window::getFocused() {
+        if (focusTarget.expired()) {
+            focus(findChildByPredicate([](ui::Node* node){
+                return *node->stealFocus;
+            }));
+        }
+        return focusTarget.lock();
+    }
+
+    bool Window::hasFocus(std::shared_ptr<ui::Node> child) {
+        return child == focusTarget.lock();
+    }
 
     void Window::focus(std::shared_ptr<ui::Node> child) {
+        if (!child)
+            child = shared_from_this();
         if (auto focus = focusTarget.lock()) {
             if (focus != child) {
                 focusTarget = child->shared_from_this();
@@ -31,7 +45,7 @@ namespace ui {
                 child->processEvent(ui::Focus{child.get()});
             }
         } else {
-            focusTarget = child->shared_from_this();
+            focusTarget = child;
             child->processEvent(ui::Focus{child.get()});
         }
     }
@@ -47,26 +61,29 @@ namespace ui {
 
     void Window::on(msg::MouseMove& event) {
         if (event.windowId == id) {
+            S32 eventX = event.x / scale;
+            S32 eventY = event.y / scale;
+
             mouseButtons = event.buttons;
-            mouseX = event.x;
-            mouseY = event.y;
+            mouseX = eventX;
+            mouseY = eventY;
 
             if (hoverWindow == this) {
                 if (auto target = dragTarget.lock()) {
                     if ((dragEvent.buttons & event.buttons) != dragEvent.buttons) {
                         pub(msg::EndDrag{});
                     } else {
-                        dragEvent.x = dragEvent.anchorX + (event.x - dragEvent.initialX);
-                        dragEvent.y = dragEvent.anchorY + (event.y - dragEvent.initialY);
-                        dragEvent.globalX = event.x;
-                        dragEvent.globalY = event.y;
+                        dragEvent.x = dragEvent.anchorX + (eventX - dragEvent.initialX);
+                        dragEvent.y = dragEvent.anchorY + (eventY - dragEvent.initialY);
+                        dragEvent.globalX = eventX;
+                        dragEvent.globalY = eventY;
                         target->processEvent(dragEvent);
                     }
                 }
             }
 
             hoverWindow = this;
-            ui::MouseMove guiEvent{nullptr, event.x, event.y, event.buttons};
+            ui::MouseMove guiEvent{nullptr, eventX, eventY, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
@@ -88,11 +105,14 @@ namespace ui {
 
     void Window::on(msg::MouseDown& event) {
         if (event.windowId == id) {
+            S32 eventX = event.x / scale;
+            S32 eventY = event.y / scale;
+
             mouseButtons = event.buttons;
-            mouseX = event.x;
-            mouseY = event.y;
+            mouseX = eventX;
+            mouseY = eventY;
             hoverWindow = this;
-            ui::MouseDown guiEvent{nullptr, event.x, event.y, event.buttons};
+            ui::MouseDown guiEvent{nullptr, eventX, eventY, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
@@ -106,9 +126,12 @@ namespace ui {
 
     void Window::on(msg::MouseUp& event) {
         if (event.windowId == id) {
+            S32 eventX = event.x / scale;
+            S32 eventY = event.y / scale;
+
             mouseButtons = event.buttons;
-            mouseX = event.x;
-            mouseY = event.y;
+            mouseX = eventX;
+            mouseY = eventY;
 
             if (auto target = dragTarget.lock()) {
                 if ((dragEvent.buttons & ~event.buttons) != dragEvent.buttons)
@@ -117,16 +140,16 @@ namespace ui {
 
             hoverWindow = this;
 
-            ui::MouseUp guiEvent{nullptr, event.x, event.y, event.buttons};
+            ui::MouseUp guiEvent{nullptr, eventX, eventY, event.buttons};
             guiEvent.target = findEventTarget(guiEvent);
             if (!guiEvent.target)
                 return;
 
             auto shared = guiEvent.target->shared_from_this();
 
-            if (auto focus = focusTarget.lock()) {
+            if (auto focus = getFocused()) {
                 if (focus.get() == guiEvent.target) {
-                    guiEvent.target->processEvent(ui::Click{focus.get(), event.x, event.y, event.buttons});
+                    guiEvent.target->processEvent(ui::Click{focus.get(), eventX, eventY, event.buttons});
                 }
             }
 
@@ -134,15 +157,37 @@ namespace ui {
         }
     }
 
+    void Window::on(msg::MouseWheel& event) {
+        if (event.windowId == id) {
+            hoverWindow = this;
+            ui::MouseWheel guiEvent{nullptr, mouseX, mouseY, mouseButtons, event.wheelX, event.wheelY};
+            guiEvent.target = findEventTarget(guiEvent);
+            if (guiEvent.target)
+                guiEvent.target->processEvent(guiEvent);
+        }
+    }
+
     void Window::on(msg::KeyDown& event) {
-        if (auto focus = focusTarget.lock()) {
-            focus->processEvent(ui::KeyDown{focus.get(), event.scancode, event.keycode, event.keyName});
+        if (auto focus = getFocused()) {
+            focus->processEvent(ui::KeyDown{
+                    focus.get(),
+                    event.scancode,
+                    event.keycode,
+                    event.keyName,
+                    event.pressedKeys
+                });
         }
     }
 
     void Window::on(msg::KeyUp& event) {
-        if (auto focus = focusTarget.lock()) {
-            focus->processEvent(ui::KeyUp{focus.get(), event.scancode, event.keycode, event.keyName});
+        if (auto focus = getFocused()) {
+            focus->processEvent(ui::KeyUp{
+                    focus.get(),
+                    event.scancode,
+                    event.keycode,
+                    event.keyName,
+                    event.pressedKeys
+                });
         }
     }
 

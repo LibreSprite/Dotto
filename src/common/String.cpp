@@ -19,6 +19,22 @@ String tostring(U64 n, U32 base) {
     return ret;
 }
 
+String tostring(F32 n) {
+    String str = std::to_string(n);
+    auto dot = str.find(".");
+    while (str.back() == '0' && str.size() > dot + 2)
+        str.pop_back();
+    return str;
+}
+
+String tostring(F64 n) {
+    String str = std::to_string(n);
+    auto dot = str.find(".");
+    while (str.back() == '0' && str.size() > dot + 2)
+        str.pop_back();
+    return str;
+}
+
 String tolower(const String& string) {
     String out;
     out.reserve(string.size());

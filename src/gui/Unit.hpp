@@ -5,6 +5,7 @@
 #pragma once
 
 #include <regex>
+#include <string_view>
 
 #include <common/Value.hpp>
 
@@ -72,6 +73,14 @@ namespace ui {
         }
 
         Unit& operator = (const char* str) {
+            std::string_view view = str;
+            if (view == "center")
+                str = "50%-50%";
+            else if (view == "top" || view == "left")
+                str = "0px";
+            else if (view == "bottom" || view == "right")
+                str = "100%-100%";
+
             auto load = +[](const String& str, F32& value, Type& type){
                 if (str.empty()) {
                     type = Type::Default;
@@ -103,7 +112,8 @@ namespace ui {
         }
 
         bool operator == (const Unit& other) const {
-            return other.type == type && other.value == value;
+            return other.type == type && other.value == value &&
+                other.referenceType == referenceType && other.reference == reference;
         }
 
         operator String () const {
@@ -122,7 +132,7 @@ namespace ui {
             reference = 0;
         }
 
-        S32 toPixel(S32 parent) const {
+        S32 toPixel(S32 parent, S32 own) const {
             switch (type) {
             case Type::Default:
                 return 0;
@@ -134,7 +144,7 @@ namespace ui {
                 case Type::Pixel:
                     return static_cast<S32>(reference + 0.5f) + static_cast<S32>(parent * value + 0.5f);
                 case Type::Percent:
-                    return static_cast<S32>(parent * reference + 0.5f) + static_cast<S32>(parent * value + 0.5f);
+                    return static_cast<S32>(parent * reference + 0.5f) + static_cast<S32>(own * value + 0.5f);
                 }
                 return 0;
 

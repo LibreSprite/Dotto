@@ -7,10 +7,12 @@
 
 namespace ui {
     void Flow::absolute(std::shared_ptr<Node> child, Rect& parentRect) {
-        child->localRect.x = child->x->toPixel(parentRect.width);
-        child->localRect.y = child->y->toPixel(parentRect.height);
-        child->localRect.width = child->width->toPixel(parentRect.width);
-        child->localRect.height = child->height->toPixel(parentRect.height);
+        child->localRect.width = child->width->toPixel(parentRect.width, parentRect.width);
+        child->localRect.height = child->height->toPixel(parentRect.height, parentRect.height);
+        S32 outerWidth = child->localRect.width + child->margin->x + S32(child->margin->width);
+        S32 outerHeight = child->localRect.height + child->margin->y + S32(child->margin->height);
+        child->localRect.x = child->x->toPixel(parentRect.width, outerWidth);
+        child->localRect.y = child->y->toPixel(parentRect.height, outerHeight);
         child->globalRect.x = child->localRect.x + parentRect.x;
         child->globalRect.y = child->localRect.y + parentRect.y;
         child->globalRect.width = child->localRect.width;
@@ -21,6 +23,8 @@ namespace ui {
     public:
         void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             for (auto& child : children) {
+                if (!*child->visible)
+                    continue;
                 if (*child->absolute) {
                     absolute(child, parentRect);
                 } else {
@@ -32,7 +36,15 @@ namespace ui {
                     child->globalRect.y = parentRect.y;
                     child->globalRect.width = parentRect.width;
                     child->globalRect.height = parentRect.height;
+                    child->localRect.width -= child->margin->x + S32(child->margin->width);
+                    child->localRect.height -= child->margin->y + S32(child->margin->height);
+                    child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                    child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 }
+                child->localRect.x += child->margin->x;
+                child->localRect.y += child->margin->y;
+                child->globalRect.x += child->margin->x;
+                child->globalRect.y += child->margin->y;
                 child->onResize();
             }
         }
@@ -49,20 +61,28 @@ namespace ui {
             bool done;
             U32 result;
             U32 offset;
+            S32 margins;
         };
 
         void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
+                if (!*child->visible)
+                    continue;
                 if (*child->absolute) {
                     absolute(child, parentRect);
+                    child->localRect.x += child->margin->x;
+                    child->localRect.y += child->margin->y;
+                    child->globalRect.x += child->margin->x;
+                    child->globalRect.y += child->margin->y;
                     child->onResize();
                 } else {
                     sizes.push_back({
                             .child = child.get(),
                             .given = child->width,
                             .min = child->minWidth,
-                            .max = child->maxWidth
+                            .max = child->maxWidth,
+                            .margins = child->margin->x + S32(child->margin->width)
                         });
                 }
             }
@@ -78,6 +98,14 @@ namespace ui {
                 child->globalRect.y = parentRect.y;
                 child->globalRect.width = size.result;
                 child->globalRect.height = parentRect.height;
+                child->localRect.x += child->margin->x;
+                child->localRect.y += child->margin->y;
+                child->globalRect.x += child->margin->x;
+                child->globalRect.y += child->margin->y;
+                child->localRect.width -= child->margin->x + S32(child->margin->width);
+                child->localRect.height -= child->margin->y + S32(child->margin->height);
+                child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 child->onResize();
             }
         }
@@ -99,18 +127,18 @@ namespace ui {
                 switch (size.given.getType()) {
                 case Unit::Type::Pixel: {
                     size.done = true;
-                    size.result = size.given.toPixel(parent);
+                    size.result = size.given.toPixel(parent, parent) + size.margins;
                     fillWidth -= size.result;
                     break;
                 }
                 case Unit::Type::Default: {
-                    totalWeight += 1000;
-                    size.result = 1000;
+                    totalWeight += 1000 + size.margins;
+                    size.result = 1000 + size.margins;
                     break;
                 }
                 case Unit::Type::Percent: {
-                    size.result = size.given.toPixel(1000);
-                    totalWeight += size.result;
+                    size.result = size.given.toPixel(1000, 1000) + size.margins;
+                    totalWeight += size.result + size.margins;
                     break;
                 }
                 }
@@ -121,9 +149,9 @@ namespace ui {
                     S32 result = fillWidth * (size.result / F32(totalWeight));
                     S32 adjusted = result;
                     if (size.min.getType() != Unit::Type::Default)
-                        adjusted = std::max(adjusted, size.min.toPixel(parent));
+                        adjusted = std::max(adjusted, size.min.toPixel(parent, parent));
                     if (size.max.getType() != Unit::Type::Default)
-                        adjusted = std::min(adjusted, size.max.toPixel(parent));
+                        adjusted = std::min(adjusted, size.max.toPixel(parent, parent));
                     fillWidth -= result - adjusted;
                     size.result = adjusted;
                     size.done = true;
@@ -140,15 +168,22 @@ namespace ui {
         void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
+                if (!*child->visible)
+                    continue;
                 if (*child->absolute) {
                     absolute(child, parentRect);
+                    child->localRect.x += child->margin->x;
+                    child->localRect.y += child->margin->y;
+                    child->globalRect.x += child->margin->x;
+                    child->globalRect.y += child->margin->y;
                     child->onResize();
                 } else {
                     sizes.push_back({
                             .child = child.get(),
                             .given = child->height,
                             .min = child->minHeight,
-                            .max = child->maxHeight
+                            .max = child->maxHeight,
+                            .margins = child->margin->y + S32(child->margin->height)
                         });
                 }
             }
@@ -164,6 +199,14 @@ namespace ui {
                 child->globalRect.y = parentRect.y + size.offset;
                 child->globalRect.width = parentRect.width;
                 child->globalRect.height = size.result;
+                child->localRect.x += child->margin->x;
+                child->localRect.y += child->margin->y;
+                child->globalRect.x += child->margin->x;
+                child->globalRect.y += child->margin->y;
+                child->localRect.width -= child->margin->x + S32(child->margin->width);
+                child->localRect.height -= child->margin->y + S32(child->margin->height);
+                child->globalRect.width -= child->margin->x + S32(child->margin->width);
+                child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 child->onResize();
             }
         }

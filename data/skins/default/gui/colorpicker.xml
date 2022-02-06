@@ -1,9 +1,5 @@
-<image controller="draggable, shortcut, script, focusfront" script="%appdata/scripts/colorpicker.js" handle="titlebar" src="%skin/window.png" height="180px" width="150px" x="0px" y="100%-180px" absolute="true" slice="7 30" overflow-hidden="true">
-  <node id="titlebar">
-    <span id="title" font="%skin/DejaVuSans.ttf" size="16px" absolute="true" x="5" y="5">
-      Color Picker
-    </span>
-    <image id="close" src="%skin/close.png" height="21px" width="21px" x="100%-30px" y="4px" absolute="true"/>
-  </node>
-  <image id="sample" src="%skin/colorpicker.png" absolute="true" y="30px" height="100%-35px" x="4px" width="100%-9px"/>
-</image>
+<popup controller="script" script="%appdata/scripts/colorpicker.js" height="180px" width="150px" title="Color Wheel">
+  <inside>
+    <image id="sample" src="%skin/colorpicker.png"/>
+  </inside>
+</popup>

@@ -1,10 +1,7 @@
 var views = {};
 var controllers = {
     filemenu : {
-        click:function(){
-            if (app.eventTarget == app.target)
-                closeStartMenu();
-        }
+        click:closeStartMenu
     },
 
     editor : {},
@@ -22,6 +19,29 @@ var controllers = {
                     views[name] = node;
                 }
             }
+
+            for (var name in controllers.script) {
+                app.addEventListener(name);
+            }
+        },
+
+        activatetool : function() {
+            views.toolconfigbutton.src = app.activeTool.get("icon");
+            views.toolconfigbutton.visible = true;
+            views.toolconfigmenu.set("meta", app.activeTool.get("meta"));
+        }
+    },
+
+    toolconfigmenu : {
+        change : function() {
+            views.toolconfigmenu.set("result", null); // clean previous result
+            app.activeTool.apply(views.toolconfigmenu.get("result"));
+        }
+    },
+
+    toolconfigbutton : {
+        click : function() {
+            views.toolconfigmenu.visible = !views.toolconfigmenu.visible;
         }
     },
 
@@ -32,34 +52,6 @@ var controllers = {
             views.startbutton.set("state", pressed ? "active" : "enabled");
             if (pressed)
                 views.filemenu.bringToFront();
-        }
-    },
-
-    newbutton : {
-        click : function() {
-            closeStartMenu();
-            app.window.createChild("newfilepopup");
-        }
-    },
-
-    openbutton : {
-        click : function() {
-            closeStartMenu();
-            var pick = app.open('*.png', 'Open image');
-            if (pick) {
-                views.editor.set("file", pick);
-                views.editor.visible = true;
-            }
-        }
-    },
-
-    savebutton : {
-        click : function() {
-            closeStartMenu();
-            var pick = app.save('*.png', 'Save image', "Image format");
-            if (pick) {
-                app.write(pick, app.activeCell.composite);
-            }
         }
     },
 
@@ -84,7 +76,7 @@ function onEvent(name) {
             break;
         }
     }
-    if (!controller) {
+    if (!controller || !controller[name]) {
         target = "script";
         controller = controllers[target];
     }

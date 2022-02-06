@@ -29,7 +29,15 @@ public:
         }
     }
 
+    std::size_t size() const {
+        return properties.size();
+    }
+
     const HashMap<String, std::shared_ptr<Value>>& getMap() const {
+        return properties;
+    }
+
+    HashMap<String, std::shared_ptr<Value>>& getMap() {
         return properties;
     }
 
@@ -67,21 +75,27 @@ public:
             else if (from.has<String>()) out = std::atol(from.get<String>().c_str());
             else return false;
         } else if constexpr (std::is_floating_point_v<Type>) {
-            if (!from.has<String>())
-                return false;
-            out = std::atof(from.get<String>().c_str());
+            if (from.has<F32>()) out = from.get<F32>();
+            else if (from.has<S32>()) out = from.get<S32>();
+            else if (from.has<U32>()) out = from.get<U32>();
+            else if (from.has<U64>()) out = from.get<U64>();
+            else if (from.has<S64>()) out = from.get<S64>();
+            else if (from.has<double>()) out = from.get<double>();
+            else if (from.has<String>()) out = std::atof(from.get<String>().c_str());
+            else return false;
         } else if constexpr (std::is_constructible_v<Type, std::shared_ptr<Value>>) {
             out = Type{from};
         } else if constexpr (std::is_assignable_v<Type, std::shared_ptr<Value>>) {
             out = Type{from};
         } else if constexpr (std::is_assignable_v<Type, String>) {
             if (from.has<String>()) out = from.get<String>();
-            else if (from.has<F32>()) out = std::to_string(from.get<F32>());
+            else if (from.has<F32>()) out = tostring(from.get<F32>());
             else if (from.has<S32>()) out = std::to_string(from.get<S32>());
             else if (from.has<U32>()) out = std::to_string(from.get<U32>());
             else if (from.has<U64>()) out = std::to_string(from.get<U64>());
             else if (from.has<S64>()) out = std::to_string(from.get<S64>());
             else if (from.has<double>()) out = std::to_string(from.get<double>());
+            else if (from.has<bool>()) out = String(from.get<bool>() ? "true" : "false");
             else return false;
         } else if constexpr (std::is_constructible_v<Type, String>) {
             if (!from.has<String>())
@@ -101,7 +115,9 @@ public:
 
     template<typename Type>
     bool get(const String& key, Type& out) const {
-        auto it = properties.find(tolower(key));
+        auto it = properties.find(key);
+        if (it == properties.end())
+            it = properties.find(tolower(key));
         if (it == properties.end())
             return false;
         bool success = assignProperty(*it->second, out);
@@ -119,10 +135,20 @@ public:
 
     template<typename Type>
     void set(const String& key, Type&& value) {
-        auto lower = tolower(key);
         auto it = properties.find(key);
         if (it == properties.end()) {
-            properties.insert({lower, std::make_shared<Value>(std::forward<Type>(value))});
+            properties.insert({key, std::make_shared<Value>(std::forward<Type>(value))});
+        } else {
+            *it->second = value;
+        }
+    }
+
+    template<typename Type>
+    void push(Type&& value) {
+        auto key = std::to_string(size());
+        auto it = properties.find(key);
+        if (it == properties.end()) {
+            properties.insert({key, std::make_shared<Value>(std::forward<Type>(value))});
         } else {
             *it->second = value;
         }
@@ -130,15 +156,13 @@ public:
 
     void append(const PropertySet& other) {
         for (auto& entry : other.properties) {
-            properties.insert({entry.first, entry.second});
+            properties.insert_or_assign(entry.first, entry.second);
         }
     }
 
     void prepend(const PropertySet& other) {
         for (auto& entry : other.properties) {
-            if (properties.find(entry.first) == properties.end()) {
-                properties.insert({entry.first, entry.second});
-            }
+            properties.insert({entry.first, entry.second});
         }
     }
 
@@ -166,7 +190,6 @@ class Serializable {
 public:
     virtual ~Serializable() {}
 
-protected:
     template<typename _Type, bool Debug = false>
     class Property {
     public:
@@ -175,8 +198,8 @@ protected:
         const String name;
         std::function<void()> change;
 
-        template<typename ParentType>
-        Property(ParentType* parent, const String& name, const Type& value = Type{}, void (ParentType::*change)() = nullptr) : name{name}, value{value} {
+        template<typename ParentType, typename InitType = Type>
+        Property(ParentType* parent, const String& name, InitType&& value = InitType{}, void (ParentType::*change)() = nullptr) : name{name}, value(std::forward<InitType>(value)) {
             if (change) {
                 this->change = [=]{(parent->*change)();};
             }

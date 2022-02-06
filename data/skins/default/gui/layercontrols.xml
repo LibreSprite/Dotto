@@ -1,0 +1,3 @@
+<row id="layercontrols">
+  <textbutton id="newlayer" label="New Layer" click="AddLayer type=bitmap"/>
+</row>

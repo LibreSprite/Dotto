@@ -15,16 +15,29 @@ else
     LN = g++
     UNAME_S := $(shell uname -s)
 
+    # uncomment if you get a linker error due to GCC 8
+    # LN_FLAGS += -lstdc++fs
+
+
     ifeq ($(UNAME_S),Linux)
         CCFLAGS += -D LINUX
         BITS := $(shell getconf LONG_BIT)
         ifeq ($(BITS),64)
-            # CPP_FLAGS += -DV8_COMPRESS_POINTERS
+            CPP_FLAGS += -DV8_COMPRESS_POINTERS
 	    # CPP_FLAGS += -DSCRIPT_ENGINE_V8
 	    # LIB_DIRS := $(shell find linux-x64 -type d)
 	    # SO_FILES := $(shell find linux-x64 -type f -name '*.so*')
         endif
+
+        ifneq ("$(wildcard /usr/lib/arm-linux-gnueabihf/libv8.so)","")
+	    CPP_FLAGS += -I/usr/include/nodejs/deps/v8/include
+	    LN_FLAGS += -L/usr/lib/arm-linux-gnueabihf
+	    LN_FLAGS += -lv8 -lv8_libplatform
+	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
+        endif
+
 	LN_FLAGS += -lGL
+	LN_FLAGS += -llcms2
     endif
 
     ifeq ($(UNAME_S),Darwin)
@@ -35,8 +48,6 @@ else
     endif
 
     # ifneq ($(filter %86,$(UNAME_P)),)
-    # endif
-    # ifneq ($(filter arm%,$(UNAME_P)),)
     # endif
 
     LIB_DIRS += $(shell find libs -type d)
@@ -62,6 +73,7 @@ else
     C_FILES += $(shell find libs -type f -name '*.c')
 
     LN_FLAGS += $(shell sdl2-config --libs)
+    LN_FLAGS += -lSDL2_image
     LN_FLAGS += $(SO_FILES)
 
 #BEGIN V8 SUPPORT
@@ -74,8 +86,9 @@ else
 
 #BEGIN LUA SUPPORT
     CPP_FLAGS += -DSCRIPT_ENGINE_LUA
-    CPP_FLAGS += $(shell pkg-config --cflags lua)
-    LN_FLAGS += $(shell pkg-config --libs lua)
+    LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do pkg-config --exists $$p && echo $$p && break ; done)
+    CPP_FLAGS += $(shell pkg-config --cflags $(LUAPKG))
+    LN_FLAGS += $(shell pkg-config --libs $(LUAPKG))
 #END
 endif
 
@@ -107,7 +120,7 @@ $(ODIR)/%.mm.o: %.mm
 	@mkdir -p "$$(dirname "$@")"
 	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
 
-libresprite: $(OBJ)
+dotto: $(OBJ)
 	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
 
 .PHONY: clean

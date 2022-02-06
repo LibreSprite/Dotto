@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <common/Color.hpp>
 #include <common/inject.hpp>
 #include <common/PropertySet.hpp>
 #include <common/Rect.hpp>
@@ -28,9 +29,11 @@ namespace ui {
         bool isDirty = true;
         std::shared_ptr<Flow> flowInstance;
         HashMap<String, std::shared_ptr<Controller>> controllers;
+        HashSet<String> tags;
 
         void reflow();
         void reattach();
+        void changeStealFocus();
 
     protected:
         void forwardToChildren(const Event& event);
@@ -53,8 +56,11 @@ namespace ui {
 
         Property<String> id{this, "id", ""};
         Property<String> controllerName{this, "controller", "", &Node::reattach};
-        Property<bool> visible{this, "visible", true};
+        Property<Color> multiply{this, "multiply", {"rgba{255,255,255,255}"}};
+        Property<F32> alpha{this, "alpha", 1.0f};
+        Property<bool> visible{this, "visible", true, &Node::resize};
         Property<bool> inputEnabled{this, "inputEnabled", true};
+        Property<bool> stealFocus{this, "steal-focus", false, &Node::changeStealFocus};
         Property<bool> debug{this, "debug"};
 
         Property<bool> hideOverflow{this, "overflow-hidden", false};
@@ -71,6 +77,7 @@ namespace ui {
         Property<Unit> maxHeight{this, "max-height", {"100%"}, &Node::resize};
 
         Property<Rect> padding{this, "padding", Rect{}, &Node::resize};
+        Property<Rect> margin{this, "margin", Rect{}, &Node::resize};
 
         Property<String> flow{this, "flow", "column", &Node::reflow};
         Property<S32> zIndex{this, "z", 0};
@@ -78,6 +85,12 @@ namespace ui {
 
         Node();
         ~Node();
+
+        bool hasTag(const String& tag);
+        void setTag(const String& tag);
+        const HashSet<String>& getTags() {
+            return tags;
+        }
 
         static std::shared_ptr<Node> fromXML(const String& widgetName);
 
@@ -89,11 +102,16 @@ namespace ui {
 
         void set(const String& key, Value& value, bool debug = false) override;
 
-        std::shared_ptr<Node> findChildById(const String& targetId);
+        std::shared_ptr<Node> findChildByPredicate(const std::function<bool(ui::Node*)> predicate);
+        std::shared_ptr<Node> findChildById(const String& targetId, bool debug = false);
+        std::shared_ptr<Node> findParentById(const String& targetId);
 
         U32 getChildSeparation(std::shared_ptr<Node> child);
 
+        void bringToFront();
         void bringToFront(std::shared_ptr<Node> child);
+
+        bool isDescendantOf(std::shared_ptr<Node> other);
 
         void processEvent(const Event& event) override;
 
@@ -111,6 +129,13 @@ namespace ui {
             }
         }
 
+        virtual bool hasFocus(std::shared_ptr<ui::Node> child = nullptr) {
+            if (parent) {
+                return parent->hasFocus(child ?: shared_from_this());
+            }
+            return false;
+        }
+
         virtual void blur(std::shared_ptr<ui::Node> child = nullptr) {
             if (parent) {
                 parent->blur(child ?: shared_from_this());
@@ -123,13 +148,29 @@ namespace ui {
 
         virtual void resize() {
             if (parent) {
-                parent->resize();
+                parent->doResize();
             }
         }
 
         virtual void doResize();
 
-        virtual void onResize() {}
+        virtual void onResize();
+
+        S32 innerWidth() {
+            return width->toPixel(0, 0) - padding->x - padding->width;
+        }
+
+        S32 innerHeight() {
+            return height->toPixel(0, 0) - padding->y - padding->height;
+        }
+
+        S32 outerWidth() {
+            return width->toPixel(0, 0) + margin->x + margin->width;
+        }
+
+        S32 outerHeight() {
+            return height->toPixel(0, 0) + margin->y + margin->height;
+        }
 
         virtual void draw(S32 z, Graphics& gfx);
 

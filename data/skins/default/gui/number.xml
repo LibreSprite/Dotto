@@ -1,0 +1,4 @@
+<row forward="num-label.text=label, num-value.text=value" result="num-value.value" id="row">
+  <span id="num-label"/>
+  <input allow="[\-0-9]" id="num-value">0</input>
+</row>

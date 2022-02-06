@@ -74,6 +74,17 @@ namespace ui {
                         .destination = globalRect,
                         .nineSlice = nineSlice,
                         .zIndex = z,
+                        .multiply = multiply,
+                        .debug = debug
+                    });
+            } else {
+                g.blit({
+                        .surface = nullptr,
+                        .source = localRect,
+                        .destination = globalRect,
+                        .nineSlice = nineSlice,
+                        .zIndex = z,
+                        .multiply = multiply,
                         .debug = debug
                     });
             }

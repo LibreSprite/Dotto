@@ -15,6 +15,7 @@ public:
     void run() override {
         std::swap(Tool::previous, Tool::active);
         if (auto tool = Tool::active.lock()) {
+            tool->onActivate();
             if (auto name = tool->get("tool")) {
                 pub(msg::ActivateTool{name->get<String>()});
                 return;

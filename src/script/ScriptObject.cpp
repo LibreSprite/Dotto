@@ -8,11 +8,13 @@
 namespace script {
 
     InternalScriptObject::InternalScriptObject() {
-        liveInstances.insert(this);
+        if(auto liveInstances = getLiveInstances())
+            liveInstances->insert(this);
     }
 
     InternalScriptObject::~InternalScriptObject() {
-        liveInstances.erase(this);
+        if(auto liveInstances = getLiveInstances())
+            liveInstances->erase(this);
     }
 
     void InternalScriptObject::makeGlobal(const String& name) {

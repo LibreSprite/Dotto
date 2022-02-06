@@ -42,40 +42,21 @@ public:
             "}";
     }
 
-    void fromString(const String& color) {
-        if (color.empty())
-            return;
-        if (color[0] == '#') {
-            U32 rgba = 0xFF;
-            std::from_chars(color.c_str() + 1, color.c_str() + color.size(), rgba, 16);
-            fromU32(rgba);
-            return;
-        }
-        if (color.back() == '}') {
-            auto parts = split(color, "{");
-            if (parts.size() != 2)
-                return;
-            auto keys = trim(tolower(parts[0]));
-            auto values = split(parts[1], ",");
-            for (U32 i = 0; i < keys.size() && i < values.size(); ++i) {
-                auto key = keys[i];
-                auto value = std::stoi(trim(values[i]));
-                if (key == 'r') r = value;
-                else if (key == 'g') g = value;
-                else if (key == 'b') b = value;
-                else if (key == 'a') a = value;
-                else continue;
-            }
-            return;
-        }
-        fromU32(std::atof(color.c_str()));
-    }
+    void fromString(const String& color);
 
-    constexpr Color& fromU32(U32 rgba) {
+    Color& fromU32(U32 rgba) {
         r = static_cast<U8>(rgba >> Rshift);
         g = static_cast<U8>(rgba >> Gshift);
         b = static_cast<U8>(rgba >> Bshift);
         a = static_cast<U8>(rgba >> Ashift);
+        return *this;
+    }
+
+    constexpr Color& fromABGR(U32 rgba) {
+        r = static_cast<U8>(rgba >> 16);
+        g = static_cast<U8>(rgba >> 8);
+        b = static_cast<U8>(rgba >> 0);
+        a = static_cast<U8>(rgba >> 24);
         return *this;
     }
 

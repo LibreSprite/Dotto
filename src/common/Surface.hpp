@@ -33,14 +33,29 @@ public:
             textureInfo->setDirty();
     }
 
+    const Vector<PixelType>& getPixels() {
+        return pixels;
+    }
+
     Color getPixel(U32 x, U32 y) {
         U32 index = x + y * _width;
         return (index >= _width * _height) ? Color{} : getColor(pixels[index]);
     }
 
+    PixelType getPixelUnsafe(U32 x, U32 y) {
+        return pixels[x + y * _width];
+    }
+
     void setPixelUnsafe(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
         pixels[index] = pixel;
+        setDirty();
+    }
+
+    void setPixels(Vector<PixelType>& read) {
+        if (read.size() != pixels.size())
+            return;
+        pixels = read;
         setDirty();
     }
 

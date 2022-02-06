@@ -1,0 +1,10 @@
+<image
+    forward="labelspan.text=label"
+    controller="tabtarget, button"
+    multiply="#00000000"
+    up-multiply="#00000000"
+    down-multiply="#20000000"
+    hover-multiply="#20FFFFFF"
+    focus-multiply="#FFDDDD">
+  <span id="labelspan"/>
+</image>

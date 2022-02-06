@@ -2,7 +2,9 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/Config.hpp>
 #include <common/XML.hpp>
+#include <fs/Cache.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Flow.hpp>
@@ -25,15 +27,59 @@ ui::Node::~Node() {
         child->parent = nullptr;
 }
 
+bool ui::Node::hasTag(const String& tag) {
+    return tags.find(tag) != tags.end();
+}
 
-std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId) {
-    if (*id == targetId)
+void ui::Node::setTag(const String& tag) {
+    if (!tag.empty()) {
+        tags.insert(tag);
+    }
+}
+
+std::shared_ptr<ui::Node> ui::Node::findChildByPredicate(const std::function<bool(ui::Node*)> predicate) {
+    if (predicate(this))
         return shared_from_this();
     for (auto& child : children) {
-        if (auto found = child->findChildById(targetId))
+        if (auto found = child->findChildByPredicate(predicate))
             return found;
     }
     return nullptr;
+}
+
+std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId, bool debug) {
+    if (debug) {
+        logV("Looking for [", targetId, "] in [", id.value, "]:", children.size());
+    }
+    if (id.value == targetId)
+        return shared_from_this();
+    for (auto& child : children) {
+        if (child->id.value == targetId)
+            return child;
+    }
+    for (auto& child : children) {
+        if (auto found = child->findChildById(targetId, debug))
+            return found;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<ui::Node> ui::Node::findParentById(const String &targetId) {
+    if (id.value == targetId)
+        return shared_from_this();
+    auto parent = this->parent;
+    while (parent) {
+        if (parent->id.value == targetId)
+            return parent->shared_from_this();
+        parent = parent->parent;
+    }
+    return nullptr;
+}
+
+void ui::Node::bringToFront() {
+    if (parent) {
+        parent->bringToFront(shared_from_this());
+    }
 }
 
 void ui::Node::bringToFront(std::shared_ptr<ui::Node> child) {
@@ -43,6 +89,19 @@ void ui::Node::bringToFront(std::shared_ptr<ui::Node> child) {
     children.erase(it);
     children.push_back(child);
 }
+
+bool ui::Node::isDescendantOf(std::shared_ptr<ui::Node> other) {
+    if (!other)
+        return false;
+    auto current = this;
+    while (current) {
+        if (current == other.get())
+            return true;
+        current = current->getParent();
+    }
+    return false;
+}
+
 
 U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
     if (!child)
@@ -59,6 +118,7 @@ U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
 }
 
 void ui::Node::processEvent(const Event& event) {
+    event.currentTarget = this;
     EventHandler::processEvent(event);
     if (event.bubble == Event::Bubble::Down && !event.cancel)
         forwardToChildren(event);
@@ -106,14 +166,18 @@ void ui::Node::load(const PropertySet& set) {
                 continue;
 
             auto target = split(parts[0], ".");
-            if (target.size() != 2)
-                continue;
-
-            auto child = findChildById(trim(target[0]));
-            if (!child)
-                continue;
-
-            child->load({{target[1], value}});
+            ui::Node* child = nullptr;
+            String key;
+            if (target.size() == 2) {
+                child = findChildById(trim(target[0])).get();
+                key = target[1];
+            } else if (target.size() == 1) {
+                child = this;
+                key = target[0];
+            }
+            if (child) {
+                child->set(trim(key), value);
+            }
         }
     }
 }
@@ -133,40 +197,60 @@ void ui::Node::set(const String& key, Value& value, bool debug) {
                 continue;
 
             auto target = split(parts[0], ".");
-            if (target.size() != 2)
-                continue;
-
-            auto child = findChildById(trim(target[0]));
-            if (!child)
-                continue;
-
-            child->set(target[1], value, debug);
+            ui::Node* child = nullptr;
+            String key;
+            if (target.size() == 2) {
+                child = findChildById(trim(target[0])).get();
+                key = target[1];
+            } else if (target.size() == 1) {
+                child = this;
+                key = target[0];
+            }
+            if (child) {
+                child->set(trim(key), value);
+            }
         }
     }
 }
 
-static void loadNodeProperties(ui::Node* node, XMLElement* element) {
+static std::shared_ptr<ui::Node> fromXMLInternal(const String& widgetName);
+
+static void loadNodeProperties(ui::Node* node, XMLElement* element, const String& widgetName) {
     PropertySet props;
     if (!element->text.empty())
         props.set("text", trim(element->text));
+
+    node->setTag(widgetName);
+    node->setTag(element->tag);
+    auto it = element->attributes.find("id");
+    if (it != element->attributes.end()) {
+        node->setTag("@" + it->second);
+    }
+
     for (auto& prop : element->attributes) {
         props.set(prop.first, prop.second);
     }
+
     node->init(props);
 }
 
-static void loadChildNodes(ui::Node* parent, XMLElement* element) {
+static ui::Node* parent = nullptr;;
+static std::shared_ptr<PropertySet> style;
+
+static void loadChildNodes(ui::Node* parentNode, XMLElement* element) {
     for (auto xml : element->children) {
         if (!xml->isElement())
             continue;
 
+        parent = parentNode;
+
         auto childElement = std::static_pointer_cast<XMLElement>(xml);
-        auto child = parent->findChildById(childElement->tag);
+        auto child = parentNode->findChildById(childElement->tag);
 
         if (!child) {
-            child = ui::Node::fromXML(childElement->tag);
+            child = fromXMLInternal(childElement->tag);
             if (child) {
-                parent->addChild(child);
+                parentNode->addChild(child);
             }
         }
 
@@ -174,11 +258,75 @@ static void loadChildNodes(ui::Node* parent, XMLElement* element) {
             continue;
 
         loadChildNodes(child.get(), childElement.get());
-        loadNodeProperties(child.get(), childElement.get());
+        loadNodeProperties(child.get(), childElement.get(), childElement->tag);
     }
 }
 
+void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
+    PropertySet result;
+
+    {
+        Vector<std::pair<S32, std::shared_ptr<PropertySet>>> applicable;
+        for (auto set : styles) {
+            if (!set)
+                continue;
+            auto& map = set->getMap();
+            for (auto& tag : node->getTags()) {
+                auto it = map.find(tag);
+                if (it != map.end() && it->second->has<std::shared_ptr<PropertySet>>()) {
+                    std::shared_ptr<PropertySet> childSet = *it->second;
+                    applicable.emplace_back(childSet->get<S32>("priority"), childSet);
+                }
+            }
+        }
+        std::sort(applicable.begin(), applicable.end(), [](auto& left, auto& right) {
+            return left.first < right.first;
+        });
+        for (auto& set : applicable) {
+            result.append(set.second);
+        }
+    }
+
+    for (auto& entry : node->getPropertySet().getMap()) {
+        result.getMap().erase(entry.first);
+    }
+
+    node->load(result);
+    styles.push_back(&result);
+    for (auto& child : node->getChildren()) {
+        applyStyle(child, styles);
+    }
+    styles.pop_back();
+}
+
 std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
+    static U32 depth = 0;
+    depth++;
+    auto lock = inject<Cache>{}->lock();
+    auto ret = fromXMLInternal(widgetName);
+    if (!--depth && ret) {
+        std::shared_ptr<PropertySet> style = inject<FileSystem>{}->parse("%skin/gui/style.ini");
+        if (style) {
+            Vector<PropertySet*> styles = {style.get(), inject<Config>{}->properties.get()};
+            applyStyle(ret, styles);
+        }
+        auto parentKey = ret->get("parent");
+        if (parentKey && parentKey->has<String>()) {
+            inject<ui::Node> root{"root"};
+            if (root) {
+                auto parent = root->findChildById(parentKey->get<String>());
+                if (parent) {
+                    parent->addChild(ret);
+                } else {
+                    logE("Could not add ", widgetName, " to ", parentKey->get<String>());
+                }
+            }
+        }
+    }
+    return ret;
+}
+
+static std::shared_ptr<ui::Node> fromXMLInternal(const String& widgetName) {
     auto& nodeRegistry = ui::Node::getRegistry();
 
     if (nodeRegistry.find(widgetName) != nodeRegistry.end())
@@ -193,14 +341,14 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
 
     auto element = std::static_pointer_cast<XMLElement>(xml);
     auto widget = inject<ui::Node>{InjectSilent::Yes, element->tag}.shared();
-    if (!widget) widget = fromXML(element->tag);
+    if (!widget) widget = fromXMLInternal(element->tag);
     if (!widget) {
         logE("Unknown widget: ", element->tag);
         return nullptr;
     }
 
     loadChildNodes(widget.get(), element.get());
-    loadNodeProperties(widget.get(), element.get());
+    loadNodeProperties(widget.get(), element.get(), widgetName);
 
     return widget;
 }
@@ -208,6 +356,12 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
 void ui::Node::reflow() {
     flowInstance = inject<Flow>{*flow};
     setDirty();
+}
+
+void ui::Node::changeStealFocus() {
+    if (isInScene && stealFocus) {
+        focus();
+    }
 }
 
 void ui::Node::reattach() {
@@ -232,6 +386,8 @@ void ui::Node::eventHandler(const AddToScene& event) {
     resize();
     if (isDirty && parent) // parent is null for root node
         parent->setDirty();
+    if (stealFocus)
+        focus();
 }
 
 void ui::Node::doResize() {
@@ -243,30 +399,43 @@ void ui::Node::doResize() {
     innerRect.width -= padding->x + padding->width;
     innerRect.height -= padding->y + padding->height;
     flowInstance->update(children, innerRect);
-    for (auto& child : children)
-        child->doResize();
+    for (auto& child : children) {
+        if (child->visible)
+            child->doResize();
+    }
+}
+
+void ui::Node::onResize() {
+    processEvent(ui::Resize{this});
 }
 
 void ui::Node::draw(S32 z, Graphics& gfx) {
+    auto prevAlpha = gfx.alpha;
     if (*hideOverflow) {
         Rect clip = gfx.pushClipRect(globalRect);
         if (!gfx.isEmptyClipRect()) {
             for (auto& child : children) {
-                if (child->visible)
+                if (child->visible) {
+                    gfx.alpha *= child->alpha;
                     child->draw(z + 1 + *child->zIndex, gfx);
+                    gfx.alpha = prevAlpha;
+                }
             }
         }
         gfx.setClipRect(clip);
     } else {
         for (auto& child : children) {
-            if (child->visible)
+            if (child->visible) {
+                gfx.alpha *= child->alpha;
                 child->draw(z + 1 + *child->zIndex, gfx);
+                gfx.alpha = prevAlpha;
+            }
         }
     }
 }
 
 void ui::Node::addChild(std::shared_ptr<Node> child) {
-    if (!child)
+    if (!child || child->parent == this)
         return;
     child->remove();
     children.push_back(child);
@@ -282,6 +451,7 @@ void ui::Node::removeChild(std::shared_ptr<Node> node) {
         if (it != children.end()) {
             node->parent = nullptr;
             children.erase(it);
+            node->processEvent(Remove{node.get()});
             node->processEvent(RemoveFromScene{node.get()});
         }
     }

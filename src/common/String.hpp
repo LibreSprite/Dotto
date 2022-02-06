@@ -10,6 +10,9 @@
 
 String tostring(U64 n, U32 base = 10);
 
+String tostring(F32 n);
+String tostring(F64 n);
+
 String tolower(const String& string);
 
 String toupper(const String& string);

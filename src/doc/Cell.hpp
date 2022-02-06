@@ -18,7 +18,9 @@ protected:
     String GUID;
     std::shared_ptr<Surface> composite = std::make_shared<Surface>();
     std::shared_ptr<Selection> mask;
+    F32 alpha = 1.0f;
 
+    void modify(bool silent);
 public:
     const String& getType() {return type;}
     const String& getGUID() {return GUID;}
@@ -26,4 +28,6 @@ public:
     Selection* getMask() {return mask.get();}
     virtual Vector<U8> serialize() = 0;
     virtual bool unserialize(const Vector<U8>&) = 0;
+    F32 getAlpha() {return alpha;}
+    void setAlpha(F32 v, bool silent);
 };

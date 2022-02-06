@@ -18,10 +18,20 @@ class Paint : public Command {
     Property<std::shared_ptr<Selection>> selection{this, "selection"};
     Property<Color> color{this, "color", Tool::color.toString()};
     Property<bool> preview{this, "preview", false};
+    Property<String> mode{this, "mode", "simple"};
     inject<Cell> cell{"activecell"};
     Vector<U32> undoData;
 
 public:
+    void undo() override {
+        auto selection = *this->selection;
+        if (!selection) {
+            logI("No selection");
+            return;
+        }
+        selection->write(cell->getComposite(), undoData);
+    }
+
     void setupPreview() {
         auto surface = cell->getComposite();
         if (!backup) {
@@ -63,6 +73,9 @@ public:
                 selection = backupSelection.get();
                 std::swap(*this->selection, backupSelection);
                 backupSelection->clear();
+                undoData = selection->read(backup.get());
+            } else {
+                undoData = selection->read(surface);
             }
             backupSurface = nullptr;
         } else {
@@ -74,7 +87,6 @@ public:
             return;
 
         F32 alpha = color.a / 255.0f / 255.0f;
-        undoData = selection->read(surface);
         auto& mask = selection->getData();
         auto commonRect = maskRect;
         auto maskStride = maskRect.width;
@@ -87,25 +99,43 @@ public:
         U32 surfaceOffsetY = commonRect.y > 0 ? commonRect.y : 0;
         U32 surfaceOffsetX = commonRect.x > 0 ? commonRect.x : 0;
 
-        for (U32 y = 0; y < commonRect.height; ++y) {
-            U32 maskIndex = (y + maskOffsetY) * maskStride + maskOffsetX;
-            U32 surfaceIndex = (y + surfaceOffsetY) * surfaceStride + surfaceOffsetX;
-            for (U32 x = 0; x < commonRect.width; ++x, ++maskIndex, ++surfaceIndex) {
-                auto amount = mask[maskIndex] * alpha;
-                tmp.fromU32(readData[surfaceIndex]);
-                tmp.r = tmp.r * (1 - amount) + color.r * amount;
-                tmp.g = tmp.g * (1 - amount) + color.g * amount;
-                tmp.b = tmp.b * (1 - amount) + color.b * amount;
-                tmp.a = tmp.a + amount * (255 - tmp.a);
-                writeData[surfaceIndex] = tmp.toU32();
+        if (*mode == "simple") {
+            for (U32 y = 0; y < commonRect.height; ++y) {
+                U32 maskIndex = (y + maskOffsetY) * maskStride + maskOffsetX;
+                U32 surfaceIndex = (y + surfaceOffsetY) * surfaceStride + surfaceOffsetX;
+                for (U32 x = 0; x < commonRect.width; ++x, ++maskIndex, ++surfaceIndex) {
+                    auto amount = mask[maskIndex] * alpha;
+                    tmp.fromU32(readData[surfaceIndex]);
+                    tmp.r = tmp.r * (1 - amount) + color.r * amount;
+                    tmp.g = tmp.g * (1 - amount) + color.g * amount;
+                    tmp.b = tmp.b * (1 - amount) + color.b * amount;
+                    tmp.a = tmp.a + amount * (255 - tmp.a);
+                    writeData[surfaceIndex] = tmp.toU32();
+                }
+            }
+        } else if (*mode == "erase") {
+            for (U32 y = 0; y < commonRect.height; ++y) {
+                U32 maskIndex = (y + maskOffsetY) * maskStride + maskOffsetX;
+                U32 surfaceIndex = (y + surfaceOffsetY) * surfaceStride + surfaceOffsetX;
+                for (U32 x = 0; x < commonRect.width; ++x, ++maskIndex, ++surfaceIndex) {
+                    auto amount = mask[maskIndex] * alpha;
+                    tmp.fromU32(readData[surfaceIndex]);
+                    tmp.r = tmp.r * (1 - amount);
+                    tmp.g = tmp.g * (1 - amount);
+                    tmp.b = tmp.b * (1 - amount);
+                    tmp.a = tmp.a * (1 - amount);
+                    writeData[surfaceIndex] = tmp.toU32();
+                }
             }
         }
 
         surface->setDirty();
         if (preview)
             this->selection->get()->clear();
-        else
+        else {
             backup.reset();
+            commit();
+        }
     }
 };
 

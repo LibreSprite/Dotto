@@ -5,12 +5,15 @@
 #pragma once
 
 #include <common/Color.hpp>
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
 #include <common/inject.hpp>
 
 class Surface;
 
 class Tool : public Injectable<Tool>, public Model, public std::enable_shared_from_this<Tool> {
+    PubSub<> pub{this};
 public:
     static inline HashMap<String, std::shared_ptr<Tool>> instances;
     static inline std::weak_ptr<Tool> previous;
@@ -29,12 +32,27 @@ public:
     virtual void init(const String& name) {
         instances.insert({name, shared_from_this()});
         load({
-                {"icon", "%skin/" + name + ".png"},
-                {"tool", name}
+                {"icon", "%appdata/icons/" + name + ".png"},
+                {"tool", name},
+                {"meta", getMetaProperties()}
             });
     }
 
-    virtual void begin(Surface* surface, const Vector<Point2D>& points) {}
+    virtual void onActivate() {
+        set("meta", getMetaProperties());
+    }
+
+    virtual void invalidateMetaMenu() {
+        if (auto old = getPropertySet().get<std::shared_ptr<PropertySet>>("meta")) {
+            auto current = getMetaProperties();
+            set("meta", current);
+            pub(msg::InvalidateMetaMenu{old, current});
+        }
+    }
+
+    virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 mode) {}
     virtual void update(Surface* surface, const Vector<Point2D>& points) {}
     virtual void end(Surface* surface, const Vector<Point2D>& points) {}
+
+    virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
 };

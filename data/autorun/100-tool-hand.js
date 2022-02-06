@@ -4,11 +4,11 @@ function onEvent(name) {
     var target = app.target;
     switch (name) {
     case "toolstart":
-        app.window.findChildById("editor").set("draggable", true);
+        app.activeEditor.set("draggable", true);
         break;
     case "toolend":
     case "tooldeactivate":
-        app.window.findChildById("editor").set("draggable", false);
+        app.activeEditor.set("draggable", false);
         break;
     }
 }

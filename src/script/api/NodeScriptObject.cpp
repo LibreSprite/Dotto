@@ -156,6 +156,7 @@ public:
         });
 
         createEventBinder<ui::AddToScene>("addtoscene");
+        createEventBinder<ui::Changed>("change");
         createEventBinder<ui::Blur>("blur");
         createEventBinder<ui::Focus>("focus");
         createEventBinder<ui::RemoveFromScene>("removefromscene");
@@ -169,6 +170,8 @@ public:
         createEventBinder<ui::KeyUp>("keyup");
         createEventBinder<ui::Drag>("drag");
         createEventBinder<ui::Drop>("drop");
+        createEventBinder<ui::Resize>("resize");
+        createEventBinder<ui::Remove>("remove");
     }
 
     HashMap<String, std::function<void(ui::Node*, const String&)>> eventBinders;
@@ -188,7 +191,6 @@ public:
                     } else {
                         app->setEventTarget(nullptr);
                     }
-                    // logV("Event [", join(event.toStrings(name), ", "), "]");
                     getEngine().raiseEvent(event.toStrings(name));
                 }
             };

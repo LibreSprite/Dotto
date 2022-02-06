@@ -2,6 +2,9 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <cmd/Command.hpp>
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <doc/Cell.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
@@ -10,18 +13,42 @@
 
 class Canvas : public ui::Controller {
 public:
+    PubSub<msg::ModifyCell, msg::ActivateCell> pub{this};
     inject<Cell> cell;
     std::shared_ptr<Tool> activeTool;
     Tool::Path points;
 
     void attach() override {
-        node()->addEventListener<ui::MouseMove, ui::MouseDown, ui::MouseUp>(this);
-        node()->set("surface", cell->getComposite()->shared_from_this());
+        node()->addEventListener<ui::MouseMove,
+                                 ui::MouseDown,
+                                 ui::MouseUp,
+                                 ui::MouseWheel>(this);
+        setup();
+    }
+
+    void on(msg::ModifyCell& event) {
+        if (event.cell.get() == cell)
+            setup();
+    }
+
+    void on(msg::ActivateCell& event) {
+        node()->set("inputEnabled", event.cell.get() == cell);
+    }
+
+    void setup() {
+        auto surface = cell->getComposite()->shared_from_this();
+        if (!surface) {
+            logI("Empty cell");
+        }
+        node()->load({
+                {"surface", surface},
+                {"alpha", cell->getAlpha()}
+            });
     }
 
     void eventHandler(const ui::MouseDown& event) {
         end();
-        paint(event.targetX(), event.targetY());
+        paint(event.targetX(), event.targetY(), event.buttons);
     }
 
     void eventHandler(const ui::MouseUp& event) {
@@ -30,10 +57,16 @@ public:
 
     void eventHandler(const ui::MouseMove& event) {
         if (event.buttons) {
-            paint(event.targetX(), event.targetY());
+            paint(event.targetX(), event.targetY(), event.buttons);
         } else {
             end();
         }
+    }
+
+    void eventHandler(const ui::MouseWheel& event) {
+        inject<Command> zoom{"zoom"};
+        zoom->set("level", "*" + tostring(1 + 0.2 * event.wheelY));
+        zoom->run();
     }
 
     void end() {
@@ -44,7 +77,7 @@ public:
         points.clear();
     }
 
-    void paint(S32 tx, S32 ty) {
+    void paint(S32 tx, S32 ty, U32 buttons) {
         auto rect = node()->globalRect;
         if (!rect.width || !rect.height)
             return;
@@ -61,7 +94,7 @@ public:
                 activeTool = Tool::active.lock();
                 if (!activeTool)
                     return;
-                activeTool->begin(surface, points);
+                activeTool->begin(surface, points, buttons);
             } while (Tool::active.lock() != activeTool);
         } else if (activeTool) {
             activeTool->update(surface, points);

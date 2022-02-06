@@ -16,9 +16,11 @@ class ToolScriptObject : public ModelScriptObject {
 public:
     const Vector<Point2D>* points;
     std::shared_ptr<script::ScriptObject> surface;
+    U32 which;
 
     ToolScriptObject() {
         surface = inject<script::ScriptObject>{typeid(std::shared_ptr<Surface>).name()};
+        addProperty("which", [=]{return which;});
         addProperty("count", [=]{return U32(points->size());});
         addProperty("color", [=]{return Tool::color.toU32();});
         addProperty("surface", [=]{return surface.get();});
@@ -54,9 +56,10 @@ public:
         }
     }
 
-    virtual void begin(Surface* surface, const Vector<Point2D>& points) {
+    virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 which) {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
+        tso->which = which;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));
         engine->raiseEvent({"toolstart"});
     }

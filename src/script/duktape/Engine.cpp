@@ -80,6 +80,7 @@ public:
     }
 
     bool eval(const String& code) override {
+        auto lock = shared_from_this();
         PushDefault engine{this};
         InternalScriptObject::PushDefault iso{internalScriptObjectName};
         initGlobals();

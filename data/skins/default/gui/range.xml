@@ -1,0 +1,11 @@
+<image slice="3 3"
+       forward="num-label.text=label, lbl.text=drag-value"
+       result="value"
+       controller="tabtarget, range"
+       handle="num-value"
+       id="row">
+  <span id="num-label" alpha="0.75" align="0"/>
+  <image id="num-value" absolute="true">
+    <span id="lbl" absolute="true" y="-20px" width="50px" x="50%-50%" align="0"/>
+  </image>
+</image>

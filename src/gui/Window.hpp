@@ -19,6 +19,7 @@ protected:
     PubSub<msg::MouseMove,
            msg::MouseUp,
            msg::MouseDown,
+           msg::MouseWheel,
            msg::KeyDown,
            msg::KeyUp,
            msg::WindowClosed,
@@ -27,6 +28,7 @@ protected:
            msg::PollActiveWindow> pub{this};
     std::weak_ptr<ui::Node> mouseOverTarget;
     std::weak_ptr<ui::Node> focusTarget;
+    std::shared_ptr<ui::Node> getFocused();
 
     static inline ui::Window* hoverWindow = nullptr;
     static inline std::weak_ptr<ui::Node> dragTarget;
@@ -45,16 +47,19 @@ public:
     Property<S32> y{this, "y"};
     Property<Color> background{this, "background"};
     Property<String> skin{this, "skin", "default"};
+    Property<F32> scale{this, "scale", 1.0f};
 
     void postInject() override;
     void resize() override;
     void doResize() override;
+    bool hasFocus(std::shared_ptr<ui::Node> child) override;
     void focus(std::shared_ptr<ui::Node> child) override;
     void blur(std::shared_ptr<ui::Node> child) override;
 
     void on(msg::MouseMove& event);
     void on(msg::MouseDown& event);
     void on(msg::MouseUp& event);
+    void on(msg::MouseWheel& event);
     void on(msg::KeyDown& event);
     void on(msg::KeyUp& event);
     void on(msg::WindowClosed& event);

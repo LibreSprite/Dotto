@@ -19,10 +19,12 @@ public:
     }
 
     void setFrameCount(U32 count) {
+        logI("Set frame count: ", count);
         data.resize(count);
     }
 
     void setLayerCount(U32 count) {
+        logI("Set layer count: ", count);
         for (auto& layer : data) {
             layer.resize(count);
         }
@@ -46,6 +48,10 @@ public:
     }
 
     void setCell(U32 frame, U32 layer, std::shared_ptr<Cell> cell) override {
+        if (!cell) {
+            if (frame >= frameCount() || layer >= layerCount())
+                return;
+        }
         if (frame >= frameCount())
             setFrameCount(frame + 1);
         if (layer >= layerCount())

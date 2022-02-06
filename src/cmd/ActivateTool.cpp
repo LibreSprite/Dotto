@@ -20,13 +20,12 @@ public:
             return;
         }
 
-        if (Tool::active.lock() == it->second) {
-            logV("Tool already active");
+        if (Tool::active.lock() == it->second)
             return;
-        }
 
         Tool::previous = Tool::active;
         Tool::active = it->second;
+        it->second->onActivate();
         pub(msg::ActivateTool{*tool});
     }
 };

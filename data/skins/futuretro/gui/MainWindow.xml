@@ -1,0 +1,72 @@
+<window
+    id="mainwindow"
+    title="Dotto"
+    controller="script, shortcut"
+    steal-focus="true"
+    script="%skin/ui.js"
+    flow="column"
+    background="#142D3B">
+  <editor/>
+
+  <image multiply="#3E4556" absolute="true" x="0" y="0" width="100%" height="16px" flow="row">
+    <node width="100%"/>
+    <image
+        src="%skin/mainmenu.png"
+        controller="button"
+        click="ToggleUI id=filemenu, hide=sidebar"
+        slice="15 15 1 1"
+        width="150px"
+        height="100%"
+        padding="16"
+        up-multiply="rgb{255,255,255}"
+        down-multiply="rgb{200,200,200}"
+        hover-multiply="rgb{255,255,255}">
+      <span text="Main Menu"/>
+    </image>
+  </image>
+
+  <image
+      id="layersidebar"
+      class="sidebar"
+      multiply="rgba{0,0,0,64}"
+      width="200px"
+      height="100%-16px"
+      absolute="true"
+      x="100%-100%"
+      y="16px"
+      visible="false"
+      overflow-hidden="true">
+    <layercontrols/>
+    <node controller="layerlist" width="200px"/>
+  </image>
+
+  <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false" class="sidebar">
+    <image multiply="#576D70" height="100%-16px" width="151px" x="100%-100%" y="16px" absolute="true" id="filemenucontainer">
+
+      <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
+      <menubutton id="openbutton" click="openfile" label="Open"/>
+      <menubutton id="savebutton" click="savefile" label="Save"/>
+      <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
+      <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
+      <menubutton id="quitbutton" label="Quit"/>
+      <image height="1px" multiply="rgba{0,0,0,128}"/>
+
+      <textbutton label="Tool Settings" click="ToggleUI id=toolconfigmenu, hide=mainsubmenu" height="16px" align="0"/>
+      <node controller="metamenu" id="toolconfigmenu" visible="false" class="mainsubmenu" height="0px"/>
+
+      <textbutton label="Filters" click="ToggleUI id=filtercontainer, hide=mainsubmenu" height="16px" align="0"/>
+      <node controller="filterlist" id="filtercontainer" visible="false" class="mainsubmenu" height="0px"/>
+
+      <node height="100%"/>
+
+      <node height="94px" padding="0 30 0 0">
+        <image src="%appdata/icon.png" y="0" x="50%-50%" width="64px" height="64px" fit="cover" absolute="true"/>
+      </node>
+
+      <span id="greeting" height="26px">Hello, ${username}!</span>
+    </image>
+  </node>
+
+  <node controller="focusfront,toolbox" id="toolbox" absolute="true" height="260px" width="40px" x="0" y="50%-50%" flow="column" />
+
+</window>

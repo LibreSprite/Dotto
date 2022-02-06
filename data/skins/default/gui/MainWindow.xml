@@ -1,36 +1,88 @@
-<window id="window" controller="script" script="%skin/ui.js" height="1000" width="1000" flow="column" background="rgb{32,32,32}">
+<window
+    id="mainwindow"
+    title="Dotto"
+    controller="script, shortcut"
+    steal-focus="true"
+    script="%skin/ui.js"
+    flow="column">
   <image src="%skin/bg.png" absolute="true" x="0" y="0" fit="cover" width="100%" height="100%"/>
 
   <editor/>
 
-  <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-35px" width="100%" height="35px" flow="row">
-    <alttextbutton id="startbutton" label="File" width="100px"/>
+  <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
+    <alttextbutton id="startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
+    <node width="100%"/>
+    <image id="toolconfigbutton" visible="false" margin="4 4 4 4" width="24px"/>
+    <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar, hide=sidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
+    <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar, hide=sidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
+    <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
+    <span controller="inputcolor"
+          forward="text=value"
+          width="100px"
+          margin="4 8 4 4"
+          match="rgba\{([0-9]+),([0-9]+),([0-9]+),([0-9]+)\}"
+          replacement="$1:$2:$3:$4"
+          alwaysupdate="true"/>
   </image>
+
+  <image
+      id="layersidebar"
+      class="sidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      visible="false"
+      overflow-hidden="true">
+    <layercontrols/>
+    <node controller="layerlist" width="200px"/>
+  </image>
+
+  <image
+      id="filtersidebar"
+      class="sidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      visible="false"
+      overflow-hidden="true">
+    <node controller="filterlist" width="200px"/>
+  </image>
+
+  <popup controller="toolbox" container="inside" width="45px" x="0px" y="50%-50%" close="false" extra-height="35"/>
+
+  <image src="%skin/frame.png" slice="2 2" controller="metamenu" id="toolconfigmenu" absolute="true" width="100px" visible="false" x="100%-100%" y="100%-100%" margin="0 0 0 36" padding="5 5 5 5"/>
 
   <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
     <image src="%skin/filemenu.png" height="500px" width="380px" x="0" y="100%-535px" absolute="true" slice="2 67">
 
-      <span absolute="true" x="75px" y="24px" width="100%-100px" font="%skin/DejaVuSans.ttf" color="rgb{255,255,255}" size="20px">Hello, ${username}!</span>
+      <span absolute="true" x="75px" y="24px" width="100%-100px" size="20px">Hello, ${username}!</span>
 
-      <node absolute="true" x="2px" y="67px" width="188px" height="100%-282px">"
-        <menubutton id="newbutton" label="New"/>
-        <menubutton id="openbutton" label="Open"/>
-        <menubutton id="savebutton" label="Save"/>
-        <menubutton id="saveAsbutton" label="Save As..."/>
-        <menubutton id="exportbutton" label="Export..."/>
+      <node absolute="true" x="2px" y="67px" width="188px" height="100%-110px">
+        <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
+        <menubutton id="openbutton" click="openfile" label="Open"/>
+        <menubutton id="savebutton" click="savefile" label="Save"/>
+        <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
+        <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
       </node>
 
-      <node controller="button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-130px" y="100%-35px" width="120px" height="24px" flow="row">
+      <node controller="recentfileslist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
+
+      <node flow="row" controller="tabtarget, button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">
         <image id="iconimage" height="24px" width="24px"/>
         <node width="5px"/>
-        <span id="labelspan" font="%skin/DejaVuSans.ttf" color="rgb{255,255,255}" size="20px" width="100px">Quit</span>
+        <span width="120px">Quit</span>
       </node>
 
     </image>
   </node>
-
-  <image controller="focusfront" handle="titlebar" src="%skin/window.png" height="213px" width="40px" x="100%-40px" y="50%-100px" absolute="true" slice="7 30" overflow-hidden="true">
-    <node controller="toolbox" id="toolbox" absolute="true" width="30px" y="30px" height="100%-35px" x="100%-37px"/>
-  </image>
-
 </window>

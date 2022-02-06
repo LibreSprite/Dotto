@@ -435,7 +435,7 @@ public:
     public:
         Regular(const String& name, const std::unordered_set<String>& flags = {}) {
 #if _DEBUG
-            std::cout << "Registered [" << name << "]" << std::endl;
+            std::cout << "Registered " << typeid(DerivedClass).name() << " [" << name << "]" << std::endl;
 #endif
 
             Injectable<BaseClass>::getRegistry()[name] = {
@@ -453,7 +453,7 @@ public:
     public:
         Shared(const String& name, const std::unordered_set<String>& flags = {}) {
 #if _DEBUG
-            std::cout << "Registered Shared [" << name << "]" << std::endl;
+            std::cout << "Registered Shared " << typeid(DerivedClass).name() << " [" << name << "]" << std::endl;
 #endif
 
             class EnableDerivedLock : public DerivedClass {

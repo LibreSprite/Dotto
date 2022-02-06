@@ -18,5 +18,6 @@ public:
     virtual void subtract(S32 x, S32 y, U32 amount) = 0;
     virtual U8 get(S32 x, S32 y) = 0;
     virtual Vector<U32> read(Surface*) = 0;
+    virtual void write(Surface*, Vector<U32>& pixels) = 0;
     virtual void clear() = 0;
 };
