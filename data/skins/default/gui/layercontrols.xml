@@ -1,3 +1,4 @@
-<row id="layercontrols">
+<node id="layercontrols">
   <textbutton id="newlayer" label="New Layer" click="AddLayer type=bitmap"/>
-</row>
+  <textbutton id="deletelayer" label="Delete Layer" click="DeleteLayer"/>
+</node>
