@@ -67,9 +67,20 @@ public:
             auto surface = cell ? cell->getComposite()->shared_from_this() : nullptr;
             auto aspect = surface ? surface->width() / F32(surface->height()) : 4.0f;
             S32 itemHeight = width / aspect;
+
+            auto maxHeight = item->maxHeight->toPixel(10000, 10000);
+            Rect previewPadding;
+            if (itemHeight > maxHeight) {
+                F32 previewWidth = maxHeight * aspect;
+                previewPadding.x = previewWidth/2;
+                previewPadding.width = previewWidth/2 + 0.5f;
+                itemHeight = maxHeight;
+            }
+
             item->load({
                     {"preview", surface},
                     {"height", itemHeight},
+                    {"preview-padding", previewPadding},
                     {"click", "ActivateLayer layer=" + std::to_string(layer)},
                     {"state", layer == currentLayer ? "active" : "enabled"},
                     {"cell", cell},
