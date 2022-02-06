@@ -2,8 +2,6 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include <regex>
-
 #include <common/Config.hpp>
 #include <common/Font.hpp>
 #include <common/match.hpp>
@@ -16,15 +14,16 @@
 #include <fs/FileSystem.hpp>
 #include <gui/Graphics.hpp>
 #include <gui/Node.hpp>
+#include <texttransform/TextTransform.hpp>
 
 namespace ui {
     class Span : public Node {
-        Property<bool> translate{this, "translate", true, &Span::redraw};
         Property<String> fontPath{this, "font", "", &Span::reload};
         Property<Rect> fontPadding{this, "font-padding"};
         Property<String> text{this, "text", "", &Span::redraw};
-        Property<String> match{this, "match", "", &Span::redraw};
-        Property<String> replacement{this, "replacement", "", &Span::redraw};
+        Property<String> textTransform{this, "text-transform", "translate", &Span::changeTransforms};
+        Vector<std::shared_ptr<TextTransform>> transforms;
+        bool transformsLoaded = false;
         Property<S32> align{this, "align", -1};
         Property<U32> size{this, "size", 12, &Span::redraw};
         Property<Color> color{this, "color", {0xFF, 0xFF, 0xFF}, &Span::redraw};
@@ -33,8 +32,18 @@ namespace ui {
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
         Property<String> filterString{this, "filter", "", &Span::changeFilter};
         PubSub<msg::Flush> pub{this};
-        inject<Config> config;
         std::shared_ptr<Filter> filter;
+
+        void changeTransforms() {
+            transformsLoaded = true;
+            transforms.clear();
+            for (auto& raw : split(textTransform, ",")) {
+                inject<TextTransform> transform{tolower(trim(raw))};
+                if (!transform)
+                    continue;
+                transforms.push_back(transform);
+            }
+        }
 
         void changeFilter() {
             if (filterString->empty()) {
@@ -55,20 +64,14 @@ namespace ui {
         }
 
         void redraw() {
+            if (!transformsLoaded)
+                changeTransforms();
             std::shared_ptr<Surface> surface;
             Vector<S32> advance;
             if (auto font = *this->font) {
                 String str = text;
-                if (translate)
-                    str = config->translate(str, this);
-                if (!match->empty()) {
-                    // logI("Match:", *match, " replacement:");
-                    try {
-                        str = std::regex_replace(str.c_str(), std::regex(match->c_str()), replacement->c_str());
-                    } catch(std::regex_error& err) {
-                        logE("Regex error: ", err.what());
-                    }
-                }
+                for (auto& transform : transforms)
+                    str = transform->run(str, this);
                 surface = font->print(size, *color, str, fontPadding, advance);
             }
             applyFilter();
