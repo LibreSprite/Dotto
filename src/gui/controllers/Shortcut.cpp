@@ -60,6 +60,7 @@ class Shortcut : public ui::Controller {
         }
     };
 
+    std::shared_ptr<PropertySet> releaseCommand;
     KeyEntry defaultMap;
     KeyEntry* currentMap = &defaultMap;
     const ui::KeyDown *lastKeyDown = nullptr;
@@ -94,22 +95,26 @@ class Shortcut : public ui::Controller {
             }
             currentMap->setAction([=]{
                 currentMap = &defaultMap;
+                releaseCommand = commandList->get<std::shared_ptr<PropertySet>>("release");
                 std::size_t size = commandList->getMap().size();
                 for (std::size_t i = 0; i < size; ++i) {
-                    auto properties = commandList->get<std::shared_ptr<PropertySet>>(std::to_string(i));
-                    if (!properties)
-                        continue;
-                    auto command = tolower(properties->get<String>("name"));
-                    if (command.empty())
-                        continue;
-                    if (auto instance = inject<Command>{command}) {
-                        instance->load(*properties);
-                        instance->run();
-                    }
+                    call(commandList->get<std::shared_ptr<PropertySet>>(std::to_string(i)));
                 }
             });
         }
         currentMap = &defaultMap;
+    }
+
+    void call(std::shared_ptr<PropertySet> properties) {
+        if (!properties)
+            return;
+        auto command = tolower(properties->get<String>("name"));
+        if (command.empty())
+            return;
+        if (auto instance = inject<Command>{command}) {
+            instance->load(*properties);
+            instance->run();
+        }
     }
 
 public:
@@ -124,6 +129,8 @@ public:
     }
 
     void eventHandler(const ui::KeyUp& event) {
+        call(releaseCommand);
+        releaseCommand = nullptr;
     }
 };
 
