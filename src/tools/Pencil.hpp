@@ -33,6 +33,7 @@ public:
     Property<bool> HQ{this, "high-quality", false};
     bool wasInit = false;
     S32 prevPlotX = 0, prevPlotY = 0;
+    U32 which;
 
     void invalidateMetaMenu() override {
         Tool::invalidateMetaMenu();
@@ -239,7 +240,7 @@ public:
 
         Vector<Point2D> segment;
         segment.push_back(smooth[0].round());
-        begin(surface, segment);
+        begin(surface, segment, which);
         for (U32 i = 1, size = smooth.size(); i < size; ++i) {
             segment.push_back(smooth[i].round());
             update(surface, segment);
@@ -249,13 +250,22 @@ public:
 
     virtual void initPaint() {
         paint = inject<Command>{"paint"};
-        paint->load({
-                {"selection", selection},
-                {"preview", true}
-            });
+        if (which == 1) {
+            paint->load({
+                    {"selection", selection},
+                    {"preview", true}
+                });
+        } else {
+            paint->load({
+                    {"selection", selection},
+                    {"mode", "erase"},
+                    {"preview", true}
+                });
+        }
     }
 
-    void begin(Surface* surface, const Vector<Point2D>& points) override {
+    void begin(Surface* surface, const Vector<Point2D>& points, U32 which) override {
+        this->which = which;
         if (!wasInit)
             changeShape();
         if (!shape)

@@ -48,7 +48,7 @@ public:
 
     void eventHandler(const ui::MouseDown& event) {
         end();
-        paint(event.targetX(), event.targetY());
+        paint(event.targetX(), event.targetY(), event.buttons);
     }
 
     void eventHandler(const ui::MouseUp& event) {
@@ -57,7 +57,7 @@ public:
 
     void eventHandler(const ui::MouseMove& event) {
         if (event.buttons) {
-            paint(event.targetX(), event.targetY());
+            paint(event.targetX(), event.targetY(), event.buttons);
         } else {
             end();
         }
@@ -77,7 +77,7 @@ public:
         points.clear();
     }
 
-    void paint(S32 tx, S32 ty) {
+    void paint(S32 tx, S32 ty, U32 buttons) {
         auto rect = node()->globalRect;
         if (!rect.width || !rect.height)
             return;
@@ -94,7 +94,7 @@ public:
                 activeTool = Tool::active.lock();
                 if (!activeTool)
                     return;
-                activeTool->begin(surface, points);
+                activeTool->begin(surface, points, buttons);
             } while (Tool::active.lock() != activeTool);
         } else if (activeTool) {
             activeTool->update(surface, points);

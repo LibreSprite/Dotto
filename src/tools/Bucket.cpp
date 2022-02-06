@@ -35,7 +35,7 @@ public:
         return meta;
     }
 
-    virtual void begin(Surface* surface, const Vector<Point2D>& points) {
+    virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 which) {
         auto targetColor = surface->getPixel(points.back().x, points.back().y);
         if (targetColor == color)
             return;
@@ -49,7 +49,7 @@ public:
         S32 width = surface->width();
         S32 height = surface->height();
 
-        if (*contiguous) {
+        if (*contiguous ^ (which == 1)) {
             Vector<Point2D> queue = points;
             while (!queue.empty()) {
                 S32 x = queue.back().x;

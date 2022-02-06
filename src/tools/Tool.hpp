@@ -50,7 +50,7 @@ public:
         }
     }
 
-    virtual void begin(Surface* surface, const Vector<Point2D>& points) {}
+    virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 mode) {}
     virtual void update(Surface* surface, const Vector<Point2D>& points) {}
     virtual void end(Surface* surface, const Vector<Point2D>& points) {}
 

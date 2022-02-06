@@ -8,13 +8,20 @@ class Surface;
 
 class Eraser : public Pencil {
 public:
-    virtual void initPaint() {
+    void initPaint() override {
         paint = inject<Command>{"paint"};
-        paint->load({
-                {"selection", selection},
-                {"mode", "erase"},
-                {"preview", true}
-            });
+        if (which == 1) {
+            paint->load({
+                    {"selection", selection},
+                    {"mode", "erase"},
+                    {"preview", true}
+                });
+        } else {
+            paint->load({
+                    {"selection", selection},
+                    {"preview", true}
+                });
+        }
     }
 };
 
