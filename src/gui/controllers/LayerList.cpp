@@ -32,7 +32,7 @@ public:
         }
         auto& ps = editor->getPropertySet();
         auto frame = ps.get<S32>("frame");
-        auto layer = ps.get<S32>("layer");
+        auto currentLayer = ps.get<S32>("layer");
         auto doc = ps.get<std::shared_ptr<Document>>("doc");
         if (!doc) {
             logI("No document");
@@ -40,8 +40,6 @@ public:
         }
         auto timeline = doc->currentTimeline();
         auto layerCount = timeline->layerCount();
-
-        logI("layerlist layerCount:", layerCount);
 
         while (layerCount > nodePool.size()) {
             auto item = ui::Node::fromXML("layerlistitem");
@@ -58,7 +56,8 @@ public:
         S32 width = node()->innerWidth();
         for (U32 i = 0; i < layerCount; ++i) {
             std::shared_ptr<ui::Node> item = nodePool[i];
-            auto cell = timeline->getCell(frame, i);
+            U32 layer = layerCount - 1 - i;
+            auto cell = timeline->getCell(frame, layer);
             if (!cell) {
                 item->remove();
                 continue;
@@ -71,8 +70,8 @@ public:
             item->load({
                     {"preview", surface},
                     {"height", itemHeight},
-                    {"click", "ActivateLayer layer=" + std::to_string(i)},
-                    {"state", i == layer ? "active" : "enabled"},
+                    {"click", "ActivateLayer layer=" + std::to_string(layer)},
+                    {"state", layer == currentLayer ? "active" : "enabled"},
                     {"cell", cell},
                 });
             height += itemHeight;
