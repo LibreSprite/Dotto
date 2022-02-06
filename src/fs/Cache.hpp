@@ -24,8 +24,6 @@ public:
         }
         ~Lock(){
             cache.lockCount--;
-            if (!cache.lockCount)
-                cache.flush();
         }
     };
 

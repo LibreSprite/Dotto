@@ -4,6 +4,7 @@
 
 #include <common/Config.hpp>
 #include <common/XML.hpp>
+#include <fs/Cache.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Flow.hpp>
@@ -301,6 +302,7 @@ void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
 std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
     static U32 depth = 0;
     depth++;
+    auto lock = inject<Cache>{}->lock();
     auto ret = fromXMLInternal(widgetName);
     if (!--depth && ret) {
         std::shared_ptr<PropertySet> style = inject<FileSystem>{}->parse("%skin/gui/style.ini");
