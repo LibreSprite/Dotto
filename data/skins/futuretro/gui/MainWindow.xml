@@ -21,7 +21,7 @@
         up-multiply="rgb{255,255,255}"
         down-multiply="rgb{200,200,200}"
         hover-multiply="rgb{255,255,255}">
-      <span text="Main Menu"/>
+      <span text-transform="translate, tolower" text="Main Menu"/>
     </image>
   </image>
 
