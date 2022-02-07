@@ -38,7 +38,10 @@ namespace ui {
             transformsLoaded = true;
             transforms.clear();
             for (auto& raw : split(textTransform, ",")) {
-                inject<TextTransform> transform{tolower(trim(raw))};
+                String clean = tolower(trim(raw));
+                if (clean.empty())
+                    continue;
+                inject<TextTransform> transform{clean};
                 if (!transform)
                     continue;
                 transforms.push_back(transform);
