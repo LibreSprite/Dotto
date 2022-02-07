@@ -13,17 +13,20 @@
 static std::shared_ptr<Surface> backup;
 static Surface::PixelType* backupSurface = nullptr;
 static std::shared_ptr<Selection> backupSelection;
+static Vector<U32> cursorUndo;
 
 class Paint : public Command {
     Property<std::shared_ptr<Selection>> selection{this, "selection"};
     Property<Color> color{this, "color", Tool::color.toString()};
     Property<bool> preview{this, "preview", false};
+    Property<bool> cursor{this, "cursor", false};
     Property<String> mode{this, "mode", "simple"};
     inject<Cell> cell{"activecell"};
     Vector<U32> undoData;
 
 public:
     void undo() override {
+        restoreBackupSurface();
         auto selection = *this->selection;
         if (!selection) {
             logI("No selection");
@@ -42,9 +45,19 @@ public:
         backup->resize(surface->width(), surface->height());
         auto surfaceData = surface->data();
         if (surfaceData == backupSurface) {
-            backupSelection->blend(*selection->get());
+            if (!cursor) {
+                backupSelection->blend(*selection->get());
+            } else {
+                backupSelection->write(surface, cursorUndo);
+                backupSelection->clear();
+                backupSelection->add(*selection->get());
+                cursorUndo = (*selection)->read(backup.get());
+            }
             return;
         }
+
+        if (cursor)
+            cursorUndo = (*selection)->read(surface);
 
         backupSelection->clear();
         backupSelection->add(*selection->get());
@@ -53,6 +66,20 @@ public:
         for (std::size_t i = 0, size = surface->width() * surface->height(); i < size; ++i) {
             backupData[i] = surfaceData[i];
         }
+    }
+
+    void restoreBackupSurface() {
+        if (!backup)
+            return;
+        auto surface = cell->getComposite();
+        auto backupData = backup->data();
+        auto surfaceData = surface->data();
+        for (std::size_t i = 0, size = surface->width() * surface->height(); i < size; ++i) {
+            surfaceData[i] = backupData[i];
+        }
+        surface->setDirty();
+        backup.reset();
+        backupSurface = nullptr;
     }
 
     void run() override {
@@ -78,11 +105,19 @@ public:
                 undoData = selection->read(surface);
             }
             backupSurface = nullptr;
+            if (cursor) {
+                restoreBackupSurface();
+                return;
+            }
         } else {
             setupPreview();
+            if (cursor) {
+                readData = backup->data();
+            }
         }
 
         auto maskRect = selection->getBounds();
+
         if (maskRect.empty())
             return;
 
@@ -134,7 +169,8 @@ public:
             this->selection->get()->clear();
         else {
             backup.reset();
-            commit();
+            if (!cursor)
+                commit();
         }
     }
 };

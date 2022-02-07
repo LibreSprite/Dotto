@@ -21,12 +21,10 @@ public:
     static inline Color color;
 
     struct Preview {
-        bool global = false;
         bool hideCursor = false;
         std::shared_ptr<Surface> surface;
         Color multiply;
         F32 x, y;
-        F32 scale;
     };
 
     static void boot() {

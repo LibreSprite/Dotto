@@ -17,7 +17,6 @@ public:
     PubSub<msg::ModifyCell, msg::ActivateCell> pub{this};
     inject<Cell> cell;
     std::shared_ptr<Tool> activeTool;
-    std::shared_ptr<ui::Node> cursor;
     Tool::Path points;
 
     void attach() override {
@@ -27,6 +26,10 @@ public:
                                  ui::MouseWheel,
                                  ui::MouseLeave>(this);
         setup();
+    }
+
+    void on(msg::ActivateTool&) {
+        end();
     }
 
     void on(msg::ModifyCell& event) {
@@ -50,7 +53,6 @@ public:
     }
 
     void eventHandler(const ui::MouseDown& event) {
-        end();
         paint(event.targetX(), event.targetY(), event.buttons);
     }
 
@@ -60,55 +62,19 @@ public:
 
     void eventHandler(const ui::MouseLeave&) {
         system->setMouseCursorVisible(true);
-        if (cursor)
-            cursor->visible.value = false;
+        end();
     }
 
     inject<System> system;
+    U32 prevButtons = ~U32{};
+
     void eventHandler(const ui::MouseMove& event) {
-        if (event.buttons) {
-            paint(event.targetX(), event.targetY(), event.buttons);
-        } else {
-            end();
-        }
+        paint(event.targetX(), event.targetY(), event.buttons);
 
         Tool::Preview* preview = nullptr;
         if (activeTool)
             preview = activeTool->getPreview();
-        if (!preview) {
-            system->setMouseCursorVisible(true);
-            if (cursor)
-                cursor->visible.value = false;
-            return;
-        }
-        if (preview->global) {
-            if (cursor)
-                cursor->visible.value = false;
-            return;
-        }
-
-        system->setMouseCursorVisible(!preview->hideCursor);
-
-        if (!cursor) {
-            cursor = ui::Node::fromXML("image");
-            cursor->absolute.value = true;
-            cursor->inputEnabled.value = false;
-        }
-
-        auto surface = cell->getComposite();
-        auto rect = node()->globalRect;
-        F32 scale = F32(rect.width) / surface->width();
-
-        cursor->set("surface", preview->surface);
-        cursor->multiply.value = preview->multiply;
-        cursor->width.value.setPixel(preview->surface->width() * scale * preview->scale);
-        cursor->height.value.setPixel(preview->surface->height() * scale * preview->scale);
-        cursor->y.value = event.targetY() + preview->y * scale;
-        cursor->set("x", event.targetX() + preview->x * scale);
-        cursor->visible.value = true;
-
-        if (!cursor->getParent())
-            node()->addChild(cursor);
+        system->setMouseCursorVisible(!preview || !preview->hideCursor);
     }
 
     void eventHandler(const ui::MouseWheel& event) {
@@ -118,6 +84,7 @@ public:
     }
 
     void end() {
+        prevButtons = ~U32{};
         if (points.empty())
             return;
         if (activeTool)
@@ -126,6 +93,10 @@ public:
     }
 
     void paint(S32 tx, S32 ty, U32 buttons) {
+        if (prevButtons != buttons)
+            end();
+
+        prevButtons = buttons;
         auto rect = node()->globalRect;
         if (!rect.width || !rect.height)
             return;
@@ -134,7 +105,8 @@ public:
         S32 x = (tx * surface->width()) / rect.width;
         S32 y = (ty * surface->height()) / rect.height;
         bool begin = points.empty();
-
+        if (!begin && x == points.back().x && y == points.back().y)
+            return;
         points.push_back({x, y});
 
         if (begin) {

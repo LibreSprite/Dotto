@@ -16,7 +16,7 @@ class ToolScriptObject : public ModelScriptObject {
 public:
     const Vector<Point2D>* points;
     std::shared_ptr<script::ScriptObject> surface;
-    U32 which;
+    U32 which = ~U32{};
 
     ToolScriptObject() {
         surface = inject<script::ScriptObject>{typeid(std::shared_ptr<Surface>).name()};
