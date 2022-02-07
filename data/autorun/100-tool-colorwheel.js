@@ -8,11 +8,12 @@ function onEvent(name) {
             window.addEventListener("remove");
         }
     } else {
+        if (app.target.which == 0 && (name == "toolstart" || name == "toolupdate" || name == "toolend"))
+            return;
         if (name == "toolstart" || name == "tooldeactivate" || name == "remove") {
             var old = window;
             window = null;
             old.remove();
-
             if (name != "tooldeactivate")
                 app.command("toggletool");
         }
