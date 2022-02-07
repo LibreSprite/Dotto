@@ -1,5 +1,5 @@
 app.addTool("spray");
-var selection;
+var selection, which;
 
 function len(x, y) {
     return x*x + y*y;
@@ -13,6 +13,7 @@ function onEvent(name) {
             app.release(selection);
             selection = app.newSelection();
             app.hold(selection);
+            which = app.target.which;
             onEvent("toolupdate");
         },
 
@@ -28,11 +29,16 @@ function onEvent(name) {
                     if (v > 0) selection.add(x, y, v);
                 }
             }
-            app.command("paint", "selection", selection, "preview", true)
+            app.command("paint",
+                        "selection", selection,
+                        "preview", true,
+                        "cursor", which == 0);
         },
 
         toolend:function(){
-            app.command("paint", "selection", selection)
+            app.command("paint",
+                        "selection", selection,
+                        "cursor", which == 0);
             selection = app.release(selection);
         }
 
