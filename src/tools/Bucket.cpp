@@ -15,6 +15,10 @@ public:
     Property<bool> proportional{this, "proportional", false};
     Property<bool> contiguous{this, "contiguous", true};
 
+    U32 which;
+    std::shared_ptr<Command> paint;
+    std::shared_ptr<Selection> selection;
+
     virtual std::shared_ptr<PropertySet> getMetaProperties() {
         auto meta = Tool::getMetaProperties();
         meta->push(std::make_shared<PropertySet>(PropertySet{
@@ -35,7 +39,39 @@ public:
         return meta;
     }
 
+    virtual void update(Surface* surface, const Vector<Point2D>& points) {
+        if (which == 0 && selection && paint) {
+            selection->add(points.back().x, points.back().y, 255);
+            paint->run();
+            return;
+        }
+    }
+
+    virtual void end(Surface* surface, const Vector<Point2D>& points) {
+        if (which == 0 && selection && paint) {
+            paint->set("preview", false);
+            paint->run();
+            paint.reset();
+            selection.reset();
+        }
+    }
+
     virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 which) {
+        this->which = which;
+        selection = inject<Selection>{"new"};
+        paint = inject<Command>{"paint"};
+        paint->set("selection", selection);
+
+        if (which == 0) {
+            selection->add(points.back().x, points.back().y, 255);
+            paint->load({
+                    {"preview", true},
+                    {"cursor", true}
+                });
+            paint->run();
+            return;
+        }
+
         auto targetColor = surface->getPixel(points.back().x, points.back().y);
         if (targetColor == color)
             return;
@@ -44,7 +80,6 @@ public:
         threshold *= threshold;
         bool proportional = this->proportional && threshold;
 
-        inject<Selection> selection{"new"};
         selection->clear();
         S32 width = surface->width();
         S32 height = surface->height();
@@ -89,9 +124,9 @@ public:
             }
         }
 
-        inject<Command> paint{"paint"};
-        paint->set("selection", selection.shared());
         paint->run();
+        paint.reset();
+        selection.reset();
     }
 };
 
