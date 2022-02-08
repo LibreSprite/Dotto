@@ -123,7 +123,9 @@ public:
 
     static script::Value getValue(duk_context* ctx, int id) {
         auto type = duk_get_type(ctx, id);
-        if (type == DUK_TYPE_NUMBER) {
+        if (type == DUK_TYPE_UNDEFINED) {
+            return {};
+        } else if (type == DUK_TYPE_NUMBER) {
             return duk_get_number(ctx, id);
         } else if (type == DUK_TYPE_STRING) {
             return {duk_get_string(ctx, id)};
