@@ -11,6 +11,11 @@ class SelectionScriptObject : public script::ScriptObject {
 
 public:
     SelectionScriptObject() {
+        addFunction("clear", [=]{
+            if (auto selection = weak.lock())
+                selection->clear();
+            return true;
+        });
         addFunction("add", [=](U32 x, U32 y, U32 amount) {
             if (auto selection = weak.lock())
                 selection->add(x, y, amount);
