@@ -14,7 +14,10 @@
 
 class Canvas : public ui::Controller {
 public:
-    PubSub<msg::ModifyCell, msg::ActivateCell> pub{this};
+    PubSub<msg::ModifyCell,
+           msg::ActivateCell,
+           msg::ActivateTool> pub{this};
+
     inject<Cell> cell;
     std::shared_ptr<Tool> activeTool;
     Tool::Path points;
