@@ -149,9 +149,13 @@ public:
             }
         }
         if (type == LUA_TTABLE) {
-            int idx = lua_getfield(L, index, "_this_");
+            int idx = -1;
+            int type = lua_getfield(L, index, "_this_");
             if (lua_islightuserdata(L, idx)) {
                 return getScriptObject(lua_touserdata(L, idx));
+            } else {
+                logE("Object with no _this_", type);
+                return {};
             }
         }
         logE("Unknown value type: ", type);
