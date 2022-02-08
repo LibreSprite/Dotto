@@ -23,7 +23,7 @@ Value FSEntity::parse() {
 
     if (auto parser = inject<Parser>{file->type()}) {
         value = parser->parseFile(file);
-        if (!value.empty())
+        if (!value.empty() && parser->canCache())
             cache->set(cacheKey, value);
     }
 
