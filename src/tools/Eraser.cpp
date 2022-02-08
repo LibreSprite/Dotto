@@ -8,21 +8,19 @@ class Surface;
 
 class Eraser : public Pencil {
 public:
-    void initPaint() override {
+    virtual void initPaint() {
         paint = inject<Command>{"paint"};
-        if (which == 1) {
-            paint->load({
-                    {"selection", selection},
-                    {"mode", "erase"},
-                    {"preview", true}
-                });
-        } else {
-            paint->load({
-                    {"selection", selection},
-                    {"preview", true}
-                });
+        paint->load({
+                {"selection", selection},
+                {"preview", true}
+            });
+        if (which == 0) {
+            paint->set("cursor", true);
+        } else if (which == 1) {
+            paint->set("mode", "erase");
         }
     }
+
 };
 
 static Tool::Shared<Eraser> erase{"eraser"};
