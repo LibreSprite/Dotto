@@ -10,6 +10,8 @@
 
 class ScriptParser : public Parser {
 public:
+    bool canCache() override {return false;}
+
     Value parseFile(std::shared_ptr<File> file) override {
         script::Engine::PushDefault oldEngine;
 
