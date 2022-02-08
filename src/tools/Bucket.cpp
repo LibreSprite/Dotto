@@ -19,6 +19,11 @@ public:
     std::shared_ptr<Command> paint;
     std::shared_ptr<Selection> selection;
 
+    Preview preview {.hideCursor = true};
+    Preview* getPreview() override {
+        return &preview;
+    }
+
     virtual std::shared_ptr<PropertySet> getMetaProperties() {
         auto meta = Tool::getMetaProperties();
         meta->push(std::make_shared<PropertySet>(PropertySet{
