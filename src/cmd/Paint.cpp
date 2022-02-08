@@ -84,6 +84,10 @@ public:
 
     void run() override {
         auto selection = this->selection->get();
+        if (!selection) {
+            this->selection.value = inject<Selection>{"new"};
+            selection = this->selection->get();
+        }
         auto& color = *this->color;
         if (!selection || !color.a) {
             return;
