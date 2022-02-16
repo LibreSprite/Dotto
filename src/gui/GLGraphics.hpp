@@ -85,8 +85,8 @@ public:
 
         auto vertexShader = compile(GL_VERTEX_SHADER,
             "#version " + version + "\n"
-            "in vec3 position;\n"
-            "in vec2 srcUV;\n"
+            "layout(location=0) in vec3 position;\n"
+            "layout(location=1) in vec2 srcUV;\n"
             "out vec2 uv;\n"
             "void main() {\n"
             "   gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
