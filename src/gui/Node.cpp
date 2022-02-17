@@ -118,6 +118,7 @@ U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
 }
 
 void ui::Node::processEvent(const Event& event) {
+    auto hold = shared_from_this();
     event.currentTarget = this;
     EventHandler::processEvent(event);
     if (event.bubble == Event::Bubble::Down && !event.cancel)
