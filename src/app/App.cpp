@@ -68,6 +68,8 @@ public:
                 entry.second->parse();
         }
         pub(msg::BootComplete{});
+        auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - referenceTime);
+        logI("Boot time: ", delta.count());
     }
 
     bool run() override {
