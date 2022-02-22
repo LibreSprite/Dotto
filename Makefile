@@ -13,21 +13,25 @@ else
     CXX = g++
     OBJC = g++
     LN = g++
+    STRIP = strip
+    FIND = find src -type f -name
     UNAME_S := $(shell uname -s)
 
-    # uncomment if you get a linker error due to GCC 8
-    # LN_FLAGS += -lstdc++fs
-
+    ifeq ($(OLDGCC),true)
+        LN_FLAGS += -lstdc++fs
+    endif
 
     ifeq ($(UNAME_S),Linux)
 	PKGCONFIG = pkg-config
         CCFLAGS += -D LINUX
         BITS := $(shell getconf LONG_BIT)
-        ifeq ($(BITS),64)
+
+        ifneq ("$(wildcard /usr/lib/x86_64-linux-gnu/libv8.so)","")
+	    CPP_FLAGS += -I/usr/include/nodejs/deps/v8/include
+	    LN_FLAGS += -L/usr/lib/x86_64-linux-gnu
+	    LN_FLAGS += -lv8 -lv8_libplatform
+	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
             CPP_FLAGS += -DV8_COMPRESS_POINTERS
-	    # CPP_FLAGS += -DSCRIPT_ENGINE_V8
-	    # LIB_DIRS := $(shell find linux-x64 -type d)
-	    # SO_FILES := $(shell find linux-x64 -type f -name '*.so*')
         endif
 
         ifneq ("$(wildcard /usr/lib/arm-linux-gnueabihf/libv8.so)","")
@@ -43,7 +47,7 @@ else
 
     ifeq ($(UNAME_S),Darwin)
 	PKGCONFIG = /usr/local/bin/pkg-config
-	CPP_FILES += $(shell find src -type f -name '*.mm')
+	CPP_FILES += $(shell $(FIND) '*.mm')
         CPP_FLAGS += -DV8_COMPRESS_POINTERS # just assume OSX is 64-bit
 	CPP_FLAGS += -DGL_SILENCE_DEPRECATION
 	LN_FLAGS += -framework OpenGL
@@ -102,8 +106,13 @@ CPP_FLAGS += --std=c++17
 CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
 
 # FLAGS += -m32 # uncomment for 32-bit build
+ifeq ($(DEBUG),true)
 FLAGS += -Og -g -D_DEBUG # debug build
-# FLAGS += -O3 # release build
+POSTBUILD =
+else
+FLAGS += -O3 # release build
+POSTBUILD = $(STRIP) dotto
+endif
 
 LN_FLAGS += -lpng
 LN_FLAGS += -lm
@@ -127,6 +136,7 @@ $(ODIR)/%.mm.o: %.mm
 
 dotto: $(OBJ)
 	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
+	$(POSTBUILD)
 
 .PHONY: clean
 
