@@ -28,7 +28,8 @@ struct Rect {
     }
 
     Rect& operator = (const String& str) {
-        auto parts = split(str, std::regex("\\s+"));
+        static std::regex expr("\\s+");
+        auto parts = split(str, expr);
         x = parts.size() > 0 ? std::stol(parts[0]) : 0;
         y = parts.size() > 1 ? std::stol(parts[1]) : 0;
         width = parts.size() > 2 ? std::stol(parts[2]) : 0;

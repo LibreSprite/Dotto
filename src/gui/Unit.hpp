@@ -96,7 +96,8 @@ namespace ui {
                 }
             };
             std::cmatch match;
-            std::regex_match(str, match, std::regex("(?:([0-9]*(?:px|%?))(\\s*[+-]\\s*))?([0-9]+(?:px|%?))"));
+            static std::regex expr{"(?:([0-9]*(?:px|%?))(\\s*[+-]\\s*))?([0-9]+(?:px|%?))"};
+            std::regex_match(str, match, expr);
 
             if (match.empty()) {
                 type = Type::Default;

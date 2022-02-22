@@ -34,7 +34,8 @@ String FileSystem::extension(const String &path) {
 }
 
 Vector<String> FileSystem::splitPath(const String& path) {
-    auto parts = split(path, std::regex("[/\\\\]"));
+    static std::regex expr("[/\\\\]");
+    auto parts = split(path, expr);
     for (auto it = parts.begin(); it != parts.end();) {
         if (*it == ".") {
             it = parts.erase(it);

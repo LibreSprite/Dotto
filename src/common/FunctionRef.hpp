@@ -23,9 +23,10 @@ public:
     FunctionRef(std::function<Func>&& func) : func{std::make_shared<std::function<Func>>(std::move(func))} {}
 
     FunctionRef(const String& commands) : FunctionRef([=]{
+        static std::regex expr("^\\s*([^\\s]+)\\s*(.*)$");
         for (auto& command : split(commands, ";")) {
             std::cmatch match;
-            std::regex_match(command.c_str(), match, std::regex("^\\s*([^\\s]+)\\s*(.*)$"));
+            std::regex_match(command.c_str(), match, expr);
             if (match.empty()) {
                 logI("Invalid command [", command, "]");
                 return;

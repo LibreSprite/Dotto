@@ -25,12 +25,15 @@ public:
         S32 yoffset = bounds.y - rect.y;
         S32 xoffset = bounds.x - rect.x;
 
+        auto out = &swap[yoffset * rect.width + xoffset];
+        auto in = &data[0];
+        U32 width = bounds.width;
         for (U32 y = 0; y < bounds.height; ++y) {
-            U32 out = (y + yoffset) * rect.width + xoffset;
-            U32 in = y * bounds.width;
-            for (U32 x = 0; x < bounds.width; ++x) {
-                swap[out + x] = data[in + x];
+            for (U32 x = 0; x < width; ++x) {
+                out[x] = in[x];
             }
+            out += rect.width;
+            in += width;
         }
 
         std::swap(data, swap);

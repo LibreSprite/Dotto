@@ -10,6 +10,7 @@
 class IniParser : public Parser {
 public:
     Value parseFile(std::shared_ptr<File> file) override {
+        static std::regex expr("[\n\r]+");
         auto set = std::make_shared<PropertySet>();
         if (!file || !file->isOpen()) {
             logV("Could not read ini file");
@@ -18,7 +19,7 @@ public:
 
         String domain = "global";
         auto subset = set;
-        for (auto& rawline : split(file->readTextFile(), std::regex("[\n\r]+"))) {
+        for (auto& rawline : split(file->readTextFile(), expr)) {
             String line = trim(rawline);
 
             auto comment = line.find("#");
