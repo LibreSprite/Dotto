@@ -12,9 +12,7 @@ class Value {
     std::any value;
     bool (*equal)(const std::any& left, const std::any& right);
     std::shared_ptr<void> (*shared)(const std::any&);
-#ifdef _DEBUG
     String (*str)(const std::any&);
-#endif
 
 public:
     Value() : equal{nullptr} {}
@@ -70,7 +68,7 @@ public:
         } else {
             shared = nullptr;
         }
-#ifdef _DEBUG
+
         if constexpr (std::is_same_v<Type, String>) {
             str = +[](const std::any& value) {
                 return std::any_cast<String>(value);
@@ -98,7 +96,6 @@ public:
                 return "[" + String(typeid(Type).name()) + "]";
             };
         }
-#endif
         return *this;
     }
 
@@ -112,11 +109,9 @@ public:
         return equal(value, other.value);
     }
 
-#ifdef _DEBUG
     String toString() const {
         return value.has_value() ? (str ? str(value) : String("[not convertible to String: ") + typeName() + "]") : "null";
     }
-#endif
 
     const char* typeName() const {
         return value.type().name();

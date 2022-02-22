@@ -261,9 +261,11 @@ public:
                 return;
             }
         }
+#ifdef _DEBUG
         if (debug) {
             logI("Could not set ", key, " to [", value.toString(), "]");
         }
+#endif
     }
 
     virtual void load(const PropertySet& set) {
