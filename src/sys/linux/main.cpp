@@ -4,11 +4,27 @@
 
 #ifdef __linux__
 
+#include <execinfo.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include <app/App.hpp>
 #include <common/System.hpp>
 #include <log/Log.hpp>
 
+void crashHandler(int sig) {
+  void* frames[20];
+  size_t size = backtrace(frames, sizeof(frames)/sizeof(frames[0]));
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(frames, size, STDERR_FILENO);
+  exit(1);
+}
+
 int main(int argc, const char* argv[]) {
+    signal(SIGSEGV, crashHandler);
+
     Log::setDefault("stdout");
     System::setDefault("sdl2", {}, "new");
 

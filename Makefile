@@ -107,7 +107,7 @@ CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
 
 # FLAGS += -m32 # uncomment for 32-bit build
 ifeq ($(DEBUG),true)
-FLAGS += -Og -g -D_DEBUG # debug build
+FLAGS += -Og -g -D_DEBUG -rdynamic # debug build
 POSTBUILD =
 else
 FLAGS += -O3 # release build
