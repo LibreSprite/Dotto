@@ -67,9 +67,6 @@ public:
     Vector<F32> vertices;
     std::shared_ptr<GLTexture> activeTexture;
 
-    Color multiply;
-    GLint multiplyLocation;
-
     F32 iwidth, iheight;
     S32 width, height;
 
@@ -87,21 +84,24 @@ public:
             "#version " + version + "\n"
             "layout(location=0) in vec3 position;\n"
             "layout(location=1) in vec2 srcUV;\n"
+            "layout(location=2) in vec4 diffuse;\n"
             "out vec2 uv;\n"
+            "out vec4 color;\n"
             "void main() {\n"
             "   gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
             "   uv = srcUV;\n"
+            "   color = diffuse;\n"
             "}");
 
         auto fragmentShader = compile(GL_FRAGMENT_SHADER,
             "#version " + version + "\n"
             "precision mediump float;"
-            "out vec4 FragColor;\n"
             "in vec2 uv;\n"
+            "in vec4 color;\n"
+            "out vec4 FragColor;\n"
             "uniform sampler2D surface;\n"
-            "uniform vec4 multiply;\n"
             "void main() {\n"
-            "    FragColor = texture(surface, uv) * multiply;\n"
+            "    FragColor = texture(surface, uv) * color;\n"
             "}");
 
         shader = link(vertexShader, fragmentShader);
@@ -144,7 +144,6 @@ public:
             glGetProgramInfoLog(program, 512, NULL, infoLog);
             logE("ERROR::SHADER::LINK_FAILED ", infoLog);
         }
-        multiplyLocation = glGetUniformLocation(program, "multiply");
         return program;
     }
 
@@ -197,10 +196,15 @@ public:
         if (requiredSize > currentBufferSize) {
             glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW);
             currentBufferSize = requiredSize;
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
             glEnableVertexAttribArray(1);
+
+            glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(5 * sizeof(float)));
+            glEnableVertexAttribArray(2);
         } else {
             glBufferSubData(GL_ARRAY_BUFFER, 0, requiredSize, vertices.data());
         }
@@ -210,19 +214,12 @@ public:
             glUseProgram(shader);
         }
 
-        GLfloat color[4];
-        color[0] = multiply.r / 255.0f;
-        color[1] = multiply.g / 255.0f;
-        color[2] = multiply.b / 255.0f;
-        color[3] = multiply.a / 255.0f;
-        glUniform4fv(multiplyLocation, 1, color);
-
         if (activeTexture) {
             activeTexture->bind(GL_TEXTURE_2D);
         } else {
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 5);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
 
         vertices.clear();
         activeTexture.reset();
@@ -247,6 +244,10 @@ public:
         F32 z;
         F32 u;
         F32 v;
+        F32 r;
+        F32 g;
+        F32 b;
+        F32 a;
         bool flip;
     };
 
@@ -261,11 +262,16 @@ public:
         vertices.push_back(vtx.z * depthFactor);
         vertices.push_back(vtx.u);
         vertices.push_back(vtx.v);
+        vertices.push_back(vtx.r);
+        vertices.push_back(vtx.g);
+        vertices.push_back(vtx.b);
+        vertices.push_back(vtx.a);
     }
 
     struct Rectf {
         F32 x, y, w, h;
         F32 u0, v0, u1, v1;
+        F32 r, g, b, a;
         bool flip;
     };
 
@@ -319,12 +325,12 @@ public:
         if (debug)
             logI("Pushing ", x1, " ", y1, " => ", x2, " ", y2);
 
-        push({x1, y1, z, u0, v0, rect.flip});
-        push({x1, y2, z, u0, v1, rect.flip});
-        push({x2, y1, z, u1, v0, rect.flip});
-        push({x1, y2, z, u0, v1, rect.flip});
-        push({x2, y2, z, u1, v1, rect.flip});
-        push({x2, y1, z, u1, v0, rect.flip});
+        push({x1, y1, z, u0, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        push({x2, y1, z, u1, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        push({x2, y2, z, u1, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        push({x2, y1, z, u1, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
     }
 
     void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
@@ -334,6 +340,13 @@ public:
         F32 z = settings.zIndex;
         F32 w = settings.destination.width;
         F32 h = settings.destination.height;
+        F32 r = settings.multiply.r / 255.0f;
+        F32 g = settings.multiply.g / 255.0f;
+        F32 b = settings.multiply.b / 255.0f;
+        F32 a = settings.multiply.a / 255.0f * alpha;
+
+        if (a <= 0)
+            return;
 
         if (!clip.overlaps(settings.destination)) {
             if (debug)
@@ -341,15 +354,11 @@ public:
             return;
         }
 
-        if (activeTexture != texture || multiply != settings.multiply) {
+        if (activeTexture != texture) {
             flush();
             activeTexture = texture;
         }
-        multiply = settings.multiply;
-        multiply.a *= alpha;
-        if (multiply.a <= 0)
-            return;
-
+        
         F32 sW = settings.nineSlice.width;
         F32 sH = settings.nineSlice.height;
         S32 textureWidth = texture ? texture->width : 1;
@@ -368,6 +377,7 @@ public:
                     w, h,
                     settings.source.x / F32(textureWidth), settings.source.y / F32(textureHeight),
                     settings.source.right() / F32(textureWidth), settings.source.bottom() / F32(textureHeight),
+                    r, g, b, a,
                     settings.flip
                 });
         } else {
@@ -380,19 +390,19 @@ public:
             F32 rW = textureWidth - sW - sX;
             F32 rH = textureHeight - sH - sY;
 
-            push(z, {x, y, sX, sY, 0.0f, 0.0f, nsX, nsY});
-            push(z, {x + sX, y, w - sX - rW, sY, nsX, 0.0f, nsX + nsW, nsY});
-            push(z, {x + w - rW, y, rW, sY, nsX + nsW, 0.0f, 1.0f, nsY});
+            push(z, {x,          y, sX,          sY, 0.0f,      0.0f, nsX,       nsY, r, g, b, a});
+            push(z, {x + sX,     y, w - sX - rW, sY, nsX,       0.0f, nsX + nsW, nsY, r, g, b, a});
+            push(z, {x + w - rW, y, rW,          sY, nsX + nsW, 0.0f, 1.0f,      nsY, r, g, b, a});
 
             y += sY;
-            push(z, {x, y, sX, h - sY - rH, 0.0f, nsY, nsX, nsY + nsH});
-            push(z, {x + sX, y, w - sX - rW, h - sY - rH, nsX, nsY, nsX + nsW, nsY + nsH});
-            push(z, {x + w - rW, y, rW, h - sY - rH, nsX + nsW, nsY, 1.0f, nsY + nsH});
+            push(z, {x,        y, sX,      h-sY-rH, 0.0f,      nsY, nsX,       nsY + nsH, r, g, b, a});
+            push(z, {x + sX,   y, w-sX-rW, h-sY-rH, nsX,       nsY, nsX + nsW, nsY + nsH, r, g, b, a});
+            push(z, {x + w-rW, y, rW,      h-sY-rH, nsX + nsW, nsY, 1.0f,      nsY + nsH, r, g, b, a});
 
             y += h - sY - rH;
-            push(z, {x, y, sX, rH, 0.0f, nsY + nsH, nsX, 1.0f});
-            push(z, {x + sX, y, w - sX - rW, rH, nsX, nsY + nsH, nsX + nsW, 1.0f});
-            push(z, {x + w - rW, y, rW, rH, nsX + nsW, nsY + nsH, 1.0f, 1.0f});
+            push(z, {x,          y, sX,          rH, 0.0f,      nsY + nsH, nsX, 1.0f, r, g, b, a});
+            push(z, {x + sX,     y, w - sX - rW, rH, nsX,       nsY + nsH, nsX + nsW, 1.0f, r, g, b, a});
+            push(z, {x + w - rW, y, rW,          rH, nsX + nsW, nsY + nsH, 1.0f, 1.0f, r, g, b, a});
         }
     }
 

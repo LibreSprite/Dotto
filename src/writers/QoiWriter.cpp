@@ -12,6 +12,8 @@ class QoiWriter : public SimpleImageWriter {
 public:
     bool writeFile(std::shared_ptr<File> file, const Value& data) override {
         std::shared_ptr<Surface> surface = data;
+        if (!surface)
+            return false;
         qoi_desc desc;
         desc.width = surface->width();
         desc.height = surface->height();
