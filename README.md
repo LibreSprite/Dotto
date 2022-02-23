@@ -1,4 +1,4 @@
-# LibreSprite Dotto!
+# LibreSprite Dotto! [![Linux x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml)
 
 ## Funding / Contributing
 
