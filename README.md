@@ -31,19 +31,19 @@ free to give the repo a star. *Think of the codegnomes.*
 | Scripting support              | OK            | 0.5     |                                                 |
 | Internationalization           | OK            | 0.5     |                                                 |
 | OpenGL Hardware acceleration   | OK            | 1.0     |                                                 |
-| Metal Hardware acceleration    | Planned       | 0.5     | Needed for OSX/iOS                              |
 | x86/64 Linux                   | OK            | 0.5     |                                                 |
 | x86/64 Windows                 | Planned       | 0.5     |                                                 |
-| x86_64 MacOS                   | Planned       | 1.0     | Needs Metal backend first                       |
-| Raspberry Pi 4 support         | Planned       | 1.0     | Needs OpenGL changes?                           |
+| x86_64 MacOS                   | OK            | 1.0     |                                                 |
+| Raspberry Pi 4 support         | OK            | 1.0     |                                                 |
 | Undo / Redo                    | OK            | 0.5     |                                                 |
 | Copy + Paste                   | Planned       | 0.5     |                                                 |
 | Resize Sprite                  | Planned       | 0.5     |                                                 |
 | Crop Sprite                    | Planned       | 0.5     |                                                 |
-| Pencil tool                    | Basic         | 0.5     |                                                 |
-| Pencil shapes/sizes/blending   | Planned       | 0.5     |                                                 |
-| Line smoothing                 | Planned       | 1.0     |                                                 |
-| Eraser tool                    | Planned       | 0.5     |                                                 |
+| Pencil tool                    | OK            | 0.5     |                                                 |
+| Pencil shapes/sizes            | OK            | 0.5     |                                                 |
+| Pencil blending modes          | Planned       | 1.0     |                                                 |
+| Line smoothing                 | Basic         | 1.0     |                                                 |
+| Eraser tool                    | OKK           | 0.5     |                                                 |
 | Text tool                      | Planned       | 1.0     |                                                 |
 | Selection                      | Internal only | 0.5     | Selections implemented but inaccessible to user |
 | Rectangular Selection tool     | Planned       | 0.5     |                                                 |
@@ -66,6 +66,8 @@ free to give the repo a star. *Think of the codegnomes.*
 | Load LBM, PCX, PNM, SVG        | OK            | 0.5     | Using `SDL2_image`                              |
 | Load TGA, TIFF, WEBP, XCF      | OK            | 0.5     | Using `SDL2_image`                              |
 | Load XPM, XV                   | OK            | 0.5     | Using `SDL2_image`                              |
+| Load QOI                       | OK            | 0.5     | Using `qoi.h`                                   |
+| Save QOI                       | OK            | 0.5     | Using `qoi.h`                                   |
 | Save PNG                       | OK            | 0.5     | Using `libpng`                                  |
 | Save JPEG                      | OK            | 0.5     | Using `SDL2_image`                              |
 | Save Dotto format              | Planned       | 0.5     |                                                 |
@@ -79,15 +81,16 @@ free to give the repo a star. *Think of the codegnomes.*
 | Commandline interface          | Planned       | 3.0     |                                                 |
 | Animation support              | Planned       | 3.0     |                                                 |
 | Android support                | Planned       | 4.0     |                                                 |
-| iOS support                    | Planned       | 4.0     |                                                 |
 
 ## Compilation
 
-### Arch Linux
+### Linux
 
 Install dependencies:
 
-`pacman -S make sdl2 sdl2_image lua v8-r lcms2`
+- Arch-based distros: `pacman -S make sdl2 sdl2_image lua v8-r lcms2`
+
+- Debian-based distros: `sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev liblua5.3-dev libfreetype6-dev libnode-dev`
 
 Checkout project:
 
@@ -99,3 +102,18 @@ Compile:
 cd Dotto
 make
 ```
+
+If you are using GCC version 8 or less, you will probably get errors like this one:
+`Folder.cpp:(.text+0x274): undefined reference to std::filesystem::__cxx11::path::_M_split_cmpts()'`
+To fix this, use:
+
+```sh
+make OLDGCC=true
+```
+
+If you want to make a debug build for development, use:
+
+```sh
+make DEBUG=true
+```
+
