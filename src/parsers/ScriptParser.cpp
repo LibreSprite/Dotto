@@ -33,4 +33,5 @@ public:
 };
 
 static Parser::Shared<ScriptParser> js{"js"};
+static Parser::Shared<ScriptParser> duk{"duk"};
 static Parser::Shared<ScriptParser> lua{"lua"};
