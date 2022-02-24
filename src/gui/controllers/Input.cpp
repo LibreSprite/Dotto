@@ -101,8 +101,13 @@ public:
         bool changed = false;
         event.cancel = true;
         String keyName = event.keyname;
+        auto keycode = event.keycode;
         String text = this->text;
         cursorPosition = std::min(text.size(), cursorPosition);
+        if (startsWith(keyName, "KP_")) {
+            keycode = keyName[3];
+            keyName = keyName.substr(3);
+        }
         if (keyName == "BACKSPACE") {
             if (!cursorPosition)
                 return;
@@ -114,8 +119,8 @@ public:
         } else if (keyName == "LEFT") {
             if (cursorPosition)
                 cursorPosition--;
-        } else if (event.keycode >= ' ' && event.keycode < 0x80) {
-            String key(reinterpret_cast<const char*>(&event.keycode));
+        } else if (keycode >= ' ' && keycode < 0x80) {
+            String key(reinterpret_cast<const char*>(&keycode));
             try {
                 if (!allowRegex->empty() && !std::regex_match(key, std::regex(*allowRegex))) {
                     return;
