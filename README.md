@@ -43,7 +43,7 @@ free to give the repo a star. *Think of the codegnomes.*
 | Pencil shapes/sizes            | OK            | 0.5     |                                                 |
 | Pencil blending modes          | Planned       | 1.0     |                                                 |
 | Line smoothing                 | Basic         | 1.0     |                                                 |
-| Eraser tool                    | OKK           | 0.5     |                                                 |
+| Eraser tool                    | OK           | 0.5     |                                                 |
 | Text tool                      | Planned       | 1.0     |                                                 |
 | Selection                      | Internal only | 0.5     | Selections implemented but inaccessible to user |
 | Rectangular Selection tool     | Planned       | 0.5     |                                                 |
