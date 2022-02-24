@@ -33,6 +33,41 @@ jobs:
     - shell: msys2 {0}
       run: |
         make -j 4
+        cp /mingw32/bin/libgcc_s_dw2-1.dll ./
+        cp /mingw32/bin/libstdc++-6.dll ./
+        cp /mingw32/bin/libwinpthread-1.dll ./
+        cp /mingw32/bin/libfreetype-6.dll ./
+        cp /mingw32/bin/liblcms2-2.dll ./
+        cp /mingw32/bin/glew32.dll ./
+        cp /mingw32/bin/lua54.dll ./
+        cp /mingw32/bin/libpng16-16.dll ./
+        cp /mingw32/bin/libv8.dll ./
+        cp /mingw32/bin/SDL2_image.dll ./
+        cp /mingw32/bin/SDL2.dll ./
+        cp /mingw32/bin/libv8_libplatform.dll ./
+        cp /mingw32/bin/libbz2-1.dll ./
+        cp /mingw32/bin/libbrotlidec.dll ./
+        cp /mingw32/bin/libharfbuzz-0.dll ./
+        cp /mingw32/bin/zlib1.dll ./
+        cp /mingw32/bin/libwebp-7.dll ./
+        cp /mingw32/bin/libjpeg-8.dll ./
+        cp /mingw32/bin/libtiff-5.dll ./
+        cp /mingw32/bin/libv8_libbase.dll ./
+        cp /mingw32/bin/libssp-0.dll ./
+        cp /mingw32/bin/libicuin69.dll ./
+        cp /mingw32/bin/libicuuc69.dll ./
+        cp /mingw32/bin/libicudt69.dll ./
+        cp /mingw32/bin/libpcre-1.dll ./
+        cp /mingw32/bin/libintl-8.dll ./
+        cp /mingw32/bin/libiconv-2.dll ./
+        cp /mingw32/bin/libbrotlicommon.dll ./
+        cp /mingw32/bin/libglib-2.0-0.dll ./
+        cp /mingw32/bin/libgraphite2.dll ./
+        cp /mingw32/bin/libdeflate.dll ./
+        cp /mingw32/bin/libjbig-0.dll ./
+        cp /mingw32/bin/libLerc.dll ./
+        cp /mingw32/bin/libzstd.dll ./
+        cp /mingw32/bin/liblzma-5.dll ./
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -40,3 +75,4 @@ jobs:
         path: |
           dotto.exe
           data
+          *.dll

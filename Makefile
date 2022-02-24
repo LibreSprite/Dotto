@@ -16,6 +16,7 @@ ifeq ($(OS),Windows_NT)
     LN_FLAGS += -lglew32
     LN_FLAGS += -llcms2
     LN_FLAGS += -lole32
+    LN_FLAGS += -mconsole
 
 else
     CC = gcc
