@@ -1,4 +1,4 @@
-# LibreSprite Dotto! [![Linux x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml) [![Windows i686 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-x86_64.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-x86_64.yml)
+# LibreSprite Dotto! [![Linux x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml) [![Windows i686 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml)
 
 ## Funding / Contributing
 
