@@ -5,10 +5,14 @@
 #pragma once
 
 #ifdef __APPLE__
-#include <OpenGL/gl3.h>
+  #include <OpenGL/gl3.h>
+#elif defined(__WINDOWS__)
+  #include <windef.h>
+  #include <GL/glew.h>
+  #include <GL/gl.h>
 #else
-#include <GL/gl.h>
-#include <GLES3/gl3.h>
+  #include <GL/gl.h>
+  #include <GLES3/gl3.h>
 #endif
 
 #include <common/match.hpp>

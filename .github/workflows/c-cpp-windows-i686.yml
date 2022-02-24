@@ -1,0 +1,42 @@
+name: Windows i686 CI
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW32
+        release: false
+        update: false
+        install: >-
+          base-devel
+          git
+          mingw-w64-i686-gcc
+          mingw-w64-i686-openssl
+          mingw-w64-i686-v8 
+          mingw-w64-i686-SDL2 
+          mingw-w64-i686-SDL2_image 
+          mingw-w64-i686-lcms2 
+          mingw-w64-i686-lua 
+          mingw-w64-i686-freetype
+          mingw-w64-i686-glew
+    - uses: actions/checkout@v2
+    - shell: msys2 {0}
+      run: |
+        make -j 4
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dotto-development-windows-i686
+        path: |
+          dotto.exe
+          data

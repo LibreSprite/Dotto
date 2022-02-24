@@ -175,7 +175,7 @@ class V8ScriptObject : public InternalScriptObject {
 public:
 
     static script::Value getValue(v8::Isolate *isolate, v8::Local<v8::Value> local) {
-        if (local->IsNullOrUndefined())
+        if (local.IsEmpty() || local->IsNullOrUndefined())
             return {};
 
         if (local->IsString()) {

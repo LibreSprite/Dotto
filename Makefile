@@ -1,13 +1,22 @@
 ifeq ($(OS),Windows_NT)
-    # CCFLAGS += -D WIN32
-    # ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
-        # CPP_FLAGS += -DV8_COMPRESS_POINTERS
-    # else
-    #     ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-    #     endif
-    #     ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-    #     endif
-    # endif
+    CC = /mingw32/bin/i686-w64-mingw32-gcc
+    CXX = /mingw32/bin/i686-w64-mingw32-g++
+    OBJC = /mingw32/bin/i686-w64-mingw32-g++
+    LN = /mingw32/bin/i686-w64-mingw32-g++
+    STRIP = strip
+    FIND = find src -type f -name
+    PKGCONFIG = pkg-config
+    DOTTO = dotto.exe
+
+    LN_FLAGS += -lv8 -lv8_libplatform
+    CPP_FLAGS += -DSCRIPT_ENGINE_V8
+    CPP_FLAGS += -D__WINDOWS__
+
+    LN_FLAGS += -lopengl32
+    LN_FLAGS += -lglew32
+    LN_FLAGS += -llcms2
+    LN_FLAGS += -lole32
+
 else
     CC = gcc
     CXX = g++
@@ -16,6 +25,7 @@ else
     STRIP = strip
     FIND = find src -type f -name
     UNAME_S := $(shell uname -s)
+    DOTTO = dotto
 
     ifeq ($(OLDGCC),true)
         LN_FLAGS += -lstdc++fs
@@ -58,47 +68,48 @@ else
     # ifneq ($(filter %86,$(UNAME_P)),)
     # endif
 
-    LIB_DIRS += $(shell find libs -type d)
-    CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
+endif
 
-    SRC_DIRS += $(shell find src -type d)
-    SRC_DIRS += $(LIB_DIRS)
-    CPP_FLAGS += -Isrc
+LIB_DIRS += $(shell find libs -type d)
+CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
 
-    CPP_FLAGS += -MMD -MP
-    CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl2)
+SRC_DIRS += $(shell find src -type d)
+SRC_DIRS += $(LIB_DIRS)
+CPP_FLAGS += -Isrc
+
+CPP_FLAGS += -MMD -MP
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl2)
 
 #BEGIN FREETYPE2
-    CPP_FLAGS += $(shell $(PKGCONFIG) --cflags freetype2)
-    LN_FLAGS += $(shell $(PKGCONFIG) --libs freetype2)
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags freetype2)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs freetype2)
 #END
 
-    CPP_FILES += $(shell find src -type f -name '*.cpp')
-    CPP_FILES += $(shell find libs -type f -name '*.cpp')
+CPP_FILES += $(shell find src -type f -name '*.cpp')
+CPP_FILES += $(shell find libs -type f -name '*.cpp')
 
-    C_FLAGS := $(CPP_FLAGS)
-    C_FILES += $(shell find src -type f -name '*.c')
-    C_FILES += $(shell find libs -type f -name '*.c')
+C_FLAGS := $(CPP_FLAGS)
+C_FILES += $(shell find src -type f -name '*.c')
+C_FILES += $(shell find libs -type f -name '*.c')
 
-    LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl2)
-    LN_FLAGS += -lSDL2_image
-    LN_FLAGS += $(SO_FILES)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl2)
+LN_FLAGS += -lSDL2_image
+LN_FLAGS += $(SO_FILES)
 
 #BEGIN V8 SUPPORT
-    # CPP_FLAGS += -DSCRIPT_ENGINE_V8
-    # CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8)
-    # CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8_libplatform)
-    # LN_FLAGS += $(shell $(PKGCONFIG) --libs v8)
-    # LN_FLAGS += $(shell $(PKGCONFIG) --libs v8_libplatform)
+# CPP_FLAGS += -DSCRIPT_ENGINE_V8
+# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8)
+# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8_libplatform)
+# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8)
+# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8_libplatform)
 #END
 
 #BEGIN LUA SUPPORT
-    CPP_FLAGS += -DSCRIPT_ENGINE_LUA
-    LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
-    CPP_FLAGS += $(shell $(PKGCONFIG) --cflags $(LUAPKG))
-    LN_FLAGS += $(shell $(PKGCONFIG) --libs $(LUAPKG))
+CPP_FLAGS += -DSCRIPT_ENGINE_LUA
+LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags $(LUAPKG))
+LN_FLAGS += $(shell $(PKGCONFIG) --libs $(LUAPKG))
 #END
-endif
 
 ODIR = build
 
@@ -111,7 +122,7 @@ FLAGS += -Og -g -D_DEBUG -rdynamic # debug build
 POSTBUILD =
 else
 FLAGS += -O3 # release build
-POSTBUILD = $(STRIP) dotto
+POSTBUILD = $(STRIP) $(DOTTO)
 endif
 
 LN_FLAGS += -lpng
@@ -134,7 +145,7 @@ $(ODIR)/%.mm.o: %.mm
 	@mkdir -p "$$(dirname "$@")"
 	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
 
-dotto: $(OBJ)
+$(DOTTO): $(OBJ)
 	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
 	$(POSTBUILD)
 

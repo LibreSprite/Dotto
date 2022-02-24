@@ -1,4 +1,4 @@
-# LibreSprite Dotto! [![Linux x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml)
+# LibreSprite Dotto! [![Linux x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml) [![Windows i686 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-x86_64.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-x86_64.yml)
 
 ## Funding / Contributing
 
@@ -32,7 +32,7 @@ free to give the repo a star. *Think of the codegnomes.*
 | Internationalization           | OK            | 0.5     |                                                 |
 | OpenGL Hardware acceleration   | OK            | 1.0     |                                                 |
 | x86/64 Linux                   | OK            | 0.5     |                                                 |
-| x86/64 Windows                 | Planned       | 0.5     |                                                 |
+| x86/64 Windows                 | Untested      | 0.5     |                                                 |
 | x86_64 MacOS                   | OK            | 1.0     |                                                 |
 | Raspberry Pi 4 support         | OK            | 1.0     |                                                 |
 | Undo / Redo                    | OK            | 0.5     |                                                 |

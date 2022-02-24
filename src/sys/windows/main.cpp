@@ -2,13 +2,13 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#ifdef __WIN32
+#ifdef __WINDOWS__
 
 #include <app/App.hpp>
 #include <common/System.hpp>
 #include <log/Log.hpp>
 
-int main(int argc, const char* argv[]) {
+extern "C" int main(int argc, const char* argv[]) {
     Log::setDefault("stdout");
     System::setDefault("sdl2", {}, "new");
 

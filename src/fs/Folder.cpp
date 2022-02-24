@@ -17,7 +17,7 @@ void Folder::forEach(std::function<void(std::shared_ptr<FSEntity>)> callback) {
                 } else if (entry.is_regular_file()) {
                     type = "std";
                 } else continue;
-                callback(getChild(entry.path().filename(), type));
+                callback(getChild(entry.path().filename().string(), type));
             }
         } catch (std::filesystem::filesystem_error&) {}
     } else {
