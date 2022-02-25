@@ -46,7 +46,8 @@ public:
         if (!m_platform) {
             // Conflicting documentation. Not sure if this is actually needed.
             // v8::V8::InitializeICUDefaultLocation(base::get_app_path().c_str());
-            // v8::V8::InitializeExternalStartupData(base::get_app_path().c_str());
+            auto appPath = inject<FileSystem>{}->find("%appdir/dotto");
+            v8::V8::InitializeExternalStartupData(appPath->getUID().c_str());
             v8::V8::InitializeICU();
 
             m_platform = v8::platform::NewDefaultPlatform();

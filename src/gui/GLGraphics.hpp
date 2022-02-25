@@ -75,6 +75,10 @@ public:
     S32 width, height;
 
     void init(const String& version) {
+#if defined(__WINDOWS__)
+        glewInit();
+#endif
+
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
 

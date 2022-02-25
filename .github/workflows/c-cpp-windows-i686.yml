@@ -68,6 +68,7 @@ jobs:
         cp /mingw32/bin/libLerc.dll ./
         cp /mingw32/bin/libzstd.dll ./
         cp /mingw32/bin/liblzma-5.dll ./
+        cp /mingw32/bin/snapshot_blob.bin ./
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -75,4 +76,5 @@ jobs:
         path: |
           dotto.exe
           data
+          snapshot_blob.bin
           *.dll

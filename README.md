@@ -117,3 +117,24 @@ If you want to make a debug build for development, use:
 make DEBUG=true
 ```
 
+### Windows
+
+Install [MSYS2](https://msys2.org).
+
+Initial setup: Open the MSYS2 shell and run:
+
+```sh
+pacman -Syu
+pacman -S base-devel git mingw-w64-i686-gcc mingw-w64-i686-openssl mingw-w64-i686-v8  mingw-w64-i686-SDL2  mingw-w64-i686-SDL2_image  mingw-w64-i686-lcms2  mingw-w64-i686-lua  mingw-w64-i686-freetype mingw-w64-i686-glew
+git clone https://github.com/LibreSprite/Dotto.git
+```
+
+Compiling:
+
+Run the Mingw32 shell (C:/msys64/mingw32.exe).
+
+```sh
+cd Dotto
+make DEBUG=false
+./dotto.exe
+```
