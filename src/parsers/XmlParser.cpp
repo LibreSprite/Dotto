@@ -9,6 +9,8 @@
 #include <common/XML.hpp>
 #include <log/Log.hpp>
 
+using namespace fs;
+
 class XmlParser : public Parser {
 public:
     std::shared_ptr<XMLNode> recurse(tinyxml2::XMLNode* in) {

@@ -11,5 +11,5 @@
 class Parser : public Injectable<Parser> {
 public:
     virtual bool canCache() {return true;}
-    virtual Value parseFile(std::shared_ptr<File> file) = 0;
+    virtual Value parseFile(std::shared_ptr<fs::File> file) = 0;
 };

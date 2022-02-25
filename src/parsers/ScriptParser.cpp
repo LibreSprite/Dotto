@@ -8,6 +8,8 @@
 #include <log/Log.hpp>
 #include <script/Engine.hpp>
 
+using namespace fs;
+
 class ScriptParser : public Parser {
 public:
     bool canCache() override {return false;}

@@ -4,8 +4,6 @@
 
 #ifdef __WINDOWS__
 
-#define _UNICODE
-
 #include <windows.h>
 #include <codecvt>
 #include <shlobj.h>
@@ -19,7 +17,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-class WindowsRootDir : public RootFolder {
+class WindowsRootDir : public fs::RootFolder {
 public:
     bool boot() {
         std::wstring_convert<std::codecvt_utf8<wchar_t>> convert;
@@ -31,7 +29,7 @@ public:
         {
             TCHAR homebuf[MAX_PATH+1] = {0};
             SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, homebuf);
-            home = convert.to_bytes(homebuf);
+            home = homebuf;
             logI("Home: ", home);
             mount("%userhome", "dir", home);
         }
@@ -48,7 +46,7 @@ public:
         {
             TCHAR exePath[MAX_PATH+1] = {0};
             ::GetModuleFileName(NULL, exePath, sizeof(exePath)/sizeof(TCHAR));
-            auto parts = split(convert.to_bytes(exePath), separator);
+            auto parts = split(exePath, separator);
             parts.pop_back();
             appdir = join(parts, separator);
             logI("AppDir: ", appdir);
@@ -70,8 +68,8 @@ public:
 };
 
 static FSEntity::Shared<WindowsRootDir> lrd{"rootDir"};
-static FileSystem::Shared<FileSystem> fs{"new"};
+static FileSystem::Shared<FileSystem> fsreg{"new"};
 static File::Shared<StdFile> stdFile{"std"};
-static File::Shared<Folder> stdDir{"dir"};
+static File::Shared<fs::Folder> stdDir{"dir"};
 
 #endif

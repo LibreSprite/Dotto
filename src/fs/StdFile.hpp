@@ -10,6 +10,8 @@
 #include <fs/File.hpp>
 #include <fs/FileSystem.hpp>
 
+using namespace fs;
+
 class StdFile : public File {
 public:
     FILE* file = nullptr;

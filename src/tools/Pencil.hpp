@@ -16,6 +16,8 @@
 #include <fs/Folder.hpp>
 #include <tools/Tool.hpp>
 
+using namespace fs;
+
 class Surface;
 
 class Pencil : public Tool {

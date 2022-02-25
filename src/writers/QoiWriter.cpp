@@ -8,6 +8,8 @@
 #include <common/Writer.hpp>
 #include <log/Log.hpp>
 
+using namespace fs;
+
 class QoiWriter : public SimpleImageWriter {
 public:
     bool writeFile(std::shared_ptr<File> file, const Value& data) override {

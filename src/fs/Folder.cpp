@@ -6,6 +6,8 @@
 
 #include <fs/Folder.hpp>
 
+using namespace fs;
+
 void Folder::forEach(std::function<void(std::shared_ptr<FSEntity>)> callback) {
     if (!this->path.empty()) {
         try {

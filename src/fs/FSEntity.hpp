@@ -8,22 +8,26 @@
 
 class Value;
 
-class FSEntity : public Injectable<FSEntity>, public std::enable_shared_from_this<FSEntity> {
-public:
-    virtual bool isFolder() = 0;
-    virtual bool isFile() = 0;
-    virtual void init(const Value& resource) = 0;
+namespace fs {
 
-    virtual String getUID() {
-        return std::to_string(reinterpret_cast<uintptr_t>(this));
-    }
+    class FSEntity : public Injectable<FSEntity>, public std::enable_shared_from_this<FSEntity> {
+    public:
+        virtual bool isFolder() = 0;
+        virtual bool isFile() = 0;
+        virtual void init(const Value& resource) = 0;
 
-    template<typename Type>
-    std::shared_ptr<Type> get() {
-        return std::dynamic_pointer_cast<Type>(shared_from_this());
-    }
+        virtual String getUID() {
+            return std::to_string(reinterpret_cast<uintptr_t>(this));
+        }
 
-    Value parse();
+        template<typename Type>
+        std::shared_ptr<Type> get() {
+            return std::dynamic_pointer_cast<Type>(shared_from_this());
+        }
 
-    static inline String separator;
-};
+        Value parse();
+
+        static inline String separator;
+    };
+
+}

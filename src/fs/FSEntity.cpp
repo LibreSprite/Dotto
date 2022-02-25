@@ -7,6 +7,8 @@
 #include <fs/File.hpp>
 #include <common/Parser.hpp>
 
+using namespace fs;
+
 Value FSEntity::parse() {
     auto file = get<File>();
     if (!file)

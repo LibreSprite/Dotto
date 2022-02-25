@@ -8,6 +8,8 @@
 #include <common/Surface.hpp>
 #include <log/Log.hpp>
 
+using namespace fs;
+
 class PNGReader {
 public:
 

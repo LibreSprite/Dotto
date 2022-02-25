@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+using namespace fs;
+
 static auto fontPaths = std::array{
     "/usr/share/fonts",
     "/usr/local/share/fonts",
@@ -87,7 +89,7 @@ public:
 };
 
 static FSEntity::Shared<LinuxRootDir> lrd{"rootDir"};
-static FileSystem::Shared<FileSystem> fs{"new"};
+static FileSystem::Shared<FileSystem> reg{"new"};
 static File::Shared<StdFile> stdFile{"std"};
 static File::Shared<Folder> stdDir{"dir"};
 

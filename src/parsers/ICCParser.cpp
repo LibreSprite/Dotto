@@ -9,6 +9,8 @@
 #include <common/Surface.hpp>
 #include <fs/FileSystem.hpp>
 
+using namespace fs;
+
 struct ICCProfile {
     cmsHPROFILE profile;
 

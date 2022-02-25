@@ -17,6 +17,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+using namespace fs;
+
 static auto fontPaths = std::array{
     "/System/Library/Fonts/",
     "/Library/Fonts",
@@ -82,7 +84,7 @@ public:
 };
 
 static FSEntity::Shared<MacOSRootDir> lrd{"rootDir"};
-static FileSystem::Shared<FileSystem> fs{"new"};
+static FileSystem::Shared<FileSystem> fsreg{"new"};
 static File::Shared<StdFile> stdFile{"std"};
 static File::Shared<Folder> stdDir{"dir"};
 

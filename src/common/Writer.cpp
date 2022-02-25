@@ -8,6 +8,8 @@
 #include <fs/FileSystem.hpp>
 #include <common/Writer.hpp>
 
+using namespace fs;
+
 bool Writer::writeFile(const String& path, const Value& data) {
     auto fsentity = inject<FileSystem>{}->find(path);
     if (!fsentity)

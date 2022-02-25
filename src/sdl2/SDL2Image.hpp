@@ -10,6 +10,8 @@
 #include <common/Surface.hpp>
 #include <fs/File.hpp>
 
+using namespace fs;
+
 class FileOps : public SDL_RWops {
 public:
     std::shared_ptr<File> file;

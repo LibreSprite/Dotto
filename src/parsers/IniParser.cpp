@@ -7,6 +7,8 @@
 #include <common/PropertySet.hpp>
 #include <common/String.hpp>
 
+using namespace fs;
+
 class IniParser : public Parser {
 public:
     Value parseFile(std::shared_ptr<File> file) override {

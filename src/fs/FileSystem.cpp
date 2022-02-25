@@ -8,6 +8,8 @@
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>
 
+using namespace fs;
+
 Value FileSystem::parse(const String& path) {
     if (auto fsentity = inject<FileSystem>{}->find(path))
         return fsentity->parse();

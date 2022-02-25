@@ -9,14 +9,14 @@
 
 class FileSystem : public Injectable<FileSystem> {
 protected:
-    inject<FSEntity> root{"rootDir"};
+    inject<fs::FSEntity> root{"rootDir"};
 
 public:
     Provides p{this};
     Vector<String> splitPath(const String& path);
     String extension(const String& path);
-    std::shared_ptr<FSEntity> getRoot() {return root;}
-    virtual std::shared_ptr<FSEntity> find(const String& path, const String& missingType = "std");
+    std::shared_ptr<fs::FSEntity> getRoot() {return root;}
+    virtual std::shared_ptr<fs::FSEntity> find(const String& path, const String& missingType = "std");
     virtual bool boot();
     static Value parse(const String& path);
     static bool write(const String& path, const Value& data);

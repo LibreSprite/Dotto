@@ -10,6 +10,8 @@
 #include <fs/Folder.hpp>
 #include <gui/Node.hpp>
 
+using namespace fs;
+
 class ConfigImpl : public Config {
 public:
     PubSub<msg::Flush> pub{this};

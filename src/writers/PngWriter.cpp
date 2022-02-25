@@ -8,6 +8,8 @@
 #include <common/Writer.hpp>
 #include <log/Log.hpp>
 
+using namespace fs;
+
 class PNGEncoder {
 public:
     png_structp png = nullptr;

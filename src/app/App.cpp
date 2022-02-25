@@ -17,6 +17,8 @@
 #include <log/Log.hpp>
 #include <script/Engine.hpp>
 
+using namespace fs;
+
 class AppImpl : public App {
 public:
     bool running = true;

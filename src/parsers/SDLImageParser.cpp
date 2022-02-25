@@ -5,6 +5,8 @@
 #include <common/Parser.hpp>
 #include <sdl2/SDL2Image.hpp>
 
+using namespace fs;
+
 class SDLImageParser : public Parser {
 public:
     Value parseFile(std::shared_ptr<File> file) override {

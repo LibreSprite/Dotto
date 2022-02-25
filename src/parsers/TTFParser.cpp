@@ -11,6 +11,8 @@
 #include <common/Font.hpp>
 #include <log/Log.hpp>
 
+using namespace fs;
+
 class Glyph {
     Vector<U8> data;
 
