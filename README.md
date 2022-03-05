@@ -88,7 +88,7 @@ free to give the repo a star. *Think of the codegnomes.*
 
 Install dependencies:
 
-- Arch-based distros: `pacman -S make sdl2 sdl2_image lua v8-r lcms2`
+- Arch-based distros: `pacman -S make sdl2 sdl2_image lua lcms2`
 
 - Debian-based distros: `sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev liblua5.3-dev libfreetype6-dev libnode-dev`
 
