@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: update Apt
+      run: sudo apt-get update
     - name: install-dependencies
       run: sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev liblua5.3-dev libfreetype6-dev libnode-dev
     - name: configure
