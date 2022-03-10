@@ -1,0 +1,28 @@
+name: MacOS x86_64 CI
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install-dependencies
+      run: brew install sdl2 sdl2_image lcms2 lua freetype v8
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make -j 4
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dotto-development-macos-11-x86_64
+        path: |
+          dotto
+          data
