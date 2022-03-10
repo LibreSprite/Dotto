@@ -15,6 +15,12 @@ rate is currently set to *5 commits per star*.
 So, if you want to contribute to the project but don't know how to code, feel
 free to give the repo a star. *Think of the codegnomes.*
 
+## Stability Notice
+
+This project is still in early stages of development and problems are to be expected.
+Instead of filing an issue here, it is faster and more productive to reach out
+over Discord/Matrix.
+
 ## Version Roadmap
 
 | Number | Notes                                                |
@@ -34,7 +40,7 @@ free to give the repo a star. *Think of the codegnomes.*
 | Internationalization           | OK            | 0.5     |                                                 |
 | OpenGL Hardware acceleration   | OK            | 1.0     |                                                 |
 | x86/64 Linux                   | OK            | 0.5     |                                                 |
-| x86/64 Windows                 | Untested      | 0.5     |                                                 |
+| x86/64 Windows                 | OK            | 0.5     |                                                 |
 | x86_64 MacOS                   | OK            | 1.0     |                                                 |
 | Raspberry Pi 4 support         | OK            | 1.0     |                                                 |
 | Undo / Redo                    | OK            | 0.5     |                                                 |
@@ -139,4 +145,20 @@ Run the Mingw32 shell (C:/msys64/mingw32.exe).
 cd Dotto
 make DEBUG=false
 ./dotto.exe
+```
+
+### MacOS
+
+Initial setup:
+
+```sh
+brew install sdl2 sdl2_image lcms2 lua freetype v8
+```
+
+Compiling:
+
+```sh
+make DEBUG=false
+chmod +x dotto
+./dotto
 ```
