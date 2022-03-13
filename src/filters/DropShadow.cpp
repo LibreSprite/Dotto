@@ -9,7 +9,7 @@
 
 class Surface;
 
-class DropShadown : public Filter {
+class DropShadow : public Filter {
 public:
     Property<S32> offsetX{this, "offset-x", 0};
     Property<S32> offsetY{this, "offset-y", 0};
@@ -105,4 +105,4 @@ public:
     }
 };
 
-static Filter::Shared<DropShadown> reg{"dropshadow"};
+static Filter::Shared<DropShadow> reg{"dropshadow"};
