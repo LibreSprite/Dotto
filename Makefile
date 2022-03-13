@@ -56,6 +56,7 @@ else
 
 	LN_FLAGS += -lGL
 	LN_FLAGS += -llcms2
+	LN_FLAGS += -lX11 -lXi
     endif
 
     ifeq ($(UNAME_S),Darwin)
