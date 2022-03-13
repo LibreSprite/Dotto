@@ -32,9 +32,13 @@ public:
     Property<S32> size{this, "size", 1, &Pencil::invalidateMetaMenu};
     Property<F32> interval{this, "interval", 1.0f, &Pencil::invalidateMetaMenu};
     Property<F32> smoothing{this, "smoothing", 0.0f, &Pencil::invalidateMetaMenu};
-    Property<bool> HQ{this, "high-quality", false};
+    Property<bool> pressuresize{this, "pen-size", true, &Pencil::invalidateMetaMenu};
+    Property<bool> pressurealpha{this, "pen-alpha", false, &Pencil::invalidateMetaMenu};
+    Property<bool> pixelperfect{this, "pixelperfect", true, &Pencil::invalidateMetaMenu};
+    Property<bool> HQ{this, "high-quality", true};
+
     bool wasInit = false;
-    S32 prevPlotX = 0, prevPlotY = 0;
+    S32 prevPlotX = 0, prevPlotY = 0, prevPlotZ = 0;
     U32 which;
     Preview preview {.hideCursor = true};
 
@@ -136,10 +140,33 @@ public:
                     {"label", HQ.name},
                     {"value", HQ.value}
                 }));
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "checkbox"},
+                    {"label", pixelperfect.name},
+                    {"value", pixelperfect.value}
+                }));
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "checkbox"},
+                    {"label", pressuresize.name},
+                    {"value", pressuresize.value}
+                }));
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "checkbox"},
+                    {"label", pressurealpha.name},
+                    {"value", pressurealpha.value}
+                }));
+
         return meta;
     }
 
-    void plot(S32 x, S32 y, bool force) {
+    void plot(const Point3D& point, bool force) {
+        auto x = point.x;
+        auto y = point.y;
+        auto z = point.z / 255.0f;
+
         if (!force) {
             S32 dx = x - prevPlotX;
             S32 dy = y - prevPlotY;
@@ -149,6 +176,7 @@ public:
 
         prevPlotX = x;
         prevPlotY = y;
+        prevPlotZ = z;
 
         if (smoothing < 0) {
             x += (rand() / F32(RAND_MAX) * 2.0f - 1.0f) * size * -smoothing;
@@ -160,20 +188,33 @@ public:
         U32 sh = shape->height();
         S32 hsw = sw / 2;
         S32 hsh = sh / 2;
-        if (scale < 1) {
+
+        if (pressuresize) {
+            scale = F32(size) * z / shape->width();
+        } else {
+            scale = F32(size) / shape->width();
+        }
+
+        F32 alpha = pressurealpha ? z : 1.0f;
+
+        if (size <= 1) {
+            selection->add(x, y, 255 * alpha);
+        } else if (scale < 1) {
+            if (scale <= 0)
+                return;
             if (!*HQ) {
                 S32 step = 1 / scale;
                 for (S32 sy = step/2; sy < sh; sy += step) {
                     for (S32 sx = step/2; sx < sw; sx += step) {
                         color = shape->getPixelUnsafe(sx, sy);
-                        selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a);
+                        selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a * alpha);
                     }
                 }
             } else {
                 for (S32 sy = 0; sy < sh; ++sy) {
                     for (S32 sx = 0; sx < sw; ++sx) {
                         color = shape->getPixelUnsafe(sx, sy);
-                        selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a * scale);
+                        selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a * alpha * scale);
                     }
                 }
             }
@@ -187,7 +228,7 @@ public:
                     S32 maxox = ox + scale;
                     for (S32 ey = oy; ey < maxoy; ++ey) {
                         for (S32 ex = ox; ex < maxox; ++ex) {
-                            selection->add(ex, ey, color.a);
+                            selection->add(ex, ey, color.a * alpha);
                         }
                     }
                 }
@@ -195,35 +236,36 @@ public:
         }
     }
 
-    void applySmoothing(Surface* surface, const Vector<Point2D>& points) {
+    Path applySmoothing(Surface* surface, const Path& points) {
         if (!points.size())
-            return;
+            return {};
 
-        struct Point2DF {
-            F32 x, y;
+        struct Point3DF {
+            F32 x, y, z;
 
-            Point2DF(const Point2D& p) : x(p.x), y(p.y) {}
+            Point3DF(const Point3D& p) : x(p.x), y(p.y), z(p.z) {}
 
-            Point2DF(F32 x, F32 y) : x{x}, y{y} {}
+            Point3DF(F32 x, F32 y, F32 z) : x{x}, y{y}, z{z} {}
 
-            Point2D round() {
-                return {S32(x + 0.5f), S32(y + 0.5f)};
+            Point3D round() {
+                return {S32(x + 0.5f), S32(y + 0.5f), S32(z + 0.5f)};
             }
         };
 
-        Vector<Point2DF> smooth;
+        Vector<Point3DF> smooth;
         smooth.reserve(points.size() * 2 - 1);
         smooth.push_back(points[0]);
         auto ref = points[0];
         for (U32 i = 1, size = points.size(); i < size; ++i) {
-            Point2DF prev = ref;
-            Point2D current = points[i];
+            Point3DF prev = ref;
+            Point3D current = points[i];
             if (std::abs(prev.x - current.x) + std::abs(prev.y - current.y) < 2)
                 continue;
             ref = current;
-            Point2DF midpoint{
+            Point3DF midpoint{
                 (prev.x + current.x) / 2,
-                (prev.y + current.y) / 2
+                (prev.y + current.y) / 2,
+                (prev.z + current.z) / 2
             };
             smooth.push_back(midpoint);
             smooth.push_back(current);
@@ -236,23 +278,22 @@ public:
             current = next;
             next = smooth[i + 1];
 
-            Point2DF tween{
+            Point3DF tween{
                 (prev.x + next.x) / 2,
-                (prev.y + next.y) / 2
+                (prev.y + next.y) / 2,
+                (prev.z + next.z) / 2
             };
 
             smooth[i].x = current.x * (1.0f - smoothing) + tween.x * smoothing;
             smooth[i].y = current.y * (1.0f - smoothing) + tween.y * smoothing;
+            smooth[i].z = current.z * (1.0f - smoothing) + tween.z * smoothing;
         }
 
-        Vector<Point2D> segment;
-        segment.push_back(smooth[0].round());
-        begin(surface, segment, which);
-        for (U32 i = 1, size = smooth.size(); i < size; ++i) {
-            segment.push_back(smooth[i].round());
-            update(surface, segment);
-        }
-        end(nullptr, segment);
+        Path rounded;
+        for (auto& point : smooth)
+            rounded.push_back(point.round());
+
+        return rounded;
     }
 
     virtual void initPaint() {
@@ -268,7 +309,7 @@ public:
         }
     }
 
-    void begin(Surface* surface, const Vector<Point2D>& points, U32 which) override {
+    void begin(Surface* surface, const Path& points, U32 which) override {
         this->which = which;
         if (!wasInit)
             changeShape();
@@ -276,36 +317,78 @@ public:
             return;
         if (size < 1)
             *size = 1;
-        scale = F32(size) / shape->width();
         if (interval <= 0)
             set("interval", shape->width() / 8.0f * scale);
         selection = inject<Selection>{"new"};
         initPaint();
-        plot(points.back().x, points.back().y, true);
+        plot(points.back(), true);
         paint->run();
     }
 
-    void update(Surface* surface, const Vector<Point2D>& points) override {
+    void update(Surface* surface, const Path& points) override {
         if (!shape)
             return;
         auto& end = points[points.size() - 1];
         auto& begin = points[points.size() - 2];
-        line(begin, end, [=](const Point2D& point){
-            plot(point.x, point.y, false);
+        line(begin, end, [&](S32 x, S32 y, S32 step, S32 max){
+            F32 lerp = F32(step) / max;
+            plot({x, y, S32(0.5f + begin.z * (1 - lerp) + end.z * lerp) }, false);
         });
         paint->run();
     }
 
-    void end(Surface* surface, const Vector<Point2D>& points) override {
+    Path applyPixelPerfect(const Path src) {
+        Path ret;
+        ret.push_back(src.front());
+
+        for (U32 it = 1, size = src.size(); it < size - 1; ++it) {
+            auto x = src[it].x;
+            auto y = src[it].y;
+            auto px = src[it-1].x;
+            auto py = src[it-1].y;
+            auto nx = src[it+1].x;
+            auto ny = src[it+1].y;
+            it += (px == x || py == y)
+                && (nx == x || ny == y)
+                && px != nx
+                && py != ny;
+            ret.push_back(src[it]);
+        }
+
+        ret.push_back(src.back());
+
+        return ret;
+    }
+
+    void end(Surface* surface, const Path& points) override {
         if (!shape)
             return;
 
         paint->load({{"preview", false}});
         paint->run();
 
-        if (which > 0 && surface && smoothing > 0 && points.size() > 2) {
-            paint->undo();
-            applySmoothing(surface, points);
+        if (which == 0 || !surface || points.size() <= 2)
+            return;
+
+        if (smoothing <= 0 && !pixelperfect)
+            return;
+
+        Path copy = points;
+        paint->undo();
+
+        if (smoothing > 0)
+            copy = applySmoothing(surface, copy);
+
+        if (pixelperfect)
+            copy = applyPixelPerfect(copy);
+
+        Path segment;
+        segment.push_back(copy[0]);
+        begin(surface, segment, which);
+        for (U32 i = 1, size = copy.size(); i < size; ++i) {
+            segment.push_back(copy[i]);
+            update(surface, segment);
         }
+        end(nullptr, segment);
     }
 };

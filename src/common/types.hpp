@@ -39,6 +39,11 @@ struct Point2D {
     S32 y;
 };
 
+struct Point3D {
+    S32 x;
+    S32 y;
+    S32 z;
+};
 
 template<class T>
 struct is_shared_ptr : std::false_type {};

@@ -107,10 +107,11 @@ public:
         auto surface = cell->getComposite();
         S32 x = (tx * surface->width()) / rect.width;
         S32 y = (ty * surface->height()) / rect.height;
+        S32 z = msg::MouseMove::pressure * 255;
         bool begin = points.empty();
         if (!begin && x == points.back().x && y == points.back().y)
             return;
-        points.push_back({x, y});
+        points.push_back({x, y, z});
 
         if (begin) {
             do {

@@ -33,7 +33,7 @@ public:
         }
     }
 
-    using Path = Vector<Point2D>;
+    using Path = Vector<Point3D>;
     Property<bool> enabled{this, "enabled", true};
 
     virtual void init(const String& name) {
@@ -59,9 +59,9 @@ public:
         }
     }
 
-    virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 mode) {}
-    virtual void update(Surface* surface, const Vector<Point2D>& points) {}
-    virtual void end(Surface* surface, const Vector<Point2D>& points) {}
+    virtual void begin(Surface* surface, const Path& points, U32 mode) {}
+    virtual void update(Surface* surface, const Path& points) {}
+    virtual void end(Surface* surface, const Path& points) {}
 
     virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
 };

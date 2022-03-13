@@ -14,11 +14,11 @@
 
 class ToolScriptObject : public ModelScriptObject {
 public:
-    const Vector<Point2D>* points;
+    const Tool::Path* points;
     std::shared_ptr<script::ScriptObject> surface;
     U32 which = ~U32{};
 
-    ToolScriptObject() {
+    void postInject() override {
         surface = inject<script::ScriptObject>{typeid(std::shared_ptr<Surface>).name()};
         addProperty("which", [=]{return which;});
         addProperty("count", [=]{return U32(points->size());});
@@ -26,11 +26,15 @@ public:
         addProperty("surface", [=]{return surface.get();});
         addProperty("lastX", [=]{return points->back().x;});
         addProperty("lastY", [=]{return points->back().y;});
+        addProperty("lastZ", [=]{return points->back().z;});
         addFunction("x", [=](U32 id) {
             return id < points->size() ? points->at(id).x : 0;
         });
         addFunction("y", [=](U32 id) {
             return id < points->size() ? points->at(id).y : 0;
+        });
+        addFunction("z", [=](U32 id) {
+            return id < points->size() ? points->at(id).z : 0;
         });
     }
 };
@@ -46,6 +50,7 @@ public:
         engine{inject<script::Engine>{"toolengine"}},
         app{inject<script::ScriptObject>{"toolapp"}.shared<AppScriptObject>()}
         {
+            tso->postInject();
     }
 
     void on(msg::ActivateTool& event) {
@@ -56,7 +61,7 @@ public:
         }
     }
 
-    virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 which) {
+    void begin(Surface* surface, const Path& points, U32 which) override {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         tso->which = which;
@@ -64,14 +69,14 @@ public:
         engine->raiseEvent({"toolstart"});
     }
 
-    virtual void update(Surface* surface, const Vector<Point2D>& points) {
+    void update(Surface* surface, const Path& points) override {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));
         engine->raiseEvent({"toolupdate"});
     }
 
-    virtual void end(Surface* surface, const Vector<Point2D>& points) {
+    void end(Surface* surface, const Path& points) override {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));

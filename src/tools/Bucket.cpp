@@ -24,7 +24,7 @@ public:
         return &preview;
     }
 
-    virtual std::shared_ptr<PropertySet> getMetaProperties() {
+    std::shared_ptr<PropertySet> getMetaProperties() override {
         auto meta = Tool::getMetaProperties();
         meta->push(std::make_shared<PropertySet>(PropertySet{
                     {"widget", "number"},
@@ -44,7 +44,7 @@ public:
         return meta;
     }
 
-    virtual void update(Surface* surface, const Vector<Point2D>& points) {
+    void update(Surface* surface, const Path& points) override {
         if (which == 0 && selection && paint) {
             selection->add(points.back().x, points.back().y, 255);
             paint->run();
@@ -52,7 +52,7 @@ public:
         }
     }
 
-    virtual void end(Surface* surface, const Vector<Point2D>& points) {
+    void end(Surface* surface, const Path& points) override {
         if (which == 0 && selection && paint) {
             paint->set("preview", false);
             paint->run();
@@ -61,7 +61,7 @@ public:
         }
     }
 
-    virtual void begin(Surface* surface, const Vector<Point2D>& points, U32 which) {
+    void begin(Surface* surface, const Path& points, U32 which) override {
         this->which = which;
         selection = inject<Selection>{"new"};
         paint = inject<Command>{"paint"};
@@ -90,7 +90,7 @@ public:
         S32 height = surface->height();
 
         if (*contiguous ^ (which != 1)) {
-            Vector<Point2D> queue = points;
+            Path queue = points;
             while (!queue.empty()) {
                 S32 x = queue.back().x;
                 S32 y = queue.back().y;

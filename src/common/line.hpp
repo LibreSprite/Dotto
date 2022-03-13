@@ -6,8 +6,8 @@
 
 #include <common/types.hpp>
 
-template<typename Func>
-void line(Point2D a, Point2D b, Func func) {
+template<typename Point, typename Func>
+void line(Point a, Point b, Func func) {
     S32 x0 = a.x;
     S32 y0 = a.y;
     S32 x1 = b.x;
@@ -56,7 +56,7 @@ void line(Point2D a, Point2D b, Func func) {
     e = (dy * 2) - dx;
 
     for (j=0; j<=dx; j++) {
-        func({x, y});
+        func(x, y, j, dx);
 
         if (e >= 0) {
             if (exchange) {
