@@ -58,6 +58,7 @@ namespace msg {
         const U32 windowId;
         const S32 x, y;
         U32 buttons;
+        static inline F32 pressure = 1.0f;
     };
 
     struct MouseWheel {
