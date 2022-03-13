@@ -11,6 +11,9 @@
 #include <gui/Graphics.hpp>
 #include <log/Log.hpp>
 
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_syswm.h>
+
 static const char* getKeyName(S32 code);
 
 class SDL2System : public System {
@@ -29,8 +32,12 @@ public:
             logE(SDL_GetError());
             return false;
         }
+
+        SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+
         root = inject<ui::Node>{"node"};
         root->processEvent(ui::AddToScene{root.get()});
+
         return true;
     }
 
@@ -55,6 +62,22 @@ public:
             switch (event.type) {
             case SDL_QUIT:
                 running = false;
+                break;
+
+            case SDL_SYSWMEVENT:
+
+#if defined(SDL_VIDEO_DRIVER_WINDOWS)
+                if (event.syswm.msg->subsystem == SDL_SYSWM_WINDOWS) {
+                    pub(event.syswm.msg->msg.win);
+                }
+#endif
+
+#if defined(SDL_VIDEO_DRIVER_X11)
+                if (event.syswm.msg->subsystem == SDL_SYSWM_X11) {
+                    pub(std::move(event.syswm.msg->msg.x11.event));
+                }
+#endif
+
                 break;
 
             case SDL_MOUSEWHEEL:

@@ -10,14 +10,20 @@
 #include <gui/GLGraphics.hpp>
 #include <gui/Window.hpp>
 #include <log/Log.hpp>
+#include <sys/NativeWindowPlugin.hpp>
+
+#include <SDL2/SDL_syswm.h>
 
 class SDL2Window : public ui::Window {
 public:
     SDL_Window* window = nullptr;
     SDL_GLContext context = nullptr;
+
     bool wasInit = false;
     std::shared_ptr<GLGraphics> graphics = std::make_shared<GLGraphics>();
     std::shared_ptr<ColorProfile> profile;
+
+    std::vector<std::pair<String, inject<NativeWindowPlugin>>> plugins;
 
     void doInit() {
         if (wasInit)
@@ -59,6 +65,26 @@ public:
         graphics->init(version);
         resize();
         setDirty();
+
+        plugins = NativeWindowPlugin::createAll();
+
+        SDL_SysWMinfo wmInfo;
+        SDL_VERSION(&wmInfo.version);
+        SDL_GetWindowWMInfo(window, &wmInfo);
+
+        for (auto& entry : plugins) {
+
+#if defined(__WINDOWS__)
+            entry.second->window = wmInfo.info.win.window;
+            entry.second->hdc = wmInfo.info.win.hdc;
+            entry.second->hinstance = wmInfo.info.win.hinstance;
+#elif defined(__linux__)
+            entry.second->display = wmInfo.info.x11.display;
+            entry.second->window = wmInfo.info.x11.window;
+#endif
+
+            entry.second->init();
+        }
     }
 
     bool update() override {
@@ -96,6 +122,8 @@ public:
     }
 
     ~SDL2Window() {
+        plugins.clear();
+
         if (context && window) {
             SDL_GL_MakeCurrent(window, context);
             graphics.reset();
