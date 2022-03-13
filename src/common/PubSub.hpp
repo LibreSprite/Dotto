@@ -88,6 +88,12 @@ public:
         return msg;
     }
 
+    template<typename Message>
+    static Message& pub(Message& msg) {
+        internal::pub(internal::channel<Message>(), &msg);
+        return msg;
+    }
+
     ~PubSub() {
         (internal::unsub<Messages>(this),...);
     }

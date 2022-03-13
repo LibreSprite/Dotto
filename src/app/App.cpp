@@ -76,12 +76,15 @@ public:
 
     bool run() override {
         pub(msg::Tick{});
-        if (!system->run())
-            return false;
-        clock::time_point now = clock::now();
-        auto delta = now - referenceTime;
-        referenceTime = now;
-        std::this_thread::sleep_for(std::chrono::milliseconds{1000 / 60} - delta);
+        pub(msg::PostTick{});
+
+        if (running) {
+            clock::time_point now = clock::now();
+            auto delta = now - referenceTime;
+            referenceTime = now;
+            std::this_thread::sleep_for(std::chrono::milliseconds{1000 / 60} - delta);
+        }
+
         return running;
     }
 

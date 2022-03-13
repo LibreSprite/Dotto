@@ -4,11 +4,20 @@
 
 #pragma once
 
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <common/inject.hpp>
 #include <gui/Window.hpp>
 
 class System : public Injectable<System> {
 public:
+    PubSub<msg::PostTick> pub{this};
+
+    void on(msg::PostTick&){
+        if (!run())
+            pub(msg::RequestShutdown{});
+    }
+
     virtual void setMouseCursorVisible(bool) = 0;
     virtual bool boot() = 0;
     virtual bool run() = 0;

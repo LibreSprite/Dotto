@@ -149,6 +149,7 @@ public:
     }
 
     ~SDL2System() {
+        root.reset();
         SDL_Quit();
     }
 };

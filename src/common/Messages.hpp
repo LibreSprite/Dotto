@@ -31,6 +31,7 @@ namespace msg {
     class Shutdown{};
     class RequestShutdown{};
     class Tick{};
+    class PostTick{};
 
     class Flush{
         const Value& resource;
