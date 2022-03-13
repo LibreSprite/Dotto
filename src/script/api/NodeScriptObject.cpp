@@ -183,6 +183,7 @@ public:
             auto handler = [=](const auto& event) {
                 if (auto app = std::static_pointer_cast<AppScriptObject>(weakapp.lock())) {
                     auto target = std::static_pointer_cast<script::ScriptObject>(shared_from_this());
+                    auto oldTarget = app->getTarget();
                     app->setTarget(target);
                     if (event.target == node) {
                         app->setEventTarget(target);
@@ -192,6 +193,7 @@ public:
                         app->setEventTarget(nullptr);
                     }
                     getEngine().raiseEvent(event.toStrings(name));
+                    app->setTarget(oldTarget);
                 }
             };
             node->addEventListener<Type>(this, handler);

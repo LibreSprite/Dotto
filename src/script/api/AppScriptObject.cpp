@@ -32,6 +32,10 @@ public:
         this->target = getEngine().toValue(target);
     }
 
+    Value getTarget() override {
+        return target.get();
+    }
+
     void setEventTarget(const Value& eventTarget) override {
         this->eventTarget = getEngine().toValue(eventTarget);
     }

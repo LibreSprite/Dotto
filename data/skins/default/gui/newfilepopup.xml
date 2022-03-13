@@ -1,4 +1,4 @@
-<popup controller="script" script="%appdata/scripts/newfilepopup.js" title="New File">
+<popup controller="script" script="%appdata/scripts/newfilepopup.duk" title="New File">
   <inside>
     <number id="widthtextbox" label="Width:" value="64"/>
     <number id="heighttextbox" label="Height:" value="64"/>

@@ -133,6 +133,9 @@ namespace script {
         bool set(const ::Value& other) {
             makeUndefined();
 
+            if (other.empty())
+                return true;
+
             if (other.has<String>()) {
                 type = Type::STRING;
                 data.string_v = new String(other.get<String>());

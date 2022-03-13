@@ -119,6 +119,15 @@ To fix this, use:
 make OLDGCC=true
 ```
 
+If Dotto compiles fine but you are getting a crash on startup, it might be due
+to outdated/buggy libraries. After a `make clean`, try compiling again with:
+
+```sh
+make DEBIANELDERLY=true
+```
+
+If you are trying to run Dotto under VirtualBox and all you see is a glitched window, you need to *disable* 3D acceleration in the VM settings. Dotto requires functioning OpenGL 3.3 to work.
+
 If you want to make a debug build for development, use:
 
 ```sh
@@ -162,3 +171,4 @@ make DEBUG=false
 chmod +x dotto
 ./dotto
 ```
+

@@ -28,7 +28,7 @@ public:
 
     Value(char* v) {*this = String{v};}
 
-    bool empty() {
+    bool empty() const {
         return !value.has_value() || has<std::nullptr_t>();
     }
 

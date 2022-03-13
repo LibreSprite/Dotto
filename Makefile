@@ -42,7 +42,9 @@ else
 	    LN_FLAGS += -L/usr/lib/x86_64-linux-gnu
 	    LN_FLAGS += -lv8 -lv8_libplatform
 	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
-            CPP_FLAGS += -DV8_COMPRESS_POINTERS
+            ifneq ($(DEBIANELDERLY),true)
+	        CPP_FLAGS += -DV8_COMPRESS_POINTERS
+            endif
         endif
 
         ifneq ("$(wildcard /usr/lib/arm-linux-gnueabihf/libv8.so)","")
