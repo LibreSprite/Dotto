@@ -28,7 +28,7 @@ public:
     std::unordered_set<String> pressedKeys;
 
     bool boot() override {
-        if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
             logE(SDL_GetError());
             return false;
         }
