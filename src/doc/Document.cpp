@@ -48,10 +48,12 @@ public:
         if (resource.has<std::shared_ptr<PropertySet>>()) {
             return loadFromPropertySet(resource);
         }
-        return true;
+        return false;
     }
 
     bool loadFromPropertySet(std::shared_ptr<PropertySet> properties) {
+        if (!properties)
+            return false;
         auto timeline = createTimeline();
         inject<Cell> cell{"bitmap"};
         auto surface = cell->getComposite();
@@ -64,6 +66,8 @@ public:
     }
 
     bool loadFromSurface(std::shared_ptr<Surface> surface) {
+        if (!surface)
+            return false;
         auto timeline = createTimeline();
         inject<Cell> cell{"bitmap"};
         *cell->getComposite() = *surface;

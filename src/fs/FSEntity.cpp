@@ -11,8 +11,10 @@ using namespace fs;
 
 Value FSEntity::parse() {
     auto file = get<File>();
-    if (!file)
+    if (!file) {
+        logE("Could not get File to parse");
         return nullptr;
+    }
 
     inject<Cache> cache;
     auto cacheKey = file->getUID();
@@ -20,13 +22,16 @@ Value FSEntity::parse() {
     if (!value.empty())
         return value;
 
-    if (!file->open())
+    if (!file->open()) {
         return nullptr;
+    }
 
     if (auto parser = inject<Parser>{file->type()}) {
         value = parser->parseFile(file);
         if (!value.empty() && parser->canCache())
             cache->set(cacheKey, value);
+    } else {
+        logE("No parser for type: ", file->type());
     }
 
     return value;

@@ -23,6 +23,8 @@ public:
     }
 
     void run() override {
+        if (!doc())
+            return;
         auto timeline = doc()->currentTimeline();
         if (!timeline)
             return;

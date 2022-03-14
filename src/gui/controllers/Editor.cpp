@@ -109,11 +109,23 @@ public:
     }
 
     void openFile() {
+        if (filePath->empty()) {
+            logI("Empty file path");
+            return;
+        }
+
+        auto file = FileSystem::parse(filePath);
+        if (file.has<std::nullptr_t>()) {
+            logE("Could not parse ", filePath);
+            return;
+        }
+
         node()->removeAllChildren();
         *doc = inject<Document>{"new"};
-        (*doc)->load(!filePath->empty() ? FileSystem::parse(filePath) : Value{});
-        (*doc)->setPath(filePath);
-        showFile();
+        if ((*doc)->load(file)) {
+            (*doc)->setPath(filePath);
+            showFile();
+        }
     }
 
     void showFile() {
