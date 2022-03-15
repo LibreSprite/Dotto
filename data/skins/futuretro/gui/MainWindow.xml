@@ -13,6 +13,19 @@
     <image
         src="%skin/mainmenu.png"
         controller="button"
+        click="ToggleUI id=layersidebar, hide=sidebar"
+        slice="15 15 1 1"
+        width="70px"
+        height="100%"
+        padding="16"
+        up-multiply="rgb{155,155,155}"
+        down-multiply="rgb{100,100,100}"
+        hover-multiply="rgb{155,155,155}">
+      <span text="Layers"/>
+    </image>
+    <image
+        src="%skin/mainmenu.png"
+        controller="button"
         click="ToggleUI id=filemenu, hide=sidebar"
         slice="15 15 1 1"
         width="150px"
