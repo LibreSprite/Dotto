@@ -84,6 +84,7 @@ over Discord/Matrix.
 | Online Resource/Script browser | Planned       | 1.0     |                                                 |
 | eXPerience theme               | In Progress   | 0.5     | Windows XP-inspired skin                        |
 | Futuretro theme                | In Progress   | 0.5     | Dark pixelart skin                              |
+| Photoshop theme                | In Progress   | 0.5     | Photoshop inspired skin                         |
 | Touchscreen-specific theme     | Planned       | 2.0     |                                                 |
 | Non-destructive Layer Filters  | Planned       | 3.0     |                                                 |
 | Commandline interface          | Planned       | 3.0     |                                                 |
