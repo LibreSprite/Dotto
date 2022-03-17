@@ -1,0 +1,55 @@
+#!/bin/sh
+
+package=Dotto.app/Dotto.app
+macos=$package/Contents/MacOS
+mkdir -p $macos
+chmod +x dotto
+cp ./dotto $macos
+cp -r ./data $macos
+
+echo '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>dotto</string>
+    <key>CFBundleIdentifier</key>
+    <string>io.github.libresprite.dotto</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>dotto</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+</dict>
+</plist>' > $package/Contents/Info.plist
+
+
+
+# List from:
+# DYLD_PRINT_LIBRARIES=1 DYLD_PRINT_LIBRARIES_POST_LAUNCH=1 ./dotto > /dev/null
+
+declare -a dependencies=(
+"/usr/local/opt/libpng/lib/libpng16.16.dylib"
+"/usr/local/opt/lua/lib/liblua.dylib"
+"/usr/local/opt/freetype/lib/libfreetype.6.dylib"
+"/usr/local/opt/jpeg/lib/libjpeg.9.dylib"
+"/usr/local/opt/libtiff/lib/libtiff.5.dylib"
+"/usr/local/opt/webp/lib/libwebp.7.dylib"
+"/usr/local/opt/sdl2/lib/libSDL2-2.0.0.dylib"
+"/usr/local/opt/sdl2_image/lib/libSDL2_image-2.0.0.dylib"
+"/usr/local/opt/little-cms2/lib/liblcms2.2.dylib"
+)
+
+for srcname in "${dependencies[@]}"
+do
+   filename=$(basename $srcname)
+   echo "Adding dependency $srcname"
+   install_name_tool -change $srcname $filename $macos/dotto
+   cp $srcname $macos
+   chmod +w "$macos/$filename"
+   for depname in "${dependencies[@]}"
+   do
+      install_name_tool -change $depname $(basename $depname) "$macos/$filename"
+   done
+done
