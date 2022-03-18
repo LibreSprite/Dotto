@@ -18,7 +18,7 @@ jobs:
     - name: configure
       run: ./configure
     - name: make
-      run: make -j 4
+      run: MACOSX_DEPLOYMENT_TARGET=10.15 make -j 4
     - name: package
       run: ./package_macosx
     - name: Archive production artifacts
