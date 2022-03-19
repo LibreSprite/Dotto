@@ -82,7 +82,7 @@ public:
     }
 
     void add(S32 x, S32 y, U32 amount) override {
-        if (x < 0 || y < 0)
+        if (x < 0 || y < 0 || amount == 0)
             return;
         Rect newBounds = bounds;
         if (newBounds.expand(x, y))
@@ -151,8 +151,13 @@ public:
         }
     }
 
+    bool empty() override {
+        return data.empty();
+    }
+
     void clear() override {
         bounds.width = 0;
+        bounds.height = 0;
         data.resize(0);
     }
 };

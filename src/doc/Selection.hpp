@@ -20,4 +20,5 @@ public:
     virtual Vector<U32> read(Surface*) = 0;
     virtual void write(Surface*, Vector<U32>& pixels) = 0;
     virtual void clear() = 0;
+    virtual bool empty() = 0;
 };
