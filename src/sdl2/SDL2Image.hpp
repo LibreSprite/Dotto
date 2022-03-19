@@ -107,6 +107,7 @@ public:
     }
 
     bool saveJPG(std::shared_ptr<File> file, std::shared_ptr<Surface> src, int quality = 75) {
+#if SDL_IMAGE_MINOR_VERSION > 0 || SDL_IMAGE_PATCHLEVEL >= 2
         if (!src || !file)
             return false;
         SDL_Surface* sdl = SDL_CreateRGBSurfaceFrom(src->data(),
@@ -122,5 +123,8 @@ public:
         int result = IMG_SaveJPG_RW(sdl, &fops, 0, 75);
         SDL_FreeSurface(sdl);
         return result == 0;
+#else
+        return false;
+#endif
     }
 };
