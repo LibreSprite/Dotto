@@ -36,4 +36,7 @@ public:
 
 static Parser::Shared<ScriptParser> js{"js"};
 static Parser::Shared<ScriptParser> duk{"duk"};
+
+#ifdef SCRIPT_ENGINE_LUA
 static Parser::Shared<ScriptParser> lua{"lua"};
+#endif
