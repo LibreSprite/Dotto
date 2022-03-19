@@ -59,9 +59,9 @@ public:
         }
     }
 
-    virtual void begin(Surface* surface, const Path& points, U32 mode) {}
-    virtual void update(Surface* surface, const Path& points) {}
-    virtual void end(Surface* surface, const Path& points) {}
+    virtual void begin(Surface* surface, Path& points, U32 mode) {}
+    virtual void update(Surface* surface, Path& points) {}
+    virtual void end(Surface* surface, Path& points) {}
 
     virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
 };

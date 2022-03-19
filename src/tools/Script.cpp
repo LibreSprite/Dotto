@@ -61,7 +61,7 @@ public:
         }
     }
 
-    void begin(Surface* surface, const Path& points, U32 which) override {
+    void begin(Surface* surface, Path& points, U32 which) override {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         tso->which = which;
@@ -69,14 +69,14 @@ public:
         engine->raiseEvent({"toolstart"});
     }
 
-    void update(Surface* surface, const Path& points) override {
+    void update(Surface* surface, Path& points) override {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));
         engine->raiseEvent({"toolupdate"});
     }
 
-    void end(Surface* surface, const Path& points) override {
+    void end(Surface* surface, Path& points) override {
         tso->surface->setWrapped(surface->shared_from_this());
         tso->points = &points;
         app->setTarget(std::static_pointer_cast<script::ScriptObject>(tso));

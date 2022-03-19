@@ -236,7 +236,7 @@ public:
         }
     }
 
-    Path applySmoothing(Surface* surface, const Path& points) {
+    Path applySmoothing(Surface* surface, Path& points) {
         if (!points.size())
             return {};
 
@@ -309,7 +309,7 @@ public:
         }
     }
 
-    void begin(Surface* surface, const Path& points, U32 which) override {
+    void begin(Surface* surface, Path& points, U32 which) override {
         this->which = which;
         if (!wasInit)
             changeShape();
@@ -325,7 +325,7 @@ public:
         paint->run();
     }
 
-    void update(Surface* surface, const Path& points) override {
+    void update(Surface* surface, Path& points) override {
         if (!shape)
             return;
         auto& end = points[points.size() - 1];
@@ -337,7 +337,7 @@ public:
         paint->run();
     }
 
-    Path applyPixelPerfect(const Path src) {
+    Path applyPixelPerfect(Path src) {
         Path ret;
         ret.push_back(src.front());
 
@@ -360,7 +360,7 @@ public:
         return ret;
     }
 
-    void end(Surface* surface, const Path& points) override {
+    void end(Surface* surface, Path& points) override {
         if (!shape)
             return;
 

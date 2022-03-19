@@ -44,7 +44,7 @@ public:
         return meta;
     }
 
-    void update(Surface* surface, const Path& points) override {
+    void update(Surface* surface, Path& points) override {
         if (which == 0 && selection && paint) {
             selection->add(points.back().x, points.back().y, 255);
             paint->run();
@@ -52,7 +52,7 @@ public:
         }
     }
 
-    void end(Surface* surface, const Path& points) override {
+    void end(Surface* surface, Path& points) override {
         if (which == 0 && selection && paint) {
             paint->set("preview", false);
             paint->run();
@@ -61,7 +61,7 @@ public:
         }
     }
 
-    void begin(Surface* surface, const Path& points, U32 which) override {
+    void begin(Surface* surface, Path& points, U32 which) override {
         this->which = which;
         selection = inject<Selection>{"new"};
         paint = inject<Command>{"paint"};
