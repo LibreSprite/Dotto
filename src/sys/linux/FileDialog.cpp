@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifndef EMSCRIPTEN
+
 #include <tinyfiledialogs/tinyfiledialogs.h>
 
 #include <common/String.hpp>
@@ -47,3 +49,5 @@ public:
 };
 
 static FileDialog::Shared<LinuxFileDialog> reg{""};
+
+#endif

@@ -41,6 +41,13 @@ public:
 
         id = SDL_GetWindowID(window);
 
+#ifdef __EMSCRIPTEN__
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+        context = SDL_GL_CreateContext(window);
+        String version = "300 es";
+#else
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -53,6 +60,7 @@ public:
             context = SDL_GL_CreateContext(window);
             version = "310 es";
         }
+#endif
         if (!context)
             return;
 

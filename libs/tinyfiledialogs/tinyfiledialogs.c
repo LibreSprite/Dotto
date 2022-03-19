@@ -47,6 +47,7 @@ Thanks for contributions, bug corrections & thorough testing to:
 - Paul Rouget
 */
 
+#ifndef EMSCRIPTEN
 
 #ifndef __sun
 #ifndef _POSIX_C_SOURCE
@@ -7747,4 +7748,6 @@ tinyfd_messageBox("The selected hexcolor is",
 #pragma warning(default:4996)
 #pragma warning(default:4100)
 #pragma warning(default:4706)
+#endif
+
 #endif

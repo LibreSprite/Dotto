@@ -2,8 +2,11 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-
+#ifdef EMSCRIPTEN
+#include <config/ftheader.h>
+#else
 #include <freetype2/ft2build.h>
+#endif
 #include FT_FREETYPE_H
 
 #include <common/inject.hpp>
