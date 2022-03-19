@@ -367,14 +367,17 @@ public:
         paint->load({{"preview", false}});
         paint->run();
 
-        if (which == 0 || !surface || points.size() <= 2)
+        if (which == 0 || !surface || points.size() <= 2 || !paint->committed())
             return;
 
         if (smoothing <= 0 && !pixelperfect)
             return;
 
         Path copy = points;
-        paint->undo();
+
+        auto doc = paint->doc();
+        if (doc)
+            doc->undo();
 
         if (smoothing > 0)
             copy = applySmoothing(surface, copy);

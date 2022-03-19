@@ -29,7 +29,7 @@ protected:
 
 public:
     std::shared_ptr<Document> doc() {return weakDoc.lock();}
-
+    bool committed() {return wasCommitted;}
     virtual void run() = 0;
     virtual void undo() {};
     virtual void redo() {run();}
