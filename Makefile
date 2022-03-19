@@ -14,6 +14,8 @@ ifeq ($(OS),Windows_NT)
 
     LN_FLAGS += -lopengl32
     LN_FLAGS += -lglew32
+
+    CPP_FLAGS += -DLCMS2_SUPPORT
     LN_FLAGS += -llcms2
     LN_FLAGS += -lole32
     LN_FLAGS += -mconsole
@@ -55,6 +57,7 @@ else
         endif
 
 	LN_FLAGS += -lGL
+        CPP_FLAGS += -DLCMS2_SUPPORT
 	LN_FLAGS += -llcms2
 	LN_FLAGS += -lX11 -lXi
     endif
@@ -66,6 +69,7 @@ else
 	CPP_FLAGS += -DGL_SILENCE_DEPRECATION
 	LN_FLAGS += -framework OpenGL
 	LN_FLAGS += -framework Foundation
+        CPP_FLAGS += -DLCMS2_SUPPORT
 	LN_FLAGS += -llcms2
     endif
 
