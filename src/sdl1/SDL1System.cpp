@@ -2,7 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#ifdef NO_SDL2
+#ifdef USE_SDL1
 
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>

@@ -16,7 +16,7 @@ LIB_DIRS += $(shell find libs -type d)
 CPP_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/libpng-config --cflags)
 LN_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/libpng-config --libs)
 
-#CPP_FLAGS += -DNO_FREETYPE
+CPP_FLAGS += -DNO_FREETYPE
 
 CPP_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/sdl-config --cflags)
 LN_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/sdl-config --libs)
@@ -35,7 +35,7 @@ CPP_FLAGS += -Isrc
 CPP_FLAGS += -DARM11
 CPP_FLAGS += -D__N3DS__
 CPP_FLAGS += -D__3DS__
-CPP_FLAGS += -DNO_SDL2
+CPP_FLAGS += -DUSE_SDL1
 CPP_FLAGS += -fsigned-char
 CPP_FLAGS += -fexceptions
 CPP_FLAGS += -I$(DEVKITPRO)/portlibs/3ds/include/SDL
