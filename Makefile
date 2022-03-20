@@ -86,12 +86,23 @@ SRC_DIRS += $(LIB_DIRS)
 CPP_FLAGS += -Isrc
 
 CPP_FLAGS += -MMD -MP
-CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl2)
 
-#BEGIN FREETYPE2
+ifeq ($(BACKEND),SDL1)
+    CPP_FLAGS += -DUSE_SDL1
+    CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl)
+    LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl)
+    LN_FLAGS += -lSDL_image
+#    CPP_FLAGS += -DNO_FREETYPE
+#    LN_FLAGS += -lSDL_ttf
+else
+    CPP_FLAGS += -DUSE_SDL2
+    CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl2)
+    LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl2)
+    LN_FLAGS += -lSDL2_image
+endif
+
 CPP_FLAGS += $(shell $(PKGCONFIG) --cflags freetype2)
 LN_FLAGS += $(shell $(PKGCONFIG) --libs freetype2)
-#END
 
 CPP_FILES += $(shell find src -type f -name '*.cpp')
 CPP_FILES += $(shell find libs -type f -name '*.cpp')
@@ -100,8 +111,6 @@ C_FLAGS := $(CPP_FLAGS)
 C_FILES += $(shell find src -type f -name '*.c')
 C_FILES += $(shell find libs -type f -name '*.c')
 
-LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl2)
-LN_FLAGS += -lSDL2_image
 LN_FLAGS += $(SO_FILES)
 
 #BEGIN V8 SUPPORT
