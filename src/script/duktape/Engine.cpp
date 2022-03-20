@@ -28,15 +28,20 @@ using namespace script;
 
 class DukEngine : public Engine {
 public:
-    HashSet<void*> memory;
+    struct Memory {
+        Memory* next;
+        Memory* prev;
+    };
+    Memory* memory = nullptr;
+
     duk_hthread* handle = nullptr;
 
     DukEngine() : Engine{"DukScriptObject"}, handle{duk_create_heap(malloc, realloc, free, this, fatal)} {}
 
     ~DukEngine() {
         duk_destroy_heap(handle);
-        for (auto ptr : memory)
-            ::free(ptr);
+        while (memory)
+            free(this, memory);
         handle = nullptr;
     }
 
@@ -48,9 +53,13 @@ public:
         if (!size)
             return nullptr;
         auto engine = static_cast<DukEngine*>(ctx);
-        auto buffer = ::malloc(size);
-        engine->memory.insert(buffer);
-        return buffer;
+        auto buffer = (Memory*) ::malloc(sizeof(Memory) + size);
+        if (engine->memory)
+            engine->memory->prev = buffer;
+        buffer->next = engine->memory;
+        buffer->prev = nullptr;
+        engine->memory = buffer;
+        return buffer + 1;
     }
 
     static void* realloc(void* ctx, void* ptr, duk_size_t size) {
@@ -61,17 +70,33 @@ public:
             return nullptr;
         }
         auto engine = static_cast<DukEngine*>(ctx);
-        engine->memory.erase(ptr);
-        auto buffer = ::realloc(ptr, size);
-        engine->memory.insert(buffer);
-        return buffer;
+        auto old = ((Memory*) ptr) - 1;
+        auto next = old->next;
+        auto prev = old->prev;
+        auto buffer = (Memory*) ::realloc(old, sizeof(Memory) + size);
+        buffer->next = next;
+        buffer->prev = prev;
+        if (next)
+            next->prev = buffer;
+        if (prev)
+            prev->next = buffer;
+        else
+            engine->memory = buffer;
+        return buffer + 1;
     }
 
     static void free(void* ctx, void* ptr) {
         if (ptr) {
-            ::free(ptr);
             auto engine = static_cast<DukEngine*>(ctx);
-            engine->memory.erase(ptr);
+
+            auto old = ((Memory*) ptr) - 1;
+            if (old->next)
+                old->next->prev = old->prev;
+            if (old->prev)
+                old->prev->next = old->next;
+            else
+                engine->memory = old->next;
+            ::free(old);
         }
     }
 
