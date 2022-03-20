@@ -78,7 +78,7 @@ public:
         pub(msg::Tick{});
         pub(msg::PostTick{});
 
-#ifndef EMSCRIPTEN
+#if !defined(EMSCRIPTEN) && !defined(__N3DS__)
         if (running) {
             clock::time_point now = clock::now();
             auto delta = now - referenceTime;
