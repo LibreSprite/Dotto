@@ -81,7 +81,7 @@ public:
         if (targetColor == color)
             return;
 
-        S32 threshold = std::max(0, std::min<S32>(this->threshold, 255));
+        S32 threshold = std::max<S32>(0, std::min<S32>(this->threshold, 255));
         threshold *= threshold;
         bool proportional = this->proportional && threshold;
 
