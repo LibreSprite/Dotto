@@ -30,7 +30,6 @@ public:
     std::unordered_set<String> pressedKeys;
 
     SDL_Surface *screen = nullptr;
-    SDL_Surface *tmpscreen = nullptr;
 
     bool boot() override {
         if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -47,14 +46,6 @@ public:
 #else
         screen = SDL_SetVideoMode(screenWidth, screenHeight, 32, SDL_HWSURFACE); // SDL_HWSURFACE);
 #endif
-        tmpscreen = SDL_CreateRGBSurface(0,
-                                         screenWidth,
-                                         screenHeight,
-                                         32,
-                                         0xFF << 0,
-                                         0xFF << 8,
-                                         0xFF << 16,
-                                         0xFF << 24);
 
         SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
 
@@ -75,10 +66,8 @@ public:
         if (!running) return false;
         root->update();
 
-        SDLGraphics gfx(tmpscreen);
+        SDLGraphics gfx(screen);
         root->draw(0, gfx);
-
-        SDL_BlitSurface(tmpscreen, nullptr, screen, nullptr);
         SDL_Flip(screen);
 
         return running;

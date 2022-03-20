@@ -15,6 +15,8 @@
 #include <gui/Texture.hpp>
 #include <log/Log.hpp>
 
+extern int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect);
+
 class SDLTextureInfo : public Texture, public TextureInfo {
 public:
     SDL_Surface* surface = nullptr;
@@ -51,7 +53,7 @@ public:
         height = globalRect.height;
         iheight = 2.0f / height;
 
-        SDL_FillRect(screen, nullptr, clearColor.toU32() | (0xFF << 24));
+        SDL_FillRect(screen, nullptr, SDL_MapRGBA(screen->format, clearColor.r, clearColor.g, clearColor.b, clearColor.a));
     }
 
     void upload(Surface& surface, SDLTextureInfo* texture) {
@@ -67,20 +69,14 @@ public:
 
         if (!texture->surface) {
             texture->surface = SDL_CreateRGBSurfaceFrom(surface.data(),
-                                                surface.width(),
-                                                surface.height(),
-                                                32,
-                                                surface.width() * sizeof(Surface::PixelType),
-                                                0xFF << 0,
-                                                0xFF << 8,
-                                                0xFF << 16,
-                                                0xFF << 24);
-            static auto once = logI("S R:", screen->format->Rmask,
-                                    " G:", screen->format->Gmask,
-                                    " B:", screen->format->Bmask,
-                                    " A:", screen->format->Amask);
-            // texture->surface = SDL_ConvertSurface(tmp, screen->format, screen->flags);
-            // SDL_FreeSurface(tmp);
+                                                        surface.width(),
+                                                        surface.height(),
+                                                        32,
+                                                        surface.width() * sizeof(Surface::PixelType),
+                                                        0xFF << Color::Rshift,
+                                                        0xFF << Color::Gshift,
+                                                        0xFF << Color::Bshift,
+                                                        0xFF << Color::Ashift);
         } else {
             auto out = (Surface::PixelType*) texture->surface->pixels;
             auto in = surface.data();
@@ -172,21 +168,14 @@ public:
 
             if (src.h && src.w) {
                 if (dest.w != src.w || dest.h != src.h) {
-                    SDL_SoftStretch(activeTexture->surface, &src, screen, &dest);
+                    SDL_SoftStretchAlpha(activeTexture->surface, &src, screen, &dest);
                 } else {
                     SDL_BlitSurface(activeTexture->surface, &src, screen, &dest);
                 }
             }
 
         } else {
-            // Color color(0, 0, 0, 255);
-            Color color{
-                U8(255*rect.r),
-                U8(255*rect.g),
-                U8(255*rect.b),
-                U8(255*rect.a)
-            };
-            SDL_FillRect(screen, &dest, color.toU32());
+            SDL_FillRect(screen, &dest, SDL_MapRGBA(screen->format, 255*rect.r, 255*rect.g, 255*rect.b, 255*rect.a));
         }
     }
 
