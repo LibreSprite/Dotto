@@ -47,7 +47,7 @@ Thanks for contributions, bug corrections & thorough testing to:
 - Paul Rouget
 */
 
-#ifndef EMSCRIPTEN
+#if defined(__linux__) || defined(__WINDOWS__) || defined(__APPLE__)
 
 #ifndef __sun
 #ifndef _POSIX_C_SOURCE
