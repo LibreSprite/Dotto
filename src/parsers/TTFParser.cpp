@@ -2,10 +2,12 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifndef NO_FREETYPE
+
 #ifdef EMSCRIPTEN
 #include <config/ftheader.h>
 #else
-#include <freetype2/ft2build.h>
+#include <ft2build.h>
 #endif
 #include FT_FREETYPE_H
 
@@ -186,3 +188,5 @@ public:
 };
 
 static Parser::Shared<FontParser> font{"ttf"};
+
+#endif
