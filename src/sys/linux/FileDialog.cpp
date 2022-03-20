@@ -2,7 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#ifndef EMSCRIPTEN
+#if defined(__linux__) || defined(__WINDOWS__) || defined(__APPLE__)
 
 #include <tinyfiledialogs/tinyfiledialogs.h>
 
