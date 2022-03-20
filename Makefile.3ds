@@ -1,0 +1,114 @@
+DEVKITPRO = /opt/devkitpro
+
+PKGCONFIG = $(DEVKITPRO)/portlibs/3ds/bin/arm-none-eabi-pkg-config
+LN = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-g++
+CPP = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-g++
+CC = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-gcc
+GDB = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-gd
+DOTTO = Dotto.elf
+LIB_DIRS += $(shell find libs -type d)
+
+# LN_FLAGS += $(shell $(PKGCONFIG) --libs libpng)
+# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libpng)
+
+# CPP_FLAGS += -I$(DEVKITPRO)/portlibs/3ds/include
+
+CPP_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/libpng-config --cflags)
+LN_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/libpng-config --libs)
+
+#CPP_FLAGS += -DNO_FREETYPE
+
+CPP_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/sdl-config --cflags)
+LN_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/sdl-config --libs)
+
+CPP_FLAGS += $(shell $(PKGCONFIG) SDL_ttf --cflags)
+LN_FLAGS += $(shell $(PKGCONFIG) SDL_ttf --libs)
+CPP_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/freetype-config --cflags)
+LN_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/freetype-config --libs)
+
+CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
+CPP_FLAGS += -Isrc
+#CPP_FLAGS += -DCOLOR_R_SHIFT=24
+#CPP_FLAGS += -DCOLOR_G_SHIFT=16
+#CPP_FLAGS += -DCOLOR_B_SHIFT=8
+#CPP_FLAGS += -DCOLOR_A_SHIFT=0
+CPP_FLAGS += -DARM11
+CPP_FLAGS += -D__N3DS__
+CPP_FLAGS += -D__3DS__
+CPP_FLAGS += -DNO_SDL2
+CPP_FLAGS += -fsigned-char
+CPP_FLAGS += -fexceptions
+CPP_FLAGS += -I$(DEVKITPRO)/portlibs/3ds/include/SDL
+CPP_FLAGS += -D_GNU_SOURCE=1
+CPP_FLAGS += -I$(DEVKITPRO)/libctru/include
+CPP_FLAGS += -Wno-pointer-arith
+CPP_FLAGS += -Wno-unused-but-set-variable
+CPP_FLAGS += -Wno-unused-function
+CPP_FLAGS += -Wno-narrowing
+CPP_FLAGS += -Wunused-variable
+CPP_FLAGS += -MMD
+CPP_FLAGS += -mword-relocations
+CPP_FLAGS += -ffunction-sections
+CPP_FLAGS += -fdata-sections
+CPP_FLAGS += -march=armv6k
+CPP_FLAGS += -mtune=mpcore
+CPP_FLAGS += -mfloat-abi=hard
+CPP_FLAGS += -mtp=soft
+
+LN_FLAGS += -specs=3dsx.specs
+LN_FLAGS += -L$(DEVKITPRO)/libctru/lib
+LN_FLAGS += -g
+LN_FLAGS += -march=armv6k
+LN_FLAGS += -mtune=mpcore
+LN_FLAGS += -mfloat-abi=hard
+LN_FLAGS += -mtp=soft
+LN_FLAGS += -Wl,-Map,FemtoTemplate.map
+LN_FLAGS += -objectFiles
+LN_FLAGS += -o
+LN_FLAGS += $(DOTTO)
+
+CPP_FILES += $(shell find src -type f -name '*.cpp')
+CPP_FILES += $(shell find libs -type f -name '*.cpp')
+
+C_FLAGS := $(CPP_FLAGS)
+C_FILES += $(shell find src -type f -name '*.c')
+C_FILES += $(shell find libs -type f -name '*.c')
+
+CPP_FLAGS += -std=gnu++17
+
+ODIR = build3ds
+ifeq ($(DEBUG),true)
+FLAGS += -Og -g -D_DEBUG # debug build
+POSTBUILD =
+else
+FLAGS += -O2 -D_DEBUG # release build
+POSTBUILD =
+endif
+
+POSTBUILD += $(DEVKITPRO)/tools/bin/3dsxtool $(DOTTO) $(DOTTO).3dsx
+OBJ = $(patsubst %,$(ODIR)/%.o,$(CPP_FILES))
+OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
+DEP := $(OBJ:.o=.d)
+
+$(ODIR)/%.cpp.o: %.cpp
+	@mkdir -p "$$(dirname "$@")"
+	$(CPP) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+
+$(ODIR)/%.c.o: %.c
+	@mkdir -p "$$(dirname "$@")"
+	$(CC) $(FLAGS) $(C_FLAGS) -c $< -o $@
+
+$(ODIR)/%.mm.o: %.mm
+	@mkdir -p "$$(dirname "$@")"
+	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+
+$(DOTTO): $(OBJ)
+	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
+	$(POSTBUILD)
+
+.PHONY: clean
+
+clean:
+	rm -rf $(ODIR)
+
+-include $(DEP)
