@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifdef USE_SDL2
+
 #include <SDL2/SDL.h>
 
 #include <common/Messages.hpp>
@@ -177,7 +179,7 @@ public:
     }
 };
 
-System::Shared<SDL2System> sys{"sdl2"};
+System::Shared<SDL2System> sys{"new"};
 
 static const char* getKeyName(S32 code) {
     switch (code) {
@@ -424,3 +426,5 @@ static const char* getKeyName(S32 code) {
     default: return "UNKNOWNX";
     }
 }
+
+#endif

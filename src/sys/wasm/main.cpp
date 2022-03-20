@@ -12,8 +12,6 @@
 
 int main(int argc, const char* argv[]) {
     Log::setDefault("stdout");
-    System::setDefault("sdl2", {}, "new");
-
     static inject<App> app{"dotto"};
     app->boot(argc, argv);
 

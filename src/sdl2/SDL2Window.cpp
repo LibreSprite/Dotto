@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifdef USE_SDL2
+
 #include <SDL2/SDL.h>
 
 #include <common/ColorProfile.hpp>
@@ -145,3 +147,5 @@ public:
 };
 
 static ui::Node::Shared<SDL2Window> win{"sdl2Window"};
+
+#endif
