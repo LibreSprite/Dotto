@@ -7,13 +7,13 @@
 
 class IncreaseToolSize : public Command {
 public:
-    Property<U32> amount{this, "amount", 1};
+    Property<S32> amount{this, "amount", 1};
 
     void run() override {
         if (auto tool = Tool::active.lock()) {
             auto& ps = tool->getPropertySet();
             auto size = ps.get<S32>("size");
-            tool->set("size", size + amount);
+            tool->set("size", size + *amount);
         }
     }
 };
