@@ -56,13 +56,15 @@
   <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false" class="sidebar">
     <image multiply="#576D70" height="100%-16px" width="151px" x="100%-100%" y="16px" absolute="true" id="filemenucontainer">
 
-      <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
-      <menubutton id="openbutton" click="openfile" label="Open"/>
-      <menubutton id="savebutton" click="savefile" label="Save"/>
-      <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
-      <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
-      <menubutton id="quitbutton" label="Quit"/>
-      <image height="1px" multiply="rgba{0,0,0,128}"/>
+      <textbutton label="File" click="ToggleUI id=filesubmenu, hide=mainsubmenu" height="16px" align="0"/>
+      <node id="filesubmenu" class="mainsubmenu" visible="false" height="150px">
+        <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
+        <menubutton id="openbutton" click="openfile" label="Open"/>
+        <menubutton id="savebutton" click="savefile" label="Save"/>
+        <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
+        <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
+        <menubutton id="quitbutton" label="Quit"/>
+      </node>
 
       <textbutton label="Tool Settings" click="ToggleUI id=toolconfigmenu, hide=mainsubmenu" height="16px" align="0"/>
       <node controller="metamenu" id="toolconfigmenu" visible="false" class="mainsubmenu" height="0px"/>
