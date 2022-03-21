@@ -13,25 +13,17 @@ SRC_DIRS += $(LIB_DIRS)
 CPP_FLAGS += -Isrc
 
 CPP_FLAGS += -MMD -MP
-CPP_FLAGS += -s USE_SDL=2
-CPP_FLAGS += -s USE_FREETYPE=1
-CPP_FLAGS += -s USE_LIBJPEG=1
-CPP_FLAGS += -s USE_SDL_IMAGE=2
-CPP_FLAGS += -s SDL2_IMAGE_FORMATS='["bmp","xpm","jpg"]'
-CPP_FLAGS += -s USE_LIBPNG=1
+CPP_FLAGS += -DUSE_SDL2
+FLAGS += -s USE_SDL=2
+FLAGS += -s USE_FREETYPE=1
+FLAGS += -s USE_LIBJPEG=1
+FLAGS += -s USE_SDL_IMAGE=2
+FLAGS += -s SDL2_IMAGE_FORMATS='["bmp","xpm","jpg"]'
+FLAGS += -s USE_LIBPNG=1
 
-LN_FLAGS += -s USE_SDL=2
-LN_FLAGS += -s USE_FREETYPE=1
-LN_FLAGS += -s USE_LIBJPEG=1
-LN_FLAGS += -s USE_SDL_IMAGE=2
-LN_FLAGS += -s SDL2_IMAGE_FORMATS='["bmp","xpm","jpg"]'
-LN_FLAGS += -s USE_LIBPNG=1
-LN_FLAGS += --preload-file data
-LN_FLAGS += -s FULL_ES3
+#LN_FLAGS += -s FULL_ES3
 LN_FLAGS += -s USE_WEBGL2=1
-# -s ERROR_ON_UNDEFINED_SYMBOLS=0
-#LN_FLAGS += -s LLD_REPORT_UNDEFINED
-#LN_FLAGS += -error-limit=0
+LN_FLAGS += --preload-file data
 
 CPP_FILES += $(shell find src -type f -name '*.cpp')
 CPP_FILES += $(shell find libs -type f -name '*.cpp')
@@ -57,7 +49,7 @@ LN_FLAGS += $(SO_FILES)
 # LN_FLAGS += $(shell $(PKGCONFIG) --libs $(LUAPKG))
 #END
 
-ODIR = build
+ODIR = buildwasm
 
 CPP_FLAGS += --std=c++17
 CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
