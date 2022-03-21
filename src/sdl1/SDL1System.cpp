@@ -4,6 +4,7 @@
 
 #ifdef USE_SDL1
 
+#include <common/Config.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/System.hpp>
@@ -30,9 +31,11 @@ public:
     std::unordered_set<String> pressedKeys;
 
     SDL_Surface *screen = nullptr;
+    bool mapJoyhatToMouseWheel = false;
+    bool mapJoyaxisToMouseWheel = false;
 
     bool boot() override {
-        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {
             logE(SDL_GetError());
             return false;
         }
@@ -48,6 +51,17 @@ public:
 #endif
 
         SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+
+        inject<Config> config;
+        mapJoyhatToMouseWheel = config->properties->get<bool>("map-joyhat-to-mousewheel");
+        mapJoyaxisToMouseWheel = config->properties->get<bool>("map-joyaxis-to-mousewheel");
+
+        if (mapJoyhatToMouseWheel || mapJoyaxisToMouseWheel) {
+            SDL_JoystickEventState(SDL_ENABLE);
+            U32 numJoysticks = SDL_NumJoysticks();
+            for (U32 i=0; i<numJoysticks; ++i)
+                SDL_JoystickOpen(i);
+        }
 
         root = inject<ui::Node>{"node"};
         root->processEvent(ui::AddToScene{root.get()});
@@ -110,6 +124,82 @@ public:
             case SDL_MOUSEBUTTONDOWN:
                 pub(msg::MouseDown{0, event.button.x, event.button.y, 1U << (event.button.button - 1)});
                 break;
+
+            case SDL_JOYHATMOTION:
+            {
+                if (mapJoyhatToMouseWheel) {
+                    int y = (event.jhat.value & 1) - !!(event.jhat.value & 4);
+                    int x = (event.jhat.value & 2) - !!(event.jhat.value & 8);
+                    pub(msg::MouseWheel{0, x, y});
+                } else {
+                    static const char* buttons[] = {
+                        "UP",
+                        "RIGHT",
+                        "DOWN",
+                        "LEFT"
+                    };
+                    static HashMap<U32, U32> hatstates;
+
+                    U32 state = event.jhat.value;
+                    U32 old = hatstates[event.jhat.hat];
+                    hatstates[event.jhat.hat] = state;
+
+                    for (U32 i = 0; i < 4; ++i) {
+                        U32 flag = 1 << i;
+                        if ((state & flag) == (old & flag))
+                            continue;
+                        bool pressed = state & flag;
+                        String name = "HAT" + std::to_string(event.jhat.hat) + "_" + buttons[i];
+                        if (pressed) {
+                            pressedKeys.insert(name);
+                            pub(msg::KeyDown{0, 0, name.c_str(), 0, pressedKeys});
+                        } else {
+                            pressedKeys.erase(name);
+                            pub(msg::KeyUp{0, 0, name.c_str(), 0, pressedKeys});
+                        }
+                    }
+                }
+                break;
+            }
+
+            case SDL_JOYAXISMOTION:
+            {
+                if (mapJoyaxisToMouseWheel) {
+                    pub(msg::MouseWheel{
+                            0,
+                            (event.jaxis.axis == 0 ? event.jaxis.value / 30000 : 0),
+                            (event.jaxis.axis != 0 ? event.jaxis.value / 30000 : 0)
+                        });
+                }
+                break;
+            }
+
+            case SDL_JOYBUTTONUP:
+            {
+                String name = "JOY" + std::to_string(event.jbutton.button);
+                pressedKeys.erase(name);
+                pub(msg::KeyUp{
+                        0,
+                        0,
+                        name.c_str(),
+                        0,
+                        pressedKeys
+                    });
+                break;
+            }
+            case SDL_JOYBUTTONDOWN:
+            {
+                String name = "JOY" + std::to_string(event.jbutton.button);
+                pressedKeys.insert(name);
+                pub(msg::KeyDown{
+                        0,
+                        0,
+                        name.c_str(),
+                        0,
+                        pressedKeys
+                    });
+                break;
+            }
 
             case SDL_KEYUP: {
                 auto name = getKeyName(event.key.keysym.sym);
