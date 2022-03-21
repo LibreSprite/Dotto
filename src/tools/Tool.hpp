@@ -5,6 +5,7 @@
 #pragma once
 
 #include <common/Color.hpp>
+#include <common/Config.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
@@ -43,6 +44,10 @@ public:
                 {"tool", name},
                 {"meta", getMetaProperties()}
             });
+
+        if (auto properties = inject<Config>{}->properties->get<std::shared_ptr<PropertySet>>(name)) {
+            load(*properties);
+        }
     }
 
     virtual Preview* getPreview() {return nullptr;}
