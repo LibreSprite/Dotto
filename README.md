@@ -41,12 +41,20 @@ over Discord/Matrix.
 | OpenGL Hardware acceleration   | OK            | 1.0     |                                                 |
 | x86/64 Linux                   | OK            | 0.5     |                                                 |
 | x86/64 Windows                 | OK            | 0.5     |                                                 |
-| x86_64 MacOS                   | OK            | 1.0     |                                                 |
+| x86_64 MacOS                   | OK            | 0.5     |                                                 |
+| Nintendo 3DS                   | OK            | 1.0     | Will probably require specific theme            |
 | Raspberry Pi 4 support         | OK            | 1.0     |                                                 |
 | Undo / Redo                    | OK            | 0.5     |                                                 |
 | Copy + Paste                   | Planned       | 0.5     |                                                 |
 | Resize Sprite                  | Planned       | 0.5     |                                                 |
 | Crop Sprite                    | Planned       | 0.5     |                                                 |
+| Solarize                       | Planned       | 2.0     |                                                 |
+| Sobel edge-detection           | Planned       | 2.0     |                                                 |
+| Mirror image                   | Planned       | 0.5     |                                                 |
+| Flip image                     | Planned       | 0.5     |                                                 |
+| Curves adjustment              | Planned       | 1.0     |                                                 |
+| Salt and Pepper filter         | Planned       | 2.0     |                                                 |
+| 2D Fast Fourier Transform      | Planned       | 2.0     |                                                 |
 | Pencil tool                    | OK            | 0.5     |                                                 |
 | Pencil shapes/sizes            | OK            | 0.5     |                                                 |
 | Pencil blending modes          | Planned       | 1.0     |                                                 |
