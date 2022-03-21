@@ -36,6 +36,7 @@ CPP_FLAGS += -DARM11
 CPP_FLAGS += -D__N3DS__
 CPP_FLAGS += -D__3DS__
 CPP_FLAGS += -DUSE_SDL1
+CPP_FLAGS += -DUSE_STBTTF
 CPP_FLAGS += -fsigned-char
 CPP_FLAGS += -fexceptions
 CPP_FLAGS += -I$(DEVKITPRO)/portlibs/3ds/include/SDL

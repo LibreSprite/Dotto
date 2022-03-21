@@ -92,8 +92,6 @@ ifeq ($(BACKEND),SDL1)
     CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl)
     LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl)
     LN_FLAGS += -lSDL_image
-#    CPP_FLAGS += -DNO_FREETYPE
-#    LN_FLAGS += -lSDL_ttf
 else
     CPP_FLAGS += -DUSE_SDL2
     CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl2)
@@ -101,8 +99,13 @@ else
     LN_FLAGS += -lSDL2_image
 endif
 
-CPP_FLAGS += $(shell $(PKGCONFIG) --cflags freetype2)
-LN_FLAGS += $(shell $(PKGCONFIG) --libs freetype2)
+ifeq ($(USE_FREETYPE),false)
+    CPP_FLAGS += -DNO_FREETYPE
+    CPP_FLAGS += -DUSE_STBTTF
+else
+    CPP_FLAGS += $(shell $(PKGCONFIG) --cflags freetype2)
+    LN_FLAGS += $(shell $(PKGCONFIG) --libs freetype2)
+endif
 
 CPP_FILES += $(shell find src -type f -name '*.cpp')
 CPP_FILES += $(shell find libs -type f -name '*.cpp')

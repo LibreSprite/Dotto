@@ -2,7 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#ifdef NO_FREETYPE
+#if defined(USE_SDL_TTF)
 
 #ifdef USE_SDL1
 #include <SDL/SDL_rwops.h>
