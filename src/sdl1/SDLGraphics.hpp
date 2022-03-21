@@ -15,7 +15,9 @@
 #include <gui/Texture.hpp>
 #include <log/Log.hpp>
 
-extern int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect);
+extern int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect, SDL_Color *multiply);
+extern int SDL_BlitSurfaceMul(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect, SDL_Color *multiply);
+extern void SDL_FillRectAlpha(SDL_Surface *src, SDL_Rect *rect, SDL_Color *color, Uint8 a);
 
 class SDLTextureInfo : public Texture, public TextureInfo {
 public:
@@ -93,7 +95,7 @@ public:
     struct Rectf {
         F32 x, y, w, h;
         F32 u0, v0, u1, v1;
-        F32 r, g, b, a;
+        U8 r, g, b, a;
         bool flip;
     };
 
@@ -167,15 +169,31 @@ public:
             src.h = (v1 - v0) * activeTexture->height;
 
             if (src.h && src.w) {
+                SDL_Color mul{
+                    rect.r,
+                    rect.g,
+                    rect.b,
+                    rect.a
+                };
+
+                SDL_Color* mulp = (rect.r != 0xFF || rect.g != 0xFF || rect.b != 0xFF || rect.a != 0xFF) ? &mul : nullptr;
+
                 if (dest.w != src.w || dest.h != src.h) {
-                    SDL_SoftStretchAlpha(activeTexture->surface, &src, screen, &dest);
+                    SDL_SoftStretchAlpha(activeTexture->surface, &src, screen, &dest, mulp);
+                } else if (mulp) {
+                    SDL_BlitSurfaceMul(activeTexture->surface, &src, screen, &dest, mulp);
                 } else {
                     SDL_BlitSurface(activeTexture->surface, &src, screen, &dest);
                 }
             }
 
         } else {
-            SDL_FillRect(screen, &dest, SDL_MapRGBA(screen->format, 255*rect.r, 255*rect.g, 255*rect.b, 255*rect.a));
+            if (rect.a != 0xFF) {
+                SDL_Color color{rect.r, rect.g, rect.b};
+                SDL_FillRectAlpha(screen, &dest, &color, rect.a);
+            } else {
+                SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, rect.r, rect.g, rect.b));
+            }
         }
     }
 
@@ -186,10 +204,10 @@ public:
         F32 z = settings.zIndex;
         F32 w = settings.destination.width;
         F32 h = settings.destination.height;
-        F32 r = settings.multiply.r / 255.0f;
-        F32 g = settings.multiply.g / 255.0f;
-        F32 b = settings.multiply.b / 255.0f;
-        F32 a = settings.multiply.a / 255.0f * alpha;
+        U8 r = settings.multiply.r;
+        U8 g = settings.multiply.g;
+        U8 b = settings.multiply.b;
+        U8 a = settings.multiply.a * alpha;
 
         if (a <= 0)
             return;

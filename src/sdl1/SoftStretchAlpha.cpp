@@ -26,158 +26,13 @@
 //    April 27, 2000 - Sam Lantinga
 // */
 
-// #include "SDL_video.h"
-// #include "SDL_blit.h"
-
-// /* This isn't ready for general consumption yet - it should be folded
-//    into the general blitting mechanism.
-// */
-
-// #if ((defined(_MFC_VER) && defined(_M_IX86)/* && !defined(_WIN32_WCE) still needed? */) || \
-//      defined(__WATCOMC__) || \
-//      (defined(__GNUC__) && defined(__i386__))) && SDL_ASSEMBLY_ROUTINES
-// /* There's a bug with gcc 4.4.1 and -O2 where srcp doesn't get the correct
-//  * value after the first scanline.  FIXME? */
-// /*#define USE_ASM_STRETCH*/
-// #endif
-
-// #ifdef USE_ASM_STRETCH
-
-// #ifdef HAVE_MPROTECT
-// #include <sys/types.h>
-// #include <sys/mman.h>
-// #endif
-// #ifdef __GNUC__
-// #define PAGE_ALIGNED __attribute__((__aligned__(4096)))
-// #else
-// #define PAGE_ALIGNED
-// #endif
-
-// #if defined(_M_IX86) || defined(i386)
-// #define PREFIX16	0x66
-// #define STORE_BYTE	0xAA
-// #define STORE_WORD	0xAB
-// #define LOAD_BYTE	0xAC
-// #define LOAD_WORD	0xAD
-// #define RETURN		0xC3
-// #else
-// #error Need assembly opcodes for this architecture
-// #endif
-
-// static unsigned char copy_row[4096] PAGE_ALIGNED;
-
-// static int generate_rowbytes(int src_w, int dst_w, int bpp)
-// {
-// 	static struct {
-// 		int bpp;
-// 		int src_w;
-// 		int dst_w;
-// 		int status;
-// 	} last;
-
-// 	int i;
-// 	int pos, inc;
-// 	unsigned char *eip, *fence;
-// 	unsigned char load, store;
-
-// 	/* See if we need to regenerate the copy buffer */
-// 	if ( (src_w == last.src_w) &&
-// 	     (dst_w == last.dst_w) && (bpp == last.bpp) ) {
-// 		return(last.status);
-// 	}
-// 	last.bpp = bpp;
-// 	last.src_w = src_w;
-// 	last.dst_w = dst_w;
-// 	last.status = -1;
-
-// 	switch (bpp) {
-// 	    case 1:
-// 		load = LOAD_BYTE;
-// 		store = STORE_BYTE;
-// 		break;
-// 	    case 2:
-// 	    case 4:
-// 		load = LOAD_WORD;
-// 		store = STORE_WORD;
-// 		break;
-// 	    default:
-// 		SDL_SetError("ASM stretch of %d bytes isn't supported\n", bpp);
-// 		return(-1);
-// 	}
-// #ifdef HAVE_MPROTECT
-// 	/* Make the code writeable */
-// 	if ( mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_WRITE) < 0 ) {
-// 		SDL_SetError("Couldn't make copy buffer writeable");
-// 		return(-1);
-// 	}
-// #endif
-// 	pos = 0x10000;
-// 	inc = (src_w << 16) / dst_w;
-// 	eip = copy_row;
-// 	fence = copy_row+sizeof(copy_row)-2;
-// 	for ( i=0; i<dst_w && eip < end; ++i ) {
-// 		while ( pos >= 0x10000L ) {
-// 			if ( eip == fence ) {
-// 				return -1;
-// 			}
-// 			if ( bpp == 2 ) {
-// 				*eip++ = PREFIX16;
-// 			}
-// 			*eip++ = load;
-// 			pos -= 0x10000L;
-// 		}
-// 		if ( eip == fence ) {
-// 			return -1;
-// 		}
-// 		if ( bpp == 2 ) {
-// 			*eip++ = PREFIX16;
-// 		}
-// 		*eip++ = store;
-// 		pos += inc;
-// 	}
-// 	*eip++ = RETURN;
-
-// #ifdef HAVE_MPROTECT
-// 	/* Make the code executable but not writeable */
-// 	if ( mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_EXEC) < 0 ) {
-// 		SDL_SetError("Couldn't make copy buffer executable");
-// 		return(-1);
-// 	}
-// #endif
-// 	last.status = 0;
-// 	return(0);
-// }
-
-// #endif /* USE_ASM_STRETCH */
-
-// #define DEFINE_COPY_ROW(name, type)			\
-// void name(type *src, int src_w, type *dst, int dst_w)	\
-// {							\
-// 	int i;						\
-// 	int pos, inc;					\
-// 	type pixel = 0;					\
-// 							\
-// 	pos = 0x10000;					\
-// 	inc = (src_w << 16) / dst_w;			\
-// 	for ( i=dst_w; i>0; --i ) {			\
-// 		while ( pos >= 0x10000L ) {		\
-// 			pixel = *src++;			\
-// 			pos -= 0x10000L;		\
-// 		}					\
-// 		*dst++ = pixel;				\
-// 		pos += inc;				\
-// 	}						\
-// }
-// DEFINE_COPY_ROW(copy_row1, Uint8)
-// DEFINE_COPY_ROW(copy_row2, Uint16)
-// DEFINE_COPY_ROW(copy_row4, Uint32)
 
 void blend_row4(Uint32 *src, int src_w, Uint32 *dst, int dst_w) {
 	int i;
 	int pos, inc;
 	Uint32 pixel = 0;
 
-        Uint32 f = (1 << 16) / 255;
+        constexpr const Uint32 f = ((1 << 16) | (1 << 8)) / 255;
         Uint8 ar, ag, ab, aa;
 
 	pos = 0x10000;
@@ -215,35 +70,64 @@ void blend_row4(Uint32 *src, int src_w, Uint32 *dst, int dst_w) {
 	}
 }
 
+void blend_row4m(Uint32 *src, int src_w, Uint32 *dst, int dst_w, SDL_Color* multiply) {
+	int i;
+	int pos, inc;
+	Uint32 pixel = 0;
 
-// /* The ASM code doesn't handle 24-bpp stretch blits */
-// void copy_row3(Uint8 *src, int src_w, Uint8 *dst, int dst_w)
-// {
-// 	int i;
-// 	int pos, inc;
-// 	Uint8 pixel[3] = { 0, 0, 0 };
+        constexpr const Uint32 f = ((1 << 16) | (1 << 8)) / 255;
+        Uint8 ar, ag, ab, aa;
 
-// 	pos = 0x10000;
-// 	inc = (src_w << 16) / dst_w;
-// 	for ( i=dst_w; i>0; --i ) {
-// 		while ( pos >= 0x10000L ) {
-// 			pixel[0] = *src++;
-// 			pixel[1] = *src++;
-// 			pixel[2] = *src++;
-// 			pos -= 0x10000L;
-// 		}
-// 		*dst++ = pixel[0];
-// 		*dst++ = pixel[1];
-// 		*dst++ = pixel[2];
-// 		pos += inc;
-// 	}
-// }
+        Uint32 mr = multiply->r * f;
+        Uint32 mg = multiply->g * f;
+        Uint32 mb = multiply->b * f;
+        Uint32 ma = multiply->unused * f;
+
+	pos = 0x10000;
+	inc = (src_w << 16) / dst_w;
+	for ( i=dst_w; i>0; --i ) {
+            if ( pos >= 0x10000L ) {
+		while ( pos >= 0x10000L ) {
+			pixel = *src++;
+			pos -= 0x10000L;
+		}
+                ar = pixel;
+                ag = pixel >> 8;
+                ab = pixel >> 16;
+                aa = pixel >> 24;
+
+                ar = Uint32(ar) * aa * f >> 16;
+                ag = Uint32(ag) * aa * f >> 16;
+                ab = Uint32(ab) * aa * f >> 16;
+
+                ar = Uint32(ar) * mr >> 16;
+                ag = Uint32(ag) * mg >> 16;
+                ab = Uint32(ab) * mb >> 16;
+                aa = aa * ma >> 16;
+            }
+
+            if (aa) {
+                Uint32 o = *dst >> 8;
+                Uint8 bb = o; o >>= 8;
+                Uint8 bg = o; o >>= 8;
+
+                bb = (Uint32(bb) * (255 - aa) * f >> 16) + ab;
+                bg = (Uint32(bg) * (255 - aa) * f >> 16) + ag;
+                Uint32 br = (o * (255 - aa) * f >> 16) + ar;
+
+                *dst = (Uint32(bb) << 8) | (Uint32(bg) << 16) | (Uint32(br) << 24);
+            }
+
+            dst++;
+            pos += inc;
+	}
+}
 
 /* Perform a stretch blit between two surfaces of the same format.
    NOTE:  This function is not safe to call from multiple threads!
 */
 
-int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect) {
+int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect, SDL_Color *multiply) {
     int src_locked;
     int dst_locked;
     int pos, inc;
@@ -253,12 +137,7 @@ int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, 
     Uint8 *dstp;
     SDL_Rect full_src;
     SDL_Rect full_dst;
-// #ifdef USE_ASM_STRETCH
-//     SDL_bool use_asm = SDL_TRUE;
-// #ifdef __GNUC__
-//     int u1, u2;
-// #endif
-// #endif /* USE_ASM_STRETCH */
+
     const int bpp = dst->format->BytesPerPixel;
 
     if ( src->format->BitsPerPixel != dst->format->BitsPerPixel ) {
@@ -324,14 +203,6 @@ int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, 
     src_row = srcrect->y;
     dst_row = dstrect->y;
 
-// #ifdef USE_ASM_STRETCH
-//     /* Write the opcodes for this stretch */
-//     if ( (bpp == 3) ||
-//          (generate_rowbytes(srcrect->w, dstrect->w, bpp) < 0) ) {
-//         use_asm = SDL_FALSE;
-//     }
-// #endif
-
     /* Perform the stretch blit */
     for ( dst_maxrow = dst_row+dstrect->h; dst_row<dst_maxrow; ++dst_row ) {
         dstp = (Uint8 *)dst->pixels + (dst_row*dst->pitch)
@@ -342,49 +213,10 @@ int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, 
             ++src_row;
             pos -= 0x10000L;
         }
-// #ifdef USE_ASM_STRETCH
-//         if (use_asm) {
-// #ifdef __GNUC__
-//             __asm__ __volatile__ (
-//                 "call *%4"
-//                 : "=&D" (u1), "=&S" (u2)
-//                 : "0" (dstp), "1" (srcp), "r" (copy_row)
-//                 : "memory" );
-// #elif defined(_MSC_VER) || defined(__WATCOMC__)
-//             { void *code = copy_row;
-//                 __asm {
-//                     push edi
-//                         push esi
-
-//                         mov edi, dstp
-//                         mov esi, srcp
-//                         call dword ptr code
-
-//                         pop esi
-//                         pop edi
-// 			}
-//             }
-// #else
-// #error Need inline assembly for this compiler
-// #endif
-//         } else
-// #endif
-            // switch (bpp) {
-            // case 1:
-            //     copy_row1(srcp, srcrect->w, dstp, dstrect->w);
-            //     break;
-            // case 2:
-            //     copy_row2((Uint16 *)srcp, srcrect->w,
-            //               (Uint16 *)dstp, dstrect->w);
-            //     break;
-            // case 3:
-            //     copy_row3(srcp, srcrect->w, dstp, dstrect->w);
-            //     break;
-            // case 4:
-                blend_row4((Uint32 *)srcp, srcrect->w,
-                          (Uint32 *)dstp, dstrect->w);
-            //     break;
-            // }
+        if (multiply)
+            blend_row4m((Uint32 *)srcp, srcrect->w, (Uint32 *)dstp, dstrect->w, multiply);
+        else
+            blend_row4((Uint32 *)srcp, srcrect->w, (Uint32 *)dstp, dstrect->w);
         pos += inc;
     }
 
@@ -396,6 +228,199 @@ int SDL_SoftStretchAlpha(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, 
         SDL_UnlockSurface(src);
     }
     return(0);
+}
+
+int SDL_BlitSurfaceMul(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect, SDL_Color *multiply) {
+    int src_locked;
+    int dst_locked;
+    SDL_Rect full_src;
+    SDL_Rect full_dst;
+
+    full_src.x = 0;
+    full_src.y = 0;
+    full_src.w = src->w;
+    full_src.h = src->h;
+
+    full_dst.x = 0;
+    full_dst.y = 0;
+    full_dst.w = dst->w;
+    full_dst.h = dst->h;
+
+    /* Verify the blit rectangles */
+    if (!srcrect) {
+        srcrect = &full_src;
+    }
+    if (!dstrect) {
+        dstrect = &full_dst;
+    }
+
+    if (dstrect->x < 0) {
+        srcrect->x -= dstrect->x;
+        srcrect->w += dstrect->x;
+        dstrect->x = 0;
+    }
+    if (dstrect->y < 0) {
+        srcrect->y -= dstrect->y;
+        srcrect->h += dstrect->y;
+        dstrect->y = 0;
+    }
+    if (dstrect->x + srcrect->w > dst->w) {
+        srcrect->w = dst->w - dstrect->x;
+    }
+    if (dstrect->y + srcrect->h > dst->h) {
+        srcrect->h = dst->h - dstrect->y;
+    }
+
+    if (srcrect->x <= -int(src->w)) {
+        return -1;
+    }
+    if (srcrect->x < 0) {
+        srcrect->w += srcrect->x;
+        dstrect->x -= srcrect->x;
+        srcrect->x = 0;
+    }
+    if (srcrect->x >= src->w) {
+        return -1;
+    }
+    if (srcrect->x + srcrect->w > src->w) {
+        srcrect->w = src->w - srcrect->x;
+    }
+
+    if (srcrect->y <= -int(src->h)) {
+        return -1;
+    }
+    if (srcrect->y < 0) {
+        srcrect->h += srcrect->y;
+        dstrect->y += -srcrect->y;
+        srcrect->y = 0;
+    }
+    if (srcrect->y >= src->h) {
+        return -1;
+    }
+    if (srcrect->y + srcrect->h > src->h) {
+        srcrect->h = src->h - srcrect->y;
+    }
+
+    /* Lock the destination if it's in hardware */
+    dst_locked = 0;
+    if ( SDL_MUSTLOCK(dst) ) {
+        if ( SDL_LockSurface(dst) < 0 ) {
+            SDL_SetError("Unable to lock destination surface");
+            return(-1);
+        }
+        dst_locked = 1;
+    }
+    /* Lock the source if it's in hardware */
+    src_locked = 0;
+    if ( SDL_MUSTLOCK(src) ) {
+        if ( SDL_LockSurface(src) < 0 ) {
+            if ( dst_locked ) {
+                SDL_UnlockSurface(dst);
+            }
+            SDL_SetError("Unable to lock source surface");
+            return(-1);
+        }
+        src_locked = 1;
+    }
+
+    auto out = (Uint8*) dst->pixels;
+    auto in = (Uint8*) src->pixels;
+
+    out += dstrect->y * dst->pitch + dstrect->x * 4;
+    in += srcrect->y * src->pitch + srcrect->x * 4;
+
+    constexpr const Uint32 f = ((1 << 16) | (1 << 8)) / 255;
+
+    Uint32 mr = multiply->r * f;
+    Uint32 mg = multiply->g * f;
+    Uint32 mb = multiply->b * f;
+
+    for (int y = 0, my = srcrect->h; y < my; ++y, out += dst->pitch, in += src->pitch) {
+        for (int x = 0, mx = srcrect->w; x < mx; ++x) {
+            int i = x * 4;
+            if (Uint32 a = in[i + 3]) {
+                Uint32 a1 = (255 - a) * f;
+                a *= f;
+                out[i + 1] = (out[i + 1] * a1 + (in[i + 2] * mr >> 16) * a) >> 16;
+                out[i + 2] = (out[i + 2] * a1 + (in[i + 1] * mg >> 16) * a) >> 16;
+                out[i + 3] = (out[i + 3] * a1 + (in[i + 0] * mb >> 16) * a) >> 16;
+            }
+        }
+    }
+
+    /* We need to unlock the surfaces if they're locked */
+    if ( dst_locked ) {
+        SDL_UnlockSurface(dst);
+    }
+    if ( src_locked ) {
+        SDL_UnlockSurface(src);
+    }
+    return 0;
+}
+
+void SDL_FillRectAlpha(SDL_Surface *s, SDL_Rect *rect, SDL_Color *color, Uint8 a) {
+    SDL_Rect full_s;
+    full_s.x = 0;
+    full_s.y = 0;
+    full_s.w = s->w;
+    full_s.h = s->h;
+    if (!rect)
+        rect = &full_s;
+
+    if (rect->x >= s->w)
+        return;
+    if (rect->y >= s->h)
+        return;
+
+    if (rect->x < 0) {
+        rect->w += rect->x;
+        rect->x = 0;
+    }
+    if (rect->y < 0) {
+        rect->h += rect->y;
+        rect->y = 0;
+    }
+    if (rect->x + rect->w > s->w)
+        rect->w = s->w - rect->x;
+    if (rect->y + rect->h > s->h)
+        rect->h = s->h - rect->y;
+
+    if (int(rect->w) <= 0)
+        return;
+    if (int(rect->h) <= 0)
+        return;
+
+    /* Lock the source if it's in hardware */
+    int s_locked = 0;
+    if ( SDL_MUSTLOCK(s) ) {
+        if ( SDL_LockSurface(s) < 0 ) {
+            SDL_SetError("Unable to lock source surface");
+            return;
+        }
+        s_locked = 1;
+    }
+    constexpr const Uint32 f = ((1 << 16) | (1 << 8)) / 255;
+
+    Uint32 mr = color->r * (a * f);
+    Uint32 mg = color->g * (a * f);
+    Uint32 mb = color->b * (a * f);
+
+    Uint32 a1 = (255 - a) * f;
+    Uint32 pitch = s->pitch / 4;
+    auto pixels = (Uint32*) s->pixels + rect->y * pitch + rect->x;
+    for (int y = 0; y < int(rect->h); ++y, pixels += pitch) {
+        for (int x = 0; x < int(rect->w); ++x) {
+            Uint32 c = pixels[x];
+            Uint32 r = ((c >> 24) * a1 + mr) >> 16;
+            Uint32 g = (((c >> 16) & 0xFF) * a1 + mg) >> 16;
+            Uint32 b = (((c >> 8) & 0xFF) * a1 + mb) >> 16;
+            pixels[x] = (b << 8) | (g << 16) | (r << 24);
+        }
+    }
+
+    if ( s_locked ) {
+        SDL_UnlockSurface(s);
+    }
 }
 
 #endif
