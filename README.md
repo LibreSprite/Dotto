@@ -51,7 +51,7 @@ over Discord/Matrix.
 | Solarize                       | Planned       | 2.0     |                                                 |
 | Sobel edge-detection           | Planned       | 2.0     |                                                 |
 | Mirror image                   | OK            | 0.5     |                                                 |
-| Flip image                     | Planned       | 0.5     |                                                 |
+| Flip image                     | OK            | 0.5     |                                                 |
 | Curves adjustment              | Planned       | 1.0     |                                                 |
 | Salt and Pepper filter         | Planned       | 2.0     |                                                 |
 | 2D Fast Fourier Transform      | Planned       | 2.0     |                                                 |
