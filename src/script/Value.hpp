@@ -153,7 +153,7 @@ namespace script {
                 data.double_v = other.get<F32>();
             } else if (other.has<F64>()) {
                 type = Type::DOUBLE;
-                data.double_v = other.get<U64>();
+                data.double_v = other.get<F64>();
             } else if (other.has<bool>()) {
                 type = Type::INT;
                 data.int_v = other.get<bool>();
