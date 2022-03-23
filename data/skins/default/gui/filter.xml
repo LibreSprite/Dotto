@@ -1,1 +1,10 @@
-<menubutton controller="activatefilter" forward="labelspan.text=filter" interactive="true"/>
+<image controller="tabtarget, button, activatefilter"
+       interactive="true"
+       forward="labelspan.text=filter"
+       multiply="#00000000"
+       up-multiply="#00000000"
+       down-multiply="#FF8080FF"
+       hover-multiply="#808080FF"
+       height="20px">
+  <span id="labelspan" x="8px" y="0px" width="100%" absolute="true"/>
+</image>
