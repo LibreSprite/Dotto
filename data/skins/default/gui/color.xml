@@ -1,4 +1,4 @@
-<row forward="color-label.text=label, color-value.multiply=value" result="color-value.value" id="row">
+<row forward="color-label.text=label, color-value.value=value" result="color-value.value" id="row">
   <span id="color-label"/>
-  <image controller="inputcolor" id="color-value" forward="color-value.multiply=value"/>
+  <image controller="inputcolor" id="color-value" forward="multiply=value"/>
 </row>
