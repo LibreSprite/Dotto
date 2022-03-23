@@ -13,7 +13,7 @@ String tostring(U64 n, U32 base) {
         base = 36;
     String ret;
     while (n) {
-        ret += "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"[n % base];
+        ret = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"[n % base] + ret;
         n /= base;
     }
     return ret;
