@@ -25,6 +25,8 @@ public:
             return nullptr;
         }
 
+        engine->scriptName = file->getUID();
+
         if (!engine->eval(file->readTextFile())) {
             logE("Error parsing script");
             return nullptr;

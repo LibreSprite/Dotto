@@ -40,8 +40,10 @@ public:
         script::Engine::setDefault(type, {type});
         script::ScriptTarget target{node()->shared_from_this()};
         engine = inject<script::Engine>{};
-        if (engine)
+        if (engine) {
+            engine->scriptName = "@" + *node()->id;
             engine->eval(text);
+        }
     }
 
     void attach() override {

@@ -113,7 +113,7 @@ public:
         bool success = true;
         try {
             if (duk_peval_string(handle, code.c_str()) != 0) {
-                log->write(Log::Level::ERROR, "Error: [", duk_safe_to_string(handle, -1), "]");
+                log->write(Log::Level::ERROR, scriptName, " [", duk_safe_to_string(handle, -1), "]");
                 success = false;
             }
             duk_pop(handle);
