@@ -17,7 +17,7 @@ public:
     std::shared_ptr<script::Engine> engine;
     Property<bool> run{this, "run", false};
     Property<String> script{this, "script", "", &ScriptController::loadScript};
-    Property<String> type{this, "type", ""};
+    Property<String> type{this, "type", "duk"};
     Property<String> text{this, "text", "", &ScriptController::loadScript};
 
     void loadScript() {
@@ -36,6 +36,11 @@ public:
             return;
         }
 
+        if (text->empty()) {
+            logI("Empty script");
+            return;
+        }
+
         script::Engine::PushDefault oldEngine;
         script::Engine::setDefault(type, {type});
         script::ScriptTarget target{node()->shared_from_this()};
@@ -43,6 +48,7 @@ public:
         if (engine) {
             engine->scriptName = "@" + *node()->id;
             engine->eval(text);
+            engine->raiseEvent({"init"});
         }
     }
 
