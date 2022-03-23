@@ -13,8 +13,8 @@
     <alttextbutton id="startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
     <node width="100%"/>
     <image id="toolconfigbutton" visible="false" margin="4 4 4 4" width="24px"/>
-    <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar, hide=sidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
-    <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar, hide=sidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
+    <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
+    <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
     <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
     <span controller="inputcolor"
           forward="text=value"

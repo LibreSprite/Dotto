@@ -13,7 +13,7 @@
     <image
         src="%skin/mainmenu.png"
         controller="button"
-        click="ToggleUI id=layersidebar, hide=sidebar"
+        click="ToggleUI id=layersidebar"
         slice="15 15 1 1"
         width="70px"
         height="100%"
@@ -26,7 +26,7 @@
     <image
         src="%skin/mainmenu.png"
         controller="button"
-        click="ToggleUI id=filemenu, hide=sidebar"
+        click="ToggleUI id=filemenu"
         slice="15 15 1 1"
         width="150px"
         height="100%"
@@ -56,7 +56,7 @@
   <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false" class="sidebar">
     <image multiply="#576D70" height="100%-16px" width="151px" x="100%-100%" y="16px" absolute="true" id="filemenucontainer">
 
-      <textbutton label="File" click="ToggleUI id=filesubmenu, hide=mainsubmenu" height="16px" align="0"/>
+      <textbutton label="File" click="ToggleUI id=filesubmenu" height="16px" align="0"/>
       <node id="filesubmenu" class="mainsubmenu" visible="false" height="150px">
         <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
         <menubutton id="openbutton" click="openfile" label="Open"/>
@@ -66,10 +66,10 @@
         <menubutton id="quitbutton" label="Quit"/>
       </node>
 
-      <textbutton label="Tool Settings" click="ToggleUI id=toolconfigmenu, hide=mainsubmenu" height="16px" align="0"/>
+      <textbutton label="Tool Settings" click="ToggleUI id=toolconfigmenu" height="16px" align="0"/>
       <node controller="metamenu" id="toolconfigmenu" visible="false" class="mainsubmenu" height="0px"/>
 
-      <textbutton label="Filters" click="ToggleUI id=filtercontainer, hide=mainsubmenu" height="16px" align="0"/>
+      <textbutton label="Filters" click="ToggleUI id=filtercontainer" height="16px" align="0"/>
       <node controller="filterlist" id="filtercontainer" visible="false" class="mainsubmenu" height="0px"/>
 
       <node height="100%"/>
