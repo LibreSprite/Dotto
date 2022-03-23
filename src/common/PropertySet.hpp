@@ -29,6 +29,12 @@ public:
         }
     }
 
+    void print() const {
+        for (auto& entry : properties) {
+            logI("[", entry.first, "] = [", entry.second->toString(), "]");
+        }
+    }
+
     std::size_t size() const {
         return properties.size();
     }
