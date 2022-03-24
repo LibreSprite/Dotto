@@ -26,4 +26,4 @@ public:
     }
 };
 
-static Filter::Shared<Mirror> reg{"mirror"};
+static Filter::Shared<Mirror> reg{"flip horizontal"};

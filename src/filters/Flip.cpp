@@ -26,4 +26,4 @@ public:
     }
 };
 
-static Filter::Shared<Flip> reg{"flip"};
+static Filter::Shared<Flip> reg{"flip vertical"};
