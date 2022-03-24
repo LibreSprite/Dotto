@@ -1,0 +1,15 @@
+<image src="%skin/colorpicker.png"
+       controller="script"
+       parent="colorpanel">
+app.target.addEventListener("mousedown");
+function onEvent(event) {
+    if (event == "mousedown") {
+        const target = app.target;
+        const surface = target.surface;
+        const x = arguments[2] / target.globalWidth * surface.width | 0;
+        const y = arguments[3] / target.globalHeight * surface.height | 0;
+        const color = surface.getPixel(x, y);
+        app.command("activatecolor", "color", color);
+    }
+}
+</image>
