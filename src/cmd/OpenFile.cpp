@@ -22,12 +22,16 @@ public:
             filters.push_back("*." + entry.first);
         }
         inject<FileDialog> dialog;
-        dialog->filterDescription = "All Formats";
-        dialog->title = "Open Image...";
-        dialog->filters = std::move(filters);
-        dialog->open();
-        if (!dialog->result.empty())
-            set("filename", join(dialog->result, "|"));
+        if (dialog) {
+            dialog->filterDescription = "All Formats";
+            dialog->title = "Open Image...";
+            dialog->filters = std::move(filters);
+            dialog->open();
+            if (!dialog->result.empty())
+                set("filename", join(dialog->result, "|"));
+        } else {
+            logE("No File dialog available");
+        }
     }
 
     void run() override {
