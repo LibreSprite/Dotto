@@ -39,11 +39,7 @@ var controllers = {
         }
     },
 
-    toolconfigbutton : {
-        click : function() {
-            views.toolconfigmenu.visible = !views.toolconfigmenu.visible;
-        }
-    },
+    toolconfigbutton : {},
 
     startbutton : {
         mouseup : function() {
