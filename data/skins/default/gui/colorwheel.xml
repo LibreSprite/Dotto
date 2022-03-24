@@ -1,6 +1,6 @@
 <image src="%skin/colorpicker.png"
        controller="script"
-       parent="colorpanel">
+       parent="colorpanel"><![CDATA[
 app.target.addEventListener("mousedown");
 function onEvent(event) {
     if (event == "mousedown") {
@@ -8,8 +8,8 @@ function onEvent(event) {
         const surface = target.surface;
         const x = arguments[2] / target.globalWidth * surface.width | 0;
         const y = arguments[3] / target.globalHeight * surface.height | 0;
-        const color = surface.getPixel(x, y);
+        const color = surface.getPixel(x, y) & ~(0xFF << 24) | (app.activeColor & (0xFF << 24));
         app.command("activatecolor", "color", color);
     }
 }
-</image>
+]]></image>
