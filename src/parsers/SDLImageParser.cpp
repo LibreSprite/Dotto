@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifdef USE_SDL2
+
 #include <common/Parser.hpp>
 #include <sdl2/SDL2Image.hpp>
 
@@ -34,3 +36,5 @@ static Parser::Shared<SDLImageParser> webp{"webp", {"image"}};
 static Parser::Shared<SDLImageParser> xcf{"xcf", {"image"}};
 static Parser::Shared<SDLImageParser> xpm{"xpm", {"image"}};
 static Parser::Shared<SDLImageParser> xv{"xv", {"image"}};
+
+#endif

@@ -3,6 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <cmath>
+#include <common/Config.hpp>
 #include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
@@ -14,14 +15,18 @@
 
 class Range : public ui::Controller {
 public:
+    inject<Config> config;
     PubSub<> pub{this};
+    F64 oldValue = std::nan("");
     Property<F64> value{this, "value", 0.0, &Range::changeValue};
     Property<F64> min{this, "min", 0.0, &Range::changeValue};
     Property<F64> max{this, "max", 1.0, &Range::changeValue};
     Property<F64> resolution{this, "resolution", 0.01, &Range::changeValue};
     Property<bool> percent{this, "percent", false};
     Property<String> handleName{this, "handle", "", &Range::setHandle};
+    Property<String> format{this, "format", "", &Range::changeFormat};
     std::shared_ptr<ui::Node> handle;
+    bool forceUpdate;
 
     ~Range() {
         if (handle)
@@ -40,7 +45,14 @@ public:
         }
     }
 
+    void changeFormat() {
+        forceUpdate = true;
+        changeValue();
+    }
+
     void changeValue() {
+        if (resolution == 0)
+            *resolution = 1;
         F64 v = std::clamp(std::round(value / resolution) * resolution, *min, *max);
         if (v != value) {
             node()->set("value", v);
@@ -52,7 +64,22 @@ public:
             v = ((v - min) * 100.0) / (max - min);
             handle->set("x", ui::Unit{std::to_string(S32(v)) + "%"});
         }
-        node()->processEvent(ui::Changed{node()});
+
+        if (value != oldValue) {
+            forceUpdate = true;
+            oldValue = value;
+            node()->processEvent(ui::Changed{node()});
+        }
+
+        if (!format->empty() && forceUpdate) {
+            String format = config->translate(this->format, node());
+            v = *value;
+            if (percent) v *= 100;
+            String str = S32(resolution) == *resolution ? std::to_string(S32(v)) : tostring(v);
+            node()->set("label", std::regex_replace(str.c_str(), std::regex("(.+)"), format.c_str()));
+        }
+
+        forceUpdate = false;
     }
 
     void attach() override {
@@ -75,8 +102,7 @@ public:
     void eventHandler(const ui::MouseWheel& event) {
         F64 offset = event.wheelX + event.wheelY;
         F64 newValue = *value + *resolution * offset;
-        value.value = newValue;
-        changeValue();
+        node()->set("value", newValue);
     }
 
     void eventHandler(const ui::MouseDown&) {
@@ -100,7 +126,7 @@ public:
             changeValue();
             value = this->value.value;
             String drag;
-            if (S32(resolution) == resolution) {
+            if (S32(resolution * (percent ? 100 : 1)) == resolution * (percent ? 100 : 1)) {
                 if (percent) {
                     drag = std::to_string(S32(value * 100)) + "%";
                 } else {
@@ -108,7 +134,7 @@ public:
                 }
             } else {
                 if (percent) {
-                    drag = std::to_string(value * 100) + "%";
+                    drag = tostring(value * 100) + "%";
                 } else {
                     drag = tostring(value);
                 }

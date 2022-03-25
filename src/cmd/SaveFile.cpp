@@ -25,12 +25,14 @@ public:
             }
         }
         inject<FileDialog> dialog;
-        dialog->filterDescription = "All Formats";
-        dialog->title = "Save As...";
-        dialog->filters = std::move(filters);
-        dialog->save();
-        if (!dialog->result.empty())
-            set("filename", dialog->result[0]);
+        if (dialog) {
+            dialog->filterDescription = "All Formats";
+            dialog->title = "Save As...";
+            dialog->filters = std::move(filters);
+            dialog->save();
+            if (!dialog->result.empty())
+                set("filename", dialog->result[0]);
+        }
     }
 
     void run() override {

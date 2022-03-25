@@ -11,10 +11,31 @@
 class Color {
 public:
     U8 r = 0, g = 0, b = 0, a = 255;
+
+    #ifdef COLOR_R_SHIFT
+    static inline constexpr const U32 Rshift = COLOR_R_SHIFT;
+    #else
     static inline constexpr const U32 Rshift = 0;
+    #endif
+
+    #ifdef COLOR_R_SHIFT
+    static inline constexpr const U32 Gshift = COLOR_G_SHIFT;
+    #else
     static inline constexpr const U32 Gshift = 8;
+    #endif
+
+    #ifdef COLOR_R_SHIFT
+    static inline constexpr const U32 Bshift = COLOR_B_SHIFT;
+    #else
     static inline constexpr const U32 Bshift = 16;
+    #endif
+
+    #ifdef COLOR_R_SHIFT
+    static inline constexpr const U32 Ashift = COLOR_A_SHIFT;
+    #else
     static inline constexpr const U32 Ashift = 24;
+    #endif
+
 
     constexpr Color() = default;
 

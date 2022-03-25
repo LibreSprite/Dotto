@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifdef USE_SDL2
+
 #include <common/Surface.hpp>
 #include <common/Writer.hpp>
 #include <sdl2/SDL2Image.hpp>
@@ -15,3 +17,5 @@ public:
 
 static Writer::Shared<JpgWriter> jpg{"jpg", {"*.jpg"}};
 static Writer::Shared<JpgWriter> jpeg{"jpeg", {"*.jpeg"}};
+
+#endif

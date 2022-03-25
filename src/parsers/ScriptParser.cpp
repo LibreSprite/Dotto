@@ -25,6 +25,8 @@ public:
             return nullptr;
         }
 
+        engine->scriptName = file->getUID();
+
         if (!engine->eval(file->readTextFile())) {
             logE("Error parsing script");
             return nullptr;
@@ -36,4 +38,7 @@ public:
 
 static Parser::Shared<ScriptParser> js{"js"};
 static Parser::Shared<ScriptParser> duk{"duk"};
+
+#ifdef SCRIPT_ENGINE_LUA
 static Parser::Shared<ScriptParser> lua{"lua"};
+#endif

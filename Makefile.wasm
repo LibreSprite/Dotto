@@ -1,0 +1,94 @@
+CC = emcc
+CXX = em++
+OBJC = em++
+LN = emcc
+FIND = find src -type f -name
+DOTTO = dotto.html
+
+LIB_DIRS += $(shell find libs -type d)
+CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
+
+SRC_DIRS += $(shell find src -type d)
+SRC_DIRS += $(LIB_DIRS)
+CPP_FLAGS += -Isrc
+
+CPP_FLAGS += -MMD -MP
+CPP_FLAGS += -DUSE_SDL2
+FLAGS += -s USE_SDL=2
+FLAGS += -s USE_FREETYPE=1
+FLAGS += -s USE_LIBJPEG=1
+FLAGS += -s USE_SDL_IMAGE=2
+FLAGS += -s SDL2_IMAGE_FORMATS='["bmp","xpm","jpg"]'
+FLAGS += -s USE_LIBPNG=1
+
+#LN_FLAGS += -s FULL_ES3
+LN_FLAGS += -s USE_WEBGL2=1
+LN_FLAGS += --preload-file data
+
+CPP_FILES += $(shell find src -type f -name '*.cpp')
+CPP_FILES += $(shell find libs -type f -name '*.cpp')
+
+C_FLAGS := $(CPP_FLAGS)
+C_FILES += $(shell find src -type f -name '*.c')
+C_FILES += $(shell find libs -type f -name '*.c')
+
+LN_FLAGS += $(SO_FILES)
+
+#BEGIN V8 SUPPORT
+# CPP_FLAGS += -DSCRIPT_ENGINE_V8
+# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8)
+# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8_libplatform)
+# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8)
+# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8_libplatform)
+#END
+
+#BEGIN LUA SUPPORT
+# CPP_FLAGS += -DSCRIPT_ENGINE_LUA
+# LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
+# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags $(LUAPKG))
+# LN_FLAGS += $(shell $(PKGCONFIG) --libs $(LUAPKG))
+#END
+
+ODIR = buildwasm
+
+CPP_FLAGS += --std=c++17
+CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
+
+# FLAGS += -m32 # uncomment for 32-bit build
+ifeq ($(DEBUG),true)
+FLAGS += -Og -g -D_DEBUG # debug build
+POSTBUILD =
+else
+FLAGS += -O3 # release build
+POSTBUILD =
+endif
+
+# LN_FLAGS += -lm
+# LN_FLAGS += -fsanitize=leak
+
+OBJ = $(patsubst %,$(ODIR)/%.o,$(CPP_FILES))
+OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
+DEP := $(OBJ:.o=.d)
+
+$(ODIR)/%.cpp.o: %.cpp
+	@mkdir -p "$$(dirname "$@")"
+	$(CXX) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+
+$(ODIR)/%.c.o: %.c
+	@mkdir -p "$$(dirname "$@")"
+	$(CC) $(FLAGS) $(C_FLAGS) -c $< -o $@
+
+$(ODIR)/%.mm.o: %.mm
+	@mkdir -p "$$(dirname "$@")"
+	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+
+$(DOTTO): $(OBJ)
+	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
+	$(POSTBUILD)
+
+.PHONY: clean
+
+clean:
+	rm -rf $(ODIR)
+
+-include $(DEP)

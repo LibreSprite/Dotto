@@ -1,0 +1,62 @@
+<node controller="script" parent="colorpanel" flow="column"><![CDATA[
+var R, G, B, A, color = app.activeColor, ignore = true;
+
+const events = {
+    init : function() {
+        app.addEventListener("activatecolor");
+        R = app.target.findChildById("R");
+        G = app.target.findChildById("G");
+        B = app.target.findChildById("B");
+        A = app.target.findChildById("A");
+        R.addEventListener("change");
+        G.addEventListener("change");
+        B.addEventListener("change");
+        A.addEventListener("change");
+        write();
+    },
+
+    activatecolor : function() {
+        if (ignore)
+            return;
+        color = app.activeColor;
+        write();
+    },
+
+    change : function() {
+        if (ignore)
+            return;
+        read();
+        if (color != app.activeColor)
+            app.command("activatecolor", "color", color >>> 0);
+    }
+};
+
+function write() {
+    ignore = true;
+    R.set("value", (color >> 0) & 0xFF);
+    G.set("value", (color >> 8) & 0xFF);
+    B.set("value", (color >> 16) & 0xFF);
+    A.set("value", (color >> 24) & 0xFF);
+    ignore = false;
+}
+
+function read() {
+    color = 0;
+    color |= (R.get("value")|0) << 0;
+    color |= (G.get("value")|0) << 8;
+    color |= (B.get("value")|0) << 16;
+    color |= (A.get("value")|0) << 24;
+}
+
+function onEvent(event) {
+    if (event in events) {
+        events[event]();
+    }
+}
+]]>
+  <span text="RGBA"/>
+  <range id="R" min="0" max="255" resolution="1" format="Red: $1"/>
+  <range id="G" min="0" max="255" resolution="1" format="Green: $1"/>
+  <range id="B" min="0" max="255" resolution="1" format="Blue: $1"/>
+  <range id="A" min="0" max="255" resolution="1" format="Alpha: $1"/>
+</node>

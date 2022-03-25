@@ -1,0 +1,24 @@
+<node controller="script"
+      parent="colorpanel"><![CDATA[
+var sample = app.target.findChildById("sample");
+var fill = app.target.findChildById("fill");
+sample.addEventListener("mousedown");
+sample.addEventListener("mousemove");
+function onEvent(event) {
+    if (event == "mousedown" || event == "mousemove") {
+        const surface = sample.surface;
+        const x = arguments[2] / sample.globalWidth * surface.width | 0;
+        const y = arguments[3] / sample.globalHeight * surface.height | 0;
+        const rawColor = surface.getPixel(x, y);
+        if (event == "mousedown") {
+            const color = rawColor & ~(0xFF << 24) | (app.activeColor & (0xFF << 24));
+            app.command("activatecolor", "color", color);
+        } else {
+            fill.set("multiply", rawColor);
+        }
+    }
+}
+]]>
+<image id="sample" src="%skin/colorpicker.png"/>
+<image id="fill"/>
+</node>

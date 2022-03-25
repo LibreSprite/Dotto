@@ -158,7 +158,7 @@ namespace ui {
     }
 
     void Window::on(msg::MouseWheel& event) {
-        if (event.windowId == id) {
+        if (!event.windowId || event.windowId == id) {
             hoverWindow = this;
             ui::MouseWheel guiEvent{nullptr, mouseX, mouseY, mouseButtons, event.wheelX, event.wheelY};
             guiEvent.target = findEventTarget(guiEvent);

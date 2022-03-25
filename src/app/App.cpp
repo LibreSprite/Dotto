@@ -78,12 +78,14 @@ public:
         pub(msg::Tick{});
         pub(msg::PostTick{});
 
+#if !defined(EMSCRIPTEN) && !defined(__N3DS__)
         if (running) {
             clock::time_point now = clock::now();
             auto delta = now - referenceTime;
             referenceTime = now;
             std::this_thread::sleep_for(std::chrono::milliseconds{1000 / 60} - delta);
         }
+#endif
 
         return running;
     }

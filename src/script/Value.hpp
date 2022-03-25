@@ -153,7 +153,7 @@ namespace script {
                 data.double_v = other.get<F32>();
             } else if (other.has<F64>()) {
                 type = Type::DOUBLE;
-                data.double_v = other.get<U64>();
+                data.double_v = other.get<F64>();
             } else if (other.has<bool>()) {
                 type = Type::INT;
                 data.int_v = other.get<bool>();
@@ -244,7 +244,9 @@ namespace script {
 
 // INT
         Value(int i) { *this = i; }
+        Value(long int i) { *this = static_cast<int>(i); }
         Value(unsigned int i) { *this = static_cast<int>(i); }
+        Value(long unsigned int i) { *this = static_cast<int>(i); }
 
         Value& operator = (int i) {
             makeUndefined();
@@ -259,6 +261,8 @@ namespace script {
             return type == Type::INT ? data.int_v : int{};
         }
 
+        operator long int () const {return static_cast<int>(*this);}
+        operator long unsigned int () const {return static_cast<int>(*this);}
         operator unsigned int () const {return static_cast<int>(*this);}
         operator short () const {return static_cast<int>(*this);}
         operator unsigned short () const {return static_cast<int>(*this);}

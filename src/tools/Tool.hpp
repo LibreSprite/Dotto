@@ -5,6 +5,7 @@
 #pragma once
 
 #include <common/Color.hpp>
+#include <common/Config.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
@@ -43,6 +44,10 @@ public:
                 {"tool", name},
                 {"meta", getMetaProperties()}
             });
+
+        if (auto properties = inject<Config>{}->properties->get<std::shared_ptr<PropertySet>>(name)) {
+            load(*properties);
+        }
     }
 
     virtual Preview* getPreview() {return nullptr;}
@@ -59,9 +64,9 @@ public:
         }
     }
 
-    virtual void begin(Surface* surface, const Path& points, U32 mode) {}
-    virtual void update(Surface* surface, const Path& points) {}
-    virtual void end(Surface* surface, const Path& points) {}
+    virtual void begin(Surface* surface, Path& points, U32 mode) {}
+    virtual void update(Surface* surface, Path& points) {}
+    virtual void end(Surface* surface, Path& points) {}
 
     virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
 };

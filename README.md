@@ -41,12 +41,13 @@ over Discord/Matrix.
 | OpenGL Hardware acceleration   | OK            | 1.0     |                                                 |
 | x86/64 Linux                   | OK            | 0.5     |                                                 |
 | x86/64 Windows                 | OK            | 0.5     |                                                 |
-| x86_64 MacOS                   | OK            | 1.0     |                                                 |
+| x86_64 MacOS                   | OK            | 0.5     |                                                 |
+| Nintendo 3DS                   | OK            | 1.0     | Will probably require specific theme            |
 | Raspberry Pi 4 support         | OK            | 1.0     |                                                 |
 | Undo / Redo                    | OK            | 0.5     |                                                 |
-| Copy + Paste                   | Planned       | 0.5     |                                                 |
+| Copy + Paste                   | Planned       | 0.5     | Waiting for selection support                   |
 | Resize Sprite                  | Planned       | 0.5     |                                                 |
-| Crop Sprite                    | Planned       | 0.5     |                                                 |
+| Crop Sprite                    | Planned       | 0.5     | Waiting for selection support                   |
 | Pencil tool                    | OK            | 0.5     |                                                 |
 | Pencil shapes/sizes            | OK            | 0.5     |                                                 |
 | Pencil blending modes          | Planned       | 1.0     |                                                 |
@@ -67,8 +68,13 @@ over Discord/Matrix.
 | Layer alpha                    | OK            | 0.5     |                                                 |
 | Image Filter support           | OK            | 0.5     |                                                 |
 | Drop Shadow filter             | OK            | 0.5     |                                                 |
-| Blur Filter                    | Planned       | 0.5     |                                                 |
-| Mirror/Flip image Filter       | Planned       | 0.5     |                                                 |
+| Solarize                       | Planned       | 2.0     |                                                 |
+| Sobel edge-detection           | Planned       | 2.0     |                                                 |
+| Mirror image                   | OK            | 0.5     |                                                 |
+| Flip image                     | OK            | 0.5     |                                                 |
+| Curves adjustment              | Planned       | 1.0     |                                                 |
+| Salt and Pepper filter         | Planned       | 2.0     |                                                 |
+| 2D Fast Fourier Transform      | Planned       | 2.0     |                                                 |
 | Load Dotto format              | Planned       | 0.5     |                                                 |
 | Load PNG, BMP, GIF, JPEG       | OK            | 0.5     | Using `libpng` and `SDL2_image`                 |
 | Load LBM, PCX, PNM, SVG        | OK            | 0.5     | Using `SDL2_image`                              |
@@ -173,3 +179,11 @@ chmod +x dotto
 ./dotto
 ```
 
+### Nintendo 3DS
+
+- Install devkitpro
+- Install dependencies: devkitARM, citro3d, 3ds-sdl, 3ds-sdl_image, 3ds-zlib, 3ds-lz4, 3ds-libpng
+- Compile: `make -j 4 -f Makefile.3ds`
+- Upload the resulting Dotto.elf.3dsx to your 3DS.
+- Create a folder called `dotto` in the root of your SD card.
+- Copy the `data` folder into the `dotto` folder (`/dotto/data/`).

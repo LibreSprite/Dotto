@@ -67,7 +67,7 @@ function mouseUpMenuButton(button, menu) {
 
 function closeMenu() {
     for (var i = 0; i < sidebars.length; ++i)
-        sidebars[i].visible = false;
+        sidebars[i].visible = "false";
 }
 
 function onEvent(name) {

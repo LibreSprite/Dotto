@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#ifdef LCMS2_SUPPORT
+
 #include <lcms2.h>
 
 #include <common/ColorProfile.hpp>
@@ -90,3 +92,5 @@ public:
 };
 
 static Parser::Shared<ICCParser> icc{"icc"};
+
+#endif

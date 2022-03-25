@@ -12,9 +12,14 @@
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
     <alttextbutton id="startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
     <node width="100%"/>
-    <image id="toolconfigbutton" visible="false" margin="4 4 4 4" width="24px"/>
-    <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar, hide=sidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
-    <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar, hide=sidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
+    <image controller="tabtarget, button"
+           id="toolconfigbutton"
+           visible="false"
+           margin="4 4 4 4"
+           width="24px"
+           click="ToggleUI id=toolconfigmenu"/>
+    <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
+    <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
     <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
     <span controller="inputcolor"
           forward="text=value"
@@ -37,6 +42,7 @@
       x="100%-100%"
       y="100%-100%"
       margin="0 0 0 35"
+      padding="5 5 5 5"
       visible="false"
       overflow-hidden="true">
     <layercontrols/>
@@ -59,12 +65,38 @@
     <node controller="filterlist" width="200px"/>
   </image>
 
+  <image
+      id="colorpanel"
+      class="sidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      visible="false"
+      overflow-hidden="true">
+  </image>
+
   <popup controller="toolbox" container="inside" width="45px" x="0px" y="50%-50%" close="false" extra-height="35"/>
 
-  <image src="%skin/frame.png" slice="2 2" controller="metamenu" id="toolconfigmenu" absolute="true" width="100px" visible="false" x="100%-100%" y="100%-100%" margin="0 0 0 36" padding="5 5 5 5"/>
+  <image src="%skin/frame.png"
+         class="sidebar"
+         slice="2 2"
+         controller="metamenu"
+         id="toolconfigmenu"
+         absolute="true"
+         width="100px"
+         visible="false"
+         x="100%-100%"
+         y="100%-100%"
+         margin="0 0 0 36"
+         padding="5 5 5 5"/>
 
   <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
-    <image src="%skin/filemenu.png" height="500px" width="380px" x="0" y="100%-535px" absolute="true" slice="2 67">
+    <image src="%skin/filemenu.png" height="400px" width="380px" x="0" y="100%-435px" absolute="true" slice="2 67">
 
       <span absolute="true" x="75px" y="24px" width="100%-100px" size="20px">Hello, ${username}!</span>
 

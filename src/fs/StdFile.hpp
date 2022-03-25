@@ -80,7 +80,7 @@ public:
     U64 read(void* buffer, U64 size) override {
         if (!file)
             return 0;
-        return fread(buffer, size, 1, file);
+        return fread(buffer, 1, size, file);
     }
 
     U64 write(const void* buffer, U64 size) override {

@@ -29,6 +29,12 @@ public:
         }
     }
 
+    void print() const {
+        for (auto& entry : properties) {
+            logI("[", entry.first, "] = [", entry.second->toString(), "]");
+        }
+    }
+
     std::size_t size() const {
         return properties.size();
     }
@@ -52,6 +58,8 @@ public:
             if (from.has<String>()) {
                 String str = tolower(from.get<String>());
                 out = str.size() && (str[0] == 't' || str[0] == 'y');
+            } else if (from.has<decltype(1)>()) {
+                out = from.get<decltype(1)>();
             } else if (from.has<U32>()) {
                 out = from.get<U32>();
             } else if (from.has<S32>()) {
@@ -67,6 +75,7 @@ public:
             } else return false;
         } else if constexpr (std::is_integral_v<Type>) {
             if (from.has<F32>()) out = from.get<F32>();
+            else if (from.has<decltype(1)>()) out = from.get<decltype(1)>();
             else if (from.has<S32>()) out = from.get<S32>();
             else if (from.has<U32>()) out = from.get<U32>();
             else if (from.has<U64>()) out = from.get<U64>();
@@ -76,6 +85,7 @@ public:
             else return false;
         } else if constexpr (std::is_floating_point_v<Type>) {
             if (from.has<F32>()) out = from.get<F32>();
+            else if (from.has<decltype(1)>()) out = from.get<decltype(1)>();
             else if (from.has<S32>()) out = from.get<S32>();
             else if (from.has<U32>()) out = from.get<U32>();
             else if (from.has<U64>()) out = from.get<U64>();
@@ -90,6 +100,7 @@ public:
         } else if constexpr (std::is_assignable_v<Type, String>) {
             if (from.has<String>()) out = from.get<String>();
             else if (from.has<F32>()) out = tostring(from.get<F32>());
+            else if (from.has<decltype(1)>()) out = std::to_string(from.get<decltype(1)>());
             else if (from.has<S32>()) out = std::to_string(from.get<S32>());
             else if (from.has<U32>()) out = std::to_string(from.get<U32>());
             else if (from.has<U64>()) out = std::to_string(from.get<U64>());

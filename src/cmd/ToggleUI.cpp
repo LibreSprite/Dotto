@@ -15,31 +15,50 @@ class ToggleUI : public Command {
     Property<String> hide{this, "hide"};
     Property<bool> bringToFront{this, "bringtofront"};
     Property<String> property{this, "property", "visible"};
+    Property<String> mode{this, "mode", "toggle"};
 
 public:
     void run() override {
         inject<ui::Node> root{"root"};
-        if (root) {
-            if (auto node = root->findChildById(id)) {
-                auto& ps = node->getPropertySet();
-                auto current = ps.get<bool>(property);
+        if (!root)
+            return;
 
-                if (!hide->empty() && !current) {
-                    root->findChildByPredicate([&](ui::Node* child){
-                        if (child->getPropertySet().get<String>("class") == *hide) {
-                            child->set(property, false);
-                        }
-                        return false;
-                    });
-                }
-
-                node->set(property, !current);
-                if (bringToFront)
-                    node->bringToFront();
-            } else {
-                logE("Could not find ", id, " for toggle");
-            }
+        auto node = root->findChildById(id);
+        if (!node) {
+            logE("Could not find ", id, " for toggle");
+            return;
         }
+
+        auto& ps = node->getPropertySet();
+        bool current = false;
+
+        if (*mode == "toggle") {
+            current = !ps.get<bool>(property);
+        } else if (*mode == "set") {
+            current = true;
+        } else if (*mode == "clear") {
+            current = false;
+        } else {
+            logE("Invalid mode for ToggleUI: ", *mode);
+            return;
+        }
+
+        if (hide->empty() && current) {
+            *hide = node->getPropertySet().get<String>("class");
+        }
+
+        if (!hide->empty() && current) {
+            root->findChildByPredicate([&](ui::Node* child){
+                if (child->getPropertySet().get<String>("class") == *hide) {
+                    child->set(property, false);
+                }
+                return false;
+            });
+        }
+
+        node->set(property, current);
+        if (bringToFront)
+            node->bringToFront();
     }
 };
 

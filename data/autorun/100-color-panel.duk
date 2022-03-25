@@ -1,0 +1,4 @@
+app.openWindow("colorpreview");
+app.openWindow("colorwheel");
+app.openWindow("rgb");
+app.openWindow("hsl");

@@ -1,0 +1,43 @@
+app.addTool("dropper");
+
+function onEvent(name) {
+    // get tool state object
+    var target = app.target;
+    if (!target) return;
+    if (!target.surface) return;
+
+    // get last mouse position
+    var x = target.lastX;
+    var y = target.lastY;
+
+    var color = target.surface.getPixel(x, y); // get color under cursor
+
+    if (target.which == 0) { // no button pressed
+        color = color | 0xFF000000; // ensure color is solid
+        if (name == "toolend") {
+            app.command("paint", "cursor", true); // clear the brush preview
+            return;
+        }
+
+        // create a selection with the color preview crosshair
+        var selection = app.newSelection();
+        for (var i = -5; i <= 5; ++i) {
+            var absi = Math.abs(i);
+            if (absi > 1) {
+                selection.add(x + i, y, 300 - absi * 30)
+                selection.add(x, y + i, 300 - absi * 30)
+            }
+        }
+
+        // Paint the crosshair onto the canvas
+        app.command("paint",
+                    "preview", true,
+                    "cursor", true,
+                    "color", color,
+                    "selection", selection);
+
+    } else if (name == "toolstart" || name == "toolupdate") { // User clicked on the canvas
+        app.command("activatecolor", "color", color); // set the active color
+        app.command("toggletool"); // switch back to previous tool
+    }
+}

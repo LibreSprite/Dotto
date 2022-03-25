@@ -93,6 +93,10 @@ public:
             return nullptr;
         });
 
+        addProperty("activeColor", [=]() {
+            return Tool::color.toU32();
+        });
+
         addFunction("addEventListener", [=](const String& name) {
             if (name == "tick") createMessageBinder<msg::Tick>(name);
             else if (name == "bootcomplete") createMessageBinder<msg::BootComplete>(name);

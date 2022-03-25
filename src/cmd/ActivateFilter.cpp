@@ -57,7 +57,12 @@ public:
             return;
         }
 
-        if (!interactive) {
+        std::shared_ptr<PropertySet> meta;
+        if (interactive) {
+            meta = filter->getMetaProperties();
+        }
+
+        if (!interactive || !meta) {
             auto surface = cell->getComposite();
             this->cell = cell;
             this->undoData = surface->getPixels();
@@ -72,8 +77,6 @@ public:
             logE("Could not create metamenu");
             return;
         }
-
-        auto meta = filter->getMetaProperties();
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
                     {"widget", "row"},
