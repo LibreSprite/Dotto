@@ -8,12 +8,14 @@
 
 class FileDialog : public Injectable<FileDialog> {
 public:
+    using Callback = std::function<void(const Vector<String>&)>;
+
     String title;
     String defaultPath;
     Vector<String> filters;
     String filterDescription;
     bool allowMultiple = false;
-    Vector<String> result;
-    virtual bool open() = 0;
-    virtual bool save() = 0;
+
+    virtual void open(Callback&&) = 0;
+    virtual void save(Callback&&) = 0;
 };

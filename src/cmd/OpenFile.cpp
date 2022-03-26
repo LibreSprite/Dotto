@@ -23,20 +23,26 @@ public:
         }
         inject<FileDialog> dialog;
         if (dialog) {
+            auto that = shared_from_this();
             dialog->filterDescription = "All Formats";
             dialog->title = "Open Image...";
             dialog->filters = std::move(filters);
-            dialog->open();
-            if (!dialog->result.empty())
-                set("filename", join(dialog->result, "|"));
+            dialog->open([=](const Vector<String>& name){
+                that->set("filename", join(name, "|"));
+                if (!fileName->empty()) {
+                    that->run();
+                }
+            });
         } else {
             logE("No File dialog available");
         }
     }
 
     void run() override {
-        if (fileName->empty())
+        if (fileName->empty()) {
             showOpenDialog();
+            return;
+        }
         if (!fileName->empty()) {
             auto files = split(fileName, "|");
             if (auto editor = inject<ui::Node>{"root"}->findChildById("editor")) { // TODO: create new editor instead
