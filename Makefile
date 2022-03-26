@@ -116,14 +116,6 @@ C_FILES += $(shell find libs -type f -name '*.c')
 
 LN_FLAGS += $(SO_FILES)
 
-#BEGIN V8 SUPPORT
-# CPP_FLAGS += -DSCRIPT_ENGINE_V8
-# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8)
-# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8_libplatform)
-# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8)
-# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8_libplatform)
-#END
-
 #BEGIN LUA SUPPORT
 CPP_FLAGS += -DSCRIPT_ENGINE_LUA
 LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
@@ -145,9 +137,9 @@ FLAGS += -O3 # release build
 POSTBUILD = $(STRIP) $(DOTTO)
 endif
 
+FLAGS += -pthread
 LN_FLAGS += -lpng
 LN_FLAGS += -lm
-# LN_FLAGS += -fsanitize=leak
 
 OBJ = $(patsubst %,$(ODIR)/%.o,$(CPP_FILES))
 OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
@@ -155,18 +147,18 @@ DEP := $(OBJ:.o=.d)
 
 $(ODIR)/%.cpp.o: %.cpp
 	@mkdir -p "$$(dirname "$@")"
-	$(CXX) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+	$(CXX) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)
 
 $(ODIR)/%.c.o: %.c
 	@mkdir -p "$$(dirname "$@")"
-	$(CC) $(FLAGS) $(C_FLAGS) -c $< -o $@
+	$(CC) -c $< -o $@ $(FLAGS) $(C_FLAGS)
 
 $(ODIR)/%.mm.o: %.mm
 	@mkdir -p "$$(dirname "$@")"
-	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+	$(OBJC) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)
 
 $(DOTTO): $(OBJ)
-	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
+	$(LN) $^ -o $@ $(FLAGS) $(LN_FLAGS)
 	$(POSTBUILD)
 
 .PHONY: clean

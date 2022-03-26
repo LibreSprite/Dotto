@@ -38,11 +38,12 @@ public:
     Vector<std::shared_ptr<NativeTask>> queue;
     Mutex queueMut;
 
-    std::array<std::thread, maxRunners> threads;
+    std::vector<std::thread> threads;
     std::atomic_bool isLive = false;
 
     void init() {
         isLive = true;
+        threads.resize(maxRunners);
         for (auto& thread : threads)
             thread = std::thread([=]{run();});
     }
@@ -51,6 +52,7 @@ public:
         isLive = false;
         for (auto& thread : threads)
             thread.join();
+        threads.clear();
     }
 
     void run() {

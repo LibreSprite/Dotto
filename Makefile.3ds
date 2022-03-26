@@ -17,6 +17,7 @@ CPP_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/libpng-config --cflags)
 LN_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/libpng-config --libs)
 
 CPP_FLAGS += -DNO_FREETYPE
+CPP_FLAGS += -DNO_THREADS
 
 CPP_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/sdl-config --cflags)
 LN_FLAGS += $(shell $(DEVKITPRO)/portlibs/3ds/bin/sdl-config --libs)
