@@ -87,6 +87,12 @@ CPP_FLAGS += -Isrc
 
 CPP_FLAGS += -MMD -MP
 
+CPP_FLAGS += -DCPPHTTPLIB_OPENSSL_SUPPORT
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libssl)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs libssl)
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libcrypto)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs libcrypto)
+
 ifeq ($(BACKEND),SDL1)
     CPP_FLAGS += -DUSE_SDL1
     CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl)
