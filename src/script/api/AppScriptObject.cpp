@@ -141,24 +141,6 @@ public:
             return true;
         });
 
-        addFunction("open", [=](const String& filters, const String& title="Script", const String& description = ""){
-            inject<FileDialog> dialog;
-            dialog->filterDescription = description;
-            dialog->title = title;
-            dialog->filters = split(filters, "|");
-            dialog->open();
-            return join(dialog->result, "|");
-        });
-
-        addFunction("save", [=](const String& filters, const String& title="Script", const String& description = ""){
-            inject<FileDialog> dialog;
-            dialog->filterDescription = description;
-            dialog->title = title;
-            dialog->filters = split(filters, "|");
-            dialog->save();
-            return join(dialog->result, "|");
-        });
-
         addFunction("openWindow", [=](const String& name) -> script::Value {
             return ui::Node::fromXML(name) != nullptr;
         });
