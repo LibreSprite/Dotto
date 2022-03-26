@@ -16,6 +16,7 @@
 #include <fs/Folder.hpp>
 #include <log/Log.hpp>
 #include <script/Engine.hpp>
+#include <task/TaskManager.hpp>
 
 using namespace fs;
 
@@ -25,6 +26,9 @@ public:
     inject<Log> log;
     inject<System> system{"new"};
     System::Provides globalSystem{system.get()};
+
+    inject<TaskManager> taskman{"new"};
+    TaskManager::Provides globalTaskMan{taskman.get()};
 
     inject<Cache> cache{"new"};
     Cache::Provides globalCache{cache.get()};
