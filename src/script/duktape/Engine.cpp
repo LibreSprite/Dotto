@@ -113,7 +113,7 @@ public:
         bool success = true;
         try {
             if (duk_peval_string(handle, code.c_str()) != 0) {
-                log->write(Log::Level::ERROR, scriptName, " [", duk_safe_to_string(handle, -1), "]");
+                log->write(Log::Level::Error, scriptName, " [", duk_safe_to_string(handle, -1), "]");
                 success = false;
             }
             duk_pop(handle);
@@ -122,7 +122,7 @@ public:
 #else
         } catch (const std::exception& ex) {
 #endif
-            log->write(Log::Level::ERROR, ex.what());
+            log->write(Log::Level::Error, ex.what());
             success = false;
         }
         execAfterEval(success);

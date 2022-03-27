@@ -24,7 +24,7 @@ public:
         if (!properties)
             properties = fs->parse("%appdata/settings.ini");
         if (!properties) {
-            Log::write(Log::Level::ERROR, "Could not open settings file. Reinstalling may fix this problem.");
+            Log::write(Log::Level::Error, "Could not open settings file. Reinstalling may fix this problem.");
             return false;
         }
 

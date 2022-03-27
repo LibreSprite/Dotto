@@ -120,7 +120,7 @@ public:
             } else throw std::runtime_error(lua_tostring(L, -1));
 
         } catch (const std::exception& ex) {
-            log->write(Log::Level::ERROR, ex.what());
+            log->write(Log::Level::Error, ex.what());
             success = false;
         }
         execAfterEval(success);
