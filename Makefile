@@ -73,6 +73,7 @@ else
 	LN_FLAGS += -framework Foundation
         CPP_FLAGS += -DLCMS2_SUPPORT
 	LN_FLAGS += -llcms2
+	export PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig"
     endif
 
     # ifneq ($(filter %86,$(UNAME_P)),)
