@@ -167,7 +167,7 @@ make DEBUG=false
 Initial setup:
 
 ```sh
-brew install sdl2 sdl2_image lcms2 lua freetype v8
+brew install sdl2 sdl2_image lcms2 lua freetype v8 openssl
 ```
 
 Compiling:

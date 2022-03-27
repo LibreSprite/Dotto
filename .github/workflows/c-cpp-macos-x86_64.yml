@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install-dependencies
-      run: brew install sdl2 sdl2_image lcms2 lua freetype v8
+      run: brew install sdl2 sdl2_image lcms2 lua freetype v8 openssl
     - name: configure
       run: ./configure
     - name: make
