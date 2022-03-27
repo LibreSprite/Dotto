@@ -64,7 +64,7 @@ public:
                     if (entry.first != lower && language->getMap().find(lower) == language->getMap().end())
                         language->set(lower, entry.second->get<String>());
                 }
-            } else {
+            } else if (languageName != "en_US") {
                 logI("Could not load language [", languageName, "]");
             }
         }

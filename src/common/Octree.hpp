@@ -128,12 +128,6 @@ public:
     }
 
     void split() {
-        logI("Splitting color");
-
-        // if (max.r - min.r < 3) return;
-        // if (max.g - min.g < 3) return;
-        // if (max.b - min.b < 3) return;
-        // if (max.a - min.a < 3) return;
         hits = 0;
 
         auto colors{std::move(std::get<Colors>(data))};

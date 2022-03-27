@@ -227,6 +227,11 @@ public:
                     pressedKeys.clear();
                     break;
 
+                case SDL_WINDOWEVENT_LEAVE:
+                    pub(msg::MouseMove{event.window.windowID, -0xFFFFF, -0xFFFFF, 0});
+                    break;
+
+                case SDL_WINDOWEVENT_ENTER:
                 case SDL_WINDOWEVENT_MOVED:
                 case SDL_WINDOWEVENT_SHOWN:
                 case SDL_WINDOWEVENT_EXPOSED:

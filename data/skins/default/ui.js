@@ -26,9 +26,14 @@ var controllers = {
         },
 
         activatetool : function() {
-            views.toolconfigbutton.src = app.activeTool.get("icon");
-            views.toolconfigbutton.visible = true;
-            views.toolconfigmenu.set("meta", app.activeTool.get("meta"));
+            var activeTool = app.activeTool;
+            if (activeTool) {
+                views.toolconfigbutton.src = activeTool.get("icon");
+                views.toolconfigbutton.visible = true;
+                views.toolconfigmenu.set("meta", activeTool.get("meta"));
+            } else {
+                views.toolconfigbutton.visible = false;
+            }
         }
     },
 

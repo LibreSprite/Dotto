@@ -29,11 +29,11 @@ public:
             }
         }
 
-        int i = 0;
-        for (auto& color : colors) {
-            logI("Color #", i, ": ", color);
-            i++;
-        }
+        // int i = 0;
+        // for (auto& color : colors) {
+        //     logI("Color #", i, ": ", color);
+        //     i++;
+        // }
     }
 
     U32 findClosestColorIndex(const Color& color) override {

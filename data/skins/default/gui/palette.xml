@@ -40,7 +40,6 @@ const handlers = {
 };
 
 function redraw(pal) {
-    console.log("Redrawing ", pal.length);
     const palwidth = Math.ceil(Math.sqrt(pal.length)) | 0;
     const palheight = Math.ceil(pal.length / palwidth) | 0;
     const surface = sample.surface;
@@ -61,7 +60,6 @@ function redraw(pal) {
 }
 
 function onEvent(event) {
-    console.log("PalEvent:" + event);
     var args = [];
     for (var i = 1; i < arguments.length; ++i)
         args.push(arguments[i]);

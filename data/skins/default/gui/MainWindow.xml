@@ -108,7 +108,7 @@
         <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
       </node>
 
-      <node controller="recentfileslist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
+      <node xcontroller="recentfileslist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
 
       <node flow="row" controller="tabtarget, button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">
         <image id="iconimage" height="24px" width="24px"/>
