@@ -18,6 +18,7 @@ ifeq ($(OS),Windows_NT)
     CPP_FLAGS += -DLCMS2_SUPPORT
     LN_FLAGS += -llcms2
     LN_FLAGS += -lole32
+    LN_FLAGS += -lws2_32
     LN_FLAGS += -mconsole
 
 else

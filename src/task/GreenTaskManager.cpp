@@ -54,6 +54,6 @@ public:
     }
 };
 
-TaskManager::Shared<GreenTaskManager> reg{"new"};
+static TaskManager::Shared<GreenTaskManager> reg{"new"};
 
 #endif

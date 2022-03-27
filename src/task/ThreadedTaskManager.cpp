@@ -121,5 +121,5 @@ public:
     }
 };
 
-TaskManager::Shared<ThreadedTaskManager> reg{"new"};
+static TaskManager::Shared<ThreadedTaskManager> reg{"new"};
 #endif
