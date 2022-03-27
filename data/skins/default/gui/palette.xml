@@ -1,0 +1,74 @@
+<node controller="script"
+      parent="colorpanel"><![CDATA[
+
+var sample = app.target.findChildById("sample");
+var fill = app.target.findChildById("fill");
+sample.addEventListener("mousedown");
+sample.addEventListener("mousemove");
+app.addEventListener("activatedocument");
+
+function getSample(x, y) {
+    const surface = sample.surface;
+    x = x / sample.globalWidth * surface.width | 0;
+    y = y / sample.globalHeight * surface.height | 0;
+    return surface.getPixel(x, y);
+}
+
+const handlers = {
+    mousedown : function(button, x, y) {
+        const rawColor = getSample(x, y);
+        const activeColor = app.activeColor;
+        const color = rawColor & ~(0xFF << 24) | (activeColor & (0xFF << 24));
+        if (color != activeColor)
+            app.command("activatecolor", "color", color);
+    },
+
+    mousemove : function(button, x, y) {
+        fill.set("multiply", getSample(x, y));
+    },
+
+    activatedocument : function() {
+        const pal = app.activeDocument.palette;
+        if (!pal) {
+            console.log("No palette in document");
+            sample.set("visible", "false");
+        } else {
+            redraw(pal);
+            sample.set("visible", "true");
+        }
+    }
+};
+
+function redraw(pal) {
+    console.log("Redrawing ", pal.length);
+    const palwidth = Math.ceil(Math.sqrt(pal.length)) | 0;
+    const palheight = Math.ceil(pal.length / palwidth) | 0;
+    const surface = sample.surface;
+    const surfaceWidth = surface.width;
+    const surfaceHeight = surface.height;
+    const cellWidth = surfaceWidth / palwidth;
+    const cellHeight = surfaceHeight / palheight;
+    for (var y = 0; y < palheight; ++y) {
+        for (var x = 0; x < palwidth; ++x) {
+            const color = pal.get(y * palwidth + x);
+            for (var cy = 0; cy < cellHeight; ++cy) {
+                for (cx = 0; cx < cellWidth; ++cx) {
+                    surface.setPixel(cy + y * cellHeight, cx + x * cellWidth, color);
+                }
+            }
+        }
+    }
+}
+
+function onEvent(event) {
+    console.log("PalEvent:" + event);
+    var args = [];
+    for (var i = 1; i < arguments.length; ++i)
+        args.push(arguments[i]);
+    if (event in handlers)
+        handlers[event].apply(null, args);
+}
+]]>
+<image id="sample" src="new:100x100:rgb{128,128,128}"/>
+<image id="fill"/>
+</node>
