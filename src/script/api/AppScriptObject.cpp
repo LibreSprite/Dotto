@@ -49,6 +49,10 @@ public:
 
         addProperty("eventTarget", [this]{return eventTarget;});
 
+        addProperty("activeDocument", [this]{
+            return getEngine().toValue(inject<Document>{"activedocument"}.shared());
+        });
+
         addProperty("activeCell", [this]{
             return getEngine().toValue(inject<Cell>{"activecell"}.shared());
         });
