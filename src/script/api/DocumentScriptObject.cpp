@@ -5,6 +5,7 @@
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <doc/Document.hpp>
+#include <script/Engine.hpp>
 #include <script/ScriptObject.hpp>
 
 class DocumentScriptObject : public script::ScriptObject {
@@ -12,14 +13,7 @@ class DocumentScriptObject : public script::ScriptObject {
     PubSub<> pub{this};
 
 public:
-    Value getWrapped() override {
-        return weak.lock();
-    }
-
-    void setWrapped(const Value& vdoc) override {
-        std::shared_ptr<Document> doc = vdoc;
-        weak = doc;
-        auto weak = this->weak;
+    void postInject() override {
         addFunction("activate", [=]{
             if (auto doc = weak.lock()) {
                 pub(msg::ActivateDocument{doc});
@@ -27,6 +21,23 @@ public:
             }
             return false;
         });
+
+        addProperty("palette", [=]()->script::Value{
+            if (auto doc = weak.lock()) {
+                return getEngine().toValue(doc->palette());
+            } else {
+                logI("palette:No document");
+            }
+            return nullptr;
+        });
+    }
+
+    Value getWrapped() override {
+        return weak.lock();
+    }
+
+    void setWrapped(const Value& vdoc) override {
+        weak = std::shared_ptr<Document>(vdoc);
     }
 };
 
