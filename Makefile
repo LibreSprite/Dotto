@@ -19,6 +19,7 @@ ifeq ($(OS),Windows_NT)
     LN_FLAGS += -llcms2
     LN_FLAGS += -lole32
     LN_FLAGS += -lws2_32
+    LN_FLAGS += -lcrypt32
     LN_FLAGS += -mconsole
 
 else
