@@ -58,6 +58,10 @@ else
 	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
         endif
 
+        ifeq ($(DEBUG),true)
+            FLAGS += -rdynamic # debug build
+        endif
+
 	LN_FLAGS += -lGL
         CPP_FLAGS += -DLCMS2_SUPPORT
 	LN_FLAGS += -llcms2
@@ -73,7 +77,6 @@ else
 	LN_FLAGS += -framework Foundation
         CPP_FLAGS += -DLCMS2_SUPPORT
 	LN_FLAGS += -llcms2
-	export PKG_CONFIG_PATH="/usr/local/opt/openssl@3/lib/pkgconfig"
     endif
 
     # ifneq ($(filter %86,$(UNAME_P)),)
@@ -139,7 +142,7 @@ CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
 
 # FLAGS += -m32 # uncomment for 32-bit build
 ifeq ($(DEBUG),true)
-FLAGS += -Og -g -D_DEBUG -rdynamic # debug build
+FLAGS += -Og -g -D_DEBUG # debug build
 POSTBUILD =
 else
 FLAGS += -O3 # release build

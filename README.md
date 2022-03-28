@@ -173,7 +173,7 @@ brew install sdl2 sdl2_image lcms2 lua freetype v8 openssl
 Compiling:
 
 ```sh
-make DEBUG=false
+PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig" make DEBUG=false
 chmod +x dotto
 ./dotto
 ```
