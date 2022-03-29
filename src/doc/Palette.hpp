@@ -2,32 +2,30 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include <common/types.hpp>
-#include <common/Color.hpp>
+#pragma once
 
-using Palette = Vector<Color>;
+#include <common/inject.hpp>
+#include <common/Surface.hpp>
 
-inline U32 findClosestColorIndex(const Palette& palette, const Color& color) {
-    if (palette.empty())
-        return color.r;
-    U32 closestIndex = 0;
-    auto closestDistance = palette[0].distanceSquared(color);
-    if (!closestDistance)
-        return closestIndex;
-    for (U32 index = 1, size = palette.size(); index < size; ++index) {
-        auto distance = palette[index].distanceSquared(color);
-        if (distance < closestDistance) {
-            if (!distance)
-                return index;
-            closestIndex = index;
-            closestDistance = distance;
-        }
+class Palette : public Injectable<Palette>, public std::enable_shared_from_this<Palette> {
+protected:
+    Vector<Color> colors;
+
+public:
+    std::size_t size() {return colors.size();}
+
+    Color* at(std::size_t index) {
+        return (index >= colors.size()) ? nullptr : &colors[index];
     }
-    return closestIndex;
-}
 
-inline Color findClosestColor(const Palette& palette, const Color& color) {
-    if (palette.empty())
-        return {color.r, color.r, color.r, 255};
-    return palette[findClosestColorIndex(palette, color)];
-}
+    virtual void loadFromSurface(Surface& surface, U32 maxColors) = 0;
+
+    virtual U32 findClosestColorIndex(const Color& color) = 0;
+
+    Color findClosestColor(const Color& color) {
+        if (colors.empty())
+            return {color.r, color.g, color.b, color.a};
+        return colors[findClosestColorIndex(color)];
+    }
+
+};

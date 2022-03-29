@@ -32,7 +32,7 @@ public:
             first = false;
             stream << arg.str();
         }
-        logger->write(Log::Level::INFO, stream.str());
+        logger->write(Log::Level::Info, stream.str());
     }
 };
 

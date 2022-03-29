@@ -1,0 +1,7 @@
+http.get("https://raw.githubusercontent.com/LibreSprite/Dotto/development/README.md");
+
+function onEvent(event) {
+    if (event == "get" && http.code == 200) {
+        console.log(http.text);
+    }
+}

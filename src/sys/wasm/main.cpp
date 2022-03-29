@@ -15,7 +15,7 @@ int main(int argc, const char* argv[]) {
     static inject<App> app{"dotto"};
     app->boot(argc, argv);
 
-    Log::write(Log::Level::VERBOSE, "Running Dotto!");
+    logI("Running Dotto!");
     emscripten_set_main_loop(+[]{app->run();}, 0, true);
 
     return 0;

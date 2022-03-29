@@ -6,6 +6,7 @@
 
 #include <common/inject.hpp>
 #include <common/PropertySet.hpp>
+#include <doc/Palette.hpp>
 
 class Timeline;
 class Command;
@@ -25,4 +26,5 @@ public:
     virtual void redo() = 0;
     virtual String path() = 0;
     virtual void setPath(const String&) = 0;
+    virtual std::shared_ptr<Palette> palette() = 0;
 };

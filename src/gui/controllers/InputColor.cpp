@@ -34,7 +34,6 @@ public:
             color = node()->getPropertySet().get<Color>("value");
         }
 
-        logI("Attach IC ", color);
         node()->set("value", color);
     }
 

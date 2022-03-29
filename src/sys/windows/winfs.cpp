@@ -8,8 +8,6 @@
 #include <codecvt>
 #include <shlobj.h>
 
-#undef ERROR
-
 #include <common/String.hpp>
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>

@@ -29,7 +29,7 @@ int main(int argc, const char* argv[]) {
     inject<App> app{"dotto"};
     app->boot(argc, argv);
 
-    Log::write(Log::Level::VERBOSE, "Running Dotto!");
+    logI("Running Dotto!");
     while(app->run());
 
     return 0;

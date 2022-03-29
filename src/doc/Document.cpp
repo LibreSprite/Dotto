@@ -20,6 +20,7 @@ class DocumentImpl : public Document {
     U32 docWidth = 0;
     U32 docHeight = 0;
     String filepath;
+    inject<Palette> globalPalette{"new"};
 
     Vector<std::shared_ptr<Command>> history;
     U32 historyCursor = 0;
@@ -71,6 +72,7 @@ public:
         auto timeline = createTimeline();
         inject<Cell> cell{"bitmap"};
         *cell->getComposite() = *surface;
+        globalPalette->loadFromSurface(*surface, 255);
         timeline->setCell(0, 0, cell);
         docWidth = surface->width();
         docHeight = surface->height();
@@ -143,6 +145,10 @@ public:
 
     void setPath(const String& path) override {
         filepath = path;
+    }
+
+    std::shared_ptr<Palette> palette() override {
+        return globalPalette;
     }
 };
 

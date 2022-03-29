@@ -39,6 +39,8 @@ declare -a dependencies=(
 "/usr/local/opt/sdl2/lib/libSDL2-2.0.0.dylib"
 "/usr/local/opt/sdl2_image/lib/libSDL2_image-2.0.0.dylib"
 "/usr/local/opt/little-cms2/lib/liblcms2.2.dylib"
+"/usr/local/opt/openssl/lib/libssl.1.1.dylib"
+"/usr/local/opt/openssl/lib/libcrypto.1.1.dylib"
 )
 
 for srcname in "${dependencies[@]}"

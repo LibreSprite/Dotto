@@ -26,12 +26,18 @@ public:
         }
         inject<FileDialog> dialog;
         if (dialog) {
+            auto that = shared_from_this();
             dialog->filterDescription = "All Formats";
             dialog->title = "Save As...";
             dialog->filters = std::move(filters);
-            dialog->save();
-            if (!dialog->result.empty())
-                set("filename", dialog->result[0]);
+            dialog->save([=](const Vector<String>& name){
+                that->set("filename", name.empty() ? "" : name[0]);
+                if (!fileName->empty()) {
+                    if (!*exportAs)
+                        doc()->setPath(fileName);
+                    FileSystem::write(fileName, doc());
+                }
+            });
         }
     }
 
@@ -40,8 +46,7 @@ public:
             return;
         if (*saveAs || doc()->path().empty()) {
             showSaveDialog();
-            if (fileName->empty())
-                return;
+            return;
         } else if (fileName->empty()) {
             *fileName = doc()->path();
         }

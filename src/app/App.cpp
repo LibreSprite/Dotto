@@ -16,6 +16,7 @@
 #include <fs/Folder.hpp>
 #include <log/Log.hpp>
 #include <script/Engine.hpp>
+#include <task/TaskManager.hpp>
 
 using namespace fs;
 
@@ -25,6 +26,9 @@ public:
     inject<Log> log;
     inject<System> system{"new"};
     System::Provides globalSystem{system.get()};
+
+    inject<TaskManager> taskman{"new"};
+    TaskManager::Provides globalTaskMan{taskman.get()};
 
     inject<Cache> cache{"new"};
     Cache::Provides globalCache{cache.get()};
@@ -46,9 +50,9 @@ public:
         referenceTime = clock::now();
         log->setGlobal();
 #ifdef _DEBUG
-        log->setLevel(Log::Level::VERBOSE); // TODO: Configure level using args
+        log->setLevel(Log::Level::Verbose); // TODO: Configure level using args
 #else
-        log->setLevel(Log::Level::INFO); // TODO: Configure level using args
+        log->setLevel(Log::Level::Info); // TODO: Configure level using args
 #endif
         fs->boot();
         config->boot();
@@ -67,7 +71,7 @@ public:
                 return left.first < right.first;
             });
             for (auto& entry : files)
-                entry.second->parse();
+                entry.second->parse(true);
         }
         pub(msg::BootComplete{});
         auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - referenceTime);

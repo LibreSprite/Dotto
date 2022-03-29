@@ -2,27 +2,17 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#if defined(__linux__) || defined(__WINDOWS__) || defined(__APPLE__)
-
-#include <tinyfiledialogs/tinyfiledialogs.h>
+#if defined(EMSCRIPTEN)
 
 #include <common/String.hpp>
 #include <fs/FileDialog.hpp>
 #include <log/Log.hpp>
 #include <task/TaskManager.hpp>
 
-class LinuxFileDialog : public FileDialog {
+class WasmFileDialog : public FileDialog {
 public:
     TaskHandle handle;
     inject<TaskManager> taskManager;
-
-    static Vector<const char*> init(const Vector<String>& filters) {
-        Vector<const char*> cfilters;
-        cfilters.reserve(filters.size());
-        for (auto& filter : filters)
-            cfilters.push_back(filter.c_str());
-        return cfilters;
-    }
 
     void open(Callback&& callback) override {
         handle = taskManager->add(
@@ -33,14 +23,7 @@ public:
                 title = this->title,
                 allowMultiple = this->allowMultiple
              ]()->Value{
-                auto cfilters = init(filters);
-                auto chosen = tinyfd_openFileDialog(title.c_str(),
-                                                    defaultPath.c_str(),
-                                                    cfilters.size(),
-                                                    cfilters.data(),
-                                                    filterDescription.c_str(),
-                                                    allowMultiple);
-                return chosen ? split(chosen, "|") : Vector<String>{};
+                return Vector<String>{};
             },
             [=](Value&& result){
                 if (result.has<Vector<String>>()) {
@@ -60,13 +43,7 @@ public:
                 title = this->title,
                 allowMultiple = this->allowMultiple
              ]()->Value{
-                auto cfilters = init(filters);
-                auto chosen = tinyfd_saveFileDialog(title.c_str(),
-                                                defaultPath.c_str(),
-                                                cfilters.size(),
-                                                cfilters.data(),
-                                                filterDescription.c_str());
-                return chosen ? String{chosen} : String{};
+                return String{};
             },
             [=](Value&& result){
                 if (result.has<String>()) {
@@ -78,6 +55,6 @@ public:
     }
 };
 
-static FileDialog::Singleton<LinuxFileDialog> reg{""};
+static FileDialog::Singleton<WasmFileDialog> reg{""};
 
 #endif

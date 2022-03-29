@@ -100,15 +100,15 @@ public:
 
                 if (!trace.IsEmpty()){
                     v8::String::Utf8Value utf8Trace(m_isolate, ToLocal(trace));
-                    log->write(Log::Level::ERROR, *utf8Trace);
+                    log->write(Log::Level::Error, *utf8Trace);
                 } else {
-                    log->write(Log::Level::ERROR, *utf8);
+                    log->write(Log::Level::Error, *utf8);
                 }
                 success = false;
             }
 
         } catch (const std::exception& ex) {
-            log->write(Log::Level::ERROR, ex.what());
+            log->write(Log::Level::Error, ex.what());
             success = false;
         }
         execAfterEval(success);
@@ -153,16 +153,16 @@ public:
 
                     if (!trace.IsEmpty()){
                         v8::String::Utf8Value utf8Trace(m_isolate, ToLocal(trace));
-                        log->write(Log::Level::ERROR, *utf8Trace);
+                        log->write(Log::Level::Error, *utf8Trace);
                     } else {
-                        log->write(Log::Level::ERROR, *utf8);
+                        log->write(Log::Level::Error, *utf8);
                     }
 
                     success = false;
                 }
             }
         } catch (const std::exception& ex) {
-            log->write(Log::Level::ERROR, ex.what());
+            log->write(Log::Level::Error, ex.what());
             success = false;
         }
         execAfterEval(success);

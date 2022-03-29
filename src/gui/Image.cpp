@@ -25,7 +25,31 @@ namespace ui {
             surface.reset();
             if (src->empty())
                 return;
-            surface = FileSystem::parse(*src);
+
+            std::cmatch match;
+            std::regex_match(src->c_str(), match, std::regex("^new:([0-9]+)x([0-9]+)(?::(.*))?"));
+            if (!match.empty()) {
+                U32 width = std::atoi(match[1].str().c_str());
+                U32 height = std::atoi(match[2].str().c_str());
+
+                if (!width || !height)
+                    return;
+
+                surface = std::make_shared<Surface>();
+                surface->resize(width, height);
+
+                if (match.size() == 4) {
+                    auto color = Color{match[3].str()}.toU32();
+                    auto data = surface->data();
+                    for (U32 i = 0; i < width * height; ++i) {
+                        data[i] = color;
+                    }
+                    surface->setDirty();
+                }
+            } else {
+                surface = FileSystem::parse(*src);
+            }
+
             if (!surface)
                 logE("Could not load image ", src);
             load({{"surface", surface}});

@@ -10,9 +10,9 @@ class Log : public Injectable<Log> {
 public:
 
     enum class Level {
-        VERBOSE,
-        INFO,
-        ERROR
+        Verbose,
+        Info,
+        Error
     };
 
     template<typename ... Args>
@@ -61,18 +61,18 @@ private:
 
 template<typename ... Args>
 inline bool logV(Args&& ... args) {
-    Log::write(Log::Level::VERBOSE, std::forward<Args>(args)...);
+    Log::write(Log::Level::Verbose, std::forward<Args>(args)...);
     return true;
 }
 
 template<typename ... Args>
 inline bool logI(Args&& ... args) {
-    Log::write(Log::Level::INFO, std::forward<Args>(args)...);
+    Log::write(Log::Level::Info, std::forward<Args>(args)...);
     return true;
 }
 
 template<typename ... Args>
 inline bool logE(Args&& ... args) {
-    Log::write(Log::Level::ERROR, std::forward<Args>(args)...);
+    Log::write(Log::Level::Error, std::forward<Args>(args)...);
     return true;
 }

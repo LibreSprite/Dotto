@@ -18,6 +18,8 @@ ifeq ($(OS),Windows_NT)
     CPP_FLAGS += -DLCMS2_SUPPORT
     LN_FLAGS += -llcms2
     LN_FLAGS += -lole32
+    LN_FLAGS += -lws2_32
+    LN_FLAGS += -lcrypt32
     LN_FLAGS += -mconsole
 
 else
@@ -56,6 +58,10 @@ else
 	    CPP_FLAGS += -DSCRIPT_ENGINE_V8
         endif
 
+        ifeq ($(DEBUG),true)
+            FLAGS += -rdynamic # debug build
+        endif
+
 	LN_FLAGS += -lGL
         CPP_FLAGS += -DLCMS2_SUPPORT
 	LN_FLAGS += -llcms2
@@ -87,6 +93,12 @@ CPP_FLAGS += -Isrc
 
 CPP_FLAGS += -MMD -MP
 
+CPP_FLAGS += -DCPPHTTPLIB_OPENSSL_SUPPORT
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libssl)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs libssl)
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libcrypto)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs libcrypto)
+
 ifeq ($(BACKEND),SDL1)
     CPP_FLAGS += -DUSE_SDL1
     CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl)
@@ -116,14 +128,6 @@ C_FILES += $(shell find libs -type f -name '*.c')
 
 LN_FLAGS += $(SO_FILES)
 
-#BEGIN V8 SUPPORT
-# CPP_FLAGS += -DSCRIPT_ENGINE_V8
-# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8)
-# CPP_FLAGS += $(shell $(PKGCONFIG) --cflags v8_libplatform)
-# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8)
-# LN_FLAGS += $(shell $(PKGCONFIG) --libs v8_libplatform)
-#END
-
 #BEGIN LUA SUPPORT
 CPP_FLAGS += -DSCRIPT_ENGINE_LUA
 LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
@@ -138,16 +142,16 @@ CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
 
 # FLAGS += -m32 # uncomment for 32-bit build
 ifeq ($(DEBUG),true)
-FLAGS += -Og -g -D_DEBUG -rdynamic # debug build
+FLAGS += -Og -g -D_DEBUG # debug build
 POSTBUILD =
 else
 FLAGS += -O3 # release build
 POSTBUILD = $(STRIP) $(DOTTO)
 endif
 
+FLAGS += -pthread
 LN_FLAGS += -lpng
 LN_FLAGS += -lm
-# LN_FLAGS += -fsanitize=leak
 
 OBJ = $(patsubst %,$(ODIR)/%.o,$(CPP_FILES))
 OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
@@ -155,18 +159,18 @@ DEP := $(OBJ:.o=.d)
 
 $(ODIR)/%.cpp.o: %.cpp
 	@mkdir -p "$$(dirname "$@")"
-	$(CXX) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+	$(CXX) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)
 
 $(ODIR)/%.c.o: %.c
 	@mkdir -p "$$(dirname "$@")"
-	$(CC) $(FLAGS) $(C_FLAGS) -c $< -o $@
+	$(CC) -c $< -o $@ $(FLAGS) $(C_FLAGS)
 
 $(ODIR)/%.mm.o: %.mm
 	@mkdir -p "$$(dirname "$@")"
-	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+	$(OBJC) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)
 
 $(DOTTO): $(OBJ)
-	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
+	$(LN) $^ -o $@ $(FLAGS) $(LN_FLAGS)
 	$(POSTBUILD)
 
 .PHONY: clean
