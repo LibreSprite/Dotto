@@ -1,0 +1,1 @@
+<textbutton parent="colorpanel" click="LoadPalette" label="Load Palette..."/>
