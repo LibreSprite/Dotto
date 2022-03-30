@@ -14,8 +14,15 @@ protected:
 public:
     std::size_t size() {return colors.size();}
 
+    void push(const Color& color) {colors.push_back(color);}
+
     Color* at(std::size_t index) {
         return (index >= colors.size()) ? nullptr : &colors[index];
+    }
+
+    Palette& operator = (const Palette& other) {
+        colors = other.colors;
+        return *this;
     }
 
     virtual void loadFromSurface(Surface& surface, U32 maxColors) = 0;
