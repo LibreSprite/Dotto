@@ -118,6 +118,7 @@ public:
             else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name);
             else if (name == "activatedocument") createMessageBinder<msg::ActivateDocument>(name);
             else if (name == "activatecell") createMessageBinder<msg::ActivateCell>(name);
+            else if (name == "changepalette") createMessageBinder<msg::ChangePalette>(name);
             return true;
         });
 
