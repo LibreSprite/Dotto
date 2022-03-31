@@ -30,7 +30,7 @@ namespace ui {
 
         constexpr Unit(S32 pixel) {*this = pixel;}
 
-        constexpr Unit(const Value& pixel) {
+        Unit(const Value& pixel) {
             if (pixel.has<U32>())
                 *this = static_cast<U32>(pixel);
             else if (pixel.has<S32>())
