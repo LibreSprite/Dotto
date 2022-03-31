@@ -3,6 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <png.h>
+#include <cstring>
 
 #include <common/Parser.hpp>
 #include <common/Surface.hpp>

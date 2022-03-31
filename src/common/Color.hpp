@@ -65,7 +65,7 @@ public:
 
     void fromString(const String& color);
 
-    Color& fromU32(U32 rgba) {
+    constexpr Color& fromU32(U32 rgba) {
         r = static_cast<U8>(rgba >> Rshift);
         g = static_cast<U8>(rgba >> Gshift);
         b = static_cast<U8>(rgba >> Bshift);
