@@ -15,6 +15,7 @@ namespace ui {
 
 class Document;
 class Cell;
+class Palette;
 class PropertySet;
 
 namespace msg {
@@ -153,6 +154,11 @@ namespace msg {
     struct ActivateCell : public Message {
         std::shared_ptr<Cell> cell;
         ActivateCell(std::shared_ptr<Cell> cell) : cell{cell} {}
+    };
+
+    struct ChangePalette : public Message {
+        std::shared_ptr<Palette> palette;
+        ChangePalette(std::shared_ptr<Palette> palette) : palette{palette} {}
     };
 
     struct ModifyCell : public Message {

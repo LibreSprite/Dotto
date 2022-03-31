@@ -6,6 +6,7 @@ var fill = app.target.findChildById("fill");
 sample.addEventListener("mousedown");
 sample.addEventListener("mousemove");
 app.addEventListener("activatedocument");
+app.addEventListener("changepalette");
 
 function getSample(x, y) {
     const surface = sample.surface;
@@ -36,6 +37,10 @@ const handlers = {
             redraw(pal);
             sample.set("visible", "true");
         }
+    },
+
+    changepalette : function() {
+        handlers.activatedocument();
     }
 };
 
