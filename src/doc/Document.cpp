@@ -12,6 +12,7 @@
 #include <doc/Cell.hpp>
 #include <doc/Document.hpp>
 #include <doc/Timeline.hpp>
+#include <fs/FileSystem.hpp>
 
 class DocumentImpl : public Document {
     HashMap<String, std::shared_ptr<Timeline>> guidToTimeline;
@@ -60,6 +61,27 @@ public:
         auto surface = cell->getComposite();
         surface->resize(properties->get<U32>("width") ?: 16,
                         properties->get<U32>("height") ?: 16);
+        Value palette;
+        auto palettePath = properties->get<String>("palette");
+        if (!palettePath.empty()) {
+            palette = inject<FileSystem>{}->parse(palettePath);
+        } else {
+            palette = properties->get<std::shared_ptr<Palette>>("palette");
+            if (!palette) {
+                palette = properties->get<std::shared_ptr<Surface>>("palette");
+            }
+        }
+
+        if (palette.has<std::shared_ptr<Surface>>()) {
+            if (auto surface = palette.get<std::shared_ptr<Surface>>()) {
+                globalPalette->loadFromSurface(*surface, 255);
+            }
+        } else if (palette.has<std::shared_ptr<Palette>>()) {
+            if (auto ptr = palette.get<std::shared_ptr<Palette>>()) {
+                *globalPalette = *ptr;
+            }
+        }
+
         timeline->setCell(0, 0, cell);
         docWidth = surface->width();
         docHeight = surface->height();
