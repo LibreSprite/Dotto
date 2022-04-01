@@ -1,6 +1,6 @@
 app.openWindow("colorpreview");
+app.openWindow("loadpalette");
+app.openWindow("palette");
 app.openWindow("colorwheel");
 app.openWindow("rgb");
 app.openWindow("hsl");
-app.openWindow("palette");
-app.openWindow("loadpalette");
