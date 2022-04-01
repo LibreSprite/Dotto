@@ -34,6 +34,6 @@ function onEvent(event) {
         handlers[event].apply(null, args);
 }
 ]]>
-<image id="sample" src="%skin/colorpicker.png"/>
+<image id="sample" src="%appdata/palettes/default.png"/>
 <image id="fill"/>
 </node>
