@@ -16,7 +16,7 @@ protected:
     friend class Document;
     String type;
     String GUID;
-    String blendMode;
+    String blendMode = "normal";
     std::shared_ptr<Surface> composite = std::make_shared<Surface>();
     std::shared_ptr<Selection> mask;
     F32 alpha = 1.0f;

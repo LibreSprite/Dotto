@@ -28,6 +28,7 @@ class Editor : public ui::Controller {
     Property<F32> scale{this, "scale", 1.0f, &Editor::rezoom};
     Property<U32> frame{this, "frame", 0, &Editor::setFrame};
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
+    std::shared_ptr<ui::Node> canvas;
     std::shared_ptr<Cell> lastCell;
     std::shared_ptr<Cell> activeCell;
     U32 activeFrame = -1;
@@ -54,22 +55,6 @@ public:
 
         activeCell = timeline->getCell(frame, layer);
 
-        if (frame != activeFrame || layer != activeLayer) {
-            for (auto cellNode : cellNodes)
-                cellNode->remove();
-            cellNodes.clear();
-
-            for (U32 i = 0, count = timeline->layerCount(); i < count; ++i) {
-                lastCell = timeline->getCell(frame, i);
-                if (!lastCell)
-                    continue;
-                Cell::Provides p{lastCell};
-                auto cellNode = ui::Node::fromXML("canvas");
-                cellNodes.push_back(cellNode);
-                node()->addChild(cellNode);
-            }
-        }
-
         cellProvides.emplace(activeCell.get(), "activecell");
         pub(msg::ActivateCell{activeCell});
 
@@ -87,6 +72,7 @@ public:
     void attach() override {
         node()->addEventListener<ui::Focus, ui::FocusChild>(this);
         pub(msg::ActivateDocument{doc});
+        canvas = node()->findChildById("canvas");
     }
 
     void rezoom() {
