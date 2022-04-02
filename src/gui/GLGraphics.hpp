@@ -118,6 +118,20 @@ public:
         glDeleteShader(fragmentShader);
     }
 
+    GLuint rawFB = 0;
+    std::shared_ptr<Surface> rawSurface;
+    std::shared_ptr<Surface> renderTarget;
+
+    void setupRawRenderTarget() {
+        if (!rawSurface) {
+            glGenFramebuffers(1, &rawFB);
+            glBindFramebuffer(GL_FRAMEBUFFER, rawFB);
+            rawSurface = std::make_shared<Surface>();
+        }
+        rawSurface->resize(width * scale, height * scale);
+        renderTarget = rawSurface;
+    }
+
     U32 compile(U32 type, const String& source) {
         U32 shader = glCreateShader(type);
         auto str = source.c_str();
@@ -176,6 +190,7 @@ public:
         iwidth = 2.0f / width;
         height = globalRect.height;
         iheight = 2.0f / height;
+        setupRawRenderTarget();
         glViewport(0, 0, width * scale, height * scale);
         glClearColor(clearColor.r/255.0f,
                      clearColor.g/255.0f,
@@ -186,6 +201,8 @@ public:
 
     void end() {
         flush();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        write();
     }
 
     U32 currentBufferSize = 0;
@@ -238,7 +255,15 @@ public:
         texture->bind(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface.width(), surface.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, surface.data());
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA,
+                     surface.width(),
+                     surface.height(),
+                     0,
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     &surface == renderTarget.get() ? nullptr : surface.data());
         texture->width = surface.width();
         texture->iwidth = 1.0f / texture->width;
         texture->height = surface.height();
@@ -446,19 +471,14 @@ public:
         clip = rect;
     }
 
-    std::shared_ptr<Surface> result;
     Surface* read() override {
-        if (!result) {
-            result = std::make_shared<Surface>();
-        }
-        result->resize(width * scale, height * scale);
-        glReadPixels(0, 0, width * scale, height * scale, GL_RGBA, GL_UNSIGNED_BYTE, result->data());
-        result->setDirty();
-        return result.get();
+        glReadPixels(0, 0, width * scale, height * scale, GL_RGBA, GL_UNSIGNED_BYTE, renderTarget->data());
+        renderTarget->setDirty();
+        return renderTarget.get();
     }
 
     void write() override {
-        if (!result)
+        if (!rawSurface)
             return;
         Rect rect(0, 0, width * scale, height * scale);
         Rect dest(0, 0, width, height);
@@ -466,7 +486,7 @@ public:
         setClipRect(rect);
         alpha = 1.0f;
         blit({
-                .surface     = result,
+                .surface     = rawSurface,
                 .source      = rect,
                 .destination = dest,
                 .nineSlice   = slice,
