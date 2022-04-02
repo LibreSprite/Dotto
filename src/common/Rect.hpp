@@ -74,7 +74,15 @@ struct Rect {
     }
 
     bool expand(const Rect& other) {
-        return expand(other.x, other.y) && expand(other.right(), other.bottom());
+        if (other.empty())
+            return false;
+        bool ret = expand(other.x, other.y);
+        bool ret2 = expand(other.right(), other.bottom());
+        return ret || ret2;
+    }
+
+    void clear() {
+        width = height = 0;
     }
 
     bool empty() {
