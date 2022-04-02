@@ -23,6 +23,8 @@ public:
             return;
         if (*property == "alpha")
             node()->set("value", tostring((*cell)->getAlpha()));
+        if (*property == "blendmode")
+            node()->set("value", (*cell)->getBlendMode());
     }
 
     void attach() override {
