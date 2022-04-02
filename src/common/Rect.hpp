@@ -73,6 +73,14 @@ struct Rect {
             py < static_cast<S32>(y + height);
     }
 
+    bool expand(const Rect& other) {
+        return expand(other.x, other.y) && expand(other.right(), other.bottom());
+    }
+
+    bool empty() {
+        return width == 0 || height == 0;
+    }
+
     bool expand(S32 px, S32 py) {
         bool changed = false;
         if (width == 0) {
