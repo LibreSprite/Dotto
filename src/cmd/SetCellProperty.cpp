@@ -34,6 +34,10 @@ public:
             prevValue = (*cell)->getAlpha();
             *value = getPropertySet().get<F32>("value");
             (*cell)->setAlpha(*value, false);
+        } else if (*property == "blendmode") {
+            prevValue = (*cell)->getBlendMode();
+            *value = getPropertySet().get<String>("value");
+            (*cell)->setBlendMode(*value, false);
         } else {
             logE("Invalid SetCellProperty property [", *property, "]");
             return;
