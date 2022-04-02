@@ -99,7 +99,7 @@ public:
 
         png_read_image(png, rowPointers);
 
-        auto surface = std::make_shared<Surface>(Surface{});
+        auto surface = std::make_shared<Surface>();
         surface->resize(width, height);
         auto data = surface->data();
         for (U32 y = 0; y < height; y++) {

@@ -29,7 +29,7 @@ public:
     U32 height = 0;
     F32 iwidth = 0;
     F32 iheight = 0;
-    bool dirty = true;
+    Rect dirtyRegion{0, 0, ~U32{}, ~U32{}};
 
     GLTexture() {
         glGenTextures(1, &id);
@@ -40,31 +40,17 @@ public:
             glDeleteTextures(1, &id);
     }
 
+    void setDirty(const Rect& region) override {
+        dirtyRegion.expand(region);
+    }
+
     void bind(U32 target) {
         glBindTexture(target, id);
     }
 };
 
-class GLGraphics;
-
-class GLTextureInfo : public TextureInfo {
-public:
-    ~GLTextureInfo();
-
-    std::shared_ptr<GLTexture> get(const std::shared_ptr<GLGraphics>& context);
-
-    void setDirty() {
-        for (auto& entry : textures) {
-            entry.second->dirty = true;
-        }
-    }
-
-    HashMap<GLGraphics*, std::shared_ptr<GLTexture>> textures;
-};
-
 class GLGraphics : public Graphics, public std::enable_shared_from_this<GLGraphics> {
 public:
-    HashSet<GLTextureInfo*> textureInfo;
     U32 VBO = 0;
     U32 VAO = 0;
     U32 shader = 0;
@@ -170,12 +156,7 @@ public:
     }
 
     ~GLGraphics() {
-        while (!textureInfo.empty()) {
-            auto it = textureInfo.begin();
-            (*it)->textures.erase(this);
-            textureInfo.erase(it);
-        }
-
+        textures.clear();
         if (VBO)
             glDeleteBuffers(1, &VBO);
         if (VAO)
@@ -251,10 +232,10 @@ public:
     }
 
     void upload(Surface& surface, GLTexture* texture) {
-        texture->dirty = false;
         texture->bind(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        // TODO: Use dirtyRegion to upload only what changed
         glTexImage2D(GL_TEXTURE_2D,
                      0,
                      GL_RGBA,
@@ -269,6 +250,7 @@ public:
         texture->height = surface.height();
         texture->iheight = 1.0f / texture->height;
         // glGenerateMipmap(GL_TEXTURE_2D);
+        texture->dirtyRegion = Rect{};
     }
 
     struct Vertex {
@@ -356,7 +338,7 @@ public:
         }
 
         if (debug)
-            logI("Pushing ", x1, " ", y1, " => ", x2, " ", y2);
+            logI("Pushing ", x1, " ", y1, " => ", x2, " ", y2, " to ", shared_from_this(), " ", activeTexture);
 
         push({x1, y1, z, u0, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
         push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
@@ -439,15 +421,24 @@ public:
         }
     }
 
+    Vector<fork_ptr<Texture>> textures;
+
     void blit(const BlitSettings& settings) override {
         std::shared_ptr<GLTexture> texture;
         if (settings.surface) {
             auto& surface = *settings.surface;
-            if (!surface.textureInfo)
-                surface.textureInfo = std::make_shared<GLTextureInfo>();
-            texture = std::static_pointer_cast<GLTextureInfo>(surface.textureInfo)->get(shared_from_this());
+            texture = surface.info().get<GLTexture>(this);
 
-            if (texture->dirty) {
+            if (!texture) {
+                texture = std::make_shared<GLTexture>();
+                fork_ptr<Texture> ptr{std::static_pointer_cast<Texture>(texture)};
+                textures.push_back(ptr);
+                if (settings.debug)
+                    logI("Creating texture ", shared_from_this(), " => ", texture);
+                surface.info().set(this, std::move(ptr));
+            }
+
+            if (!texture->dirtyRegion.empty()) {
                 if (settings.debug)
                     logI("Uploading surface");
                 upload(surface, texture.get());
@@ -473,7 +464,7 @@ public:
 
     Surface* read() override {
         glReadPixels(0, 0, width * scale, height * scale, GL_RGBA, GL_UNSIGNED_BYTE, renderTarget->data());
-        renderTarget->setDirty();
+        renderTarget->setDirty(renderTarget->rect());
         return renderTarget.get();
     }
 
@@ -499,18 +490,3 @@ public:
     }
 };
 
-inline std::shared_ptr<GLTexture> GLTextureInfo::get(const std::shared_ptr<GLGraphics>& context) {
-    auto it = textures.find(context.get());
-    if (it == textures.end()) {
-        auto texture = std::make_shared<GLTexture>();
-        it = textures.emplace(context.get(), texture).first;
-        context->textureInfo.insert(this);
-    }
-    return it->second;
-}
-
-inline GLTextureInfo::~GLTextureInfo() {
-    for (auto& entry : textures) {
-        entry.first->textureInfo.erase(this);
-    }
-}

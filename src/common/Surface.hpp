@@ -8,6 +8,7 @@
 #include <variant>
 
 #include <common/Color.hpp>
+#include <common/Rect.hpp>
 #include <common/types.hpp>
 #include <gui/Texture.hpp>
 
@@ -15,8 +16,21 @@ class Surface : public std::enable_shared_from_this<Surface> {
 public:
     using PixelType = U32;
 
+private:
+    U32 _width = 0, _height = 0;
+    Vector<PixelType> pixels;
+    std::unique_ptr<TextureInfo> _textureInfo;
+
+public:
     U32 width() const {return _width;}
     U32 height() const {return _height;}
+    Rect rect() const {return {0, 0, _width, _height};}
+
+    TextureInfo& info() {
+        if (!_textureInfo)
+            _textureInfo = std::make_unique<TextureInfo>();
+        return *_textureInfo;
+    }
 
     void resize(U32 width, U32 height) {
         _width = width;
@@ -28,9 +42,9 @@ public:
 
     U32 dataSize() {return _width * _height * sizeof(PixelType);};
 
-    void setDirty() {
-        if (textureInfo)
-            textureInfo->setDirty();
+    void setDirty(const Rect& region) {
+        if (_textureInfo)
+            _textureInfo->setDirty(region);
     }
 
     const Vector<PixelType>& getPixels() {
@@ -49,20 +63,20 @@ public:
     void setPixelUnsafe(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
         pixels[index] = pixel;
-        setDirty();
+        setDirty({S32(x), S32(y), 1, 1});
     }
 
-    void setPixels(Vector<PixelType>& read) {
+    void setPixels(const Vector<PixelType>& read) {
         if (read.size() != pixels.size())
             return;
         pixels = read;
-        setDirty();
+        setDirty({0, 0, _width, _height});
     }
 
     void setPixel(U32 x, U32 y, PixelType pixel) {
         U32 index = x + y * _width;
         if (index < _width * _height) {
-            setDirty();
+            setDirty({S32(x), S32(y), 1, 1});
             pixels[index] = pixel;
         }
     }
@@ -75,9 +89,11 @@ public:
         return pixel;
     }
 
-    std::shared_ptr<TextureInfo> textureInfo;
-
-private:
-    U32 _width = 0, _height = 0;
-    Vector<PixelType> pixels;
+    Surface& operator = (const Surface& other) {
+        _width = other._width;
+        _height = other._height;
+        pixels = other.pixels;
+        setDirty(rect());
+        return *this;
+    }
 };

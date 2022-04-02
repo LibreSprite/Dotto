@@ -77,7 +77,7 @@ public:
         for (std::size_t i = 0, size = surface->width() * surface->height(); i < size; ++i) {
             surfaceData[i] = backupData[i];
         }
-        surface->setDirty();
+        surface->setDirty(surface->rect());
         backup.reset();
         backupSurface = nullptr;
     }
@@ -168,7 +168,7 @@ public:
             }
         }
 
-        surface->setDirty();
+        surface->setDirty(commonRect);
         if (preview)
             this->selection->get()->clear();
         else {

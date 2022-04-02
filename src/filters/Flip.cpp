@@ -22,7 +22,7 @@ public:
                 std::swap(data[x], end[x]);
         }
 
-        surface->setDirty();
+        surface->setDirty(surface->rect());
     }
 };
 

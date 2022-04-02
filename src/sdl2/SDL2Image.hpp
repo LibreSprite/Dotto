@@ -35,7 +35,7 @@ public:
             return nullptr;
         auto surface = std::make_shared<Surface>();
         surface->resize(sdl->w, sdl->h);
-        surface->setDirty();
+        surface->setDirty(surface->rect());
         SDL_LockSurface(sdl);
 
         Color color;

@@ -101,7 +101,7 @@ public:
             }
         }
 
-        surface->setDirty();
+        surface->setDirty(surface->rect());
     }
 };
 
