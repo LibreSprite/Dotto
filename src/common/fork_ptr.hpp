@@ -23,6 +23,8 @@ class fork_ptr {
     std::shared_ptr<guarded_t> guarded;
 
 public:
+    fork_ptr() = default;
+
     fork_ptr(const std::shared_ptr<Type>& guarded) : guarded{std::make_shared<guarded_t>(guarded)} {}
 
     fork_ptr(const fork_ptr<Type>& other) : guarded{other.guarded} {}
@@ -67,6 +69,13 @@ public:
 
     std::shared_ptr<Type> shared() {
         return guarded ? guarded->ptr : nullptr;
+    }
+
+    template<typename Impl, typename ... Args>
+    void emplace(Args ... args) {
+        reset();
+        auto ptr = std::static_pointer_cast<Type>(std::make_shared<Impl>(std::forward<Args>(args)...));
+        guarded = std::make_shared<guarded_t>(ptr);
     }
 
     void reset() {
