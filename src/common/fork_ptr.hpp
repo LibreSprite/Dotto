@@ -70,7 +70,7 @@ public:
     }
 
     void reset() {
-        if (guarded) {
+        if (guarded && guarded->ptr) {
             auto ptr = guarded->ptr;
             guarded->ptr.reset();
             for (auto& entry : guarded->cleanup) {
