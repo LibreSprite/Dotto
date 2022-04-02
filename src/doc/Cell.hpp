@@ -16,6 +16,7 @@ protected:
     friend class Document;
     String type;
     String GUID;
+    String blendMode;
     std::shared_ptr<Surface> composite = std::make_shared<Surface>();
     std::shared_ptr<Selection> mask;
     F32 alpha = 1.0f;
@@ -30,4 +31,6 @@ public:
     virtual bool unserialize(const Vector<U8>&) = 0;
     F32 getAlpha() {return alpha;}
     void setAlpha(F32 v, bool silent);
+    const String& getBlendMode() {return blendMode;}
+    void setBlendMode(const String&, bool silent);
 };
