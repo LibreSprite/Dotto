@@ -6,6 +6,8 @@
 
 #include <cmd/Command.hpp>
 #include <common/Config.hpp>
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
 #include <common/String.hpp>
 #include <common/Surface.hpp>
@@ -15,6 +17,7 @@
 #include <fs/FileSystem.hpp>
 
 class DocumentImpl : public Document {
+    PubSub<> pub{this};
     HashMap<String, std::shared_ptr<Timeline>> guidToTimeline;
     String GUID = getGUID();
     String currentTimelineName;
@@ -41,6 +44,15 @@ public:
 
     U32 height() override {
         return docHeight;
+    }
+
+    void setDocumentSize(U32 width, U32 height) override {
+        if (docWidth == width && docHeight == height) {
+            return;
+        }
+        docWidth = width;
+        docHeight = height;
+        pub(msg::ResizeDocument{shared_from_this()});
     }
 
     bool load(const Value& resource) override {

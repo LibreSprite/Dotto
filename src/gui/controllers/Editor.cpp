@@ -19,7 +19,10 @@
 
 class Editor : public ui::Controller {
     Property<std::shared_ptr<Document>> doc{this, "doc"};
-    PubSub<msg::ActivateDocument, msg::ActivateEditor, msg::PollActiveEditor> pub{this};
+    PubSub<msg::ResizeDocument,
+           msg::ActivateDocument,
+           msg::ActivateEditor,
+           msg::PollActiveEditor> pub{this};
     std::optional<Document::Provides> docProvides;
     std::optional<ui::Node::Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
@@ -137,6 +140,12 @@ public:
 
     void eventHandler(const ui::FocusChild&) {activate();}
     void eventHandler(const ui::Focus&) {activate();}
+
+    void on(msg::ResizeDocument& msg) {
+        if (msg.doc.get() == doc->get()) {
+            rezoom();
+        }
+    }
 
     void on(msg::ActivateDocument& msg) {
         if (msg.doc.get() != doc->get()) {
