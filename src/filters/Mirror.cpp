@@ -9,6 +9,8 @@ class Surface;
 
 class Mirror : public Filter {
 public:
+    String category() override {return "transform";}
+
     void run(std::shared_ptr<Surface> surface) override {
         auto data = surface->data();
         S32 width = surface->width();

@@ -14,6 +14,8 @@ public:
     Property<S32> radiusX{this, "radius-x", 10};
     Property<S32> radiusY{this, "radius-y", 10};
 
+    String category() override {return "blur";}
+
     std::shared_ptr<PropertySet> getMetaProperties() override {
         auto meta = Filter::getMetaProperties();
 

@@ -29,12 +29,14 @@ public:
 
     virtual bool forceAllLayers() {return false;}
     virtual bool forceAllFrames() {return false;}
+    virtual String category() = 0;
 
     virtual void init(const String& name) {
         instances.insert({name, shared_from_this()});
         load({
                 {"icon", "%skin/" + name + ".png"},
-                {"filter", name}
+                {"filter", name},
+                {"category", category()}
             });
     }
 

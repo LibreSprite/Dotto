@@ -13,6 +13,8 @@ public:
     Property<U32> height{this, "height"};
     Property<std::shared_ptr<Document>> doc{this, "document"};
 
+    String category() override {return "resize";}
+
     bool forceAllLayers() override {return true;}
     bool forceAllFrames() override {return true;}
 

@@ -17,6 +17,8 @@ public:
     bool forceAllLayers() override {return true;}
     bool forceAllFrames() override {return true;}
 
+    String category() override {return "resize";}
+
     std::shared_ptr<PropertySet> getMetaProperties() override {
         auto meta = Filter::getMetaProperties();
 
