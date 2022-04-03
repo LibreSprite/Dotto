@@ -26,6 +26,13 @@ public:
     U32 height() const {return _height;}
     Rect rect() const {return {0, 0, _width, _height};}
 
+    std::shared_ptr<Surface> clone() {
+        auto other = std::make_shared<Surface>();
+        other->resize(_width, _height);
+        other->setPixels(getPixels());
+        return other;
+    }
+
     TextureInfo& info() {
         if (!_textureInfo)
             _textureInfo = std::make_unique<TextureInfo>();
