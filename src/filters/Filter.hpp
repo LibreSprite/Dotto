@@ -23,8 +23,8 @@ public:
 
     using Path = Vector<Point2D>;
     Property<bool> enabled{this, "enabled", true};
-    Property<bool> allLayers{this, "allLayers", false};
-    Property<bool> allFrames{this, "allFrames", false};
+    Property<bool> allLayers{this, "all-layers", false};
+    Property<bool> allFrames{this, "all-frames", false};
     std::shared_ptr<PropertySet> undoData;
 
     virtual bool forceAllLayers() {return false;}
