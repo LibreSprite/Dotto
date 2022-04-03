@@ -25,6 +25,7 @@ public:
     Property<bool> enabled{this, "enabled", true};
     Property<bool> allLayers{this, "allLayers", false};
     Property<bool> allFrames{this, "allFrames", false};
+    std::shared_ptr<PropertySet> undoData;
 
     virtual bool forceAllLayers() {return false;}
     virtual bool forceAllFrames() {return false;}
@@ -36,6 +37,8 @@ public:
                 {"filter", name}
             });
     }
+
+    virtual void undo() {}
 
     virtual std::shared_ptr<PropertySet> getMetaProperties() {
         auto meta = std::make_shared<PropertySet>();

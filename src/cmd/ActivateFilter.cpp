@@ -34,6 +34,7 @@ class ActivateFilter : public Command {
     U32 undoSize() {return layerCount() * frameCount();}
 
     Vector<std::shared_ptr<Surface>> undoData;
+    std::shared_ptr<PropertySet> filterUndoData;
 
 public:
     U32 commitSize() override {return undoSize();}
@@ -54,6 +55,16 @@ public:
                     *surface = *data;
                 }
             }
+        }
+
+        if (filterUndoData) {
+            auto it = Filter::instances.find(tolower(filter));
+            if (it == Filter::instances.end()) {
+                logE("Invalid filter \"", *filter, "\"");
+                return;
+            }
+            it->second->undoData = filterUndoData;
+            it->second->undo();
         }
     }
 
@@ -89,6 +100,8 @@ public:
             }
         }
 
+        set("document", doc);
+
         filter->load(getPropertySet());
         allFrames = filter->allFrames;
         allLayers = filter->allLayers;
@@ -106,6 +119,8 @@ public:
              " and ",
              (allLayers ? "all layers " : "layer " + std::to_string(layer)));
 
+        filter->undoData = nullptr;
+
         for (U32 frame = startFrame(); frame != endFrame(); ++frame) {
             for (U32 layer = startLayer(); layer != endLayer(); ++layer) {
                 auto cell = timeline->getCell(frame, layer);
@@ -121,6 +136,7 @@ public:
             }
         }
 
+        filterUndoData = filter->undoData;
         commit();
     }
 
