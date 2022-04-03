@@ -106,12 +106,18 @@ public:
             return;
         }
 
-        node()->removeAllChildren();
-        *doc = inject<Document>{"new"};
-        if ((*doc)->load(file)) {
-            (*doc)->setPath(filePath);
-            showFile();
+        std::shared_ptr<Document> newDoc;
+        if (file.has<std::shared_ptr<Document>>()) {
+            newDoc = file.get<std::shared_ptr<Document>>();
+        } else {
+            newDoc = inject<Document>{"new"};
+            if (!newDoc->load(file)) {
+                return;
+            }
         }
+        *doc = newDoc;
+        newDoc->setPath(filePath);
+        showFile();
     }
 
     void showFile() {
