@@ -38,6 +38,7 @@ public:
     std::shared_ptr<Cell> cell() {return weakCell.lock();}
 
     bool committed() {return wasCommitted;}
+    virtual U32 commitSize() {return 1;}
     virtual void run() = 0;
     virtual void undo() {};
     virtual void redo() {run();}
