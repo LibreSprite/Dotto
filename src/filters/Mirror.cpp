@@ -9,8 +9,6 @@ class Surface;
 
 class Mirror : public Filter {
 public:
-    std::shared_ptr<PropertySet> getMetaProperties() override {return nullptr;}
-
     void run(std::shared_ptr<Surface> surface) override {
         auto data = surface->data();
         S32 width = surface->width();

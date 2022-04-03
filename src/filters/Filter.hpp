@@ -23,6 +23,11 @@ public:
 
     using Path = Vector<Point2D>;
     Property<bool> enabled{this, "enabled", true};
+    Property<bool> allLayers{this, "allLayers", false};
+    Property<bool> allFrames{this, "allFrames", false};
+
+    virtual bool forceAllLayers() {return false;}
+    virtual bool forceAllFrames() {return false;}
 
     virtual void init(const String& name) {
         instances.insert({name, shared_from_this()});
@@ -32,7 +37,24 @@ public:
             });
     }
 
-    virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
+    virtual std::shared_ptr<PropertySet> getMetaProperties() {
+        auto meta = std::make_shared<PropertySet>();
+        if (!forceAllFrames()) {
+            meta->push(std::make_shared<PropertySet>(PropertySet{
+                        {"widget", "checkbox"},
+                        {"label", allFrames.name},
+                        {"value", allFrames.value}
+                    }));
+        }
+        if (!forceAllLayers()) {
+            meta->push(std::make_shared<PropertySet>(PropertySet{
+                        {"widget", "checkbox"},
+                        {"label", allLayers.name},
+                        {"value", allLayers.value}
+                    }));
+        }
+        return meta;
+    }
 
     virtual void run(std::shared_ptr<Surface> surface) = 0;
 };

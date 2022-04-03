@@ -20,23 +20,41 @@ class ActivateFilter : public Command {
     PubSub<> pub{this};
     std::weak_ptr<ui::Node> menu;
 
-    Vector<Surface::PixelType> undoData;
-    std::shared_ptr<Cell> cell;
+    U32 frame, layer;
+    bool allFrames, allLayers;
+
+    U32 startFrame() {return allFrames ? 0 : frame;}
+    U32 endFrame() {return allFrames ? frame : frame + 1;}
+    U32 frameCount() {return endFrame() - startFrame();}
+
+    U32 startLayer() {return allLayers ? 0 : layer;}
+    U32 endLayer() {return allLayers ? layer : layer + 1;}
+    U32 layerCount() {return endLayer() - startLayer();}
+
+    U32 undoSize() {return layerCount() * frameCount();}
+
+    Vector<std::shared_ptr<Surface>> undoData;
 
 public:
-    void undo() override {
-        cell->getComposite()->setPixels(this->undoData);
-    }
+    U32 commitSize() override {return undoSize();}
 
-    void redo() override {
-        auto it = Filter::instances.find(tolower(filter));
-        if (it == Filter::instances.end()) {
-            logE("Invalid filter \"", *filter, "\"");
-            return;
+    void undo() override {
+        auto doc = this->doc();
+        auto timeline = doc->currentTimeline();
+        U32 stride = allFrames ? (allLayers ? timeline->layerCount() : 1) : 0;
+        for (U32 frame = startFrame(); frame != endFrame(); ++frame) {
+            for (U32 layer = startLayer(); layer != endLayer(); ++layer) {
+                auto cell = timeline->getCell(frame, layer);
+                if (!cell)
+                    continue;
+                auto surface = cell->getComposite();
+                if (!surface)
+                    continue;
+                if (auto data = undoData[(frame - startFrame()) * stride + (layer - startLayer())]) {
+                    *surface = *data;
+                }
+            }
         }
-        auto& filter = it->second;
-        auto surface = cell->getComposite();
-        filter->run(surface->shared_from_this());
     }
 
     void run() override {
@@ -58,27 +76,55 @@ public:
             return;
         }
 
-        auto cell = doc->currentTimeline()->getCell();
-        if (!cell) {
-            logE("No active cell");
+        auto timeline = doc->currentTimeline();
+        if (!timeline) {
+            logE("No active timeline");
             return;
         }
 
-        std::shared_ptr<PropertySet> meta;
         if (interactive) {
-            meta = filter->getMetaProperties();
+            if (auto meta = filter->getMetaProperties()) {
+                showMenu(meta);
+                return;
+            }
         }
 
-        if (!interactive || !meta) {
-            auto surface = cell->getComposite();
-            this->cell = cell;
-            this->undoData = surface->getPixels();
-            filter->load(getPropertySet());
-            filter->run(surface->shared_from_this());
-            commit();
-            return;
+        filter->load(getPropertySet());
+        allFrames = filter->allFrames;
+        allLayers = filter->allLayers;
+        frame = allFrames ? timeline->frameCount() : timeline->frame();
+        layer = allLayers ? timeline->layerCount() : timeline->layer();
+        U32 stride = allFrames ? (allLayers ? timeline->layerCount() : 1) : 0;
+
+        bool hasUndoData = undoData.size() == undoSize();
+        if (!hasUndoData) {
+            undoData.resize(undoSize());
         }
 
+        logV("Running ", *this->filter, " on ",
+             (allFrames ? "all frames " : "frame " + std::to_string(frame)),
+             " and ",
+             (allLayers ? "all layers " : "layer " + std::to_string(layer)));
+
+        for (U32 frame = startFrame(); frame != endFrame(); ++frame) {
+            for (U32 layer = startLayer(); layer != endLayer(); ++layer) {
+                auto cell = timeline->getCell(frame, layer);
+                if (!cell)
+                    continue;
+                auto surface = cell->getComposite();
+                if (!surface)
+                    continue;
+                if (!hasUndoData) {
+                    undoData[(frame - startFrame()) * stride + (layer - startLayer())] = surface->clone();
+                }
+                filter->run(surface->shared_from_this());
+            }
+        }
+
+        commit();
+    }
+
+    void showMenu(std::shared_ptr<PropertySet> meta) {
         auto metamenu = ui::Node::fromXML("metamenu");
         if (!metamenu) {
             logE("Could not create metamenu");
