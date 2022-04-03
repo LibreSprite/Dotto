@@ -21,7 +21,6 @@ class Editor : public ui::Controller {
     Property<std::shared_ptr<Document>> doc{this, "doc"};
     PubSub<msg::ActivateDocument, msg::ActivateEditor, msg::PollActiveEditor> pub{this};
     std::optional<Document::Provides> docProvides;
-    std::optional<Cell::Provides> cellProvides;
     std::optional<ui::Node::Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
     Property<std::shared_ptr<PropertySet>> newFileProperties{this, "newfile", nullptr, &Editor::newFile};
@@ -49,14 +48,11 @@ public:
             return;
         }
 
-        auto cell = timeline->getCell(frame, layer);
+        auto cell = timeline->activate(frame, layer);
         if (activeCell == cell)
             return;
 
-        activeCell = timeline->getCell(frame, layer);
-
-        cellProvides.emplace(activeCell.get(), "activecell");
-        pub(msg::ActivateCell{activeCell});
+        activeCell = cell;
 
         if (frame != activeFrame) {
             activeFrame = frame;
@@ -134,7 +130,6 @@ public:
     void activate() {
         editorProvides.emplace(node(), "activeeditor");
         docProvides.emplace(doc->get(), "activedocument");
-        cellProvides.emplace(activeCell.get(), "activecell");
         pub(msg::ActivateEditor{node()});
         pub(msg::ActivateDocument{doc});
         pub(msg::ActivateCell{activeCell});
@@ -146,7 +141,6 @@ public:
     void on(msg::ActivateDocument& msg) {
         if (msg.doc.get() != doc->get()) {
             docProvides.reset();
-            cellProvides.reset();
         }
     }
 

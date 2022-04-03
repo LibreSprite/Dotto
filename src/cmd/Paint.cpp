@@ -21,7 +21,6 @@ class Paint : public Command {
     Property<bool> preview{this, "preview", false};
     Property<bool> cursor{this, "cursor", false};
     Property<String> mode{this, "mode", "simple"};
-    inject<Cell> cell{"activecell"};
     Vector<U32> undoData;
 
 public:
@@ -32,11 +31,11 @@ public:
             logI("No selection");
             return;
         }
-        selection->write(cell->getComposite(), undoData);
+        selection->write(cell()->getComposite(), undoData);
     }
 
     void setupPreview() {
-        auto surface = cell->getComposite();
+        auto surface = cell()->getComposite();
         if (!backup) {
             backup = std::make_shared<Surface>();
             backupSelection = inject<Selection>{"new"};
@@ -71,7 +70,7 @@ public:
     void restoreBackupSurface() {
         if (!backup)
             return;
-        auto surface = cell->getComposite();
+        auto surface = cell()->getComposite();
         auto backupData = backup->data();
         auto surfaceData = surface->data();
         for (std::size_t i = 0, size = surface->width() * surface->height(); i < size; ++i) {
@@ -83,6 +82,10 @@ public:
     }
 
     void run() override {
+        auto cell = this->cell();
+        if (!cell)
+            return;
+
         auto selection = this->selection->get();
         if (!selection) {
             this->selection.value = inject<Selection>{"new"};

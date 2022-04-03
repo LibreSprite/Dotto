@@ -54,7 +54,14 @@ public:
         });
 
         addProperty("activeCell", [this]{
-            return getEngine().toValue(inject<Cell>{"activecell"}.shared());
+            inject<Document> doc{"activedocument"};
+            std::shared_ptr<Cell> cell;
+            if (doc) {
+                if (auto timeline = doc->currentTimeline()) {
+                    cell = timeline->getCell();
+                }
+            }
+            return getEngine().toValue(cell);
         });
 
         addProperty("activeEditor", [this]{

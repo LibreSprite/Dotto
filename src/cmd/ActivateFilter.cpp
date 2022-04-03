@@ -8,6 +8,7 @@
 #include <common/PubSub.hpp>
 #include <common/String.hpp>
 #include <doc/Cell.hpp>
+#include <doc/Timeline.hpp>
 #include <log/Log.hpp>
 #include <filters/Filter.hpp>
 #include <gui/Node.hpp>
@@ -51,7 +52,13 @@ public:
             return;
         }
 
-        inject<Cell> cell{"activecell"};
+        auto doc = this->doc();
+        if (!doc) {
+            logE("No active document");
+            return;
+        }
+
+        auto cell = doc->currentTimeline()->getCell();
         if (!cell) {
             logE("No active cell");
             return;
