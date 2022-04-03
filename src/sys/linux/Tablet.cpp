@@ -21,6 +21,11 @@ public:
     EasyTabInfo* easyTab = nullptr;
 
     void init() {
+        if (!display) {
+            logE("No X11 display, disabling tablet support");
+            return;
+        }
+
         S32 count;
         auto devices = XListInputDevices(display, &count);
         if (!devices) {
