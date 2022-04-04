@@ -198,8 +198,8 @@ public:
         }
 
         Color color;
-        U32 sw = shape->width();
-        U32 sh = shape->height();
+        S32 sw = S32(shape->width());
+        S32 sh = S32(shape->height());
         S32 hsw = sw / 2;
         S32 hsh = sh / 2;
 

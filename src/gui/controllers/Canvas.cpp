@@ -3,11 +3,10 @@
 // Read LICENSE.txt for more information.
 
 #include <blender/Blender.hpp>
-#include <cmd/Command.hpp>
+
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/Surface.hpp>
-#include <common/System.hpp>
 #include <common/fork_ptr.hpp>
 #include <doc/Cell.hpp>
 #include <doc/Document.hpp>
@@ -16,8 +15,6 @@
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
 #include <gui/Texture.hpp>
-#include <memory>
-#include <tools/Tool.hpp>
 
 class DirtyWatcher : public Texture {
 public:
@@ -36,17 +33,12 @@ public:
 class Canvas : public ui::Controller {
 public:
     PubSub<msg::ModifyCell,
-           msg::ActivateCell,
-           msg::ActivateTool,
            msg::PostTick> pub{this};
 
     Property<std::shared_ptr<Surface>> surface{this, "surface"};
     Property<std::shared_ptr<Document>> doc{this, "document", nullptr, &Canvas::setDocument};
     Property<U32> frame{this, "frame", 0, &Canvas::setFrame};
-    Property<U32> layer{this, "layer", 0, &Canvas::setLayer};
-
-    std::shared_ptr<Tool> activeTool;
-    Tool::Path points;
+    Property<U32> layer{this, "layer"};
 
     Vector<fork_ptr<Texture>> watchers;
     HashMap<String, std::shared_ptr<Blender>> blenders;
@@ -74,9 +66,6 @@ public:
     void setFrame() {
         watchers.clear();
         redraw(true);
-    }
-
-    void setLayer() {
     }
 
     void redraw(bool forceFullRedraw) {
@@ -161,121 +150,16 @@ public:
         }
     }
 
-    bool isRelevantCell(std::shared_ptr<Cell> cell) {
-        if (!*doc) {
-            return false;
-        }
-        auto& doc = **this->doc;
-        auto timeline = doc.currentTimeline();
-        auto frames = timeline->frameCount();
-        if (frame >= frames) {
-            return false;
-        }
-        auto layers = timeline->layerCount();
-        if (!layers) {
-            return false;
-        }
-
-        for (auto i = 0; i < layers; ++i) {
-            if (timeline->getCell(frame, i) == cell)
-                return true;
-        }
-        return false;
-    }
-
-    void attach() override {
-        node()->addEventListener<ui::MouseMove,
-                                 ui::MouseDown,
-                                 ui::MouseUp,
-                                 ui::MouseWheel,
-                                 ui::MouseLeave>(this);
-        redraw(true);
-    }
-
-    void on(msg::ActivateTool&) {
-        end();
-    }
-
     void on(msg::ModifyCell& event) {
         redraw(true);
-    }
-
-    void on(msg::ActivateCell& event) {
-        node()->set("inputEnabled", isRelevantCell(event.cell));
     }
 
     void on(msg::PostTick&) {
         redraw(false);
     }
 
-    void eventHandler(const ui::MouseDown& event) {
-        paint(event.targetX(), event.targetY(), event.buttons);
-    }
-
-    void eventHandler(const ui::MouseUp& event) {
-        end();
-    }
-
-    void eventHandler(const ui::MouseLeave&) {
-        system->setMouseCursorVisible(true);
-        end();
-    }
-
-    inject<System> system;
-    U32 prevButtons = ~U32{};
-
-    void eventHandler(const ui::MouseMove& event) {
-        paint(event.targetX(), event.targetY(), event.buttons);
-
-        Tool::Preview* preview = nullptr;
-        if (activeTool)
-            preview = activeTool->getPreview();
-        system->setMouseCursorVisible(!preview || !preview->hideCursor);
-    }
-
-    void eventHandler(const ui::MouseWheel& event) {
-        inject<Command> zoom{"zoom"};
-        zoom->set("level", "*" + tostring(1 + 0.2 * event.wheelY));
-        zoom->run();
-    }
-
-    void end() {
-        prevButtons = ~U32{};
-        if (points.empty())
-            return;
-        if (activeTool)
-            activeTool->end(activeCell->getComposite(), points);
-        points.clear();
-    }
-
-    void paint(S32 tx, S32 ty, U32 buttons) {
-        if (prevButtons != buttons)
-            end();
-
-        prevButtons = buttons;
-        auto rect = node()->globalRect;
-        if (!rect.width || !rect.height)
-            return;
-
-        auto surface = activeCell->getComposite();
-        S32 x = (tx * surface->width()) / rect.width;
-        S32 y = (ty * surface->height()) / rect.height;
-        S32 z = msg::MouseMove::pressure * 255;
-        bool begin = points.empty();
-        if (!begin && x == points.back().x && y == points.back().y)
-            return;
-        points.push_back({x, y, z});
-
-        if (begin) {
-            do {
-                activeTool = Tool::active.lock();
-                if (!activeTool)
-                    return;
-                activeTool->begin(surface, points, buttons);
-            } while (Tool::active.lock() != activeTool);
-        } else if (activeTool) {
-            activeTool->update(surface, points);
-        }
+    void attach() override {
+        redraw(true);
     }
 };
 
