@@ -29,7 +29,7 @@ over Discord/Matrix.
 | 1.0    | First stable release focused on static image editing |
 | 2.0    | Polish based on feedback from previous releases      |
 | 3.0    | Animation Support                                    |
-| 4.0    | Additional platforms support (Android / iOS)         |
+| 4.0    | Additional platforms support (Android)         |
 
 ## Feature Roadmap
 
