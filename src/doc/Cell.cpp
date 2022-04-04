@@ -27,6 +27,8 @@ void Cell::setBlendMode(const String& newMode, bool silent) {
 
 class BitmapCell  : public Cell {
 public:
+    String getType() const override {return "bitmap";}
+
     Vector<U8> serialize() override {
         return {};
     }

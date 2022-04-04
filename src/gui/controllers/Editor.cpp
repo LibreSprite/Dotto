@@ -17,6 +17,7 @@
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
+#include <layer/Layer.hpp>
 #include <log/Log.hpp>
 #include <tools/Tool.hpp>
 
@@ -25,7 +26,6 @@ class Editor : public ui::Controller {
     PubSub<msg::ResizeDocument,
            msg::ActivateDocument,
            msg::ActivateEditor,
-           msg::ActivateTool,
            msg::PollActiveEditor> pub{this};
     std::optional<Document::Provides> docProvides;
     std::optional<ui::Node::Provides> editorProvides;
@@ -36,15 +36,9 @@ class Editor : public ui::Controller {
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
     std::shared_ptr<ui::Node> canvas;
     std::shared_ptr<ui::Node> container;
-    std::shared_ptr<Cell> lastCell;
     std::shared_ptr<Cell> activeCell;
-    U32 activeFrame = -1;
-    U32 activeLayer = -1;
+    std::shared_ptr<Layer> layerEditor;
     inject<System> system;
-
-    U32 prevButtons = ~U32{};
-    std::shared_ptr<Tool> activeTool;
-    Tool::Path points;
 
 public:
     void setFrame() {
@@ -60,19 +54,26 @@ public:
             return;
         }
 
+        bool frameChanged = timeline->frame() != *frame;
+        bool layerChanged = timeline->layer() != *layer;
         auto cell = timeline->activate(frame, layer);
         if (activeCell == cell)
             return;
 
+        if (!activeCell || activeCell->getType() != cell->getType()) {
+            layerEditor = inject<Layer>{cell->getType()};
+            layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
+        }
+
+        layerEditor->setCell(cell);
+
         activeCell = cell;
 
-        if (frame != activeFrame) {
-            activeFrame = frame;
+        if (frameChanged) {
             pub(msg::ActivateFrame{doc, frame});
         }
 
-        if (layer != activeLayer) {
-            activeLayer = layer;
+        if (layerChanged) {
             pub(msg::ActivateLayer{doc, layer});
         }
     }
@@ -91,63 +92,26 @@ public:
     }
 
     void eventHandler(const ui::MouseDown& event) {
-        paint(event.globalX - canvas->globalRect.x, event.globalY - canvas->globalRect.y, event.buttons);
+        layerEditor->setGlobalCanvas(canvas->globalRect);
+        layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+        layerEditor->setButtons(event.buttons);
+        layerEditor->update();
     }
 
     void eventHandler(const ui::MouseUp& event) {
-        end();
+        layerEditor->setButtons(event.buttons);
+        layerEditor->update();
     }
 
     void eventHandler(const ui::MouseLeave&) {
-        end();
         system->setMouseCursorVisible(true);
     }
 
     void eventHandler(const ui::MouseMove& event) {
-        paint(event.globalX - canvas->globalRect.x, event.globalY - canvas->globalRect.y, event.buttons);
-        Tool::Preview* preview = nullptr;
-        if (activeTool)
-            preview = activeTool->getPreview();
-        system->setMouseCursorVisible(!preview || !preview->hideCursor);
-    }
-
-    void end() {
-        prevButtons = ~U32{};
-        if (points.empty())
-            return;
-        if (activeTool)
-            activeTool->end(activeCell->getComposite(), points);
-        points.clear();
-    }
-
-    void paint(S32 tx, S32 ty, U32 buttons) {
-        if (prevButtons != buttons)
-            end();
-
-        prevButtons = buttons;
-        auto rect = canvas->globalRect;
-        if (!rect.width || !rect.height)
-            return;
-
-        auto surface = activeCell->getComposite();
-        S32 x = tx * S32(surface->width()) / S32(rect.width);
-        S32 y = ty * S32(surface->height()) / S32(rect.height);
-        S32 z = msg::MouseMove::pressure * 255;
-        bool begin = points.empty();
-        if (!begin && x == points.back().x && y == points.back().y)
-            return;
-        points.push_back({x, y, z});
-
-        if (begin) {
-            do {
-                activeTool = Tool::active.lock();
-                if (!activeTool)
-                    return;
-                activeTool->begin(surface, points, buttons);
-            } while (Tool::active.lock() != activeTool);
-        } else if (activeTool) {
-            activeTool->update(surface, points);
-        }
+        layerEditor->setGlobalCanvas(canvas->globalRect);
+        layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+        layerEditor->setButtons(event.buttons);
+        layerEditor->update();
     }
 
     void eventHandler(const ui::MouseWheel& event) {
@@ -223,13 +187,11 @@ public:
     void eventHandler(const ui::FocusChild&) {activate();}
     void eventHandler(const ui::Focus&) {activate();}
 
-    void on(msg::ActivateTool&) {
-        end();
-    }
 
     void on(msg::ResizeDocument& msg) {
         if (msg.doc.get() == doc->get()) {
             rezoom();
+            layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
         }
     }
 
