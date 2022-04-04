@@ -18,10 +18,9 @@
         controller="hover-reveal">
     <textbutton id="blend"
                 width="50px"
-                controller="cycle, cellpropertymodifier"
+                controller="cellpropertymodifier, cycle"
                 property="blendmode"
-                forward="labelspan.text=value"
-                options="normal, screen"/>
+                forward="labelspan.text=value"/>
     <range controller="cellpropertymodifier"
            property="alpha"
            label="Transparency:"
