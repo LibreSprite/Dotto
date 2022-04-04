@@ -4,7 +4,7 @@
 
 #include <blender/Blender.hpp>
 
-class Normal : public SoftBlender {
+class Normal : public Blender {
 public:
     Surface::PixelType blendPixel(const Color& a, const Color& b, F32 alpha) override {
         alpha *= b.a * (1.0f / 255.0f);

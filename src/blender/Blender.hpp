@@ -12,14 +12,8 @@
 class Blender : public Injectable<Blender>, public std::enable_shared_from_this<Blender> {
 public:
     static inline Color color;
-    virtual void blend(Surface* result, Surface* low, Surface* high, F32 alpha, const Rect& area) = 0;
-};
-
-class SoftBlender : public Blender {
-public:
     virtual Surface::PixelType blendPixel(const Color& a, const Color& b, F32 alpha) = 0;
-
-    void blend(Surface* result, Surface* low, Surface* high, F32 alpha, const Rect& area) override {
+    virtual void blend(Surface* result, Surface* low, Surface* high, F32 alpha, const Rect& area) {
         auto a = low->data(), b = high->data(), c = result->data();
         U32 size = result->width() * result->height();
         U32 stride = result->width();
