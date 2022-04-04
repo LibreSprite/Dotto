@@ -7,16 +7,22 @@
 #include <common/inject.hpp>
 #include <common/PropertySet.hpp>
 #include <doc/Document.hpp>
+#include <doc/Timeline.hpp>
 
 class Command : public Injectable<Command>,
                 public Model,
                 public std::enable_shared_from_this<Command> {
     std::weak_ptr<Document> weakDoc;
+    std::weak_ptr<Cell> weakCell;
     bool wasCommitted = false;
 
 protected:
     Command() {
         weakDoc = inject<Document>{InjectSilent::Yes, "activedocument"}.shared();
+        if (auto doc = this->doc()) {
+            if (auto timeline = doc->currentTimeline())
+                weakCell = timeline->getCell();
+        }
     }
 
     void commit() {
@@ -29,7 +35,10 @@ protected:
 
 public:
     std::shared_ptr<Document> doc() {return weakDoc.lock();}
+    std::shared_ptr<Cell> cell() {return weakCell.lock();}
+
     bool committed() {return wasCommitted;}
+    virtual U32 commitSize() {return 1;}
     virtual void run() = 0;
     virtual void undo() {};
     virtual void redo() {run();}

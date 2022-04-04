@@ -89,8 +89,10 @@ public:
             entry.second->hdc = wmInfo.info.win.hdc;
             entry.second->hinstance = wmInfo.info.win.hinstance;
 #elif defined(__linux__)
-            entry.second->display = wmInfo.info.x11.display;
-            entry.second->window = wmInfo.info.x11.window;
+            if (wmInfo.subsystem == SDL_SYSWM_X11) {
+                entry.second->display = wmInfo.info.x11.display;
+                entry.second->window = wmInfo.info.x11.window;
+            }
 #endif
 
             entry.second->init();

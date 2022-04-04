@@ -8,6 +8,7 @@
 class TimelineImpl : public Timeline {
 public:
     Vector<Vector<std::shared_ptr<Cell>>> data;
+    U32 _frame = 0, _layer = 0;
 
     U32 frameCount() const override {
         return data.size();
@@ -28,6 +29,18 @@ public:
         for (auto& layer : data) {
             layer.resize(count);
         }
+    }
+
+    U32 frame() const override {return _frame;}
+    U32 layer() const override {return _layer;}
+
+    std::shared_ptr<Cell> activate(U32 frame, U32 layer) override {
+        auto cell = getCell(frame, layer, false);
+        if (cell) {
+            _frame = frame;
+            _layer = layer;
+        }
+        return cell;
     }
 
     std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop) const override {

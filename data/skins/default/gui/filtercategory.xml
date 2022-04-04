@@ -1,0 +1,4 @@
+<node forward="labelspan.text=label"
+      height="24px">
+  <span id="labelspan"/>
+</node>

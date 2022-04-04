@@ -44,7 +44,7 @@ namespace ui {
                     for (U32 i = 0; i < width * height; ++i) {
                         data[i] = color;
                     }
-                    surface->setDirty();
+                    surface->setDirty(surface->rect());
                 }
             } else {
                 surface = FileSystem::parse(*src);

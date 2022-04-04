@@ -25,7 +25,7 @@ public:
 
         auto surface = std::make_shared<Surface>();
         surface->resize(desc.width, desc.height);
-        surface->setDirty();
+        surface->setDirty(surface->rect());
         auto out = surface->data();
         for (U32 i = 0; i < desc.width * desc.height; ++i)
             out[i] = reinterpret_cast<Surface::PixelType*>(pixels.get())[i];

@@ -46,27 +46,28 @@ over Discord/Matrix.
 | Raspberry Pi 4 support         | OK            | 1.0     |                                                 |
 | Undo / Redo                    | OK            | 0.5     |                                                 |
 | Copy + Paste                   | Planned       | 0.5     | Waiting for selection support                   |
-| Resize Sprite                  | Planned       | 0.5     |                                                 |
 | Crop Sprite                    | Planned       | 0.5     | Waiting for selection support                   |
 | Pencil tool                    | OK            | 0.5     |                                                 |
 | Pencil shapes/sizes            | OK            | 0.5     |                                                 |
-| Pencil blending modes          | Planned       | 1.0     |                                                 |
+| Pencil blending modes          | OK            | 1.0     |                                                 |
 | Line smoothing                 | Basic         | 1.0     |                                                 |
 | Eraser tool                    | OK            | 0.5     |                                                 |
 | Text tool                      | Planned       | 1.0     |                                                 |
 | Selection                      | Internal only | 0.5     | Selections implemented but inaccessible to user |
 | Rectangular Selection tool     | Planned       | 0.5     |                                                 |
 | Wand Selection tool            | Planned       | 0.5     |                                                 |
-| Dither tool                    | Planned       | 2.0     |                                                 |
 | Fill Bucket                    | OK            | 0.5     |                                                 |
-| Fill Bucket blending           | Planned       | 0.5     |                                                 |
+| Fill Bucket blending           | OK            | 0.5     |                                                 |
 | Gradient tool                  | Planned       | 2.0     |                                                 |
 | Layers support                 | Partial       | 0.5     |                                                 |
 | Layer groups                   | Planned       | 2.0     |                                                 |
 | Layer masks                    | Planned       | 2.0     |                                                 |
-| Layer blending                 | Planned       | 0.5     |                                                 |
+| Layer blending                 | OK            | 0.5     |                                                 |
 | Layer alpha                    | OK            | 0.5     |                                                 |
-| Image Filter support           | OK            | 0.5     |                                                 |
+| Filter support                 | OK            | 0.5     |                                                 |
+| Smart filter support           | Planned       | 1.0     |                                                 |
+| Resize: Nearest Neighbor       | OK            | 0.5     |                                                 |
+| Resize: Scale2X                | OK            | 0.5     |                                                 |
 | Drop Shadow filter             | OK            | 0.5     |                                                 |
 | Solarize                       | Planned       | 2.0     |                                                 |
 | Sobel edge-detection           | Planned       | 2.0     |                                                 |

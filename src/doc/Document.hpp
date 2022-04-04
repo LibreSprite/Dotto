@@ -16,6 +16,7 @@ public:
     virtual bool load(const Value& resource) = 0;
     virtual U32 width() = 0;
     virtual U32 height() = 0;
+    virtual void setDocumentSize(U32 width, U32 height) = 0;
     virtual bool selectTimeline(const String& timeline) = 0;
     virtual std::shared_ptr<Timeline> currentTimeline() = 0;
     virtual std::shared_ptr<Timeline> createTimeline() = 0;

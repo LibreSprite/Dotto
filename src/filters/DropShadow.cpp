@@ -14,6 +14,7 @@ public:
     Property<S32> offsetX{this, "offset-x", 0};
     Property<S32> offsetY{this, "offset-y", 0};
     Property<Color> shadowColor{this, "shadow-color", "rgba{0,0,0,255}"};
+    String category() override {return "misc";}
 
     std::shared_ptr<PropertySet> getMetaProperties() override {
         auto meta = Filter::getMetaProperties();
@@ -101,7 +102,7 @@ public:
             }
         }
 
-        surface->setDirty();
+        surface->setDirty(surface->rect());
     }
 };
 

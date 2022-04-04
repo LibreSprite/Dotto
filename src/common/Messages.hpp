@@ -151,6 +151,11 @@ namespace msg {
         ActivateDocument(std::shared_ptr<Document> doc) : doc{doc} {}
     };
 
+    struct ResizeDocument : public Message {
+        std::shared_ptr<Document> doc;
+        ResizeDocument(std::shared_ptr<Document> doc) : doc{doc} {}
+    };
+
     struct ActivateCell : public Message {
         std::shared_ptr<Cell> cell;
         ActivateCell(std::shared_ptr<Cell> cell) : cell{cell} {}

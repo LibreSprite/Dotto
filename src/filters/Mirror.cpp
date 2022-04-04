@@ -9,7 +9,7 @@ class Surface;
 
 class Mirror : public Filter {
 public:
-    std::shared_ptr<PropertySet> getMetaProperties() override {return nullptr;}
+    String category() override {return "transform";}
 
     void run(std::shared_ptr<Surface> surface) override {
         auto data = surface->data();
@@ -22,7 +22,7 @@ public:
                 std::swap(data[x], data[width - x - 1]);
         }
 
-        surface->setDirty();
+        surface->setDirty(surface->rect());
     }
 };
 

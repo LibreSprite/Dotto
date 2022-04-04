@@ -23,16 +23,43 @@ public:
 
     using Path = Vector<Point2D>;
     Property<bool> enabled{this, "enabled", true};
+    Property<bool> allLayers{this, "all-layers", false};
+    Property<bool> allFrames{this, "all-frames", false};
+    std::shared_ptr<PropertySet> undoData;
+
+    virtual bool forceAllLayers() {return false;}
+    virtual bool forceAllFrames() {return false;}
+    virtual String category() = 0;
 
     virtual void init(const String& name) {
         instances.insert({name, shared_from_this()});
         load({
                 {"icon", "%skin/" + name + ".png"},
-                {"filter", name}
+                {"filter", name},
+                {"category", category()}
             });
     }
 
-    virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
+    virtual void undo() {}
+
+    virtual std::shared_ptr<PropertySet> getMetaProperties() {
+        auto meta = std::make_shared<PropertySet>();
+        if (!forceAllFrames()) {
+            meta->push(std::make_shared<PropertySet>(PropertySet{
+                        {"widget", "checkbox"},
+                        {"label", allFrames.name},
+                        {"value", allFrames.value}
+                    }));
+        }
+        if (!forceAllLayers()) {
+            meta->push(std::make_shared<PropertySet>(PropertySet{
+                        {"widget", "checkbox"},
+                        {"label", allLayers.name},
+                        {"value", allLayers.value}
+                    }));
+        }
+        return meta;
+    }
 
     virtual void run(std::shared_ptr<Surface> surface) = 0;
 };

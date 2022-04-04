@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include <blender/Blender.hpp>
 #include <cmd/Command.hpp>
 #include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PropertySet.hpp>
 #include <common/PubSub.hpp>
-#include <common/line.hpp>
 #include <common/Surface.hpp>
+#include <common/line.hpp>
 #include <doc/Selection.hpp>
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>
@@ -32,6 +33,7 @@ public:
     Property<S32> size{this, "size", 1, &Pencil::invalidateMetaMenu};
     Property<F32> interval{this, "interval", 1.0f, &Pencil::invalidateMetaMenu};
     Property<F32> smoothing{this, "smoothing", 0.0f, &Pencil::invalidateMetaMenu};
+    Property<String> mode{this, "blend-mode", "normal", &Pencil::invalidateMetaMenu};
     Property<bool> pressuresize{this, "pen-size", true, &Pencil::invalidateMetaMenu};
     Property<bool> pressurealpha{this, "pen-alpha", false, &Pencil::invalidateMetaMenu};
     Property<bool> pixelperfect{this, "pixelperfect", true, &Pencil::invalidateMetaMenu};
@@ -145,6 +147,18 @@ public:
                     {"widget", "checkbox"},
                     {"label", pixelperfect.name},
                     {"value", pixelperfect.value}
+                }));
+
+        auto& registry = Blender::getRegistry();
+        Vector<String> options;
+        for (auto& opt : registry)
+            options.push_back(opt.first);
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "option"},
+                    {"label", mode.name},
+                    {"value", mode.value},
+                    {"options", join(options, ",")}
                 }));
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
@@ -300,12 +314,11 @@ public:
         paint = inject<Command>{"paint"};
         paint->load({
                 {"selection", selection},
-                {"preview", true}
+                {"preview", true},
+                {"mode", which != 2 ? *mode : "erase"}
             });
         if (which == 0) {
             paint->set("cursor", true);
-        } else if (which == 2) {
-            paint->set("mode", "erase");
         }
     }
 

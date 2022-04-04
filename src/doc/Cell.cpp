@@ -18,6 +18,13 @@ void Cell::setAlpha(F32 v, bool silent) {
     modify(old == alpha || silent);
 }
 
+void Cell::setBlendMode(const String& newMode, bool silent) {
+    if (blendMode == newMode)
+        return;
+    blendMode = newMode;
+    modify(silent);
+}
+
 class BitmapCell  : public Cell {
 public:
     Vector<U8> serialize() override {
