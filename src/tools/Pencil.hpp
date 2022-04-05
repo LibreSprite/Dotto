@@ -32,12 +32,12 @@ public:
     F32 scale;
     Property<S32> size{this, "size", 1, &Pencil::invalidateMetaMenu};
     Property<F32> interval{this, "interval", 1.0f, &Pencil::invalidateMetaMenu};
-    Property<F32> smoothing{this, "smoothing", 0.0f, &Pencil::invalidateMetaMenu};
+    Property<F32> smoothing{this, "stroke-smoothing", 0.0f, &Pencil::invalidateMetaMenu};
     Property<String> mode{this, "blend-mode", "normal", &Pencil::invalidateMetaMenu};
     Property<bool> pressuresize{this, "pen-size", true, &Pencil::invalidateMetaMenu};
     Property<bool> pressurealpha{this, "pen-alpha", false, &Pencil::invalidateMetaMenu};
     Property<bool> pixelperfect{this, "pixelperfect", true, &Pencil::invalidateMetaMenu};
-    Property<bool> HQ{this, "high-quality", true};
+    Property<bool> HQ{this, "antialias", true};
 
     bool wasInit = false;
     S32 prevPlotX = 0, prevPlotY = 0, prevPlotZ = 0;
