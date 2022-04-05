@@ -79,6 +79,7 @@ public:
         if (!transform || !surface)
             return false;
         cmsDoTransform(transform, surface->data(), surface->data(), surface->width() * surface->height());
+        surface->setDirty(surface->rect());
         return true;
     }
 };
