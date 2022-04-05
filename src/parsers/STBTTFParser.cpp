@@ -26,10 +26,9 @@ public:
         for (U32 y = 0; y < height; ++y) {
             for (U32 x = 0; x < width; ++x) {
                 auto alpha = data[y * width + x];
-                auto m = alpha / 255.0f;
                 target.setPixel(x + offsetX + bearingX,
                                 y + offsetY + bearingY,
-                                Color(color.r * m, color.g * m, color.b * m, alpha));
+                                Color(color.r, color.g, color.b, alpha));
             }
         }
         offsetX += advance;
