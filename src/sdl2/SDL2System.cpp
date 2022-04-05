@@ -31,6 +31,8 @@ public:
     std::unordered_set<String> pressedKeys;
     bool mapJoyhatToMouseWheel = false;
     bool mapJoyaxisToMouseWheel = false;
+    bool invertMouseWheelX = false;
+    bool invertMouseWheelY = false;
 
     bool boot() override {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_EVENTS) != 0) {
@@ -42,6 +44,8 @@ public:
         inject<Config> config;
         mapJoyhatToMouseWheel = config->properties->get<bool>("map-joyhat-to-mousewheel");
         mapJoyaxisToMouseWheel = config->properties->get<bool>("map-joyaxis-to-mousewheel");
+        invertMouseWheelX = config->properties->get<bool>("mouse-wheel-invert-x");
+        invertMouseWheelY = config->properties->get<bool>("mouse-wheel-invert-y");
 
         if (mapJoyhatToMouseWheel || mapJoyaxisToMouseWheel) {
             SDL_JoystickEventState(SDL_ENABLE);
@@ -98,10 +102,11 @@ public:
             case SDL_MOUSEWHEEL:
                 pub(msg::MouseWheel{
                         event.wheel.windowID,
-                        event.wheel.x,
-                        event.wheel.y
+                        (invertMouseWheelX ? -event.wheel.x : event.wheel.x),
+                        (invertMouseWheelY ? -event.wheel.y : event.wheel.y)
                     });
                 break;
+
             case SDL_MOUSEMOTION:
                 pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y, event.motion.state});
                 break;
