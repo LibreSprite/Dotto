@@ -53,6 +53,8 @@ jobs:
         cp /mingw32/bin/libjpeg-8.dll ./
         cp /mingw32/bin/libtiff-5.dll ./
         cp /mingw32/bin/libv8_libbase.dll ./
+        cp /mingw32/bin/libcrypto-1_1.dll ./
+        cp /mingw32/bin/libssl-1_1.dll ./
         cp /mingw32/bin/libssp-0.dll ./
         cp /mingw32/bin/libicuin69.dll ./
         cp /mingw32/bin/libicuuc69.dll ./
