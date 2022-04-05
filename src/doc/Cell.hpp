@@ -14,7 +14,6 @@ class Document;
 class Cell  : public Injectable<Cell>, public Serializable, public std::enable_shared_from_this<Cell> {
 protected:
     friend class Document;
-    String type;
     String GUID;
     String blendMode = "normal";
     std::shared_ptr<Surface> composite = std::make_shared<Surface>();
@@ -23,7 +22,7 @@ protected:
 
     void modify(bool silent);
 public:
-    const String& getType() {return type;}
+    virtual String getType() const = 0;
     const String& getGUID() {return GUID;}
     Surface* getComposite() {return composite.get();}
     Selection* getMask() {return mask.get();}

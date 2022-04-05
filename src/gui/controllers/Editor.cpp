@@ -4,10 +4,12 @@
 
 #include <optional>
 
+#include <cmd/Command.hpp>
 #include <common/Messages.hpp>
 #include <common/PropertySet.hpp>
 #include <common/PubSub.hpp>
 #include <common/String.hpp>
+#include <common/System.hpp>
 #include <doc/Cell.hpp>
 #include <doc/Document.hpp>
 #include <doc/Timeline.hpp>
@@ -15,7 +17,9 @@
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
+#include <layer/Layer.hpp>
 #include <log/Log.hpp>
+#include <tools/Tool.hpp>
 
 class Editor : public ui::Controller {
     Property<std::shared_ptr<Document>> doc{this, "doc"};
@@ -31,11 +35,10 @@ class Editor : public ui::Controller {
     Property<U32> frame{this, "frame", 0, &Editor::setFrame};
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
     std::shared_ptr<ui::Node> canvas;
-    std::shared_ptr<Cell> lastCell;
+    std::shared_ptr<ui::Node> container;
     std::shared_ptr<Cell> activeCell;
-    U32 activeFrame = -1;
-    U32 activeLayer = -1;
-    Vector<std::shared_ptr<ui::Node>> cellNodes;
+    std::shared_ptr<Layer> layerEditor;
+    inject<System> system;
 
 public:
     void setFrame() {
@@ -51,33 +54,76 @@ public:
             return;
         }
 
+        bool frameChanged = timeline->frame() != *frame;
+        bool layerChanged = timeline->layer() != *layer;
         auto cell = timeline->activate(frame, layer);
         if (activeCell == cell)
             return;
 
+        if (!activeCell || activeCell->getType() != cell->getType()) {
+            layerEditor = inject<Layer>{cell->getType()};
+            layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
+        }
+
+        layerEditor->setCell(cell);
+
         activeCell = cell;
 
-        if (frame != activeFrame) {
-            activeFrame = frame;
+        if (frameChanged) {
             pub(msg::ActivateFrame{doc, frame});
         }
 
-        if (layer != activeLayer) {
-            activeLayer = layer;
+        if (layerChanged) {
             pub(msg::ActivateLayer{doc, layer});
         }
     }
 
     void attach() override {
-        node()->addEventListener<ui::Focus, ui::FocusChild>(this);
+        node()->addEventListener<ui::Focus,
+                                 ui::FocusChild,
+                                 ui::MouseMove,
+                                 ui::MouseDown,
+                                 ui::MouseUp,
+                                 ui::MouseWheel,
+                                 ui::MouseLeave>(this);
         pub(msg::ActivateDocument{doc});
         canvas = node()->findChildById("canvas");
+        container = node()->findChildById("container");
+    }
+
+    void eventHandler(const ui::MouseDown& event) {
+        layerEditor->setGlobalCanvas(canvas->globalRect);
+        layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+        layerEditor->setButtons(event.buttons);
+        layerEditor->update();
+    }
+
+    void eventHandler(const ui::MouseUp& event) {
+        layerEditor->setButtons(event.buttons);
+        layerEditor->update();
+    }
+
+    void eventHandler(const ui::MouseLeave&) {
+        system->setMouseCursorVisible(true);
+    }
+
+    void eventHandler(const ui::MouseMove& event) {
+        layerEditor->setGlobalCanvas(canvas->globalRect);
+        layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+        layerEditor->setButtons(event.buttons);
+        layerEditor->update();
+    }
+
+    void eventHandler(const ui::MouseWheel& event) {
+        inject<Command> zoom{"zoom"};
+        zoom->set("level", "*" + tostring(1 + 0.2 * event.wheelY));
+        zoom->run();
     }
 
     void rezoom() {
-        if (!*doc)
+        if (!*doc || !canvas)
             return;
-        node()->load({
+        container->load({
                 {"x", "center"},
                 {"y", "center"},
                 {"width", (*doc)->width() * scale},
@@ -124,10 +170,10 @@ public:
                 {"visible", true},
                 {"doc", *doc}
             });
-        rezoom();
         setFrame();
         activate();
         node()->focus();
+        rezoom();
     }
 
     void activate() {
@@ -141,9 +187,11 @@ public:
     void eventHandler(const ui::FocusChild&) {activate();}
     void eventHandler(const ui::Focus&) {activate();}
 
+
     void on(msg::ResizeDocument& msg) {
         if (msg.doc.get() == doc->get()) {
             rezoom();
+            layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
         }
     }
 
