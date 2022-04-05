@@ -5,7 +5,6 @@
        x="0px"
        height="100%"
        width="100%"
-       scale="4"
        forward="canvas.layer=layer, canvas.frame=frame, canvas.document=doc, canvas.timeline=timeline, container.draggable=draggable"
        visible="false">
   <image controller="draggable" draggable="false" id="container" slice="1 1" src="%skin/editor.png" absolute="true">

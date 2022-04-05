@@ -31,7 +31,7 @@ class Editor : public ui::Controller {
     std::optional<ui::Node::Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
     Property<std::shared_ptr<PropertySet>> newFileProperties{this, "newfile", nullptr, &Editor::newFile};
-    Property<F32> scale{this, "scale", 1.0f, &Editor::rezoom};
+    Property<F32> scale{this, "scale", 0.0f, &Editor::rezoom};
     Property<U32> frame{this, "frame", 0, &Editor::setFrame};
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
     std::shared_ptr<ui::Node> canvas;
@@ -123,6 +123,17 @@ public:
     void rezoom() {
         if (!*doc || !canvas)
             return;
+
+        if (scale == 0) {
+            auto editor = node()->globalRect;
+            Rect canvas {0, 0, (*doc)->width(), (*doc)->height()};
+            if (!editor.empty() && !canvas.empty()) {
+                F32 fit = std::min(F32(editor.width) / F32(canvas.width), F32(editor.height) / F32(canvas.height));
+                node()->set("scale", fit * 0.9f);
+                return;
+            }
+        }
+
         container->load({
                 {"x", "center"},
                 {"y", "center"},
