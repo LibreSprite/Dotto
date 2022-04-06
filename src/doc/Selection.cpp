@@ -167,6 +167,27 @@ public:
         }
     }
 
+    void apply(const Rect& limit, const std::function<void(S32, S32, U8)>& callback) override {
+        S32 minY = std::max<S32>(bounds.y, limit.y);
+        S32 maxY = std::min<S32>(bounds.bottom(), limit.bottom());
+        S32 minX = std::max<S32>(bounds.x, limit.x);
+        S32 maxX = std::min<S32>(bounds.right(), limit.right());
+        S32 skip = 0;
+        if (minX > bounds.x)
+            skip = minX - bounds.x;
+        U32 cursor = 0;
+        for (S32 y = minY; y < maxY; ++y) {
+            U32 index = (y - bounds.y) * bounds.width + skip;
+            for (S32 x = minX; x < maxX; ++x) {
+                callback(x, y, data[index++]);
+            }
+            callback(maxX, y, 0);
+        }
+        for (S32 x = minX; x <= maxX; ++x) {
+            callback(x, maxY, 0);
+        }
+    }
+
     bool empty() override {
         return data.empty();
     }

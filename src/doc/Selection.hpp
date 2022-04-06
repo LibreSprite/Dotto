@@ -20,6 +20,7 @@ public:
     virtual U8 get(S32 x, S32 y) = 0;
     virtual Vector<U32> read(Surface*) = 0;
     virtual void write(Surface*, Vector<U32>& pixels) = 0;
+    virtual void apply(const Rect& limit, const std::function<void(S32, S32, U8)>& callback) = 0;
     virtual void clear() = 0;
     virtual bool empty() = 0;
 };
