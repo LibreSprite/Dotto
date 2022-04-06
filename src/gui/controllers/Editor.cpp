@@ -34,6 +34,11 @@ class Editor : public ui::Controller {
     Property<F32> scale{this, "scale", 0.0f, &Editor::rezoom};
     Property<U32> frame{this, "frame", 0, &Editor::setFrame};
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
+    F32 overlayScale = 1.0f;
+    Tool::Preview preview {
+        .hideCursor = false,
+        .overlay = inject<Selection>{"new"}
+    };
 
     std::shared_ptr<Surface> overlaySurface;
 
@@ -103,11 +108,17 @@ public:
         layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
         layerEditor->setButtons(event.buttons);
         layerEditor->update();
+            layerEditor->setGlobalCanvas(canvas->globalRect);
+            layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+            layerEditor->setButtons(event.buttons);
+            layerEditor->update();
+            updateToolOverlay();
     }
 
     void eventHandler(const ui::MouseUp& event) {
         layerEditor->setButtons(event.buttons);
         layerEditor->update();
+        updateToolOverlay();
     }
 
     void eventHandler(const ui::MouseLeave&) {
@@ -119,12 +130,53 @@ public:
         layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
         layerEditor->setButtons(event.buttons);
         layerEditor->update();
+        updateToolOverlay();
     }
 
     void eventHandler(const ui::MouseWheel& event) {
         inject<Command> zoom{"zoom"};
         zoom->set("level", "*" + tostring(1 + 0.2 * event.wheelY));
         zoom->run();
+    }
+
+    void clearToolOverlay() {
+        if (!overlaySurface)
+            return;
+        if (!preview.overlay->empty()) {
+            preview.draw(true, preview, *overlaySurface, container->globalRect, overlayScale);
+            preview.overlay->clear();
+        }
+    }
+
+    void updateToolOverlay() {
+        if (!overlaySurface)
+            return;
+
+        Tool::Preview* currentPreview = nullptr;
+        if (auto activeTool = Tool::active.lock())
+            currentPreview = activeTool->getPreview();
+
+        clearToolOverlay();
+
+        if (currentPreview) {
+            if (currentPreview->overlay) {
+                *preview.overlay = *currentPreview->overlay;
+            }
+            preview.overlayColor = currentPreview->overlayColor;
+            preview.altColor = currentPreview->altColor;
+            preview.hideCursor = currentPreview->hideCursor;
+            preview.draw = currentPreview->draw;
+        } else {
+            preview.hideCursor = false;
+        }
+
+        if (!preview.overlay->empty()) {
+            overlaySurface->resize(node()->globalRect.width, node()->globalRect.height);
+            overlayScale = scale;
+            preview.draw(false, preview, *overlaySurface, container->globalRect, overlayScale);
+        }
+
+        system->setMouseCursorVisible(!preview.hideCursor);
     }
 
     void rezoom() {
@@ -140,6 +192,8 @@ public:
                 return;
             }
         }
+
+        clearToolOverlay();
 
         container->load({
                 {"x", "center"},
