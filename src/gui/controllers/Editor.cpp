@@ -26,7 +26,8 @@ class Editor : public ui::Controller {
     PubSub<msg::ResizeDocument,
            msg::ActivateDocument,
            msg::ActivateEditor,
-           msg::PollActiveEditor> pub{this};
+           msg::PollActiveEditor,
+           msg::Tick> pub{this};
     std::optional<Document::Provides> docProvides;
     std::optional<ui::Node::Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
@@ -259,6 +260,14 @@ public:
     void eventHandler(const ui::FocusChild&) {activate();}
     void eventHandler(const ui::Focus&) {activate();}
 
+    U32 frameCounter = 0;
+    void on(msg::Tick&) {
+        if (frameCounter++ < 10)
+            return;
+        frameCounter = 0;
+        if (preview.draw == Tool::Preview::drawOutlineAnts)
+            preview.draw(false, preview, *overlaySurface, container->globalRect, overlayScale);
+    }
 
     void on(msg::ResizeDocument& msg) {
         if (msg.doc.get() == doc->get()) {
