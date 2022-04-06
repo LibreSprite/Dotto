@@ -35,6 +35,8 @@ class Editor : public ui::Controller {
     Property<F32> scale{this, "scale", 0.0f, &Editor::rezoom};
     Property<U32> frame{this, "frame", 0, &Editor::setFrame};
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
+    Property<bool> draggable{this, "draggable", false};
+
     F32 overlayScale = 1.0f;
     Tool::Preview preview {
         .hideCursor = false,
@@ -105,15 +107,19 @@ public:
     }
 
     void eventHandler(const ui::MouseDown& event) {
-        layerEditor->setGlobalCanvas(canvas->globalRect);
-        layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
-        layerEditor->setButtons(event.buttons);
-        layerEditor->update();
+        if (draggable) {
+            pub(msg::BeginDrag{
+                    container,
+                    container->globalRect.x,
+                    container->globalRect.y
+                });
+        } else {
             layerEditor->setGlobalCanvas(canvas->globalRect);
             layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
             layerEditor->setButtons(event.buttons);
             layerEditor->update();
             updateToolOverlay();
+        }
     }
 
     void eventHandler(const ui::MouseUp& event) {
