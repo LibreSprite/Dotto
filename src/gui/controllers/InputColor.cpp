@@ -40,7 +40,6 @@ public:
     void eventHandler(const ui::Click&) {
         String mode = "toggle";
         if (activeInput != this) {
-            node()->getPropertySet().print();
             inject<Command> activate{"activatecolor"};
             activate->set("color", node()->getPropertySet().get<Color>("value"));
             activate->run();
