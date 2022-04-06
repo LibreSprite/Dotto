@@ -15,12 +15,10 @@ public:
     Property<bool> proportional{this, "proportional", false};
     Property<bool> contiguous{this, "contiguous", true};
 
-    U32 which;
-    std::shared_ptr<Command> paint;
-    std::shared_ptr<Selection> selection;
-
     Preview preview {.hideCursor = true};
     Preview* getPreview() override {
+        preview.overlayColor = Tool::color;
+        preview.overlayColor.a = 0xFF;
         return &preview;
     }
 
@@ -45,35 +43,21 @@ public:
     }
 
     void update(Surface* surface, Path& points) override {
-        if (which == 0 && selection && paint) {
-            selection->add(points.back().x, points.back().y, 255);
-            paint->run();
+        if (preview.overlay) {
+            preview.overlay->clear();
+            preview.overlay->add(points.back().x, points.back().y, 255);
             return;
         }
     }
 
     void end(Surface* surface, Path& points) override {
-        if (which == 0 && selection && paint) {
-            paint->set("preview", false);
-            paint->run();
-            paint.reset();
-            selection.reset();
-        }
+        preview.overlay.reset();
     }
 
     void begin(Surface* surface, Path& points, U32 which) override {
-        this->which = which;
-        selection = inject<Selection>{"new"};
-        paint = inject<Command>{"paint"};
-        paint->set("selection", selection);
-
         if (which == 0) {
-            selection->add(points.back().x, points.back().y, 255);
-            paint->load({
-                    {"preview", true},
-                    {"cursor", true}
-                });
-            paint->run();
+            preview.overlay = inject<Selection>{"new"};
+            preview.overlay->add(points.back().x, points.back().y, 255);
             return;
         }
 
@@ -81,11 +65,17 @@ public:
         if (targetColor == color)
             return;
 
+        inject<Command> paint{"paint"};
+        inject<Selection> selection{"new"};
+        paint->load({
+                {"selection", selection.shared()},
+                {"surface", surface->shared_from_this()}
+            });
+
         S32 threshold = std::max<S32>(0, std::min<S32>(this->threshold, 255));
         threshold *= threshold;
         bool proportional = this->proportional && threshold;
 
-        selection->clear();
         S32 width = surface->width();
         S32 height = surface->height();
 
@@ -130,8 +120,6 @@ public:
         }
 
         paint->run();
-        paint.reset();
-        selection.reset();
     }
 };
 
