@@ -12,6 +12,7 @@ class Selection : public Injectable<Selection>, public std::enable_shared_from_t
 public:
     virtual const Rect& getBounds() const = 0;
     virtual const Vector<U8>& getData() const = 0;
+    virtual Selection& operator = (const Selection& other) = 0;
     virtual void add(const Selection& other) = 0;
     virtual void blend(const Selection& other) = 0;
     virtual void add(S32 x, S32 y, U32 amount) = 0;

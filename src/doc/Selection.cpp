@@ -40,6 +40,12 @@ public:
         bounds = rect;
     }
 
+    Selection& operator = (const Selection& other) override {
+        data = other.getData();
+        bounds = other.getBounds();
+        return *this;
+    }
+
     void add(const Selection& other) override {
         Rect otherBounds = other.getBounds();
         Rect newBounds = bounds;
