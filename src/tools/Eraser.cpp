@@ -8,17 +8,24 @@ class Surface;
 
 class Eraser : public Pencil {
 public:
-    virtual void initPaint() {
+    Eraser() {
+        preview.draw = Preview::drawFilledSolid;
+        preview.overlayColor = 0x3FFFFFFF;
+        preview.altColor = 0x3F000000;
+    }
+
+    Preview* getPreview() override {
+        return &preview;
+    }
+
+    void initPaint(Surface* surface) override {
         paint = inject<Command>{"paint"};
         paint->load({
                 {"selection", selection},
-                {"preview", true}
+                {"preview", true},
+                {"surface", surface->shared_from_this()},
+                {"mode", which == 1 ? "erase" : "normal"},
             });
-        if (which == 0) {
-            paint->set("cursor", true);
-        } else if (which == 1) {
-            paint->set("mode", "erase");
-        }
     }
 
 };
