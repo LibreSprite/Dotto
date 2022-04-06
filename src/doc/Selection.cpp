@@ -82,7 +82,7 @@ public:
     }
 
     void add(S32 x, S32 y, U32 amount) override {
-        if (x < 0 || y < 0 || amount == 0)
+        if (amount == 0)
             return;
         Rect newBounds = bounds;
         if (newBounds.expand(x, y))
@@ -97,7 +97,7 @@ public:
     }
 
     void subtract(S32 x, S32 y, U32 amount) override {
-        if (x < 0 || y < 0)
+        if (amount == 0)
             return;
         if (!bounds.contains(x, y))
             return;
@@ -124,11 +124,16 @@ public:
 
     Vector<U32> read(Surface* surface) override {
         Vector<U32> pixels;
-        U32 maxY = std::min<U32>(bounds.bottom(), surface->height());
-        U32 maxX = std::min<U32>(bounds.right(), surface->width());
-        for (U32 y = bounds.y; y < maxY; ++y) {
+        S32 minY = std::max<S32>(bounds.y, 0);
+        S32 maxY = std::min<S32>(bounds.bottom(), surface->height());
+        S32 minX = std::max<S32>(bounds.x, 0);
+        S32 maxX = std::min<S32>(bounds.right(), surface->width());
+        for (S32 y = minY; y < maxY; ++y) {
             U32 index = (y - bounds.y) * bounds.width;
-            for (U32 x = bounds.x; x < maxX; ++x) {
+            if (bounds.x < 0) {
+                index -= bounds.x;
+            }
+            for (S32 x = minX; x < maxX; ++x) {
                 if (data[index++]) {
                     pixels.push_back(surface->getPixelUnsafe(x, y));
                 }
@@ -138,12 +143,17 @@ public:
     }
 
     void write(Surface* surface, Vector<U32>& pixels) override {
-        U32 maxY = std::min<U32>(bounds.bottom(), surface->height());
-        U32 maxX = std::min<U32>(bounds.right(), surface->width());
+        S32 minY = std::max<S32>(bounds.y, 0);
+        S32 maxY = std::min<S32>(bounds.bottom(), surface->height());
+        S32 minX = std::max<S32>(bounds.x, 0);
+        S32 maxX = std::min<S32>(bounds.right(), surface->width());
         U32 cursor = 0;
-        for (U32 y = bounds.y; y < maxY; ++y) {
+        for (S32 y = minY; y < maxY; ++y) {
             U32 index = (y - bounds.y) * bounds.width;
-            for (U32 x = bounds.x; x < maxX; ++x) {
+            if (bounds.x < 0) {
+                index -= bounds.x;
+            }
+            for (S32 x = minX; x < maxX; ++x) {
                 if (data[index++]) {
                     surface->setPixelUnsafe(x, y, pixels[cursor++]);
                 }
