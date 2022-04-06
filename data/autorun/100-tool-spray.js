@@ -1,8 +1,14 @@
 app.addTool("spray");
-var selection, which;
+var scatter = 50;
+var selection, which, cx, cy;
 
 function len(x, y) {
     return x*x + y*y;
+}
+
+function random() {
+    cx = app.target.lastX + Math.random() * (scatter*2) - scatter;
+    cy = app.target.lastY + Math.random() * (scatter*2) - scatter;
 }
 
 function onEvent(name) {
@@ -10,17 +16,16 @@ function onEvent(name) {
         init:function(){},
 
         toolstart:function(){
-            app.release(selection);
+            app.target.hideCursor = true;
             selection = app.newSelection();
-            app.hold(selection);
+            app.target.previewArea = selection;
             which = app.target.which;
             onEvent("toolupdate");
         },
 
         toolupdate:function(){
-            var scatter = 50;
-            var cx = app.target.lastX + Math.random() * (scatter*2) - scatter;
-            var cy = app.target.lastY + Math.random() * (scatter*2) - scatter;
+            if (!which)
+                selection.clear();
             var size = scatter - (len(cx - app.target.lastX, cy - app.target.lastY) / (scatter));
             var normalize = 255 / (size*size);
             for (var y = cy - size; y < cy + size; ++y) {
@@ -29,17 +34,21 @@ function onEvent(name) {
                     if (v > 0) selection.add(x, y, v);
                 }
             }
-            app.command("paint",
-                        "selection", selection,
-                        "preview", true,
-                        "cursor", which == 0);
+            if (which) {
+                app.command("paint",
+                            "selection", selection,
+                            "preview", true,
+                            "surface", app.target.surface);
+            }
+            random();
         },
 
         toolend:function(){
-            app.command("paint",
-                        "selection", selection,
-                        "cursor", which == 0);
-            selection = app.release(selection);
+            if (which) {
+                app.command("paint",
+                            "selection", selection,
+                            "surface", app.target.surface);
+            }
         }
 
     })[name] || (function(){
