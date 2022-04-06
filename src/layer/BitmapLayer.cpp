@@ -44,11 +44,6 @@ public:
         } else if (activeTool) {
             activeTool->update(surface, points);
         }
-
-        Tool::Preview* preview = nullptr;
-        if (activeTool)
-            preview = activeTool->getPreview();
-        system->setMouseCursorVisible(!preview || !preview->hideCursor);
     }
 
     void end() {
