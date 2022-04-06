@@ -34,8 +34,12 @@ class Editor : public ui::Controller {
     Property<F32> scale{this, "scale", 0.0f, &Editor::rezoom};
     Property<U32> frame{this, "frame", 0, &Editor::setFrame};
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
+
+    std::shared_ptr<Surface> overlaySurface;
+
     std::shared_ptr<ui::Node> canvas;
     std::shared_ptr<ui::Node> container;
+
     std::shared_ptr<Cell> activeCell;
     std::shared_ptr<Layer> layerEditor;
     inject<System> system;
@@ -89,6 +93,9 @@ public:
         pub(msg::ActivateDocument{doc});
         canvas = node()->findChildById("canvas");
         container = node()->findChildById("container");
+        if (auto tooloverlay = node()->findChildById("tooloverlay")) {
+            overlaySurface = tooloverlay->getPropertySet().get<std::shared_ptr<Surface>>("surface");
+        }
     }
 
     void eventHandler(const ui::MouseDown& event) {
