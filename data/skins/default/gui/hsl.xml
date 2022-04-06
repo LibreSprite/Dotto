@@ -57,9 +57,9 @@ function hsl(r, g, b) {
     r /= 255;
     g /= 255;
     b /= 255;
-    const l = Math.max(r, g, b);
-    const s = l - Math.min(r, g, b);
-    const h = 0;
+    var l = Math.max(r, g, b);
+    var s = l - Math.min(r, g, b);
+    var h = 0;
     if (s) {
         if (l === r) {
             h = (g - b) / s;
