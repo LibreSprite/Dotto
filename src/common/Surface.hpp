@@ -50,6 +50,11 @@ public:
         setDirty({S32(x), S32(y), 1, 1});
     }
 
+    void setHLine(S32 x, S32 y, S32 w, PixelType pixel);
+    void antsHLine(S32 x, S32 y, S32 w, U32 age, PixelType A, PixelType B);
+    void setVLine(S32 x, S32 y, S32 h, PixelType pixel);
+    void antsVLine(S32 x, S32 y, S32 h, U32 age, PixelType A, PixelType B);
+    void fillRect(const Rect& rect, PixelType pixel);
     void setPixel(U32 x, U32 y, PixelType pixel);
 
     void setPixel(U32 x, U32 y, const Color& color) {
