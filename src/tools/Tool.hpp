@@ -7,9 +7,10 @@
 #include <common/Color.hpp>
 #include <common/Config.hpp>
 #include <common/Messages.hpp>
-#include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
+#include <common/PubSub.hpp>
 #include <common/inject.hpp>
+#include <doc/Selection.hpp>
 
 class Surface;
 
@@ -22,10 +23,17 @@ public:
     static inline Color color;
 
     struct Preview {
+        static void drawOutlineSolid(bool clear, Preview& preview, Surface& surface, const Rect& container, F32 scale);
+        static void drawOutlineAnts(bool clear, Preview& preview, Surface& surface, const Rect& container, F32 scale);
+        static void drawFilledSolid(bool clear, Preview& preview, Surface& surface, const Rect& container, F32 scale);
+
         bool hideCursor = false;
-        std::shared_ptr<Surface> surface;
-        Color multiply;
-        F32 x, y;
+        std::shared_ptr<Selection> overlay;
+        Color overlayColor;
+        Color altColor;
+
+        using draw_t = decltype(drawFilledSolid)*;
+        draw_t draw = drawFilledSolid;
     };
 
     static void boot() {
