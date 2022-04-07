@@ -45,8 +45,6 @@ void Tool::Preview::drawOutlineAnts(bool clear, Preview& preview, Surface& surfa
 
     auto color = preview.overlayColor.toU32();
     auto invert = preview.altColor.toU32();
-    static U32 age = 0;
-    age++;
     Rect dirty;
     bool before = false;
     preview.overlay->apply(
@@ -66,12 +64,12 @@ void Tool::Preview::drawOutlineAnts(bool clear, Preview& preview, Surface& surfa
             dirty.expand(x0, y0);
             if (above != current) {
                 dirty.expand(x0 + scale + 1, y0);
-                surface.antsHLine(x0, y0, scale + 1, age, color, invert);
+                surface.antsHLine(x0, y0, scale + 1, antAge, color, invert);
             }
             if (before != current) {
                 before = current;
                 dirty.expand(x0, y0 + scale + 1);
-                surface.antsVLine(x0, y0, scale + 1, age, color, invert);
+                surface.antsVLine(x0, y0, scale + 1, antAge, color, invert);
             }
         });
     dirty.intersect(surface.rect());

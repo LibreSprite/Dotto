@@ -271,6 +271,8 @@ public:
         if (frameCounter++ < 10)
             return;
         frameCounter = 0;
+        Tool::antAge++;
+
         if (preview.draw == Tool::Preview::drawOutlineAnts)
             preview.draw(false, preview, *overlaySurface, container->globalRect, overlayScale);
     }

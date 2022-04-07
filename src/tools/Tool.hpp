@@ -21,6 +21,7 @@ public:
     static inline std::weak_ptr<Tool> previous;
     static inline std::weak_ptr<Tool> active;
     static inline Color color;
+    static inline U32 antAge = 0;
 
     struct Preview {
         static void drawOutlineSolid(bool clear, Preview& preview, Surface& surface, const Rect& container, F32 scale);
