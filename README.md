@@ -65,7 +65,6 @@ over Discord/Matrix.
 | Layer blending                 | OK            | 0.5     |                                                 |
 | Layer alpha                    | OK            | 0.5     |                                                 |
 | Filter support                 | OK            | 0.5     |                                                 |
-| Smart filter support           | Planned       | 1.0     |                                                 |
 | Resize: Nearest Neighbor       | OK            | 0.5     |                                                 |
 | Resize: Scale2X                | OK            | 0.5     |                                                 |
 | Drop Shadow filter             | OK            | 0.5     |                                                 |

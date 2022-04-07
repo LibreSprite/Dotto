@@ -1,1 +1,2 @@
-* List Of LibreSprite Prototype authors
+* List Of LibreSprite Dotto! authors
+Felipe Manga
