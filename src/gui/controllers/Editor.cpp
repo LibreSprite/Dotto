@@ -27,6 +27,7 @@ class Editor : public ui::Controller {
            msg::ActivateDocument,
            msg::ActivateEditor,
            msg::PollActiveEditor,
+           msg::PreModifySelection,
            msg::Tick> pub{this};
     std::optional<Document::Provides> docProvides;
     std::optional<ui::Node::Provides> editorProvides;
@@ -201,6 +202,7 @@ public:
         }
 
         clearToolOverlay();
+        clearSelectionOverlay();
 
         container->load({
                 {"x", "center"},
@@ -266,8 +268,26 @@ public:
     void eventHandler(const ui::FocusChild&) {activate();}
     void eventHandler(const ui::Focus&) {activate();}
 
+    std::shared_ptr<Selection> selection = nullptr;
+
+    void clearSelectionOverlay() {
+        if (selection) {
+            Tool::Preview preview {.overlay = selection};
+            Tool::Preview::drawOutlineSolid(true, preview, *overlaySurface, container->globalRect, overlayScale);
+            selection.reset();
+        }
+    }
+
+    void on(msg::PreModifySelection& event) {
+        if (event.selection == selection.get()) {
+            clearSelectionOverlay();
+        }
+    }
+
     U32 frameCounter = 0;
     void on(msg::Tick&) {
+        if (!*doc)
+            return;
         if (frameCounter++ < 10)
             return;
         frameCounter = 0;
@@ -275,6 +295,25 @@ public:
 
         if (preview.draw == Tool::Preview::drawOutlineAnts)
             preview.draw(false, preview, *overlaySurface, container->globalRect, overlayScale);
+
+        auto timeline = (*doc)->currentTimeline();
+        if (!timeline)
+            return;
+
+        auto selection = timeline->getSelection();
+        if (!selection || selection->empty()) {
+            this->selection.reset();
+            return;
+        }
+
+        this->selection = selection->shared_from_this();
+        Tool::Preview preview {
+            .overlay = this->selection,
+            .overlayColor = Color{200, 200, 200, 200},
+            .altColor = Color{55, 55, 55, 200},
+            .draw = Tool::Preview::drawOutlineAnts
+        };
+        Tool::Preview::drawOutlineAnts(false, preview, *overlaySurface, container->globalRect, overlayScale);
     }
 
     void on(msg::ResizeDocument& msg) {

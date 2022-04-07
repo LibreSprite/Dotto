@@ -17,6 +17,7 @@ class Document;
 class Cell;
 class Palette;
 class PropertySet;
+class Selection;
 
 namespace msg {
 
@@ -169,5 +170,10 @@ namespace msg {
     struct ModifyCell : public Message {
         std::shared_ptr<Cell> cell;
         ModifyCell(std::shared_ptr<Cell> cell) : cell{cell} {}
+    };
+
+    struct PreModifySelection : public Message {
+        Selection* selection;
+        PreModifySelection(Selection* selection) : selection{selection} {}
     };
 }
