@@ -28,8 +28,8 @@ public:
             dialog->title = "Open Image...";
             dialog->filters = std::move(filters);
             dialog->open([=](const Vector<String>& name){
-                that->set("filename", join(name, "|"));
-                if (!fileName->empty()) {
+                if (!name.empty() && !name[0].empty()) {
+                    that->set("filename", name[0]);
                     that->run();
                 }
             });

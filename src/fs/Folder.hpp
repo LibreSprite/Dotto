@@ -42,7 +42,7 @@ namespace fs {
                 if (!missingDriver.empty()) {
                     driver = inject<FSEntity>{missingDriver};
                     if (driver)
-                        driver->init(path + separator + name);
+                        driver->init(path + (path.empty() ? "" : separator) + name);
                 }
             } else {
                 driver = inject<FSEntity>{it->second->driver};
