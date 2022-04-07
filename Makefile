@@ -20,7 +20,11 @@ ifeq ($(OS),Windows_NT)
     LN_FLAGS += -lole32
     LN_FLAGS += -lws2_32
     LN_FLAGS += -lcrypt32
-    LN_FLAGS += -mconsole
+    ifeq ($(DEBUG),true)
+        LN_FLAGS += -mconsole
+    else
+        LN_FLAGS += -mwindows
+    endif
 
 else
     CC = gcc
