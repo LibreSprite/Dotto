@@ -182,6 +182,7 @@ public:
             auto weakapp = getEngine().getGlobal("app")->weak_from_this();
             auto handler = [=](const auto& event) {
                 if (auto app = std::static_pointer_cast<AppScriptObject>(weakapp.lock())) {
+                    auto engine = getEngine().shared_from_this();
                     auto target = std::static_pointer_cast<script::ScriptObject>(shared_from_this());
                     auto oldTarget = app->getTarget();
                     app->setTarget(target);
