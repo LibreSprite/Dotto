@@ -9,6 +9,7 @@
 
 class Cell;
 class DocumentImpl;
+class Selection;
 
 class Timeline : public Injectable<Timeline>, public Serializable, public std::enable_shared_from_this<Timeline> {
     friend class DocumentImpl;
@@ -23,4 +24,6 @@ public:
     virtual std::shared_ptr<Cell> getCell() const {return getCell(frame(), layer(), false);}
     virtual std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop = false) const = 0;
     virtual void setCell(U32 frame, U32 layer, std::shared_ptr<Cell> cell) = 0;
+    virtual void setSelection(const Selection* selection) = 0;
+    virtual Selection* getSelection() = 0;
 };
