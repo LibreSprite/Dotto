@@ -102,6 +102,30 @@ public:
         }
     }
 
+    void add(const Rect& rect, U32 amount) override {
+        if (amount == 0)
+            return;
+        Rect newBounds = bounds;
+        bool didExpand = newBounds.expand(rect.x, rect.y);
+        didExpand |= newBounds.expand(rect.right(), rect.bottom());
+        if (didExpand)
+            expand(newBounds);
+        S32 ydiff = rect.y - bounds.y;
+        S32 xdiff = rect.x - bounds.x;
+        S32 size = data.size();
+        for (S32 y = 0; y < S32(rect.height); ++y) {
+            for (S32 x = 0; x < S32(rect.width); ++x) {
+                U32 index = (y + ydiff) * bounds.width + (x + xdiff);
+                if (index >= size) {
+                    logE("Invalid selection add");
+                } else {
+                    U32 old = data[index] + amount;
+                    data[index] = old > 0xFF ? 0xFF : old;
+                }
+            }
+        }
+    }
+
     void subtract(S32 x, S32 y, U32 amount) override {
         if (amount == 0)
             return;
