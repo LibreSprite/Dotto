@@ -32,6 +32,11 @@ public:
         bool begin = points.empty();
         if (!begin && point.x == points.back().x && point.y == points.back().y)
             return;
+
+        if (!buttons() && points.size() > 5) {
+            points.erase(points.begin(), points.begin() + (points.size() - 5));
+        }
+
         points.push_back(point);
 
         if (begin) {
