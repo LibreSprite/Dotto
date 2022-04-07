@@ -140,6 +140,29 @@ public:
         }
     }
 
+    void subtract(const Rect& rect, U32 amount) override {
+        if (amount == 0)
+            return;
+        Rect newBounds = bounds;
+        newBounds.intersect(rect);
+        if (newBounds.empty())
+            return;
+        S32 ydiff = newBounds.y - bounds.y;
+        S32 xdiff = newBounds.x - bounds.x;
+        S32 size = data.size();
+        for (S32 y = 0; y < S32(newBounds.height); ++y) {
+            for (S32 x = 0; x < S32(newBounds.width); ++x) {
+                U32 index = (y + ydiff) * bounds.width + (x + xdiff);
+                if (index >= size) {
+                    logE("Invalid selection add");
+                } else {
+                    S32 old = data[index] - amount;
+                    data[index] = old < 0 ? 0 : old;
+                }
+            }
+        }
+    }
+
     U8 get(S32 x, S32 y) override {
         if (!bounds.contains(x, y))
             return 0;
