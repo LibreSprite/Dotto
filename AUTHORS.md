@@ -1,2 +1,3 @@
-* List Of LibreSprite Dotto! authors
-Felipe Manga
+# List Of LibreSprite Dotto! authors
+
+- Felipe Manga
