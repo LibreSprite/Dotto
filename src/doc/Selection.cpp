@@ -87,6 +87,29 @@ public:
         }
     }
 
+    Rect getTrimmedBounds() const override {
+        if (bounds.empty())
+            return bounds;
+
+        S32 minX = bounds.right(), minY = bounds.bottom();
+        S32 maxX = bounds.left(), maxY = bounds.top();
+        for (S32 y = bounds.y; y < bounds.bottom(); ++y) {
+            for (S32 x = bounds.x; x < bounds.right(); ++x) {
+                if (!data[(y - bounds.y) * bounds.width + (x - bounds.x)])
+                    continue;
+                minX = std::min(x, minX);
+                minY = std::min(y, minY);
+                maxX = std::max(x, maxX);
+                maxY = std::max(y, maxY);
+            }
+        }
+
+        return {
+            minX, minY,
+            U32(maxX - minX + 1), U32(maxY - minY + 1)
+        };
+    }
+
     void add(S32 x, S32 y, U32 amount) override {
         if (amount == 0)
             return;
