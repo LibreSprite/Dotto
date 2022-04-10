@@ -25,17 +25,3 @@ void Cell::setBlendMode(const String& newMode, bool silent) {
     modify(silent);
 }
 
-class BitmapCell  : public Cell {
-public:
-    String getType() const override {return "bitmap";}
-
-    Vector<U8> serialize() override {
-        return {};
-    }
-
-    bool unserialize(const Vector<U8>&) override {
-        return true;
-    }
-};
-
-static Cell::Shared<BitmapCell> reg{"bitmap"};

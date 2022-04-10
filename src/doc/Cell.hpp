@@ -32,4 +32,5 @@ public:
     void setAlpha(F32 v, bool silent);
     const String& getBlendMode() {return blendMode;}
     void setBlendMode(const String&, bool silent);
+    virtual void setSelection(const Selection* selection) = 0;
 };
