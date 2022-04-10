@@ -122,15 +122,14 @@ public:
 
     void drawGrid(const Color& color) {
         needsGridRedraw = false;
-        if (*grid && gridSurface && scale >= 3) {
-            gridoverlay->set("visible", true);
-        } else {
+        if (!*grid || !gridSurface || scale < 3) {
             if (gridoverlay) {
                 gridoverlay->set("visible", false);
             }
             return;
         }
 
+        gridoverlay->set("visible", true);
         gridSurface->resize(node()->globalRect.width, node()->globalRect.height);
         gridSurface->setDirty(gridSurface->rect());
         gridSurface->fillRect(gridSurface->rect(), 0);
