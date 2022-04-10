@@ -16,6 +16,7 @@ public:
     virtual Selection& operator = (const Selection& other) = 0;
     virtual void add(const Selection& other) = 0;
     virtual void blend(const Selection& other) = 0;
+    virtual void mask(const Selection& other) = 0;
     virtual void add(S32 x, S32 y, U32 amount) = 0;
     virtual void add(const Rect&, U32 amount) = 0;
     virtual void subtract(S32 x, S32 y, U32 amount) = 0;

@@ -110,6 +110,32 @@ public:
         };
     }
 
+    void mask(const Selection& other) override {
+        auto newBounds = getTrimmedBounds();
+        newBounds.intersect(other.getTrimmedBounds());
+        if (newBounds.empty()) {
+            clear();
+            return;
+        }
+
+        swap.resize(newBounds.width * newBounds.height);
+
+        auto& otherData = other.getData();
+        auto otherBounds = other.getBounds();
+
+        for (S32 y = newBounds.y; y < newBounds.bottom(); ++y) {
+            for (S32 x = newBounds.x; x < newBounds.right(); ++x) {
+                U32 otherAmount = otherData[(y - otherBounds.y) * otherBounds.width + (x - otherBounds.x)];
+                U32 ownAmount = data[(y - bounds.y) * bounds.width + (x - bounds.x)];
+                U32 mul = otherAmount * ownAmount / 255;
+                swap[(y - newBounds.y) * newBounds.width + (x - newBounds.x)] = mul;
+            }
+        }
+
+        data = swap;
+        bounds = newBounds;
+    }
+
     void add(S32 x, S32 y, U32 amount) override {
         if (amount == 0)
             return;
@@ -258,7 +284,7 @@ public:
         }
     }
 
-    bool empty() override {
+    bool empty() const override {
         return data.empty();
     }
 
