@@ -65,9 +65,25 @@ public:
     }
 };
 
+class WinFile : public StdFile {
+public:
+    bool open(const FileOpenSettings& settings) override {
+        close();
+        auto mode = settings.write ? L"rb+" : L"rb";
+
+        auto wpath = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(path);
+        auto wcpath = reinterpret_cast<const wchar_t *>(wpath.c_str());
+
+        file = _wfopen(wcpath, mode);
+        if (!file && settings.create && settings.write)
+            file = _wfopen(wcpath, L"wb+");
+        return file;
+    }
+};
+
 static FSEntity::Shared<WindowsRootDir> lrd{"rootDir"};
 static FileSystem::Shared<FileSystem> fsreg{"new"};
-static File::Shared<StdFile> stdFile{"std"};
+static File::Shared<WinFile> winFile{"std"};
 static File::Shared<fs::Folder> stdDir{"dir"};
 
 #endif

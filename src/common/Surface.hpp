@@ -25,38 +25,15 @@ public:
     U32 width() const {return _width;}
     U32 height() const {return _height;}
     Rect rect() const {return {0, 0, _width, _height};}
-
-    std::shared_ptr<Surface> clone() {
-        auto other = std::make_shared<Surface>();
-        other->resize(_width, _height);
-        other->setPixels(getPixels());
-        return other;
-    }
-
-    TextureInfo& info() {
-        if (!_textureInfo)
-            _textureInfo = std::make_unique<TextureInfo>();
-        return *_textureInfo;
-    }
-
-    void resize(U32 width, U32 height) {
-        _width = width;
-        _height = height;
-        pixels.resize(width * height);
-    }
-
     PixelType* data() {return pixels.data();}
-
     U32 dataSize() {return _width * _height * sizeof(PixelType);};
+    const Vector<PixelType>& getPixels() {return pixels;}
 
-    void setDirty(const Rect& region) {
-        if (_textureInfo)
-            _textureInfo->setDirty(region);
-    }
-
-    const Vector<PixelType>& getPixels() {
-        return pixels;
-    }
+    std::shared_ptr<Surface> clone();
+    TextureInfo& info();
+    void resize(U32 width, U32 height);
+    void setDirty(const Rect& region);
+    void setPixels(const Vector<PixelType>& read);
 
     Color getPixel(U32 x, U32 y) {
         U32 index = x + y * _width;
@@ -73,20 +50,12 @@ public:
         setDirty({S32(x), S32(y), 1, 1});
     }
 
-    void setPixels(const Vector<PixelType>& read) {
-        if (read.size() != pixels.size())
-            return;
-        pixels = read;
-        setDirty({0, 0, _width, _height});
-    }
-
-    void setPixel(U32 x, U32 y, PixelType pixel) {
-        U32 index = x + y * _width;
-        if (index < _width * _height) {
-            setDirty({S32(x), S32(y), 1, 1});
-            pixels[index] = pixel;
-        }
-    }
+    void setHLine(S32 x, S32 y, S32 w, PixelType pixel);
+    void antsHLine(S32 x, S32 y, S32 w, U32 age, PixelType A, PixelType B);
+    void setVLine(S32 x, S32 y, S32 h, PixelType pixel);
+    void antsVLine(S32 x, S32 y, S32 h, U32 age, PixelType A, PixelType B);
+    void fillRect(const Rect& rect, PixelType pixel);
+    void setPixel(U32 x, U32 y, PixelType pixel);
 
     void setPixel(U32 x, U32 y, const Color& color) {
         setPixel(x, y, color.toU32());

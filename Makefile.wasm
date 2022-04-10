@@ -24,8 +24,10 @@ FLAGS += -s USE_SDL_IMAGE=2
 FLAGS += -s SDL2_IMAGE_FORMATS='["bmp","xpm","jpg"]'
 FLAGS += -s USE_LIBPNG=1
 
-#LN_FLAGS += -s FULL_ES3
+LN_FLAGS += -s ALLOW_MEMORY_GROWTH=1
 LN_FLAGS += -s USE_WEBGL2=1
+LN_FLAGS += -s EXPORTED_FUNCTIONS=_main,_onPointerEvent
+LN_FLAGS += -s EXPORTED_RUNTIME_METHODS=cwrap
 LN_FLAGS += --preload-file data
 
 CPP_FILES += $(shell find src -type f -name '*.cpp')

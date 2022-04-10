@@ -207,6 +207,7 @@ public:
 
             void on(Type& message) {
                 if (auto app = weakapp.lock()) {
+                    auto engine = app->getEngine().shared_from_this();
                     app->getEngine().raiseEvent({name});
                 }
             }

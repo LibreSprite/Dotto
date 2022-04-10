@@ -33,6 +33,8 @@ public:
     SDL_Surface *screen = nullptr;
     bool mapJoyhatToMouseWheel = false;
     bool mapJoyaxisToMouseWheel = false;
+    bool invertMouseWheelX = false;
+    bool invertMouseWheelY = false;
 
     bool boot() override {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) != 0) {
@@ -55,6 +57,8 @@ public:
         inject<Config> config;
         mapJoyhatToMouseWheel = config->properties->get<bool>("map-joyhat-to-mousewheel");
         mapJoyaxisToMouseWheel = config->properties->get<bool>("map-joyaxis-to-mousewheel");
+        invertMouseWheelX = config->properties->get<bool>("mouse-wheel-invert-x");
+        invertMouseWheelY = config->properties->get<bool>("mouse-wheel-invert-y");
 
         if (mapJoyhatToMouseWheel || mapJoyaxisToMouseWheel) {
             SDL_JoystickEventState(SDL_ENABLE);

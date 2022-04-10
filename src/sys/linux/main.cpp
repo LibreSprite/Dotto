@@ -14,9 +14,16 @@
 #include <common/System.hpp>
 #include <log/Log.hpp>
 
+String crashInfo = "¯\\_(ツ)_/¯";
+
+void setCrashInfo(const String& info) {
+    crashInfo = info;
+}
+
 void crashHandler(int sig) {
   void* frames[20];
   size_t size = backtrace(frames, sizeof(frames)/sizeof(frames[0]));
+  fprintf(stderr, "Crashinfo: %s\n", crashInfo.c_str());
   fprintf(stderr, "Error: signal %d:\n", sig);
   backtrace_symbols_fd(frames, size, STDERR_FILENO);
   exit(1);

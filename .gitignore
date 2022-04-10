@@ -2,3 +2,5 @@
 build
 *.org
 dotto
+dotto.exe
+snapshot_blob.bin

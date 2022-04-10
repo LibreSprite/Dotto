@@ -60,6 +60,8 @@ public:
     F32 iwidth, iheight;
     S32 width, height;
 
+    U32 empty = 0;
+
     void init(const String& version) {
 #if defined(__WINDOWS__)
         glewInit();
@@ -68,7 +70,8 @@ public:
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glGenTextures(1, &empty);
+        glBindTexture(GL_TEXTURE_2D, empty);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         auto color = Color{0xFF, 0xFF, 0xFF, 0xFF}.toU32();
@@ -105,16 +108,38 @@ public:
     }
 
     GLuint rawFB = 0;
+    GLuint RBO = 0;
     std::shared_ptr<Surface> rawSurface;
     std::shared_ptr<Surface> renderTarget;
 
     void setupRawRenderTarget() {
+        static U32 oldSize = 0;
+        U32 size = U32(width * scale) * U32(height * scale);
+        bool needsResize = size != oldSize;
+        oldSize = size;
+
         if (!rawSurface) {
             glGenFramebuffers(1, &rawFB);
-            glBindFramebuffer(GL_FRAMEBUFFER, rawFB);
+            glGenRenderbuffers(1, &RBO);
             rawSurface = std::make_shared<Surface>();
         }
-        rawSurface->resize(width * scale, height * scale);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, rawFB);
+
+        std::shared_ptr<GLTexture> texture = getTexture(*rawSurface);
+
+        if (needsResize) {
+            glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width * scale, height * scale);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+            rawSurface->resize(width * scale, height * scale);
+            upload(*rawSurface, texture.get());
+        }
+
+        texture->bind(GL_TEXTURE_2D);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->id, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
         renderTarget = rawSurface;
     }
 
@@ -157,6 +182,8 @@ public:
 
     ~GLGraphics() {
         textures.clear();
+        if (empty)
+            glDeleteTextures(1, &empty);
         if (VBO)
             glDeleteBuffers(1, &VBO);
         if (VAO)
@@ -223,7 +250,7 @@ public:
         if (activeTexture) {
             activeTexture->bind(GL_TEXTURE_2D);
         } else {
-            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_2D, empty);
         }
         glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
 
@@ -244,7 +271,7 @@ public:
                      0,
                      GL_RGBA,
                      GL_UNSIGNED_BYTE,
-                     &surface == renderTarget.get() ? nullptr : surface.data());
+                     surface.data());
         texture->width = surface.width();
         texture->iwidth = 1.0f / texture->width;
         texture->height = surface.height();
@@ -423,21 +450,24 @@ public:
 
     Vector<fork_ptr<Texture>> textures;
 
+    std::shared_ptr<GLTexture> getTexture(Surface& surface) {
+        auto texture = surface.info().get<GLTexture>(this);
+
+        if (!texture) {
+            texture = std::make_shared<GLTexture>();
+            fork_ptr<Texture> ptr{std::static_pointer_cast<Texture>(texture)};
+            textures.push_back(ptr);
+            surface.info().set(this, std::move(ptr));
+        }
+
+        return texture;
+    }
+
     void blit(const BlitSettings& settings) override {
         std::shared_ptr<GLTexture> texture;
         if (settings.surface) {
             auto& surface = *settings.surface;
-            texture = surface.info().get<GLTexture>(this);
-
-            if (!texture) {
-                texture = std::make_shared<GLTexture>();
-                fork_ptr<Texture> ptr{std::static_pointer_cast<Texture>(texture)};
-                textures.push_back(ptr);
-                if (settings.debug)
-                    logI("Creating texture ", shared_from_this(), " => ", texture);
-                surface.info().set(this, std::move(ptr));
-            }
-
+            texture = getTexture(surface);
             if (!texture->dirtyRegion.empty()) {
                 if (settings.debug)
                     logI("Uploading surface");

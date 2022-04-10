@@ -3,11 +3,13 @@
 // Read LICENSE.txt for more information.
 
 #include <doc/Cell.hpp>
+#include <doc/Selection.hpp>
 #include <doc/Timeline.hpp>
 
 class TimelineImpl : public Timeline {
 public:
     Vector<Vector<std::shared_ptr<Cell>>> data;
+    std::shared_ptr<Selection> selection;
     U32 _frame = 0, _layer = 0;
 
     U32 frameCount() const override {
@@ -72,6 +74,21 @@ public:
         if (layer >= layerCount())
             setLayerCount(layer + 1);
         data[frame][layer] = cell;
+    }
+
+    void setSelection(const Selection* selection) {
+        if (!selection) {
+            this->selection.reset();
+        } else {
+            if (!this->selection) {
+                this->selection = inject<Selection>{"new"};
+            }
+            *this->selection = *selection;
+        }
+    }
+
+    Selection* getSelection() {
+        return selection.get();
     }
 };
 

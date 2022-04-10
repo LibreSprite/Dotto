@@ -20,22 +20,23 @@ function onEvent(name) {
         }
 
         // create a selection with the color preview crosshair
-        var selection = app.newSelection();
-        for (var i = -5; i <= 5; ++i) {
+        var selection = app.target.previewArea;
+        if (!selection) {
+            app.target.previewArea = selection = app.newSelection();
+            app.target.hideCursor = true;
+        } else {
+            selection.clear();
+        }
+        app.target.previewColor = color;
+
+        for (var i = -4; i <= 4; ++i) {
             var absi = Math.abs(i);
-            if (absi > 1) {
-                selection.add(x + i, y, 300 - absi * 30)
-                selection.add(x, y + i, 300 - absi * 30)
+            absi -= absi > 1;
+            for (var l = -absi + 1; l < absi; ++l) {
+                selection.add(x + i, y + l, 255)
+                selection.add(x + l, y + i, 255)
             }
         }
-
-        // Paint the crosshair onto the canvas
-        app.command("paint",
-                    "preview", true,
-                    "cursor", true,
-                    "color", color,
-                    "selection", selection);
-
     } else if (name == "toolstart" || name == "toolupdate") { // User clicked on the canvas
         app.command("activatecolor", "color", color); // set the active color
         app.command("toggletool"); // switch back to previous tool

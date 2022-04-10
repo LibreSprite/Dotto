@@ -40,6 +40,12 @@ public:
         bounds = rect;
     }
 
+    Selection& operator = (const Selection& other) override {
+        data = other.getData();
+        bounds = other.getBounds();
+        return *this;
+    }
+
     void add(const Selection& other) override {
         Rect otherBounds = other.getBounds();
         Rect newBounds = bounds;
@@ -82,7 +88,7 @@ public:
     }
 
     void add(S32 x, S32 y, U32 amount) override {
-        if (x < 0 || y < 0 || amount == 0)
+        if (amount == 0)
             return;
         Rect newBounds = bounds;
         if (newBounds.expand(x, y))
@@ -96,8 +102,32 @@ public:
         }
     }
 
+    void add(const Rect& rect, U32 amount) override {
+        if (amount == 0)
+            return;
+        Rect newBounds = bounds;
+        bool didExpand = newBounds.expand(rect.x, rect.y);
+        didExpand |= newBounds.expand(rect.right(), rect.bottom());
+        if (didExpand)
+            expand(newBounds);
+        S32 ydiff = rect.y - bounds.y;
+        S32 xdiff = rect.x - bounds.x;
+        S32 size = data.size();
+        for (S32 y = 0; y < S32(rect.height); ++y) {
+            for (S32 x = 0; x < S32(rect.width); ++x) {
+                U32 index = (y + ydiff) * bounds.width + (x + xdiff);
+                if (index >= size) {
+                    logE("Invalid selection add");
+                } else {
+                    U32 old = data[index] + amount;
+                    data[index] = old > 0xFF ? 0xFF : old;
+                }
+            }
+        }
+    }
+
     void subtract(S32 x, S32 y, U32 amount) override {
-        if (x < 0 || y < 0)
+        if (amount == 0)
             return;
         if (!bounds.contains(x, y))
             return;
@@ -107,6 +137,29 @@ public:
         } else {
             S32 old = data[index] - amount;
             data[index] = old < 0 ? 0 : old;
+        }
+    }
+
+    void subtract(const Rect& rect, U32 amount) override {
+        if (amount == 0)
+            return;
+        Rect newBounds = bounds;
+        newBounds.intersect(rect);
+        if (newBounds.empty())
+            return;
+        S32 ydiff = newBounds.y - bounds.y;
+        S32 xdiff = newBounds.x - bounds.x;
+        S32 size = data.size();
+        for (S32 y = 0; y < S32(newBounds.height); ++y) {
+            for (S32 x = 0; x < S32(newBounds.width); ++x) {
+                U32 index = (y + ydiff) * bounds.width + (x + xdiff);
+                if (index >= size) {
+                    logE("Invalid selection add");
+                } else {
+                    S32 old = data[index] - amount;
+                    data[index] = old < 0 ? 0 : old;
+                }
+            }
         }
     }
 
@@ -124,11 +177,16 @@ public:
 
     Vector<U32> read(Surface* surface) override {
         Vector<U32> pixels;
-        U32 maxY = std::min<U32>(bounds.bottom(), surface->height());
-        U32 maxX = std::min<U32>(bounds.right(), surface->width());
-        for (U32 y = bounds.y; y < maxY; ++y) {
+        S32 minY = std::max<S32>(bounds.y, 0);
+        S32 maxY = std::min<S32>(bounds.bottom(), surface->height());
+        S32 minX = std::max<S32>(bounds.x, 0);
+        S32 maxX = std::min<S32>(bounds.right(), surface->width());
+        for (S32 y = minY; y < maxY; ++y) {
             U32 index = (y - bounds.y) * bounds.width;
-            for (U32 x = bounds.x; x < maxX; ++x) {
+            if (bounds.x < 0) {
+                index -= bounds.x;
+            }
+            for (S32 x = minX; x < maxX; ++x) {
                 if (data[index++]) {
                     pixels.push_back(surface->getPixelUnsafe(x, y));
                 }
@@ -138,16 +196,42 @@ public:
     }
 
     void write(Surface* surface, Vector<U32>& pixels) override {
-        U32 maxY = std::min<U32>(bounds.bottom(), surface->height());
-        U32 maxX = std::min<U32>(bounds.right(), surface->width());
+        S32 minY = std::max<S32>(bounds.y, 0);
+        S32 maxY = std::min<S32>(bounds.bottom(), surface->height());
+        S32 minX = std::max<S32>(bounds.x, 0);
+        S32 maxX = std::min<S32>(bounds.right(), surface->width());
         U32 cursor = 0;
-        for (U32 y = bounds.y; y < maxY; ++y) {
+        for (S32 y = minY; y < maxY; ++y) {
             U32 index = (y - bounds.y) * bounds.width;
-            for (U32 x = bounds.x; x < maxX; ++x) {
+            if (bounds.x < 0) {
+                index -= bounds.x;
+            }
+            for (S32 x = minX; x < maxX; ++x) {
                 if (data[index++]) {
                     surface->setPixelUnsafe(x, y, pixels[cursor++]);
                 }
             }
+        }
+    }
+
+    void apply(const Rect& limit, const std::function<void(S32, S32, U8)>& callback) override {
+        S32 minY = std::max<S32>(bounds.y, limit.y);
+        S32 maxY = std::min<S32>(bounds.bottom(), limit.bottom());
+        S32 minX = std::max<S32>(bounds.x, limit.x);
+        S32 maxX = std::min<S32>(bounds.right(), limit.right());
+        S32 skip = 0;
+        if (minX > bounds.x)
+            skip = minX - bounds.x;
+        U32 cursor = 0;
+        for (S32 y = minY; y < maxY; ++y) {
+            U32 index = (y - bounds.y) * bounds.width + skip;
+            for (S32 x = minX; x < maxX; ++x) {
+                callback(x, y, data[index++]);
+            }
+            callback(maxX, y, 0);
+        }
+        for (S32 x = minX; x <= maxX; ++x) {
+            callback(x, maxY, 0);
         }
     }
 

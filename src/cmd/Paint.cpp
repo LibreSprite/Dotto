@@ -6,7 +6,6 @@
 #include <cmd/Command.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
-#include <doc/Cell.hpp>
 #include <doc/Selection.hpp>
 #include <log/Log.hpp>
 #include <tools/Tool.hpp>
@@ -22,6 +21,7 @@ class Paint : public Command {
     Property<bool> preview{this, "preview", false};
     Property<bool> cursor{this, "cursor", false};
     Property<String> mode{this, "mode", "normal"};
+    Property<std::shared_ptr<Surface>> surface{this, "surface"};
     Vector<U32> undoData;
 
 public:
@@ -32,11 +32,11 @@ public:
             logI("No selection");
             return;
         }
-        selection->write(cell()->getComposite(), undoData);
+        selection->write(surface->get(), undoData);
     }
 
     void setupPreview() {
-        auto surface = cell()->getComposite();
+        auto surface = this->surface->get();
         if (!backup) {
             backup = std::make_shared<Surface>();
             backupSelection = inject<Selection>{"new"};
@@ -71,7 +71,7 @@ public:
     void restoreBackupSurface() {
         if (!backup)
             return;
-        auto surface = cell()->getComposite();
+        auto surface = this->surface->get();
         auto backupData = backup->data();
         auto surfaceData = surface->data();
         for (std::size_t i = 0, size = surface->width() * surface->height(); i < size; ++i) {
@@ -83,8 +83,7 @@ public:
     }
 
     void run() override {
-        auto cell = this->cell();
-        if (!cell)
+        if (!*surface)
             return;
 
         auto selection = this->selection->get();
@@ -97,7 +96,7 @@ public:
             return;
         }
 
-        auto surface = cell->getComposite();
+        auto surface = this->surface->get();
         auto writeData = surface->data();
         auto readData = writeData;
 
@@ -136,8 +135,8 @@ public:
 
         commonRect.intersect({0, 0, surface->width(), surface->height()});
 
-        U32 maskOffsetY = commonRect.y > 0 ? 0 : -commonRect.y;
-        U32 maskOffsetX = commonRect.x > 0 ? 0 : -commonRect.x;
+        U32 maskOffsetY = maskRect.y > 0 ? 0 : -maskRect.y;
+        U32 maskOffsetX = maskRect.x > 0 ? 0 : -maskRect.x;
         U32 surfaceOffsetY = commonRect.y > 0 ? commonRect.y : 0;
         U32 surfaceOffsetX = commonRect.x > 0 ? commonRect.x : 0;
 

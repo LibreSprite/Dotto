@@ -65,7 +65,6 @@ over Discord/Matrix.
 | Layer blending                 | OK            | 0.5     |                                                 |
 | Layer alpha                    | OK            | 0.5     |                                                 |
 | Filter support                 | OK            | 0.5     |                                                 |
-| Smart filter support           | Planned       | 1.0     |                                                 |
 | Resize: Nearest Neighbor       | OK            | 0.5     |                                                 |
 | Resize: Scale2X                | OK            | 0.5     |                                                 |
 | Drop Shadow filter             | OK            | 0.5     |                                                 |
@@ -107,6 +106,8 @@ Install dependencies:
 - Arch-based distros: `pacman -S make sdl2 sdl2_image lua v8-r lcms2`
 
 - Debian-based distros: `sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev liblua5.3-dev libfreetype6-dev libnode-dev`
+
+- Fedora-Based distros: `sudo dnf install g++ make SDL2-devel SDL2_image-devel lua-devel v8-devel lcms2-devel freetype-devel zenity libXi-devel`
 
 Checkout project:
 
@@ -160,6 +161,7 @@ Run the Mingw32 shell (C:/msys64/mingw32.exe).
 
 ```sh
 cd Dotto
+cp /mingw32/bin/snapshot_blob.bin ./
 make DEBUG=false
 ./dotto.exe
 ```

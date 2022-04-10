@@ -32,12 +32,12 @@ public:
     F32 scale;
     Property<S32> size{this, "size", 1, &Pencil::invalidateMetaMenu};
     Property<F32> interval{this, "interval", 1.0f, &Pencil::invalidateMetaMenu};
-    Property<F32> smoothing{this, "smoothing", 0.0f, &Pencil::invalidateMetaMenu};
+    Property<F32> smoothing{this, "stroke-smoothing", 0.0f, &Pencil::invalidateMetaMenu};
     Property<String> mode{this, "blend-mode", "normal", &Pencil::invalidateMetaMenu};
     Property<bool> pressuresize{this, "pen-size", true, &Pencil::invalidateMetaMenu};
     Property<bool> pressurealpha{this, "pen-alpha", false, &Pencil::invalidateMetaMenu};
     Property<bool> pixelperfect{this, "pixelperfect", true, &Pencil::invalidateMetaMenu};
-    Property<bool> HQ{this, "high-quality", true};
+    Property<bool> HQ{this, "antialias", true};
 
     bool wasInit = false;
     S32 prevPlotX = 0, prevPlotY = 0, prevPlotZ = 0;
@@ -45,6 +45,10 @@ public:
     Preview preview {.hideCursor = true};
 
     Preview* getPreview() override {
+        preview.altColor.fromU32(Tool::color.toU32() ^ 0xFFFFFF);
+        preview.altColor.a = 0xFF;
+        preview.overlayColor = Tool::color;
+        preview.overlayColor.a = 0xFF;
         return &preview;
     }
 
@@ -310,19 +314,18 @@ public:
         return rounded;
     }
 
-    virtual void initPaint() {
+    virtual void initPaint(Surface* surface) {
         paint = inject<Command>{"paint"};
         paint->load({
                 {"selection", selection},
                 {"preview", true},
-                {"mode", which != 2 ? *mode : "erase"}
+                {"mode", which != 2 ? *mode : "erase"},
+                {"surface", surface->shared_from_this()}
             });
-        if (which == 0) {
-            paint->set("cursor", true);
-        }
     }
 
     void begin(Surface* surface, Path& points, U32 which) override {
+        paint.reset();
         this->which = which;
         if (!wasInit)
             changeShape();
@@ -333,21 +336,36 @@ public:
         if (interval <= 0)
             set("interval", shape->width() / 8.0f * scale);
         selection = inject<Selection>{"new"};
-        initPaint();
+
+        if (which) {
+            initPaint(surface);
+            preview.overlay.reset();
+        } else {
+            preview.overlay = selection;
+        }
+
         plot(points.back(), true);
-        paint->run();
+
+        if (paint)
+            paint->run();
     }
 
     void update(Surface* surface, Path& points) override {
         if (!shape)
             return;
+
+        if (!paint)
+            selection->clear();
+
         auto& end = points[points.size() - 1];
         auto& begin = points[points.size() - 2];
         line(begin, end, [&](S32 x, S32 y, S32 step, S32 max){
             F32 lerp = F32(step) / max;
             plot({x, y, S32(0.5f + begin.z * (1 - lerp) + end.z * lerp) }, false);
         });
-        paint->run();
+
+        if (paint)
+            paint->run();
     }
 
     Path applyPixelPerfect(Path src) {
@@ -374,17 +392,23 @@ public:
     }
 
     void end(Surface* surface, Path& points) override {
-        if (!shape)
+        if (!shape || !paint) {
+            selection.reset();
             return;
+        }
 
         paint->load({{"preview", false}});
         paint->run();
 
-        if (which == 0 || !surface || points.size() <= 2 || !paint->committed())
+        if (!surface || points.size() <= 2 || !paint->committed()) {
+            selection.reset();
             return;
+        }
 
-        if (smoothing <= 0 && !pixelperfect)
+        if (smoothing <= 0 && !pixelperfect) {
+            selection.reset();
             return;
+        }
 
         Path copy = points;
 

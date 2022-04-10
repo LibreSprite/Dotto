@@ -2,21 +2,24 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include <common/line.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/Surface.hpp>
+#include <common/line.hpp>
+#include <doc/Selection.hpp>
+#include <script/Engine.hpp>
 #include <script/ScriptObject.hpp>
-#include <tools/Tool.hpp>
 #include <script/api/AppScriptObject.hpp>
 #include <script/api/ModelScriptObject.hpp>
-#include <script/Engine.hpp>
+#include <tools/Tool.hpp>
 
 class ToolScriptObject : public ModelScriptObject {
 public:
     const Tool::Path* points;
     std::shared_ptr<script::ScriptObject> surface;
     U32 which = ~U32{};
+    Tool::Preview* preview;
+    String style = "filledsolid";
 
     void postInject() override {
         surface = inject<script::ScriptObject>{typeid(std::shared_ptr<Surface>).name()};
@@ -27,6 +30,38 @@ public:
         addProperty("lastX", [=]{return points->back().x;});
         addProperty("lastY", [=]{return points->back().y;});
         addProperty("lastZ", [=]{return points->back().z;});
+
+        addProperty("previewColor",
+                    [=]{return preview->overlayColor.toU32();},
+                    [=](U32 color){preview->overlayColor.fromU32(color); return color;});
+        addProperty("previewArea",
+                    [=]{return getEngine().toValue(preview->overlay);},
+                    [=](const script::Value& obj){
+                        if (obj.type != script::Value::Type::OBJECT)
+                            return 0;
+                        auto wrapped = obj.data.object_v->getWrapped();
+                        if (!wrapped.has<std::shared_ptr<Selection>>())
+                            return 0;
+                        preview->overlay = wrapped.get<std::shared_ptr<Selection>>();
+                        return 1;
+                    });
+        addProperty("hideCursor",
+                    [=]{return preview->hideCursor;},
+                    [=](bool hide){preview->hideCursor = hide; return hide;});
+        addProperty("previewStyle",
+                    [=]{return style;},
+                    [=](const String& newStyle){
+                        if (newStyle == "filledsolid") {
+                            preview->draw = Tool::Preview::drawFilledSolid;
+                            style = newStyle;
+                        } else if (newStyle == "outlinesolid") {
+                            preview->draw = Tool::Preview::drawOutlineSolid;
+                            style = newStyle;
+                        }
+                        return style;
+                    });
+
+
         addFunction("x", [=](U32 id) {
             return id < points->size() ? points->at(id).x : 0;
         });
@@ -46,10 +81,14 @@ public:
     std::shared_ptr<ToolScriptObject> tso = std::make_shared<ToolScriptObject>();
     PubSub<msg::ActivateTool> pub{this};
 
+    Preview preview {};
+    Preview* getPreview() override {return &preview;}
+
     Script() :
         engine{inject<script::Engine>{"toolengine"}},
         app{inject<script::ScriptObject>{"toolapp"}.shared<AppScriptObject>()}
         {
+            tso->preview = &preview;
             tso->postInject();
     }
 

@@ -103,7 +103,7 @@ struct Rect {
                 x = px;
                 changed = true;
             }
-            if (x + width <= px) {
+            if (S32(x + width) <= px) {
                 width = (px - x) + 1;
                 changed = true;
             }
@@ -112,7 +112,7 @@ struct Rect {
                 y = py;
                 changed = true;
             }
-            if (y + height <= py) {
+            if (S32(y + height) <= py) {
                 height = (py - y) + 1;
                 changed = true;
             }
