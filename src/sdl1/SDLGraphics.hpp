@@ -26,10 +26,10 @@ public:
     U32 height = 0;
     F32 iwidth = 0;
     F32 iheight = 0;
-    bool dirty = true;
+    Rect dirtyRegion{0, 0, ~U32{}, ~U32{}};
 
-    void setDirty() {
-        dirty = true;
+    void setDirty(const Rect& region) override {
+        dirtyRegion.expand(region);
     }
 
     ~SDLTextureInfo() {
@@ -59,7 +59,7 @@ public:
     }
 
     void upload(Surface& surface, SDLTextureInfo* texture) {
-        texture->dirty = false;
+        texture->dirtyRegion = Rect{};
 
         if (texture->surface) {
             if (texture->surface->w != surface.width() ||
@@ -267,15 +267,28 @@ public:
         }
     }
 
+    Vector<fork_ptr<Texture>> textures;
+
+    std::shared_ptr<SDLTextureInfo> getTexture(Surface& surface) {
+        auto texture = surface.info().get<SDLTextureInfo>(this);
+
+        if (!texture) {
+            texture = std::make_shared<SDLTextureInfo>();
+            fork_ptr<Texture> ptr{std::static_pointer_cast<Texture>(texture)};
+            textures.push_back(ptr);
+            surface.info().set(this, std::move(ptr));
+        }
+
+        return texture;
+    }
+
     void blit(const BlitSettings& settings) override {
         std::shared_ptr<SDLTextureInfo> texture;
         if (settings.surface) {
             auto& surface = *settings.surface;
-            if (!surface.textureInfo)
-                surface.textureInfo = std::make_shared<SDLTextureInfo>();
-            texture = std::static_pointer_cast<SDLTextureInfo>(surface.textureInfo);
+            texture = getTexture(surface);
 
-            if (texture->dirty) {
+            if (!texture->dirtyRegion.empty()) {
                 if (settings.debug)
                     logI("Uploading surface");
                 upload(surface, texture.get());
