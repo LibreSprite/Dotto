@@ -26,7 +26,8 @@ class Editor : public ui::Controller {
     PubSub<msg::ResizeDocument,
            msg::ActivateDocument,
            msg::ActivateEditor,
-           msg::PollActiveEditor> pub{this};
+           msg::PollActiveEditor,
+           msg::Tick> pub{this};
     std::optional<Document::Provides> docProvides;
     std::optional<ui::Node::Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
@@ -35,12 +36,16 @@ class Editor : public ui::Controller {
     Property<U32> frame{this, "frame", 0, &Editor::setFrame};
     Property<U32> layer{this, "layer", 0, &Editor::setFrame};
     Property<bool> draggable{this, "draggable", false};
+    Property<bool> grid{this, "grid", false, &Editor::changeGrid};
+    Property<Color> gridColor{this, "grid-color", Color{128, 128, 255, 128}};
+    bool needsGridRedraw = false;
 
-    F32 overlayScale = 1.0f;
     std::shared_ptr<Surface> overlaySurface;
+    std::shared_ptr<Surface> gridSurface;
 
     std::shared_ptr<ui::Node> canvas;
     std::shared_ptr<ui::Node> container;
+    std::shared_ptr<ui::Node> gridoverlay;
 
     std::shared_ptr<Cell> activeCell;
     std::shared_ptr<Layer> layerEditor;
@@ -100,10 +105,49 @@ public:
         if (auto tooloverlay = node()->findChildById("tooloverlay")) {
             overlaySurface = tooloverlay->getPropertySet().get<std::shared_ptr<Surface>>("surface");
         }
+        gridoverlay = node()->findChildById("gridoverlay");
+        if (gridoverlay) {
+            gridSurface = gridoverlay->getPropertySet().get<std::shared_ptr<Surface>>("surface");
+        }
     }
 
     void eventHandler(const ui::Resize&) {
         overlaySurface->resize(node()->globalRect.width, node()->globalRect.height);
+        changeGrid();
+    }
+
+    void changeGrid() {
+        if (*grid && gridSurface && scale >= 3) {
+            needsGridRedraw = true;
+            gridoverlay->set("visible", true);
+        } else if (gridoverlay) {
+            gridoverlay->set("visible", false);
+        }
+    }
+
+    void drawGrid(const Color& color) {
+        needsGridRedraw = false;
+        gridSurface->resize(node()->globalRect.width, node()->globalRect.height);
+        gridSurface->setDirty(gridSurface->rect());
+        gridSurface->fillRect(gridSurface->rect(), 0);
+
+        S32 linesY = (*doc)->height();
+        S32 linesX = (*doc)->width();
+        U32 gridColor = color.toU32();
+
+        for (S32 x = 0; x <= linesX; ++x) {
+            gridSurface->setVLine(
+                x * scale + canvas->globalRect.x, canvas->globalRect.y,
+                canvas->globalRect.height,
+                gridColor);
+        }
+
+        for (S32 y = 0; y <= linesY; ++y) {
+            gridSurface->setHLine(
+                canvas->globalRect.x, y * scale + canvas->globalRect.y,
+                canvas->globalRect.width,
+                gridColor);
+        }
     }
 
     void eventHandler(const ui::MouseDown& event) {
@@ -159,6 +203,10 @@ public:
 
         if (layerEditor) {
             layerEditor->clearOverlays();
+        }
+
+        if (*grid && gridSurface) {
+            changeGrid();
         }
 
         container->load({
@@ -246,6 +294,11 @@ public:
     void on(msg::PollActiveEditor& msg) {
         if (editorProvides.has_value())
             msg.editor = node();
+    }
+
+    void on(msg::Tick&) {
+        if (needsGridRedraw)
+            drawGrid(gridColor);
     }
 };
 
