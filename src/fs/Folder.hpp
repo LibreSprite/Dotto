@@ -32,6 +32,7 @@ namespace fs {
         String getUID() override {return path;}
         bool isFolder() override {return true;}
         bool isFile() override {return false;}
+        virtual bool isRootFolder() {return false;}
 
         void forEach(std::function<void(std::shared_ptr<FSEntity>)>);
 
@@ -42,7 +43,7 @@ namespace fs {
                 if (!missingDriver.empty()) {
                     driver = inject<FSEntity>{missingDriver};
                     if (driver)
-                        driver->init(path + (path.empty() ? "" : separator) + name);
+                        driver->init(isRootFolder() ? name : path + separator + name);
                 }
             } else {
                 driver = inject<FSEntity>{it->second->driver};
@@ -64,6 +65,7 @@ namespace fs {
 
     class RootFolder : public Folder {
     public:
+        virtual bool isRootFolder() {return true;}
         virtual bool boot() = 0;
     };
 
