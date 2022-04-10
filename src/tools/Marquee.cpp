@@ -6,6 +6,7 @@
 #include <common/line.hpp>
 #include <common/PubSub.hpp>
 #include <common/Surface.hpp>
+#include <doc/BitmapCell.hpp>
 #include <doc/Document.hpp>
 #include <doc/Selection.hpp>
 #include <tools/Tool.hpp>
@@ -58,8 +59,10 @@ public:
             return;
         inject<Document> doc{"activedocument"};
         auto timeline = doc->currentTimeline();
-        pub(msg::PreModifySelection{timeline->getSelection()});
-        timeline->setSelection(preview.overlay.get());
+        if (auto cell = dynamic_cast<BitmapCell*>(timeline->getCell().get())) {
+            pub(msg::PreModifySelection{cell->getSelection()});
+            cell->setSelection(preview.overlay.get());
+        }
         preview.overlay->clear();
     }
 
@@ -67,13 +70,16 @@ public:
         if (which) {
             inject<Document> doc{"activedocument"};
             auto timeline = doc->currentTimeline();
-            if (auto selection = timeline->getSelection()) {
+            auto cell = dynamic_cast<BitmapCell*>(timeline->getCell().get());
+            if (!cell)
+                return;
+            if (auto selection = cell->getSelection()) {
                 if (which >= 2) {
                     logI(selection->getBounds());
                     *preview.overlay = *selection;
                 }
                 pub(msg::PreModifySelection{selection});
-                timeline->setSelection(nullptr);
+                cell->setSelection(nullptr);
             }
         }
         this->which = which;
