@@ -58,7 +58,7 @@ public:
         Tool::Preview preview {
             .overlay = this->selection,
             .overlayColor = Color{200, 200, 200, 200},
-            .altColor = Color{255, 55, 55, 200},
+            .altColor = Color{55, 55, 55, 200},
             .draw = Tool::Preview::drawOutlineAnts
         };
         Tool::Preview::drawOutlineAnts(false, preview, *overlayLayer(), selectionGlobalCanvas, selectionScale);

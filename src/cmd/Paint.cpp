@@ -100,6 +100,11 @@ public:
         auto writeData = surface->data();
         auto readData = writeData;
 
+        inject<Selection> activeSelection{InjectSilent::Yes, "active"};
+        if (activeSelection) {
+            selection->mask(*activeSelection);
+        }
+
         if (!preview) {
             if (backupSurface == readData) {
                 backupSelection->blend(*selection);
