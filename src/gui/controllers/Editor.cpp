@@ -117,16 +117,20 @@ public:
     }
 
     void changeGrid() {
-        if (*grid && gridSurface && scale >= 3) {
-            needsGridRedraw = true;
-            gridoverlay->set("visible", true);
-        } else if (gridoverlay) {
-            gridoverlay->set("visible", false);
-        }
+        needsGridRedraw = true;
     }
 
     void drawGrid(const Color& color) {
         needsGridRedraw = false;
+        if (*grid && gridSurface && scale >= 3) {
+            gridoverlay->set("visible", true);
+        } else {
+            if (gridoverlay) {
+                gridoverlay->set("visible", false);
+            }
+            return;
+        }
+
         gridSurface->resize(node()->globalRect.width, node()->globalRect.height);
         gridSurface->setDirty(gridSurface->rect());
         gridSurface->fillRect(gridSurface->rect(), 0);
@@ -297,8 +301,9 @@ public:
     }
 
     void on(msg::Tick&) {
-        if (needsGridRedraw)
+        if (needsGridRedraw) {
             drawGrid(gridColor);
+        }
     }
 };
 
