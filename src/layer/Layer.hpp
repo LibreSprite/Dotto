@@ -6,6 +6,9 @@
 
 #include <memory>
 
+#include <common/Messages.hpp>
+#include <common/PubSub.hpp>
+#include <common/Surface.hpp>
 #include <common/inject.hpp>
 #include <common/types.hpp>
 #include <doc/Cell.hpp>
@@ -16,6 +19,7 @@ class Layer : public Injectable<Layer>, public std::enable_shared_from_this<Laye
     Rect _globalCanvas;
     Point3D _globalMouse;
     U32 _buttons = 0;
+    std::shared_ptr<Surface> _overlay;
 
 public:
     virtual void setCell(std::shared_ptr<Cell> cell) {_cell = cell;}
@@ -49,6 +53,14 @@ public:
         point.y = (point.y * S32(_localCanvas.height)) / S32(_globalCanvas.height);
         return point;
     }
+
+    void setOverlayLayer(std::shared_ptr<Surface> surface) {
+        _overlay = surface;
+    }
+    Surface* overlayLayer() {
+        return _overlay.get();
+    }
+    virtual void clearOverlays() = 0;
 
     virtual void update() = 0;
 };
