@@ -15,7 +15,6 @@ public:
     virtual Surface::PixelType blendPixel(const Color& a, const Color& b, F32 alpha) = 0;
     virtual void blend(Surface* result, Surface* low, Surface* high, F32 alpha, const Rect& area) {
         auto a = low->data(), b = high->data(), c = result->data();
-        U32 size = result->width() * result->height();
         U32 stride = result->width();
         Color ca, cb;
         for (U32 y = 0; y < area.height; ++y) {

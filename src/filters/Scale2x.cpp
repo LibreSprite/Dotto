@@ -40,11 +40,11 @@ public:
 
         for (S32 y = 0; y < height; ++y) {
             for (S32 x = 0; x < width; ++x) {
-                u = data[(std::max(y - 1, 0) * width) + x];
-                l = data[y * width + std::max(0, x - 1)];
+                u = data[(std::max<S32>(y - 1, 0) * width) + x];
+                l = data[y * width + std::max<S32>(0, x - 1)];
                 c = data[y * width + x];
-                r = data[y * width + std::min(width - 1, x + 1)];
-                d = data[(std::min(height - 1, y + 1) * width) + x];
+                r = data[y * width + std::min<S32>(width - 1, x + 1)];
+                d = data[(std::min<S32>(height - 1, y + 1) * width) + x];
 
                 E0 = l == u && u != r && l != d ? l : c;
                 E1 = r == u && u != l && r != d ? r : c;

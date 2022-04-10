@@ -82,7 +82,7 @@ public:
 
         auto surface = cell->getComposite();
         if (auto selection = cell->getSelection()) {
-            mask.emplace(cell->getSelection(), "active");
+            mask.emplace(selection, "active");
         } else {
             mask.reset();
         }

@@ -14,20 +14,20 @@ class PaletteScriptObject : public script::ScriptObject {
 
 public:
     void postInject() override {
-        addProperty("length", [=]{
+        addProperty("length", [=]() -> U32 {
             if (auto pal = weak.lock()) {
                 return S32(pal->size());
             }
             return 0;
         });
 
-        addFunction("get", [=](int index){
+        addFunction("get", [=](int index) -> U32 {
             if (auto pal = weak.lock()) {
                 auto color = pal->at(index);
                 if (color)
                     return color->toU32();
             }
-            return 0U;
+            return 0;
         });
     }
 
