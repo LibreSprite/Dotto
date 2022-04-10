@@ -30,6 +30,8 @@ jobs:
           mingw-w64-i686-freetype
           mingw-w64-i686-glew
     - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
     - shell: msys2 {0}
       run: |
         make -j 4

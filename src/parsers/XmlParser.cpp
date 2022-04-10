@@ -2,7 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#include "../libs/tinyxml2/tinyxml2.h"
+#include <tinyxml2/tinyxml2.h>
 
 #include <common/inject.hpp>
 #include <common/Parser.hpp>

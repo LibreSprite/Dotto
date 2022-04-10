@@ -88,7 +88,7 @@ else
 
 endif
 
-LIB_DIRS += $(shell find libs -type d)
+LIB_DIRS += $(shell find dependencies -type d)
 CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
 
 SRC_DIRS += $(shell find src -type d)
@@ -124,11 +124,11 @@ else
 endif
 
 CPP_FILES += $(shell find src -type f -name '*.cpp')
-CPP_FILES += $(shell find libs -type f -name '*.cpp')
+CPP_FILES += $(shell find dependencies -type f -name '*.cpp')
 
 C_FLAGS := $(CPP_FLAGS)
 C_FILES += $(shell find src -type f -name '*.c')
-C_FILES += $(shell find libs -type f -name '*.c')
+C_FILES += $(shell find dependencies -type f -name '*.c')
 
 LN_FLAGS += $(SO_FILES)
 

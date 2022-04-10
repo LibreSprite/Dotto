@@ -6,7 +6,7 @@ CPP = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-g++
 CC = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-gcc
 GDB = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-gd
 DOTTO = Dotto.elf
-LIB_DIRS += $(shell find libs -type d)
+LIB_DIRS += $(shell find dependencies -type d)
 
 # LN_FLAGS += $(shell $(PKGCONFIG) --libs libpng)
 # CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libpng)
@@ -70,11 +70,11 @@ LN_FLAGS += -o
 LN_FLAGS += $(DOTTO)
 
 CPP_FILES += $(shell find src -type f -name '*.cpp')
-CPP_FILES += $(shell find libs -type f -name '*.cpp')
+CPP_FILES += $(shell find dependencies -type f -name '*.cpp')
 
 C_FLAGS := $(CPP_FLAGS)
 C_FILES += $(shell find src -type f -name '*.c')
-C_FILES += $(shell find libs -type f -name '*.c')
+C_FILES += $(shell find dependencies -type f -name '*.c')
 
 CPP_FLAGS += -std=gnu++17
 

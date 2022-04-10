@@ -1,0 +1,3 @@
+[submodule "dependencies"]
+	path = dependencies
+	url = git@github.com:LibreSprite/DottoDependencies.git
