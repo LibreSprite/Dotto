@@ -44,6 +44,9 @@ public:
             value = atof(level.c_str()) / 100.0f;
         }
 
+        if (value > 1.0f)
+            value = S32(value * 10.0f) / 10.0f;
+
         logV("Setting zoom level to ", value);
         editor->set("scale", value);
     }
