@@ -16,13 +16,9 @@ public:
             ui::Node::fromXML("newfilepopup");
             return;
         }
-        inject<ui::Node> root{"root"};
-        if (!root)
-            return;
-        auto editor = root->findChildById("editor");
-        if (!editor)
-            return;
-        editor->set("newfile", std::make_shared<PropertySet>(getPropertySet()));
+        if (auto editor = ui::Node::fromXML("editor")) {
+            editor->set("newfile", std::make_shared<PropertySet>(getPropertySet()));
+        }
     }
 };
 

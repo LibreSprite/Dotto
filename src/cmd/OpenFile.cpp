@@ -45,7 +45,7 @@ public:
         }
         if (!fileName->empty()) {
             auto files = split(fileName, "|");
-            if (auto editor = inject<ui::Node>{"root"}->findChildById("editor")) { // TODO: create new editor instead
+            if (auto editor = ui::Node::fromXML("editor")) {
                 editor->set("file", files[0]);
             }
         }

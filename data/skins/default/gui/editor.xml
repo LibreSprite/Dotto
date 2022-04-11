@@ -1,15 +1,12 @@
 <node id="editor"
-       controller="editor"
-       absolute="true"
-       y="0px"
-       x="0px"
-       height="100%"
-       width="100%"
-       forward="canvas.layer=layer, canvas.frame=frame, canvas.document=doc, canvas.timeline=timeline"
-       visible="false"
-       grid="false"
-       grid-color="rgba{32,32,200,200}"
-       draggable="false">
+      parent="editorcontainer"
+      controller="editor"
+      forward="canvas.layer=layer, canvas.frame=frame, canvas.document=doc, canvas.timeline=timeline"
+      visible="false"
+      overflow-hidden="true"
+      grid="false"
+      grid-color="rgba{32,32,200,200}"
+      draggable="false">
   <image controller="draggable" visible="true" id="container" slice="1 1" src="%skin/editor.png" absolute="true">
     <canvas id="canvas" inputEnabled="false"/>
   </image>
