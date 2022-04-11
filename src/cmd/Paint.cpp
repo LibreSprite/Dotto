@@ -6,6 +6,7 @@
 #include <cmd/Command.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
+#include <doc/BitmapCell.hpp>
 #include <doc/Selection.hpp>
 #include <log/Log.hpp>
 #include <tools/Tool.hpp>
@@ -100,9 +101,15 @@ public:
         auto writeData = surface->data();
         auto readData = writeData;
 
-        inject<Selection> activeSelection{InjectSilent::Yes, "active"};
-        if (activeSelection) {
-            selection->mask(*activeSelection);
+        inject<Document> doc{InjectSilent::Yes, "activedocument"};
+        if (doc) {
+            if (auto timeline = doc->currentTimeline()) {
+                if (auto cell = std::dynamic_pointer_cast<BitmapCell>(timeline->getCell())) {
+                    if (auto activeSelection = cell->getSelection()) {
+                        selection->mask(*activeSelection);
+                    }
+                }
+            }
         }
 
         if (!preview) {
