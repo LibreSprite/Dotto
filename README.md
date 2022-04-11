@@ -110,7 +110,7 @@ Install dependencies:
 
 Checkout project:
 
-`git clone --recurse-submodules git@github.com/LibreSprite/Dotto.git`
+`git clone --recurse-submodules https://github.com/LibreSprite/Dotto.git`
 
 Compile:
 
