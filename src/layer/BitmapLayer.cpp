@@ -37,7 +37,7 @@ public:
         Tool::antAge++;
 
         if (preview.draw == Tool::Preview::drawOutlineAnts)
-            preview.draw(false, preview, *overlayLayer(), globalCanvas(), overlayScale());
+            preview.draw(false, preview, *overlayLayer(), offsetCanvas(), overlayScale());
 
         clearSelectionOverlay();
 
@@ -52,7 +52,7 @@ public:
         }
 
         this->selection = selection->shared_from_this();
-        selectionGlobalCanvas = globalCanvas();
+        selectionGlobalCanvas = offsetCanvas();
         selectionScale = overlayScale();
 
         Tool::Preview preview {
@@ -131,7 +131,7 @@ public:
 
     void clearToolOverlay() {
         if (!preview.overlay->empty()) {
-            preview.draw(true, preview, *overlayLayer(), globalCanvas(), overlayScale());
+            preview.draw(true, preview, *overlayLayer(), offsetCanvas(), overlayScale());
             preview.overlay->clear();
         }
     }
@@ -178,7 +178,7 @@ public:
             preview.draw(false,
                          preview,
                          *overlayLayer(),
-                         globalCanvas(),
+                         offsetCanvas(),
                          overlayScale());
         }
 

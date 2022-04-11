@@ -73,11 +73,14 @@ public:
 
         if (!activeCell || activeCell->getType() != cell->getType()) {
             layerEditor = inject<Layer>{cell->getType()};
-            layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
-            layerEditor->setOverlayLayer(overlaySurface);
+            if (layerEditor) {
+                layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
+                layerEditor->setOverlayLayer(overlaySurface);
+            }
         }
 
-        layerEditor->setCell(cell);
+        if (layerEditor)
+            layerEditor->setCell(cell);
 
         activeCell = cell;
 
@@ -98,6 +101,7 @@ public:
                                  ui::MouseUp,
                                  ui::MouseWheel,
                                  ui::MouseLeave,
+                                 ui::MouseEnter,
                                  ui::Resize>(this);
         pub(msg::ActivateDocument{doc});
         canvas = node()->findChildById("canvas");
@@ -160,8 +164,9 @@ public:
                     container->globalRect.x,
                     container->globalRect.y
                 });
-        } else {
+        } else if (layerEditor) {
             layerEditor->setGlobalCanvas(canvas->globalRect);
+            layerEditor->setGlobalOverlay(node()->globalRect);
             layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
             layerEditor->setButtons(event.buttons);
             layerEditor->update();
@@ -169,19 +174,33 @@ public:
     }
 
     void eventHandler(const ui::MouseUp& event) {
-        layerEditor->setButtons(event.buttons);
-        layerEditor->update();
+        if (layerEditor) {
+            layerEditor->setButtons(event.buttons);
+            layerEditor->update();
+        }
+    }
+
+    void eventHandler(const ui::MouseEnter&) {
+        activate();
     }
 
     void eventHandler(const ui::MouseLeave&) {
         system->setMouseCursorVisible(true);
+        if (layerEditor) {
+            layerEditor->setButtons(0);
+            layerEditor->update();
+            layerEditor->clearOverlays();
+        }
     }
 
     void eventHandler(const ui::MouseMove& event) {
-        layerEditor->setGlobalCanvas(canvas->globalRect);
-        layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
-        layerEditor->setButtons(event.buttons);
-        layerEditor->update();
+        if (layerEditor) {
+            layerEditor->setGlobalCanvas(canvas->globalRect);
+            layerEditor->setGlobalOverlay(node()->globalRect);
+            layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+            layerEditor->setButtons(event.buttons);
+            layerEditor->update();
+        }
     }
 
     void eventHandler(const ui::MouseWheel& event) {
@@ -265,12 +284,21 @@ public:
         rezoom();
     }
 
+    static inline Editor* activeEditor = nullptr;
+    static inline Document* activeDocument = nullptr;
     void activate() {
-        editorProvides.emplace(node(), "activeeditor");
-        docProvides.emplace(doc->get(), "activedocument");
-        pub(msg::ActivateEditor{node()});
-        pub(msg::ActivateDocument{doc});
-        pub(msg::ActivateCell{activeCell});
+        if (activeEditor != this) {
+            activeEditor = this;
+            editorProvides.emplace(node(), "activeeditor");
+            pub(msg::ActivateEditor{node()});
+        }
+
+        if (activeDocument != doc->get()) {
+            activeDocument = doc->get();
+            docProvides.emplace(doc->get(), "activedocument");
+            pub(msg::ActivateDocument{doc});
+            pub(msg::ActivateCell{activeCell});
+        }
     }
 
     void eventHandler(const ui::FocusChild&) {activate();}
@@ -279,7 +307,9 @@ public:
     void on(msg::ResizeDocument& msg) {
         if (msg.doc.get() == doc->get()) {
             rezoom();
-            layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
+            if (layerEditor) {
+                layerEditor->setLocalCanvas({0, 0, (*doc)->width(), (*doc)->height()});
+            }
         }
     }
 

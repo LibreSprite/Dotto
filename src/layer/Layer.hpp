@@ -17,6 +17,7 @@ class Layer : public Injectable<Layer>, public std::enable_shared_from_this<Laye
     std::shared_ptr<Cell> _cell;
     Rect _localCanvas;
     Rect _globalCanvas;
+    Rect _globalOverlay;
     Point3D _globalMouse;
     U32 _buttons = 0;
     std::shared_ptr<Surface> _overlay;
@@ -31,9 +32,19 @@ public:
     virtual void setLocalCanvas(const Rect& rect) {_localCanvas = rect;}
     const Rect& localCanvas() const {return _localCanvas;}
 
+    virtual void setGlobalOverlay(const Rect& rect) {_globalOverlay = rect;}
+    const Rect& globalOverlay() const {return _globalOverlay;}
+
     virtual void setGlobalMouse(const Point3D& coords) {
         _globalMouse = coords;
     }
+
+    Rect offsetCanvas() const {
+        return {
+            _globalCanvas.x - _globalOverlay.x, _globalCanvas.y - _globalOverlay.y,
+            _globalCanvas.width, _globalCanvas.height
+        };
+    };
 
     virtual void setButtons(U32 buttons) {
         _buttons = buttons;
