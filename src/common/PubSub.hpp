@@ -66,7 +66,8 @@ namespace internal {
     inline void pub(Vector<Listener>* listeners, void* msg) {
         if (!listeners)
             return;
-        for (auto& listener : *listeners) {
+        for (std::size_t i = 0; i < listeners->size(); ++i) {
+            auto& listener = listeners->at(i);
             if (listener.call) {
                 listener.call(listener.object, msg);
             }
