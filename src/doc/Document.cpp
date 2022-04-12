@@ -16,7 +16,10 @@
 #include <doc/Timeline.hpp>
 #include <fs/FileSystem.hpp>
 
+
 class DocumentImpl : public Document {
+    friend class HistoryLock;
+
     PubSub<> pub{this};
     HashMap<String, std::shared_ptr<Timeline>> guidToTimeline;
     String GUID = getGUID();
@@ -173,6 +176,10 @@ public:
         lockHistory--;
     }
 
+    HistoryLock getHistoryLock() override {
+        return {shared_from_this()};
+    }
+
     String path() override {
         return filepath;
     }
@@ -185,5 +192,13 @@ public:
         return globalPalette;
     }
 };
+
+HistoryLock::HistoryLock(std::shared_ptr<Document> doc) : doc{doc} {
+    std::static_pointer_cast<DocumentImpl>(doc)->lockHistory++;
+}
+
+HistoryLock::~HistoryLock() {
+    std::static_pointer_cast<DocumentImpl>(doc)->lockHistory--;
+}
 
 static Document::Shared<DocumentImpl> reg{"new"};
