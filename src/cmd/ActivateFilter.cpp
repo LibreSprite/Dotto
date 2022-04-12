@@ -93,6 +93,10 @@ public:
             return;
         }
 
+        set("document", doc);
+        filter->load(getPropertySet());
+        filter->beforeRun();
+
         if (interactive) {
             if (auto meta = filter->getMetaProperties()) {
                 showMenu(meta);
@@ -100,9 +104,6 @@ public:
             }
         }
 
-        set("document", doc);
-
-        filter->load(getPropertySet());
         allFrames = filter->allFrames;
         allLayers = filter->allLayers;
         frame = allFrames ? timeline->frameCount() : timeline->frame();
@@ -135,6 +136,8 @@ public:
                 filter->run(surface->shared_from_this());
             }
         }
+
+        filter->afterRun();
 
         filterUndoData = filter->undoData;
         commit();

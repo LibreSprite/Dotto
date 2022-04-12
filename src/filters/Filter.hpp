@@ -61,5 +61,7 @@ public:
         return meta;
     }
 
+    virtual void beforeRun() {}
     virtual void run(std::shared_ptr<Surface> surface) = 0;
+    virtual void afterRun() {}
 };
