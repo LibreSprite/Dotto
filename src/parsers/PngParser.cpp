@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#if !defined(ANDROID)
+
 #include <png.h>
 #include <cstring>
 
@@ -118,3 +120,5 @@ public:
 };
 
 static Parser::Shared<PngParser> png{"png", {"image"}};
+
+#endif

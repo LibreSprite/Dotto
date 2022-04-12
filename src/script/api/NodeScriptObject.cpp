@@ -26,7 +26,7 @@ public:
     void setWrapped(const Value& vmodel) override {
         std::shared_ptr<ui::Node> node = vmodel;
         ModelScriptObject::setWrapped(std::static_pointer_cast<Model>(node));
-        auto weak = std::weak_ptr(node);
+        std::weak_ptr<ui::Node> weak = node;
         this->weak = weak;
 
         addProperty("globalX", [=]()->script::Value {

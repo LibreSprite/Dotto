@@ -2,7 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(ANDROID)
 
 #include <X11/Xlib.h>
 

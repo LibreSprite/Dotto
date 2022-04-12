@@ -4,7 +4,7 @@
 
 #ifdef USE_SDL2
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <common/ColorProfile.hpp>
 #include <common/Config.hpp>
@@ -14,7 +14,7 @@
 #include <log/Log.hpp>
 #include <sys/NativeWindowPlugin.hpp>
 
-#include <SDL2/SDL_syswm.h>
+#include <SDL_syswm.h>
 
 class SDL2Window : public ui::Window {
 public:
@@ -88,7 +88,7 @@ public:
             entry.second->window = wmInfo.info.win.window;
             entry.second->hdc = wmInfo.info.win.hdc;
             entry.second->hinstance = wmInfo.info.win.hinstance;
-#elif defined(__linux__)
+#elif defined(__linux__) && !defined(ANDROID)
             if (wmInfo.subsystem == SDL_SYSWM_X11) {
                 entry.second->display = wmInfo.info.x11.display;
                 entry.second->window = wmInfo.info.x11.window;

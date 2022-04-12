@@ -2,6 +2,7 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#if !defined(ANDROID)
 #include <png.h>
 
 #include <common/Surface.hpp>
@@ -79,3 +80,4 @@ public:
 };
 
 static Writer::Shared<PngWriter> png{"png", {"*.png"}};
+#endif

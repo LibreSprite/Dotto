@@ -10,6 +10,9 @@
   #include <windef.h>
   #include <GL/glew.h>
   #include <GL/gl.h>
+#elif defined(ANDROID)
+  #include <GLES/gl.h>
+  #include <GLES3/gl3.h>
 #else
   #include <GL/gl.h>
   #include <GLES3/gl3.h>

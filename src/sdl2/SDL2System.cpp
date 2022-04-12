@@ -4,7 +4,7 @@
 
 #ifdef USE_SDL2
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <common/Config.hpp>
 #include <common/Messages.hpp>
@@ -14,8 +14,8 @@
 #include <gui/Graphics.hpp>
 #include <log/Log.hpp>
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_syswm.h>
+#include <SDL_events.h>
+#include <SDL_syswm.h>
 
 static const char* getKeyName(S32 code);
 

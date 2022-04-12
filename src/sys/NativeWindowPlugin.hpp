@@ -7,7 +7,7 @@
 #include "common/Value.hpp"
 #include "common/inject.hpp"
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(ANDROID)
 #include <X11/Xlib.h>
 #endif
 
@@ -23,7 +23,7 @@
 
 class NativeWindowPlugin : public Injectable<NativeWindowPlugin> {
 public:
-#if defined(__linux__)
+#if defined(__linux__) && !defined(ANDROID)
     Display* display = nullptr;
     Window window = 0;
 #endif
