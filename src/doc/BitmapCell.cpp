@@ -13,6 +13,14 @@ public:
     String getType() const override {return "bitmap";}
 
     void setSelection(const Selection* selection) override {
+        if (selection == this->selection.get()) {
+            return;
+        }
+
+        if (this->selection) {
+            PubSub<>::pub(msg::PreModifySelection{this->selection.get()});
+        }
+
         if (!selection || selection->getBounds().width <= 1 || selection->getBounds().height <= 1) {
             this->selection.reset();
         } else {

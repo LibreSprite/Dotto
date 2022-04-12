@@ -60,7 +60,6 @@ public:
         inject<Document> doc{"activedocument"};
         auto timeline = doc->currentTimeline();
         if (auto cell = dynamic_cast<BitmapCell*>(timeline->getCell().get())) {
-            pub(msg::PreModifySelection{cell->getSelection()});
             cell->setSelection(preview.overlay.get());
         }
         preview.overlay->clear();
@@ -78,7 +77,6 @@ public:
                     logI(selection->getBounds());
                     *preview.overlay = *selection;
                 }
-                pub(msg::PreModifySelection{selection});
                 cell->setSelection(nullptr);
             }
         }
