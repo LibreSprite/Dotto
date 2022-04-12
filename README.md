@@ -46,7 +46,7 @@ over Discord/Matrix.
 | Raspberry Pi 4 support         | OK          | 1.0     |                                      |
 | Undo / Redo                    | OK          | 0.5     |                                      |
 | Copy + Paste                   | Planned     | 0.5     |                                      |
-| Crop Sprite                    | Planned     | 0.5     |                                      |
+| Crop Sprite                    | OK          | 0.5     |                                      |
 | Pencil tool                    | OK          | 0.5     |                                      |
 | Pencil shapes/sizes            | OK          | 0.5     |                                      |
 | Pencil blending modes          | OK          | 1.0     |                                      |
