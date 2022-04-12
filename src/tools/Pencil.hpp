@@ -27,6 +27,13 @@ public:
     std::shared_ptr<Selection> selection;
     std::shared_ptr<Command> paint;
 
+    enum WhichMode {
+        Hover       = 0,
+        Normal      = 1 << 0,
+        Alternative = 1 << 1,
+        Dropper     = 1 << 2
+    };
+
     Property<String> shapeName{this, "shape", "%appdata/brushes/square.png", &Pencil::changeShape};
     std::shared_ptr<Surface> shape;
     F32 scale;
@@ -180,10 +187,20 @@ public:
         return meta;
     }
 
+    void dropper(Surface* surface, const Point3D& point) {
+        auto x = point.x;
+        auto y = point.y;
+        if (surface->rect().contains(x, y)) {
+            Tool::color = surface->getPixel(x, y);
+            pub(msg::ActivateColor{Tool::color});
+        }
+    }
+
     void plot(const Point3D& point, bool force) {
         auto x = point.x;
         auto y = point.y;
         auto z = point.z / 255.0f;
+        auto size = which == Dropper ? 1 : *this->size;
 
         if (!force) {
             S32 dx = x - prevPlotX;
@@ -337,11 +354,15 @@ public:
             set("interval", shape->width() / 8.0f * scale);
         selection = inject<Selection>{"new"};
 
-        if (which) {
+        if (which == Normal || which == Alternative) {
             initPaint(surface);
             preview.overlay.reset();
         } else {
             preview.overlay = selection;
+        }
+
+        if (which == Dropper) {
+            dropper(surface, points.back());
         }
 
         plot(points.back(), true);
@@ -354,8 +375,13 @@ public:
         if (!shape)
             return;
 
-        if (!paint)
+        if (!paint) {
             selection->clear();
+        }
+
+        if (which == Dropper) {
+            dropper(surface, points.back());
+        }
 
         auto& end = points[points.size() - 1];
         auto& begin = points[points.size() - 2];
@@ -364,8 +390,9 @@ public:
             plot({x, y, S32(0.5f + begin.z * (1 - lerp) + end.z * lerp) }, false);
         });
 
-        if (paint)
+        if (paint) {
             paint->run();
+        }
     }
 
     Path applyPixelPerfect(Path src) {
