@@ -227,9 +227,7 @@ public:
             layerEditor->clearOverlays();
         }
 
-        if (*grid && gridSurface) {
-            changeGrid();
-        }
+        changeGrid();
 
         container->load({
                 {"x", "center"},
@@ -331,6 +329,10 @@ public:
 
     void on(msg::Tick&) {
         if (needsGridRedraw) {
+            if (layerEditor) {
+                layerEditor->setGlobalCanvas(canvas->globalRect);
+                layerEditor->setGlobalOverlay(node()->globalRect);
+            }
             drawGrid(gridColor);
         }
     }
