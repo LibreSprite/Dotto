@@ -3,7 +3,6 @@
 // Read LICENSE.txt for more information.
 
 #if defined(ANDROID)
-#include <android/log.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +13,7 @@
 #include <log/Log.hpp>
 
 extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, const char* argv[]) {
-    Log::setDefault("stdout");
+    Log::setDefault("logcat");
     inject<App> app{"dotto"};
     app->boot(argc, argv);
     logI("Running Dotto!");
