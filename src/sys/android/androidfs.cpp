@@ -5,6 +5,7 @@
 #if defined(__ANDROID__)
 
 #include <SDL.h>
+#include <android/asset_manager_jni.h>
 
 #include <limits.h>
 #include <unistd.h>
@@ -118,9 +119,47 @@ public:
     }
 };
 
+class AndroidFolder : public Folder {
+public:
+    void forEach(std::function<void(std::shared_ptr<FSEntity>)> callback) override {
+        if (!startsWith(getUID(), "appdata:")) {
+            Folder::forEach(callback);
+            return;
+        }
+        auto path = getUID();
+
+        static jobject assetManagerJobject;
+        static AAssetManager* assetManager = nullptr;
+        if (!assetManager) {
+            auto env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+            auto activity = (jobject)SDL_AndroidGetActivity();
+            auto clazz = env->GetObjectClass(activity);
+            auto methodId = env->GetMethodID(clazz, "getAssets", "()Landroid/content/res/AssetManager;");
+            assetManagerJobject = env->CallObjectMethod(activity, methodId);
+            assetManager = AAssetManager_fromJava(env, assetManagerJobject);
+            env->DeleteLocalRef(activity);
+            env->DeleteLocalRef(clazz);
+        }
+
+        if (!assetManager) {
+            return;
+        }
+
+        if (auto dir = AAssetManager_openDir(assetManager, path.c_str() + 9)) {
+            String type;
+            inject<FileSystem> fs;
+            while (auto filename = AAssetDir_getNextFileName(dir)){
+                type = fs->extension(filename).empty() ? "dir" : "std";
+                callback(getChild(filename, type));
+            }
+            AAssetDir_close(dir);
+        }
+    }
+};
+
 static FSEntity::Shared<AndroidRootDir> lrd{"rootDir"};
 static FileSystem::Shared<FileSystem> reg{"new"};
 static File::Shared<AndroidFile> stdFile{"std"};
-static File::Shared<Folder> stdDir{"dir"};
+static File::Shared<AndroidFolder> stdDir{"dir"};
 
 #endif

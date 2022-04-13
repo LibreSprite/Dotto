@@ -34,7 +34,7 @@ namespace fs {
         bool isFile() override {return false;}
         virtual bool isRootFolder() {return false;}
 
-        void forEach(std::function<void(std::shared_ptr<FSEntity>)>);
+        virtual void forEach(std::function<void(std::shared_ptr<FSEntity>)>);
 
         std::shared_ptr<FSEntity> getChild(const String& name, const String& missingDriver) {
             std::shared_ptr<FSEntity> driver;
