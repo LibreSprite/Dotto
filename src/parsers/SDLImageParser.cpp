@@ -26,7 +26,6 @@ static Parser::Shared<SDLImageParser> jpg{"jpg", {"image"}};
 static Parser::Shared<SDLImageParser> jpeg{"jpeg", {"image"}};
 static Parser::Shared<SDLImageParser> lbm{"lbm", {"image"}};
 static Parser::Shared<SDLImageParser> pcx{"pcx", {"image"}};
-// static Parser::Shared<SDLImageParser> png{"png", {"image"}};
 static Parser::Shared<SDLImageParser> pnm{"pnm", {"image"}};
 static Parser::Shared<SDLImageParser> svg{"svg", {"image"}};
 static Parser::Shared<SDLImageParser> tga{"tga", {"image"}};
@@ -37,4 +36,7 @@ static Parser::Shared<SDLImageParser> xcf{"xcf", {"image"}};
 static Parser::Shared<SDLImageParser> xpm{"xpm", {"image"}};
 static Parser::Shared<SDLImageParser> xv{"xv", {"image"}};
 
+#if defined(__ANDROID__)
+static Parser::Shared<SDLImageParser> png{"png", {"image"}};
+#endif
 #endif
