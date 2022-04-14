@@ -10,7 +10,7 @@ class Surface;
 
 class Scale2X : public Filter {
 public:
-    Property<std::shared_ptr<Document>> doc{this, "document"};
+    Property<Document*> doc{this, "document"};
 
     bool forceAllLayers() override {return true;}
     bool forceAllFrames() override {return true;}

@@ -64,7 +64,10 @@ public:
                 return;
             }
             it->second->undoData = filterUndoData;
+            it->second->set("document", doc.get());
             it->second->undo();
+            doc.reset();
+            it->second->set("document", doc.get());
         }
     }
 
@@ -93,7 +96,7 @@ public:
             return;
         }
 
-        set("document", doc);
+        set("document", doc.get());
         filter->load(getPropertySet());
         filter->beforeRun();
 
@@ -141,6 +144,10 @@ public:
 
         filterUndoData = filter->undoData;
         commit();
+
+        doc.reset();
+        set("document", doc.get());
+        filter->set("document", doc.get());
     }
 
     void showMenu(std::shared_ptr<PropertySet> meta) {

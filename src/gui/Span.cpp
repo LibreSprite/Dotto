@@ -102,19 +102,19 @@ namespace ui {
                 localRect.y = 0;
                 localRect.width = (*surface)->width();
                 localRect.height = (*surface)->height();
-                if (align == -1) { // left, default
-                } else if (align == 0) { // center
-                    globalRect.x += globalRect.width/2 - localRect.width/2;
-                } else if (align == 1) { // right
-                    globalRect.x += globalRect.width - localRect.width;
-                }
                 if (localRect.width) {
                     F32 factor = globalRect.width / F32(localRect.width);
-                    if (factor > 1) {
+                    if (factor >= 1) {
+                        if (align == -1) { // left, default
+                        } else if (align == 0) { // center
+                            globalRect.x += globalRect.width/2 - localRect.width/2;
+                        } else if (align == 1) { // right
+                            globalRect.x += globalRect.width - localRect.width;
+                        }
                         globalRect.width = localRect.width;
                         globalRect.height = localRect.height;
                     } else {
-                        globalRect.y += globalRect.height * (1 - factor) / 2;
+                        globalRect.y += globalRect.height/2 - localRect.height/2;
                         globalRect.height = localRect.height * factor;
                     }
                 }

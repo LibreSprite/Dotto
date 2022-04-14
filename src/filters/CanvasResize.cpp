@@ -17,7 +17,7 @@ class CanvasResize : public Filter {
 public:
     Property<U32> width{this, "width"};
     Property<U32> height{this, "height"};
-    Property<std::shared_ptr<Document>> doc{this, "document"};
+    Property<Document*> doc{this, "document"};
     Rect bounds;
 
     String category() override {return "resize";}
