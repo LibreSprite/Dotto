@@ -23,6 +23,15 @@ class Shortcut : public ui::Controller {
         std::unique_ptr<KeyMap> childMap;
         std::function<void()> action;
 
+        bool isModifier(const String& key) {
+            return key == "LCTRL" ||
+                   key == "RCTRL" ||
+                   key == "LSHIFT" ||
+                   key == "RSHIFT" ||
+                   key == "LALT" ||
+                   key == "RALT";
+        }
+
     public:
         KeyMap* getChildMap(Shortcut* shortcut) {
             if (!childMap) {
@@ -30,14 +39,24 @@ class Shortcut : public ui::Controller {
                 action = [this, shortcut]{
                     String keyCode;
                     Vector<String> keys;
-                    for (auto& key : shortcut->lastKeyDown->pressedKeys)
+                    Vector<String> altKeys;
+                    for (auto& key : shortcut->lastKeyDown->pressedKeys) {
                         keys.push_back(key);
+                        altKeys.push_back(key.c_str() + isModifier(key));
+
+                    }
                     std::sort(keys.begin(), keys.end());
                     auto it = childMap->find(join(keys, "+"));
+                    if (it == childMap->end()) {
+                        std::sort(altKeys.begin(), altKeys.end());
+                        it = childMap->find(join(altKeys, "+"));
+                    }
                     if (it == childMap->end())
                         it = childMap->find(std::to_string(shortcut->lastKeyDown->keycode));
                     if (it == childMap->end())
                         it = childMap->find(tolower(shortcut->lastKeyDown->keyname));
+                    if (it == childMap->end() && isModifier(shortcut->lastKeyDown->keyname))
+                        it = childMap->find(tolower(shortcut->lastKeyDown->keyname + 1));
                     if (it == childMap->end())
                         logV("Key name: ", shortcut->lastKeyDown->keyname);
                     shortcut->currentMap = (it != childMap->end()) ? it->second.get() : &shortcut->defaultMap;
