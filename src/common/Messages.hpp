@@ -147,10 +147,21 @@ namespace msg {
         ActivateLayer(std::shared_ptr<Document> doc, U32 layer) : doc{doc}, layer{layer} {}
     };
 
+    struct CloseDocument : public Message {
+        Document* doc;
+        CloseDocument(Document* doc) : doc{doc} {}
+    };
+
     struct RenameDocument : public Message {
         std::shared_ptr<Document> doc;
         RenameDocument(std::shared_ptr<Document> doc) : doc{doc} {}
     };
+
+    struct OpenDocument : public Message {
+        std::shared_ptr<Document> doc;
+        OpenDocument(std::shared_ptr<Document> doc) : doc{doc} {}
+    };
+
     struct ActivateDocument : public Message {
         std::shared_ptr<Document> doc;
         ActivateDocument(std::shared_ptr<Document> doc) : doc{doc} {}

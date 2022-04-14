@@ -123,6 +123,8 @@ public:
             else if (name == "activatecolor") createMessageBinder<msg::ActivateColor>(name);
             else if (name == "activatelayer") createMessageBinder<msg::ActivateLayer>(name);
             else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name);
+            else if (name == "closedocument") createMessageBinder<msg::CloseDocument>(name);
+            else if (name == "opendocument") createMessageBinder<msg::OpenDocument>(name);
             else if (name == "activatedocument") createMessageBinder<msg::ActivateDocument>(name);
             else if (name == "activatecell") createMessageBinder<msg::ActivateCell>(name);
             else if (name == "changepalette") createMessageBinder<msg::ChangePalette>(name);
@@ -208,7 +210,7 @@ public:
             void on(Type& message) {
                 if (auto app = weakapp.lock()) {
                     auto engine = app->getEngine().shared_from_this();
-                    app->getEngine().raiseEvent({name});
+                    engine->raiseEvent({name});
                 }
             }
         };

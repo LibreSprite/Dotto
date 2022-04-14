@@ -36,6 +36,10 @@ class DocumentImpl : public Document {
     U32 lockHistory = 0;
 
 public:
+    ~DocumentImpl() {
+        pub(msg::CloseDocument{this});
+    }
+
     String getGUID() {
         U32 now = std::chrono::high_resolution_clock::now().time_since_epoch().count();
         static U32 counter = now * U32(rand());
@@ -61,15 +65,18 @@ public:
     }
 
     bool load(const Value& resource) override {
+        bool ret = false;
         filepath = "Untitled-" + std::to_string(++unsavedNumber);
         haspath = false;
         if (resource.has<std::shared_ptr<Surface>>()) {
-            return loadFromSurface(resource);
+            ret = loadFromSurface(resource);
+        } else if (resource.has<std::shared_ptr<PropertySet>>()) {
+            ret = loadFromPropertySet(resource);
         }
-        if (resource.has<std::shared_ptr<PropertySet>>()) {
-            return loadFromPropertySet(resource);
+        if (ret) {
+            pub(msg::OpenDocument{shared_from_this()});
         }
-        return false;
+        return ret;
     }
 
     bool loadFromPropertySet(std::shared_ptr<PropertySet> properties) {
