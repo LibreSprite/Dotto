@@ -6,7 +6,8 @@
       overflow-hidden="true"
       grid="false"
       grid-color="rgba{32,32,200,200}"
-      draggable="false">
+      draggable="false"
+      steal-focus="true">
   <image controller="draggable" visible="true" id="container" slice="1 1" src="%skin/editor.png" absolute="true">
     <canvas id="canvas" inputEnabled="false"/>
   </image>
