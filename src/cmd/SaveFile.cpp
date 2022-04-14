@@ -44,7 +44,7 @@ public:
     void run() override {
         if (!doc())
             return;
-        if (*saveAs || doc()->path().empty()) {
+        if (*saveAs || !doc()->hasPath()) {
             showSaveDialog();
             return;
         } else if (fileName->empty()) {

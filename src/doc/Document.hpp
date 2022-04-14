@@ -30,6 +30,7 @@ public:
     virtual std::shared_ptr<Timeline> currentTimeline() = 0;
     virtual std::shared_ptr<Timeline> createTimeline() = 0;
     virtual const HashMap<String, std::shared_ptr<Timeline>>& getTimelines() = 0;
+    virtual bool hasPath() = 0;
     virtual String path() = 0;
     virtual void setPath(const String&) = 0;
     virtual std::shared_ptr<Palette> palette() = 0;

@@ -19,6 +19,7 @@
 
 class DocumentImpl : public Document {
     friend class HistoryLock;
+    static inline U32 unsavedNumber = 0;
 
     PubSub<> pub{this};
     HashMap<String, std::shared_ptr<Timeline>> guidToTimeline;
@@ -27,6 +28,7 @@ class DocumentImpl : public Document {
     U32 docWidth = 0;
     U32 docHeight = 0;
     String filepath;
+    bool haspath = false;
     inject<Palette> globalPalette{"new"};
 
     Vector<std::shared_ptr<Command>> history;
@@ -59,6 +61,8 @@ public:
     }
 
     bool load(const Value& resource) override {
+        filepath = "Untitled-" + std::to_string(++unsavedNumber);
+        haspath = false;
         if (resource.has<std::shared_ptr<Surface>>()) {
             return loadFromSurface(resource);
         }
@@ -180,12 +184,21 @@ public:
         return {shared_from_this()};
     }
 
+    bool hasPath() override {
+        return haspath;
+    }
+
     String path() override {
         return filepath;
     }
 
     void setPath(const String& path) override {
         filepath = path;
+        haspath = !path.empty();
+        if (!haspath) {
+            filepath = "Untitled-" + std::to_string(++unsavedNumber);
+        }
+        pub(msg::RenameDocument{shared_from_this()});
     }
 
     std::shared_ptr<Palette> palette() override {
