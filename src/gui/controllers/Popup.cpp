@@ -13,8 +13,14 @@ class Popup : public ui::Controller {
     std::shared_ptr<ui::Node> closeButton;
 public:
     void attach() override {
-        node()->addEventListener<ui::Click>(this);
+        node()->addEventListener<ui::Click, ui::KeyUp>(this);
         closeButton = node()->findChildById("close");
+    }
+
+    void eventHandler(const ui::KeyUp& event) {
+        if (String(event.keyname) == "ESCAPE" && closeButton) {
+            node()->remove();
+        }
     }
 
     void eventHandler(const ui::Click& event) {
