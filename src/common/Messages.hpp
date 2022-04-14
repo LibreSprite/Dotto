@@ -162,6 +162,11 @@ namespace msg {
         OpenDocument(std::shared_ptr<Document> doc) : doc{doc} {}
     };
 
+    struct RequestActivateDocument : public Message {
+        std::shared_ptr<Document> doc;
+        RequestActivateDocument(std::shared_ptr<Document> doc) : doc{doc} {}
+    };
+
     struct ActivateDocument : public Message {
         std::shared_ptr<Document> doc;
         ActivateDocument(std::shared_ptr<Document> doc) : doc{doc} {}

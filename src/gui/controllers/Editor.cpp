@@ -24,6 +24,7 @@
 class Editor : public ui::Controller {
     Property<std::shared_ptr<Document>> doc{this, "doc"};
     PubSub<msg::ResizeDocument,
+           msg::RequestActivateDocument,
            msg::ActivateDocument,
            msg::ActivateEditor,
            msg::PollActiveEditor,
@@ -299,6 +300,12 @@ public:
         }
     }
 
+    void on(msg::RequestActivateDocument& msg) {
+        if (msg.doc.get() == doc->get()) {
+            activate();
+        }
+    }
+
     void eventHandler(const ui::FocusChild&) {activate();}
     void eventHandler(const ui::Focus&) {activate();}
 
@@ -312,7 +319,9 @@ public:
     }
 
     void on(msg::ActivateDocument& msg) {
-        if (msg.doc.get() != doc->get()) {
+        bool isSame = msg.doc.get() == doc->get();
+        node()->set("visible", isSame);
+        if (!isSame) {
             docProvides.reset();
         }
     }

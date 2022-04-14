@@ -11,7 +11,14 @@
 
   <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
     <alttextbutton id="startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
-    <node width="100%"/>
+    <node width="100%" flow="row" controller="script"><![CDATA[
+    var node = app.target;
+    app.addEventListener("opendocument");
+    function onEvent(event) {
+      if (event == "opendocument")
+        node.createChild("docmenuitem");
+    }
+    ]]></node>
     <image controller="tabtarget, button"
            id="toolconfigbutton"
            visible="false"
