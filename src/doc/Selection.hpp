@@ -14,6 +14,7 @@ public:
     virtual Rect getTrimmedBounds() const = 0;
     virtual const Vector<U8>& getData() const = 0;
     virtual Selection& operator = (const Selection& other) = 0;
+    virtual void move(S32 offsetX, S32 offsetY) = 0;
     virtual void add(const Selection& other) = 0;
     virtual void blend(const Selection& other) = 0;
     virtual void mask(const Selection& other) = 0;

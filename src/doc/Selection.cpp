@@ -46,6 +46,11 @@ public:
         return *this;
     }
 
+    void move(S32 offsetX, S32 offsetY) override {
+        bounds.x += offsetX;
+        bounds.y += offsetY;
+    }
+
     void add(const Selection& other) override {
         Rect otherBounds = other.getBounds();
         Rect newBounds = bounds;
