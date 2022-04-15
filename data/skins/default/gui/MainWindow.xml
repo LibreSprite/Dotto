@@ -87,7 +87,7 @@
       overflow-hidden="true">
   </image>
 
-  <popup controller="toolbox" container="inside" width="45px" x="0px" y="50%-50%" close="false" extra-height="35"/>
+  <popup controller="toolbox" container="inside" width="32px" x="0px" y="50%-50%" close="false" extra-height="35"/>
 
   <image src="%skin/frame.png"
          class="sidebar"
