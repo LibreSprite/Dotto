@@ -4,8 +4,8 @@
        controller="tabtarget, range"
        handle="num-value"
        id="row">
-  <span id="num-label" alpha="0.75" align="0"/>
+  <span id="num-label" alpha="0.75" align="0" inputEnabled="false"/>
   <image id="num-value" absolute="true">
-    <span id="lbl" absolute="true" y="-20px" width="50px" x="50%-50%" align="0"/>
+    <span id="lbl" absolute="true" y="-20px" width="50px" x="50%-50%" align="0" inputEnabled="false"/>
   </image>
 </image>

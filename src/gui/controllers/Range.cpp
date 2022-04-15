@@ -40,9 +40,9 @@ public:
         if (handle) {
             handle->addEventListener<ui::Drag,
                                      ui::Drop,
-                                     ui::MouseDown,
                                      ui::Resize>(this);
         }
+        node()->addEventListener<ui::MouseDown>(this);
     }
 
     void changeFormat() {
@@ -105,12 +105,26 @@ public:
         node()->set("value", newValue);
     }
 
-    void eventHandler(const ui::MouseDown&) {
-        pub(msg::BeginDrag{
-                handle->shared_from_this(),
-                handle->globalRect.x,
-                handle->globalRect.y
-            });
+    void eventHandler(const ui::MouseDown& event) {
+        if (event.target == node()) {
+            F64 width = node()->globalRect.width - node()->padding->x - node()->padding->width;
+            F64 start = node()->globalRect.x + node()->padding->x;
+            F64 value = std::clamp<F64>((event.globalX - start - handle->globalRect.width/2.0f) / width * (max - min) + min, min, max);
+            if (value != this->value) {
+                this->value.value = value;
+                changeValue();
+                value = this->value.value;
+                node()->load({
+                        {"value", tostring(value)},
+                    });
+            }
+        } else {
+            pub(msg::BeginDrag{
+                    handle->shared_from_this(),
+                    handle->globalRect.x,
+                    handle->globalRect.y
+                });
+        }
     }
 
     void eventHandler(const ui::Drop& event) {
