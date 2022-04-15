@@ -6,6 +6,7 @@
 
 #ifdef USE_SDL2
 
+#include <SDL_error.h>
 #include <SDL_image.h>
 
 #include <common/Color.hpp>
@@ -31,8 +32,10 @@ public:
     std::shared_ptr<Surface> load(Vector<U8>& data) {
         auto ops = SDL_RWFromMem(data.data(), data.size());
         SDL_Surface* sdl = IMG_Load_RW(ops, 1);
-        if (!sdl)
+        if (!sdl) {
+            logE("Error parsing image:[", SDL_GetError(), "]");
             return nullptr;
+        }
         auto surface = std::make_shared<Surface>();
         surface->resize(sdl->w, sdl->h);
         surface->setDirty(surface->rect());
