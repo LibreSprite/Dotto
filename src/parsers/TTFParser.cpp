@@ -41,13 +41,25 @@ public:
         }
     }
 
-    void blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target) {
-        for (U32 y = 0; y < height; ++y) {
-            for (U32 x = 0; x < width; ++x) {
-                auto alpha = data[y * width + x];
-                target.setPixel(x + offsetX + bearingX,
-                                y + offsetY - bearingY,
-                                Color(color.r, color.g, color.b, alpha));
+    void blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target, U8 threshold = 0) {
+        if (threshold == 0) {
+            for (U32 y = 0; y < height; ++y) {
+                for (U32 x = 0; x < width; ++x) {
+                    auto alpha = data[y * width + x];
+                    target.setPixel(x + offsetX + bearingX,
+                                    y + offsetY - bearingY,
+                                    Color(color.r, color.g, color.b, alpha));
+                }
+            }
+        } else {
+            for (U32 y = 0; y < height; ++y) {
+                for (U32 x = 0; x < width; ++x) {
+                    if (data[y * width + x] < threshold)
+                        continue;
+                    target.setPixel(x + offsetX + bearingX,
+                                    y + offsetY - bearingY,
+                                    color);
+                }
             }
         }
         offsetX += advance;
