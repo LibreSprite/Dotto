@@ -17,9 +17,8 @@ function getSample(x, y) {
 
 const handlers = {
     mousedown : function(button, x, y) {
-        const rawColor = getSample(x, y);
         const activeColor = app.activeColor;
-        const color = rawColor & ~(0xFF << 24) | (activeColor & (0xFF << 24));
+        const color = getSample(x, y);
         if (color != activeColor)
             app.command("activatecolor", "color", color);
     },
