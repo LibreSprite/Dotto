@@ -100,6 +100,7 @@ public:
     }
 
     void eventHandler(const ui::MouseWheel& event) {
+        event.cancel = true;
         F64 offset = event.wheelX + event.wheelY;
         F64 newValue = *value + *resolution * offset;
         node()->set("value", newValue);

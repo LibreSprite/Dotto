@@ -33,6 +33,7 @@
 
   <image
       id="layersidebar"
+      controller="scrollable"
       class="sidebar"
       src="%skin/bar.png"
       slice="2 8"
@@ -51,6 +52,7 @@
 
   <image
       id="filtersidebar"
+      controller="scrollable"
       class="sidebar"
       src="%skin/bar.png"
       slice="2 8"
@@ -67,6 +69,7 @@
 
   <image
       id="colorpanel"
+      controller="scrollable"
       class="sidebar"
       src="%skin/bar.png"
       slice="2 8"
