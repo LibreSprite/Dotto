@@ -24,7 +24,7 @@ protected:
 public:
     virtual String getType() const = 0;
     const String& getGUID() {return GUID;}
-    Surface* getComposite() {return composite.get();}
+    virtual Surface* getComposite() {return composite.get();}
     Selection* getMask() {return mask.get();}
     virtual Vector<U8> serialize() = 0;
     virtual bool unserialize(const Vector<U8>&) = 0;

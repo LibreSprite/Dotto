@@ -5,6 +5,7 @@
 #include <common/Messages.hpp>
 #include <common/System.hpp>
 #include <doc/Document.hpp>
+#include <doc/GroupCell.hpp>
 #include <doc/Timeline.hpp>
 #include <layer/Layer.hpp>
 #include <tools/Tool.hpp>

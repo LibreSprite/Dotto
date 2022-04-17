@@ -48,13 +48,15 @@ public:
         return cell;
     }
 
+    std::shared_ptr<Cell> getCell(U32 frame) const override {
+        return (frame >= data.size()) ? nullptr : data[frame];
+    }
+
     std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop) const override {
         if (data.empty())
             return nullptr;
         if (loop) {
             frame %= frameCount();
-            if (!data[frame])
-                return nullptr;
             layer %= data[frame]->layerCount();
         } else {
             if (frame >= data.size())

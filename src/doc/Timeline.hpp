@@ -22,6 +22,7 @@ public:
     virtual U32 layer() const = 0;
     virtual std::shared_ptr<Cell> activate(U32 frame, U32 layer) = 0;
     virtual std::shared_ptr<Cell> getCell() const {return getCell(frame(), layer(), false);}
+    virtual std::shared_ptr<Cell> getCell(U32 frame) const = 0;
     virtual std::shared_ptr<Cell> getCell(U32 frame, U32 layer, bool loop = false) const = 0;
     virtual void setCell(U32 frame, U32 layer, std::shared_ptr<Cell> cell) = 0;
 };

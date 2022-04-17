@@ -18,7 +18,6 @@ class BitmapLayer : public Layer {
     std::shared_ptr<Tool> activeTool;
     Tool::Path points;
     inject<System> system;
-    inject<Document> doc;
     std::optional<Selection::Provides> mask;
     Tool::Preview preview {
         .hideCursor = false,
