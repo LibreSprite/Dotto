@@ -168,7 +168,7 @@ public:
         } else if (layerEditor) {
             layerEditor->setGlobalCanvas(canvas->globalRect);
             layerEditor->setGlobalOverlay(node()->globalRect);
-            layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+            layerEditor->setGlobalMouse({event.globalX, event.globalY, msg::MouseMove::pressure * 255});
             layerEditor->setButtons(event.buttons);
             layerEditor->update();
         }
@@ -198,7 +198,7 @@ public:
         if (layerEditor) {
             layerEditor->setGlobalCanvas(canvas->globalRect);
             layerEditor->setGlobalOverlay(node()->globalRect);
-            layerEditor->setGlobalMouse({event.globalX, event.globalY, S32(msg::MouseMove::pressure * 255)});
+            layerEditor->setGlobalMouse({event.globalX, event.globalY, msg::MouseMove::pressure * 255});
             layerEditor->setButtons(event.buttons);
             layerEditor->update();
         }

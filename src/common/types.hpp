@@ -42,7 +42,7 @@ struct Point2D {
 struct Point3D {
     S32 x;
     S32 y;
-    S32 z;
+    F32 z;
 };
 
 template<class T>

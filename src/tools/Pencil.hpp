@@ -232,7 +232,7 @@ public:
 
         F32 alpha = pressurealpha ? z : 1.0f;
 
-        if (size <= 1) {
+        if (size <= 1 || scale <= 0) {
             selection->add(x, y, 255 * alpha);
         } else if (scale < 1) {
             if (scale <= 0)
