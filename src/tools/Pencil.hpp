@@ -55,7 +55,7 @@ public:
         preview.altColor.fromU32(Tool::color.toU32() ^ 0xFFFFFF);
         preview.altColor.a = 0xFF;
         preview.overlayColor = Tool::color;
-        preview.overlayColor.a = 0xFF;
+        preview.overlayColor.a = 0x7F;
         return &preview;
     }
 
@@ -199,7 +199,7 @@ public:
     void plot(const Point3D& point, bool force) {
         auto x = point.x;
         auto y = point.y;
-        auto z = point.z / 255.0f;
+        auto z = which == Hover ? 0.5f : point.z / 255.0f;
         auto size = which == Dropper ? 1 : *this->size;
 
         if (!force) {
