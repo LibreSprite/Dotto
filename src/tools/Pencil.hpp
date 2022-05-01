@@ -224,7 +224,7 @@ public:
         S32 hsw = sw / 2;
         S32 hsh = sh / 2;
 
-        if (pressuresize) {
+        if (pressuresize && which) {
             scale = F32(size) * z / shape->width();
         } else {
             scale = F32(size) / shape->width();
@@ -356,7 +356,7 @@ public:
 
         if (which == Normal || which == Alternative) {
             initPaint(surface);
-            preview.overlay.reset();
+            preview.overlay = inject<Selection>{"new"}; // .reset();
         } else {
             preview.overlay = selection;
         }
@@ -367,8 +367,10 @@ public:
 
         plot(points.back(), true);
 
-        if (paint)
+        if (paint) {
+            *preview.overlay = *selection;
             paint->run();
+        }
     }
 
     void update(Surface* surface, Path& points) override {
@@ -391,6 +393,7 @@ public:
         });
 
         if (paint) {
+            *preview.overlay = *selection;
             paint->run();
         }
     }
@@ -421,6 +424,7 @@ public:
     void end(Surface* surface, Path& points) override {
         if (!shape || !paint) {
             selection.reset();
+            preview.overlay.reset();
             return;
         }
 
