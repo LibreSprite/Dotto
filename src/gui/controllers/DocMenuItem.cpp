@@ -15,7 +15,8 @@ public:
     Property<Document*> _doc{this, "doc", nullptr, &DocMenuItem::setDoc};
     Property<S32> maxSize{this, "maxsize", 32};
     PubSub<msg::ActivateDocument,
-           msg::RenameDocument> pub{this};
+           msg::RenameDocument,
+           msg::CloseDocument> pub{this};
     std::weak_ptr<Document> weakDoc;
 
     void setDoc() {
