@@ -109,6 +109,7 @@
         <menubutton id="savebutton" click="savefile" label="Save"/>
         <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
         <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
+        <menubutton id="closebutton" click="closefile" label="Close"/>
       </node>
 
       <node xcontroller="recentfileslist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
