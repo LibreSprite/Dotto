@@ -283,7 +283,7 @@ public:
             Point3DF(F32 x, F32 y, F32 z) : x{x}, y{y}, z{z} {}
 
             Point3D round() {
-                return {S32(x + 0.5f), S32(y + 0.5f), S32(z + 0.5f)};
+                return {S32(x + 0.5f), S32(y + 0.5f), z};
             }
         };
 
@@ -389,7 +389,7 @@ public:
         auto& begin = points[points.size() - 2];
         line(begin, end, [&](S32 x, S32 y, S32 step, S32 max){
             F32 lerp = F32(step) / max;
-            plot({x, y, S32(0.5f + begin.z * (1 - lerp) + end.z * lerp) }, false);
+            plot({x, y, begin.z * (1 - lerp) + end.z * lerp}, false);
         });
 
         if (paint) {
