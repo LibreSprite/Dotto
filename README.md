@@ -3,6 +3,7 @@
 ## [![Linux x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml) [![Windows i686 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml) [![MacOS x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml)
 
 ## What is Dotto?
+NOTE: For those that don't know, LibreSprite is a pixel art drawing and animation app, forked from Aseprite.
 ### What
 LibreSprite Dotto! is a clean-room, modern, flexible rewrite of LibreSprite. Since it does not reuse code, it is more of a spiritual successor than a new version, hence the new repository.
 
