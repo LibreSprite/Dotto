@@ -2,6 +2,27 @@
 
 ## [![Linux x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml) [![Windows i686 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml) [![MacOS x86_64 CI](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml)
 
+### What
+LibreSprite Dotto! is a clean-room, modern, flexible rewrite of LibreSprite. Since it does not reuse code, it is more of a spiritual successor than a new version, hence the new repository.
+
+### Who
+The core is currently being written by myself, though @Zughy and @maujin111 have been closely involved since before day 1.
+Due to the scripting system being tightly integrated, the JavaScript and Lua programmers of the community will soon be able to get involved as well.
+
+### Why
+First, some context. LibreSprite was born half a decade ago, as a fork of Aseprite. Aseprite, in turn, was born shortly after the invention of the transistor. Despite numerous rewrites and refactors, the codebase showed serious signs of age. Notably, it was based on a buggy, custom, old version of Allegro for rendering and often did not follow standard C++11 coding practices.
+
+After the fork, Aseprite went on getting refactored/maintained/improved, while LibreSprite mostly just sat there, gathering digital dust.
+
+Recently, an effort was made to make the fork usable. An SDL2 backend was added as an alternative for Allegro and several bugs were patched. During this process, one thing became painfully obvious to the maintainers: adding new features without breaking things is going to be really, really hard.
+
+As an example, we often get requests for new tools. Ideally, LibreSprite would be flexible enough to allow users to add their own tools by making simple scripts. Unfortunately, there is a lot of hardcoding in the existing set of tools. They're even hardcoded to skins as old skins have no way of displaying icons for tools that came later. Our community is fond of custom skins and breaking existing skins every time we want to add a new tool isn't what we want.
+
+Looking at the current state of LibreSprite, we came to the conclusion that getting it to where we are comfortable adding new features would take just as long as simply starting again. This was not at all a decision taken lightly. Throwing away decades of work and doing it again is not going to be easy. So Dotto! was born initially as a prototype branch, where we tested the waters to see if it was really something we wanted to do. Now we know: it is.
+
+### When
+It's opensource, so: it'll be ready when it's ready. As of this writing, Dotto is 3 weeks old. Compared to the decades of work that had already been put into LibreSprite by the original author, there is still a long road to go. On the other hand, progress is really fast. Keep an eye out for updates here and on Discord or Matrix, if you blink you'll miss 7 commits.
+
 ## Funding / Contributing
 
 For the time being, this project is fuelled purely by the power of the **stars**.
