@@ -11,7 +11,7 @@ class Translate : public TextTransform {
 public:
     inject<Config> config;
     String run(const String& input, const ui::Node* node) override {
-        return config->translate(input, node);
+        return input.empty() ? input : config->translate(input, node);
     }
 };
 
