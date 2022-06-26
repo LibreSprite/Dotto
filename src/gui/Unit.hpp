@@ -30,17 +30,16 @@ namespace ui {
 
         constexpr Unit(S32 pixel) {*this = pixel;}
 
-        Unit(const Value& pixel) {
-            if (pixel.has<U32>())
-                *this = static_cast<U32>(pixel);
-            else if (pixel.has<S32>())
-                *this = static_cast<S32>(pixel);
-            else if (pixel.has<F32>())
-                *this = U32(F32(pixel));
-            else if (pixel.has<F64>())
-                *this = U32(F64(pixel));
-            else if (pixel.has<String>())
-                *this = pixel.get<String>();
+        static void addConverters() {
+            Value::addConverter([](F32 pixel) -> Unit {return static_cast<S32>(pixel);});
+            Value::addConverter([](F64 pixel) -> Unit {return static_cast<S32>(pixel);});
+            Value::addConverter([](U32 pixel) -> Unit {return static_cast<S32>(pixel);});
+            Value::addConverter([](S32 pixel) -> Unit {return pixel;});
+            Value::addConverter([](U64 pixel) -> Unit {return static_cast<S32>(pixel);});
+            Value::addConverter([](S64 pixel) -> Unit {return static_cast<S32>(pixel);});
+            Value::addConverter([](const String& pixel) -> Unit {return pixel;});
+            Value::addConverter([](const char* pixel) -> Unit {return pixel;});
+            Value::addConverter([](char* pixel) -> Unit {return pixel;});
         }
 
         constexpr Unit& operator = (S32 pixel) {
@@ -167,7 +166,7 @@ namespace ui {
             return type;
         }
 
-    private:
+    protected:
         F32 value = 1.0f;
         Type type = Type::Percent;
         F32 reference = 0;

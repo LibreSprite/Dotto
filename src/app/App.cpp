@@ -7,6 +7,7 @@
 
 #include <app/App.hpp>
 #include <common/Config.hpp>
+#include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <common/PropertySet.hpp>
@@ -54,6 +55,7 @@ public:
 #else
         log->setLevel(Log::Level::Info); // TODO: Configure level using args
 #endif
+        initValue();
         fs->boot();
         config->boot();
         system->boot();
@@ -76,6 +78,14 @@ public:
         pub(msg::BootComplete{});
         auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - referenceTime);
         logI("Boot time: ", delta.count());
+    }
+
+    void initValue() {
+        Value::addBasicConverters();
+        Value::addConverter([](const String& str) -> Rect {return str;});
+        Value::addConverter([](const String& str) -> FunctionRef<void()> {return str;});
+        ui::Unit::addConverters();
+        Color::addConverters();
     }
 
     bool run() override {

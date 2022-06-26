@@ -7,6 +7,7 @@
 #include <charconv>
 #include <common/types.hpp>
 #include <common/String.hpp>
+#include <common/Value.hpp>
 
 class Color {
 public:
@@ -50,6 +51,16 @@ public:
     }
 
     constexpr Color(U8 r, U8 g, U8 b, U8 a = 255) : r{r}, g{g}, b{b}, a{a} {}
+
+    static void addConverters() {
+        Value::addConverter([](const String& str) -> Color {return str;});
+        Value::addConverter([](F32 pixel) -> Color {return static_cast<U32>(pixel);});
+        Value::addConverter([](F64 pixel) -> Color {return static_cast<U32>(pixel);});
+        Value::addConverter([](U32 pixel) -> Color {return pixel;});
+        Value::addConverter([](U64 pixel) -> Color {return static_cast<U32>(pixel);});
+        Value::addConverter([](S32 pixel) -> Color {return static_cast<U32>(pixel);});
+        Value::addConverter([](S64 pixel) -> Color {return static_cast<U32>(pixel);});
+    }
 
     operator String () const {
         return toString();

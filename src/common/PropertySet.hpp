@@ -49,79 +49,12 @@ public:
 
     template<typename Type>
     static bool assignProperty(Value& from, Type& out) {
-        if (from.has<Type>()) {
-            out = from.get<Type>();
+        if (from.get(out)) {
             return true;
         }
 
-        if constexpr (std::is_same_v<Type, bool>) {
-            if (from.has<String>()) {
-                String str = tolower(from.get<String>());
-                out = str.size() && (str[0] == 't' || str[0] == 'y');
-            } else if (from.has<decltype(1)>()) {
-                out = from.get<decltype(1)>();
-            } else if (from.has<U32>()) {
-                out = from.get<U32>();
-            } else if (from.has<S32>()) {
-                out = from.get<S32>();
-            } else if (from.has<U64>()) {
-                out = from.get<U64>();
-            } else if (from.has<S64>()) {
-                out = from.get<S64>();
-            } else if (from.has<F32>()) {
-                out = from.get<F32>();
-            } else if (from.has<F64>()) {
-                out = from.get<F64>();
-            } else return false;
-        } else if constexpr (std::is_integral_v<Type>) {
-            if (from.has<F32>()) out = from.get<F32>();
-            else if (from.has<decltype(1)>()) out = from.get<decltype(1)>();
-            else if (from.has<S32>()) out = from.get<S32>();
-            else if (from.has<U32>()) out = from.get<U32>();
-            else if (from.has<U64>()) out = from.get<U64>();
-            else if (from.has<S64>()) out = from.get<S64>();
-            else if (from.has<double>()) out = from.get<double>();
-            else if (from.has<String>()) out = std::atol(from.get<String>().c_str());
-            else return false;
-        } else if constexpr (std::is_floating_point_v<Type>) {
-            if (from.has<F32>()) out = from.get<F32>();
-            else if (from.has<decltype(1)>()) out = from.get<decltype(1)>();
-            else if (from.has<S32>()) out = from.get<S32>();
-            else if (from.has<U32>()) out = from.get<U32>();
-            else if (from.has<U64>()) out = from.get<U64>();
-            else if (from.has<S64>()) out = from.get<S64>();
-            else if (from.has<double>()) out = from.get<double>();
-            else if (from.has<String>()) out = std::atof(from.get<String>().c_str());
-            else return false;
-        } else if constexpr (std::is_constructible_v<Type, std::shared_ptr<Value>>) {
-            out = Type{from};
-        } else if constexpr (std::is_assignable_v<Type, std::shared_ptr<Value>>) {
-            out = Type{from};
-        } else if constexpr (std::is_assignable_v<Type, String>) {
-            if (from.has<String>()) out = from.get<String>();
-            else if (from.has<F32>()) out = tostring(from.get<F32>());
-            else if (from.has<decltype(1)>()) out = std::to_string(from.get<decltype(1)>());
-            else if (from.has<S32>()) out = std::to_string(from.get<S32>());
-            else if (from.has<U32>()) out = std::to_string(from.get<U32>());
-            else if (from.has<U64>()) out = std::to_string(from.get<U64>());
-            else if (from.has<S64>()) out = std::to_string(from.get<S64>());
-            else if (from.has<double>()) out = std::to_string(from.get<double>());
-            else if (from.has<bool>()) out = String(from.get<bool>() ? "true" : "false");
-            else return false;
-        } else if constexpr (std::is_constructible_v<Type, String>) {
-            if (!from.has<String>())
-                return false;
-            out = Type{from.get<String>()};
-        } else if constexpr (std::is_assignable_v<Type, Value>) {
-            out = from;
-        } else if constexpr (std::is_constructible_v<Type, Value>) {
-            out = Type{from};
-        } else {
-            return false;
-        }
-
-        from = out;
-        return true;
+        logV("Could not assign ", from.typeName(), " to ", typeid(Type).name());
+        return false;
     }
 
     template<typename Type>
@@ -131,7 +64,7 @@ public:
             it = properties.find(tolower(key));
         if (it == properties.end())
             return false;
-        bool success = assignProperty(*it->second, out);
+        bool success = it->second->get(out);
         if (!success && debug)
             logE("Could not assign ", it->second->typeName(), " to ", typeid(Type).name());
         return success;
@@ -220,7 +153,7 @@ public:
                     +[](void* data, Value& value) {
                         auto prop = static_cast<Property<Type>*>(data);
                         auto oldValue = prop->value;
-                        bool didAssign = PropertySet::assignProperty(value, prop->value);
+                        bool didAssign = value.get(prop->value);
                         bool didChange = !(prop->value == oldValue);
 #ifdef _DEBUG
                         if (Debug || PropertySet::debug) {
@@ -231,7 +164,7 @@ public:
                             else if (!prop->change)
                                 logE("Assign to ", prop->name, ": No trigger");
                             else
-                                logE("Assign to ", prop->name, ": triggered");
+                                logE("Assign to ", prop->name, ": triggered ", value.toString());
                         }
 #endif
                         return (didAssign && prop->change && didChange) ? &prop->change : nullptr;
