@@ -54,8 +54,8 @@ public:
 
     static void addConverters() {
         Value::addConverter([](const String& str) -> Color {return str;});
-        Value::addConverter([](F32 pixel) -> Color {return static_cast<U32>(pixel);});
-        Value::addConverter([](F64 pixel) -> Color {return static_cast<U32>(pixel);});
+        Value::addConverter([](F32 pixel) -> Color {return static_cast<S32>(pixel);});
+        Value::addConverter([](F64 pixel) -> Color {return static_cast<S32>(pixel);});
         Value::addConverter([](U32 pixel) -> Color {return pixel;});
         Value::addConverter([](U64 pixel) -> Color {return static_cast<U32>(pixel);});
         Value::addConverter([](S32 pixel) -> Color {return static_cast<U32>(pixel);});
