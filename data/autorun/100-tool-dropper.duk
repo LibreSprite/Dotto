@@ -11,9 +11,9 @@ function onEvent(name) {
     var y = target.lastY;
 
     var color = target.surface.getPixel(x, y); // get color under cursor
+    color = color | 0xFF000000; // ensure color is solid
 
     if (target.which == 0) { // no button pressed
-        color = color | 0xFF000000; // ensure color is solid
         if (name == "toolend") {
             app.command("paint", "cursor", true); // clear the brush preview
             return;
