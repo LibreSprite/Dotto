@@ -20,7 +20,11 @@ public:
 
     bool boot() override {
         inject<FileSystem> fs;
-        properties = fs->parse("%userdata/settings.ini");
+
+        try {
+            properties = fs->parse("%userdata/settings.ini");
+        }catch(const std::exception& ex){}
+
         if (!properties)
             properties = fs->parse("%appdata/settings.ini");
         if (!properties) {
@@ -55,9 +59,7 @@ public:
                 languageName = fullName;
             }
             first = false;
-            auto add = fs->parse("%appdata/i18n/" + languageName + ".ini");
-            if (add.has<std::shared_ptr<PropertySet>>()) {
-                auto ps = add.get<std::shared_ptr<PropertySet>>();
+            if (std::shared_ptr<PropertySet> ps = fs->parse("%appdata/i18n/" + languageName + ".ini")) {
                 language->append(ps);
                 for (auto& entry : ps->getMap()) {
                     auto lower = tolower(entry.first);

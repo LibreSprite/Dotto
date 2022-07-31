@@ -144,9 +144,13 @@ public:
 
         template<typename ParentType, typename InitType = Type>
         Property(ParentType* parent, const String& name, InitType&& value = InitType{}, void (ParentType::*change)() = nullptr) : name{name}, value(std::forward<InitType>(value)) {
-            if (change) {
+
+            if constexpr (is_shared_ptr<Type>::value)
+                Value::addSharedConverters<Type>();
+
+            if (change)
                 this->change = [=]{(parent->*change)();};
-            }
+
             parent->propertySerializers.push_back(PropertySerializer{
                     this,
                     &this->name,

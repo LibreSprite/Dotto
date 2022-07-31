@@ -90,9 +90,6 @@ public:
 
     template<typename Type, bool exact = false>
     bool get(Type& out) const {
-        if (!value.has_value())
-            return false;
-
         if constexpr (std::is_same_v<Type, Value>) {
             out = *this;
             return true;
@@ -108,6 +105,11 @@ public:
             return false;
         }
 
+        if (!value.has_value()) {
+            out = Type{};
+            return true;
+        }
+
         auto& converters = getConverters();
         auto it = converters.find(key);
         if (it == converters.end())
@@ -119,10 +121,16 @@ public:
 
     template<typename Type>
     operator Type () const {
+        if (!value.has_value())
+            return Type{};
+
         auto key = std::make_pair(std::type_index(value.type()), std::type_index(typeid(Type)));
 
         if (key.first == key.second)
             return std::any_cast<Type>(value);
+
+        if constexpr (is_shared_ptr<Type>::value)
+            Value::addSharedConverters<Type>();
 
         auto& converters = getConverters();
         auto it = converters.find(key);
@@ -212,12 +220,28 @@ public:
     }
 
     template<typename Func, typename This = typename arg_type<Func>::type, typename That = std::result_of_t<Func(This)>>
-    static void addConverter(const Func& func) {
+    static void addConverter(const Func& func, bool overwrite = false) {
         auto& converters = getConverters();
         auto key = std::make_pair(std::type_index(typeid(This)), std::type_index(typeid(That)));
         converters[key] = [func](const std::any& value, void* target) {
             *reinterpret_cast<That*>(target) = func(std::any_cast<This>(value));
         };
+    }
+
+    template<typename Type>
+    static void addSharedConverters() {
+        auto& converters = getConverters();
+        auto key = std::make_pair(std::type_index(typeid(nullptr_t)), std::type_index(typeid(Type)));
+        if (converters.find(key) != converters.end()) {
+            return;
+        }
+        addConverter([](U32){return Type{};}, true);
+        addConverter([](U64){return Type{};}, true);
+        addConverter([](S32){return Type{};}, true);
+        addConverter([](S64){return Type{};}, true);
+        addConverter([](F32){return Type{};}, true);
+        addConverter([](F64){return Type{};}, true);
+        addConverter([](nullptr_t){return Type{};}, true);
     }
 
     template<typename Type>
