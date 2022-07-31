@@ -161,7 +161,7 @@ Run the Mingw32 shell (C:/msys64/mingw32.exe).
 ```sh
 cd Dotto
 cp /mingw32/bin/snapshot_blob.bin ./
-make DEBUG=false
+make DEBUG=true
 ./dotto.exe
 ```
 
@@ -170,14 +170,17 @@ make DEBUG=false
 Initial setup:
 
 ```sh
-brew install sdl2 sdl2_image lcms2 lua freetype v8 openssl
+brew install sdl2 sdl2_image lcms2 lua freetype v8 openssl pkg-config
 ```
 
 Compiling:
 
 ```sh
-PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig" make DEBUG=false
-chmod +x dotto
+make DEBUG=true -j 4
+```
+
+Running:
+```sh
 ./dotto
 ```
 
