@@ -1,3 +1,7 @@
+LN_FLAGS :=
+CPP_FLAGS :=
+C_FLAGS :=
+
 ifeq ($(OS),Windows_NT)
     CC = /mingw32/bin/i686-w64-mingw32-gcc
     CXX = /mingw32/bin/i686-w64-mingw32-g++
@@ -73,7 +77,9 @@ else
     endif
 
     ifeq ($(UNAME_S),Darwin)
-	PKGCONFIG = /usr/local/bin/pkg-config
+	PKGCONFIG := PKG_CONFIG_PATH=$(shell for p in /opt/homebrew/opt/openssl/lib/pkgconfig /usr/local/opt/openssl/lib/pkgconfig ; do [ -d $$p ] && echo $$p && break ; done)
+	PKGCONFIG += $(shell which pkg-config || echo "/usr/local/bin/pkg-config")
+
 	CPP_FILES += $(shell $(FIND) '*.mm')
         CPP_FLAGS += -DV8_COMPRESS_POINTERS # just assume OSX is 64-bit
 	CPP_FLAGS += -DGL_SILENCE_DEPRECATION
@@ -102,6 +108,10 @@ CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libssl)
 LN_FLAGS += $(shell $(PKGCONFIG) --libs libssl)
 CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libcrypto)
 LN_FLAGS += $(shell $(PKGCONFIG) --libs libcrypto)
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags lcms2)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs lcms2)
+CPP_FLAGS += $(shell $(PKGCONFIG) --cflags libpng)
+LN_FLAGS += $(shell $(PKGCONFIG) --libs libpng)
 
 ifeq ($(BACKEND),SDL1)
     CPP_FLAGS += -DUSE_SDL1
@@ -126,7 +136,7 @@ endif
 CPP_FILES += $(shell find src -type f -name '*.cpp')
 CPP_FILES += $(shell find dependencies -type f -name '*.cpp')
 
-C_FLAGS := $(CPP_FLAGS)
+C_FLAGS += $(CPP_FLAGS)
 C_FILES += $(shell find src -type f -name '*.c')
 C_FILES += $(shell find dependencies -type f -name '*.c')
 
@@ -134,7 +144,7 @@ LN_FLAGS += $(SO_FILES)
 
 #BEGIN LUA SUPPORT
 CPP_FLAGS += -DSCRIPT_ENGINE_LUA
-LUAPKG := $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
+LUAPKG += $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
 CPP_FLAGS += $(shell $(PKGCONFIG) --cflags $(LUAPKG))
 LN_FLAGS += $(shell $(PKGCONFIG) --libs $(LUAPKG))
 #END
@@ -144,7 +154,6 @@ ODIR = build
 CPP_FLAGS += --std=c++17
 CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
 
-# FLAGS += -m32 # uncomment for 32-bit build
 ifeq ($(DEBUG),true)
 FLAGS += -Og -g -D_DEBUG # debug build
 POSTBUILD =
