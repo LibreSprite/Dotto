@@ -223,9 +223,19 @@ static void loadNodeProperties(ui::Node* node, XMLElement* element, const String
 
     node->setTag(widgetName);
     node->setTag(element->tag);
-    auto it = element->attributes.find("id");
-    if (it != element->attributes.end()) {
-        node->setTag("@" + it->second);
+
+    {
+        auto it = element->attributes.find("id");
+        if (it != element->attributes.end()) {
+            node->setTag("@" + it->second);
+        }
+    }
+
+    {
+        auto it = element->attributes.find("class");
+        if (it != element->attributes.end()) {
+            node->setTag("*" + it->second);
+        }
     }
 
     for (auto& prop : element->attributes) {
