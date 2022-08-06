@@ -231,7 +231,7 @@ public:
     template<typename Type>
     static void addSharedConverters() {
         auto& converters = getConverters();
-        auto key = std::make_pair(std::type_index(typeid(nullptr_t)), std::type_index(typeid(Type)));
+        auto key = std::make_pair(std::type_index(typeid(std::nullptr_t)), std::type_index(typeid(Type)));
         if (converters.find(key) != converters.end()) {
             return;
         }
@@ -241,7 +241,7 @@ public:
         addConverter([](S64){return Type{};}, true);
         addConverter([](F32){return Type{};}, true);
         addConverter([](F64){return Type{};}, true);
-        addConverter([](nullptr_t){return Type{};}, true);
+        addConverter([](std::nullptr_t){return Type{};}, true);
     }
 
     template<typename Type>
