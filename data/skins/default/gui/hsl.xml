@@ -26,7 +26,7 @@ const events = {
         read();
         ignore = true;
         if (color != app.activeColor)
-            app.command("activatecolor", "color", color >>> 0);
+            app.command("activatecolor", "color", color);
         ignore = false;
     }
 };

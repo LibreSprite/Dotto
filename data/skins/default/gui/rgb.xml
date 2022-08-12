@@ -27,7 +27,7 @@ const events = {
             return;
         read();
         if (color != app.activeColor)
-            app.command("activatecolor", "color", color >>> 0);
+            app.command("activatecolor", "color", color);
     }
 };
 
