@@ -50,11 +50,20 @@ public:
         context = SDL_GL_CreateContext(window);
         String version = "300 es";
 #else
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        inject<Config> config;
+        auto oglMajor = config->properties->get<int>("OpenGLMajor");
+        auto oglMinor = config->properties->get<bool>("OpenGLMinor");
+        auto oglProfile = config->properties->get<std::string>("OpenGLProfile");
+        if (oglMajor == 0) {
+            oglMajor = 3;
+            oglMinor = 3;
+            oglProfile = "core";
+        }
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, oglMajor);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, oglMinor);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, oglProfile == "es" ? SDL_GL_CONTEXT_PROFILE_ES : SDL_GL_CONTEXT_PROFILE_CORE);
         context = SDL_GL_CreateContext(window);
-        String version = "330 core";
+        String version = std::to_string(oglMajor) + std::to_string(oglMinor) + "0 " + oglProfile;
         if (!context) {
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -63,8 +72,10 @@ public:
             version = "310 es";
         }
 #endif
-        if (!context)
+        if (!context) {
+            logE("Could not create OpenGL context");
             return;
+        }
 
         auto profilePath = inject<Config>{}->properties->get<String>("icc-profile");
         if (!profilePath.empty()) {
