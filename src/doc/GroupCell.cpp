@@ -55,6 +55,12 @@ public:
     }
 
     void resize(U32 count) override {
+        if (count < data.size()) {
+            for (std::size_t i = count, max = data.size(); i < max; ++i) {
+                if (data[i] && data[i]->cell)
+                    data[i]->cell->setParent(nullptr);
+            }
+        }
         data.resize(count);
     }
 
@@ -63,16 +69,33 @@ public:
     }
 
     std::shared_ptr<Cell> getCell(U32 layer) const override {
-        return data.size() > layer ? data[layer]->cell : nullptr;
+        return data.size() > layer && data[layer] ? data[layer]->cell : nullptr;
     }
 
     void setCell(U32 layer, std::shared_ptr<Cell> cell) override {
-        if (!cell && layer >= layerCount()) {
-            return;
+        if (!cell) {
+            if (layer >= layerCount())
+                return;
+
+            if (data[layer] && data[layer]->cell)
+                data[layer]->cell->setParent(nullptr);
+
+            data[layer].reset();
+        } else {
+            if (layer >= layerCount())
+                resize(layer + 1);
+
+            if (data[layer] && data[layer]->cell)
+                data[layer]->cell->setParent(nullptr);
+
+            data[layer] = cell ? std::make_shared<ChildCell>(cell) : nullptr;
+
+            if (cell)
+                cell->setParent(this);
         }
-        if (layer >= layerCount())
-            resize(layer + 1);
-        data[layer] = std::make_shared<ChildCell>(cell);
+
+        previousResult.reset();
+        pub(msg::ModifyGroup{});
     }
 
     void on(msg::ModifyCell& event) {

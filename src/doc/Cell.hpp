@@ -10,6 +10,7 @@
 #include <doc/Selection.hpp>
 
 class Document;
+class Timeline;
 
 class Cell  : public Injectable<Cell>, public Serializable, public std::enable_shared_from_this<Cell> {
 protected:
@@ -19,9 +20,13 @@ protected:
     std::shared_ptr<Surface> composite = std::make_shared<Surface>();
     std::shared_ptr<Selection> mask;
     F32 alpha = 1.0f;
+    Cell* _parent = nullptr;
 
     void modify(bool silent);
 public:
+    virtual void setParent(Cell* parent) {_parent = parent;}
+    Cell* parent() const {return _parent;}
+
     virtual String getType() const = 0;
     const String& getGUID() {return GUID;}
     virtual Surface* getComposite() {return composite.get();}

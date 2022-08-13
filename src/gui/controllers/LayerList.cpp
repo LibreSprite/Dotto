@@ -15,7 +15,10 @@
 #include <filters/Filter.hpp>
 
 class LayerList : public ui::Controller {
-    PubSub<msg::ActivateDocument, msg::ActivateLayer, msg::ActivateFrame> pub{this};
+    PubSub<msg::ActivateDocument,
+           msg::ActivateLayer,
+           msg::ActivateFrame,
+           msg::ModifyGroup> pub{this};
     Vector<std::shared_ptr<ui::Node>> nodePool;
 
 public:
@@ -23,6 +26,7 @@ public:
     void on(msg::ActivateDocument&) {update();}
     void on(msg::ActivateFrame&) {update();}
     void on(msg::ActivateLayer&) {update();}
+    void on(msg::ModifyGroup&) {update();}
 
     void update() {
         inject<ui::Node> editor{InjectSilent::Yes, "activeeditor"};

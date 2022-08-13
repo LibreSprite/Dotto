@@ -192,6 +192,8 @@ namespace msg {
         ModifyCell(std::shared_ptr<Cell> cell) : cell{cell} {}
     };
 
+    struct ModifyGroup : public Message {};
+
     struct PreModifySelection : public Message {
         Selection* selection;
         PreModifySelection(Selection* selection) : selection{selection} {}
