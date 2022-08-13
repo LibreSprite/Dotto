@@ -29,7 +29,7 @@ public:
     virtual void setParent(Cell* parent) {_parent = parent;}
     Cell* parent() const {return _parent;}
 
-    virtual void setDocument(Document* document) {_document = document;}
+    virtual void setDocument(Document* document);
     Document* document() const {return _document;}
 
     virtual String getType() const = 0;

@@ -11,6 +11,7 @@
 class Timeline;
 class Command;
 class Document;
+class Cell;
 
 class HistoryLock {
     std::shared_ptr<Document> doc;
@@ -21,6 +22,11 @@ public:
 };
 
 class Document : public Injectable<Document>, public Serializable, public std::enable_shared_from_this<Document> {
+protected:
+    friend class Cell;
+    virtual void addCell(Cell* cell) = 0;
+    virtual void removeCell(Cell* cell) = 0;
+
 public:
     virtual bool load(const Value& resource) = 0;
     virtual U32 width() = 0;

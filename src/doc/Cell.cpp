@@ -5,6 +5,17 @@
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <doc/Cell.hpp>
+#include <doc/Document.hpp>
+
+void Cell::setDocument(Document* document) {
+    if (_document)
+        _document->removeCell(this);
+
+    _document = document;
+
+    if (document)
+        _document->addCell(this);
+}
 
 void Cell::modify(bool silent) {
     if (!silent) {

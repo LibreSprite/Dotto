@@ -35,9 +35,43 @@ class DocumentImpl : public Document {
     U32 historyCursor = 0;
     U32 lockHistory = 0;
 
+    Vector<Cell*> cells;
+
 public:
     ~DocumentImpl() {
         pub(msg::CloseDocument{this});
+    }
+
+    void addCell(Cell* cell) override {
+#ifdef _DEBUG
+        for (auto prev : cells) {
+            if (prev == cell) {
+                logE("Cell added twice");
+                return;
+            }
+        }
+#endif
+        if (!cell) {
+            logE("Adding null cell");
+            return;
+        }
+
+        cells.push_back(cell);
+        logV("Added cell");
+    }
+
+    void removeCell(Cell* cell) override {
+        if (!cell) {
+            logE("Removing null cell");
+            return;
+        }
+        auto it = std::find(cells.begin(), cells.end(), cell);
+        if (it != cells.end()) {
+            cells.erase(it);
+            logV("Removed cell");
+        } else {
+            logE("Removing unregistered cell");
+        }
     }
 
     String getGUID() {
