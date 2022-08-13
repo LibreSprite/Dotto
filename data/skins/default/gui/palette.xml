@@ -28,7 +28,10 @@ const handlers = {
     },
 
     activatedocument : function() {
-        const pal = app.activeDocument.palette;
+        const doc = app.activeDocument;
+        if (!doc)
+            return;
+        const pal = doc.palette;
         if (!pal) {
             console.log("No palette in document");
             sample.set("visible", "false");

@@ -15,21 +15,22 @@
 #include <filters/Filter.hpp>
 
 class LayerList : public ui::Controller {
-    PubSub<msg::ActivateEditor, msg::ActivateLayer, msg::ActivateFrame> pub{this};
+    PubSub<msg::ActivateDocument, msg::ActivateLayer, msg::ActivateFrame> pub{this};
     Vector<std::shared_ptr<ui::Node>> nodePool;
 
 public:
 
-    void on(msg::ActivateEditor&) {update();}
+    void on(msg::ActivateDocument&) {update();}
     void on(msg::ActivateFrame&) {update();}
     void on(msg::ActivateLayer&) {update();}
 
     void update() {
-        inject<ui::Node> editor{"activeeditor"};
+        inject<ui::Node> editor{InjectSilent::Yes, "activeeditor"};
         if (!editor) {
             logI("No editor");
             return;
         }
+
         auto& ps = editor->getPropertySet();
         auto frame = ps.get<S32>("frame");
         auto currentLayer = ps.get<S32>("layer");
