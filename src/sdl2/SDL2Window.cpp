@@ -52,7 +52,7 @@ public:
 #else
         inject<Config> config;
         auto oglMajor = config->properties->get<int>("OpenGLMajor");
-        auto oglMinor = config->properties->get<bool>("OpenGLMinor");
+        auto oglMinor = config->properties->get<int>("OpenGLMinor");
         auto oglProfile = config->properties->get<std::string>("OpenGLProfile");
         if (oglMajor == 0) {
             oglMajor = 3;
@@ -64,12 +64,14 @@ public:
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, oglProfile == "es" ? SDL_GL_CONTEXT_PROFILE_ES : SDL_GL_CONTEXT_PROFILE_CORE);
         context = SDL_GL_CreateContext(window);
         String version = std::to_string(oglMajor) + std::to_string(oglMinor) + "0 " + oglProfile;
+        logV("Creating OGL context: ", version, " ", context ? "Success" : "Failed");
         if (!context) {
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
             context = SDL_GL_CreateContext(window);
             version = "310 es";
+            logV("Creating OGL context: ", version, " ", context ? "Success" : "Failed");
         }
 #endif
         if (!context) {
