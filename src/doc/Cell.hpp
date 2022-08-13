@@ -21,11 +21,16 @@ protected:
     std::shared_ptr<Selection> mask;
     F32 alpha = 1.0f;
     Cell* _parent = nullptr;
+    Document* _document = nullptr;
 
     void modify(bool silent);
+
 public:
     virtual void setParent(Cell* parent) {_parent = parent;}
     Cell* parent() const {return _parent;}
+
+    virtual void setDocument(Document* document) {_document = document;}
+    Document* document() const {return _document;}
 
     virtual String getType() const = 0;
     const String& getGUID() {return GUID;}

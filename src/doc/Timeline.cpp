@@ -33,8 +33,10 @@ public:
         logI("Set frame count: ", count);
         data.resize(count);
         for (auto& cell : data) {
-            if (!cell)
+            if (!cell) {
                 cell = std::static_pointer_cast<GroupCell>(inject<Cell>{"group"}.shared());
+                cell->setDocument(doc);
+            }
         }
     }
 

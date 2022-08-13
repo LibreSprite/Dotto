@@ -90,8 +90,10 @@ public:
 
             data[layer] = cell ? std::make_shared<ChildCell>(cell) : nullptr;
 
-            if (cell)
+            if (cell) {
                 cell->setParent(this);
+                cell->setDocument(document());
+            }
         }
 
         previousResult.reset();
