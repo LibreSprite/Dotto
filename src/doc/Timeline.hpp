@@ -8,6 +8,7 @@
 #include <common/PropertySet.hpp>
 
 class Cell;
+class Document;
 class DocumentImpl;
 class Selection;
 
@@ -15,7 +16,10 @@ class Timeline : public Injectable<Timeline>, public Serializable, public std::e
     friend class DocumentImpl;
     String GUID;
 
+    virtual void setDocument(Document*) = 0;
+
 public:
+    virtual Document* document() const = 0;
     virtual U32 frameCount() const = 0;
     virtual U32 layerCount() const = 0;
     virtual U32 frame() const = 0;

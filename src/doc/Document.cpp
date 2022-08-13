@@ -142,6 +142,7 @@ public:
     std::shared_ptr<Timeline> createTimeline() override {
         Provides doc{this};
         auto timeline = inject<Timeline>{"new"}.shared();
+        timeline->setDocument(this);
         timeline->GUID = getGUID();
         guidToTimeline[timeline->GUID] = timeline;
         currentTimelineName = timeline->GUID;

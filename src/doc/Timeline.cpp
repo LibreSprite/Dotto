@@ -8,8 +8,17 @@
 
 class TimelineImpl : public Timeline {
 public:
+    Document* doc = nullptr;
     Vector<std::shared_ptr<GroupCell>> data;
     U32 _frame = 0, _layer = 0;
+
+    void setDocument(Document* document) override {
+        doc = document;
+    }
+
+    Document* document() const override {
+        return doc;
+    }
 
     U32 frameCount() const override {
         return data.size();
