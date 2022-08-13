@@ -249,7 +249,7 @@ public:
         return pixels;
     }
 
-    void write(Surface* surface, Vector<U32>& pixels) override {
+    void write(Surface* surface, const Vector<U32>& pixels) override {
         S32 minY = std::max<S32>(bounds.y, 0);
         S32 maxY = std::min<S32>(bounds.bottom(), surface->height());
         S32 minX = std::max<S32>(bounds.x, 0);
