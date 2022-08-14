@@ -11,13 +11,12 @@
 #include <doc/BitmapCell.hpp>
 #include <doc/Document.hpp>
 #include <doc/Selection.hpp>
+#include <doc/GroupCell.hpp>
 #include <tools/Tool.hpp>
 
 class Move : public  Tool {
 public:
     PubSub<> pub{this};
-    inject<Layer> group{"group"};
-
     std::shared_ptr<Surface> lifted;
 
     Preview preview {
@@ -58,17 +57,34 @@ public:
         if (!which)
             return;
         inject<Cell> cell{"activecell"};
-        endMove(cell->document());
         if (auto bitmapCell = dynamic_cast<BitmapCell*>(cell.get())) {
             beginBitmapMove(bitmapCell);
         }
     }
 
-    void endMove(Document* doc) {
+    void applyBitmapMove(GroupCell* group) {
 
     }
 
+    std::shared_ptr<GroupCell> findBitmapMoveGroup(Document* doc) {
+        for (auto cell : doc->cells()) {
+            auto parent = group->getParent();
+            if (!parent || cell->getName() != ".MoveToolTmp")
+                continue;
+            if (auto group = dynamic_cast<GroupCell*>(cell)) {
+                applyBitmapMove(group);
+                return std::static_pointer_cast<GroupCell>(group->shared_from_this());
+            }
+        }
+
+        auto group = inject<Cell>{"group"}.shared<GroupCell>();
+        group->setName(".MoveToolTmp");
+        return group;
+    }
+
     void beginBitmapMove(BitmapCell* cell) {
+        auto tmpGroup = findBitmapMoveGroup(cell->document());
+
         // auto selection = cell->getSelection();
         // if (!selection) {
         //     auto lock = doc->getHistoryLock();
@@ -91,4 +107,4 @@ public:
 };
 
 static Tool::Shared<Move> move{"move"};
-*/
+/* */
