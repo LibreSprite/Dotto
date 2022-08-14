@@ -40,6 +40,7 @@ public:
     virtual String path() = 0;
     virtual void setPath(const String&) = 0;
     virtual std::shared_ptr<Palette> palette() = 0;
+    virtual const Vector<Cell*> cells() const = 0;
 
     virtual HistoryLock getHistoryLock() = 0;
     virtual void writeHistory(std::shared_ptr<Command> command) = 0;

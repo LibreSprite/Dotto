@@ -77,8 +77,10 @@ public:
             if (layer >= layerCount())
                 return;
 
-            if (data[layer] && data[layer]->cell)
+            if (data[layer] && data[layer]->cell) {
                 data[layer]->cell->setParent(nullptr);
+                data[layer]->cell->setDocument(nullptr);
+            }
 
             data[layer].reset();
         } else {

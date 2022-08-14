@@ -30,6 +30,7 @@ class Editor : public ui::Controller {
            msg::PollActiveEditor,
            msg::Tick> pub{this};
     std::optional<Document::Provides> docProvides;
+    std::optional<Cell::Provides> cellProvides;
     std::optional<ui::Node::Provides> editorProvides;
     Property<String> filePath{this, "file", "", &Editor::openFile};
     Property<std::shared_ptr<PropertySet>> newFileProperties{this, "newfile", nullptr, &Editor::newFile};
@@ -84,6 +85,7 @@ public:
             layerEditor->setCell(cell);
 
         activeCell = cell;
+        cellProvides.emplace(activeCell.get(), "activecell");
 
         if (frameChanged) {
             pub(msg::ActivateFrame{doc, frame});
@@ -296,6 +298,7 @@ public:
             activeDocument = doc->get();
             docProvides.emplace(doc->get(), "activedocument");
             pub(msg::ActivateDocument{doc});
+            cellProvides.emplace(activeCell.get(), "activecell");
             pub(msg::ActivateCell{activeCell});
         }
     }
