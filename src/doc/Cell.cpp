@@ -23,6 +23,13 @@ void Cell::modify(bool silent) {
     }
 }
 
+void Cell::setName(const String& newName, bool silent) {
+    if (name == newName)
+        return;
+    name = newName;
+    modify(silent);
+}
+
 void Cell::setAlpha(F32 v, bool silent) {
     auto old = alpha;
     alpha = std::clamp(v, 0.0f, 1.0f);
