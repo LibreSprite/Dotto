@@ -53,9 +53,8 @@ public:
         clearCaret();
         cursorPosition = text->size();
         auto surfaceValue = span->get("surface");
-        if (surfaceValue && surfaceValue->has<std::shared_ptr<Surface>>()) {
-            auto surface = surfaceValue->get<std::shared_ptr<Surface>>();
-            drawCaret(surface, surface->width() - 1);
+        if (auto surface = surfaceValue ? surfaceValue->get<std::shared_ptr<Surface>>() : nullptr) {
+            drawCaret(surface, int(surface->width()) - 1);
         }
     }
 
@@ -91,9 +90,7 @@ public:
         if (surface) {
             if (span)
                 color = span->getPropertySet().get<Color>("color");
-            for (S32 y = 0; y < surface->height(); ++y) {
-                surface->setPixel(cursorX, y, color);
-            }
+            surface->setVLine(cursorX, 0, surface->height(), color.toU32());
         }
     }
 
