@@ -37,6 +37,10 @@ public:
         localRect.width = globalRect.width;
         localRect.height = globalRect.height;
 
+        if (*x == 0 && *y == 0) {
+            *x = *y = SDL_WINDOWPOS_CENTERED;
+        }
+
         window = SDL_CreateWindow(title->c_str(), *x, *y, globalRect.width, globalRect.height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if (!window)
             return;
