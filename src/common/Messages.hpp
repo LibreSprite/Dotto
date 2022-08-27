@@ -6,6 +6,16 @@
 
 #include <unordered_set>
 
+#if defined(__WINDOWS__)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX   /* don't define min() and max(). */
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 #include <common/Value.hpp>
 #include <common/Color.hpp>
 
@@ -20,6 +30,15 @@ class PropertySet;
 class Selection;
 
 namespace msg {
+
+    #ifdef __WINDOWS__
+    struct WinEvent {
+        HWND hwnd;                  /**< The window for the message */
+        UINT msg;                   /**< The type of message */
+        WPARAM wParam;              /**< WORD message parameter */
+        LPARAM lParam;              /**< LONG message parameter */
+    };
+    #endif
 
     class Message {
     public:

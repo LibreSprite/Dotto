@@ -87,7 +87,13 @@ public:
 
 #if defined(SDL_VIDEO_DRIVER_WINDOWS)
                 if (event.syswm.msg->subsystem == SDL_SYSWM_WINDOWS) {
-                    pub(event.syswm.msg->msg.win);
+                    auto& win = event.syswm.msg->msg.win;
+                    pub(msg::WinEvent{
+                            .hwnd = win.hwnd,
+                            .msg = win.msg,
+                            .wParam = win.wParam,
+                            .lParam = win.lParam
+                        });
                 }
 #endif
 
