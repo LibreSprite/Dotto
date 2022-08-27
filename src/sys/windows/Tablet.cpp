@@ -18,10 +18,8 @@ public:
     EasyTabInfo* easyTab = nullptr;
 
     void init() {
-        if (EasyTab_Load(window) == EASYTAB_OK) {
+        if (EasyTab_Load(window) == EASYTAB_OK)
             easyTab = EasyTab;
-            logI("Max pressure: ", EasyTab->MaxPressure, " cxs:", GetSystemMetrics(SM_CXSCREEN), " cxy:", GetSystemMetrics(SM_CYSCREEN));
-        }
     }
 
     void on(msg::WinEvent& event) {
