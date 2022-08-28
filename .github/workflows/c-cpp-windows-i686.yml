@@ -23,6 +23,7 @@ jobs:
           mingw-w64-i686-gcc
           mingw-w64-i686-openssl
           mingw-w64-i686-v8 
+          mingw-w64-i686-icu
           mingw-w64-i686-SDL2 
           mingw-w64-i686-SDL2_image 
           mingw-w64-i686-lcms2 
@@ -58,9 +59,9 @@ jobs:
         cp /mingw32/bin/libcrypto-1_1.dll ./
         cp /mingw32/bin/libssl-1_1.dll ./
         cp /mingw32/bin/libssp-0.dll ./
-        # cp /mingw32/bin/libicuin69.dll ./
-        cp /mingw32/bin/libicuuc69.dll ./
-        cp /mingw32/bin/libicudt69.dll ./
+        cp /mingw32/bin/libicuin*.dll ./
+        cp /mingw32/bin/libicuuc*.dll ./
+        cp /mingw32/bin/libicudt*.dll ./
         cp /mingw32/bin/libpcre-1.dll ./
         cp /mingw32/bin/libintl-8.dll ./
         cp /mingw32/bin/libiconv-2.dll ./

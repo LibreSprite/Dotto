@@ -4,3 +4,4 @@ build
 dotto
 dotto.exe
 snapshot_blob.bin
+*.dll
