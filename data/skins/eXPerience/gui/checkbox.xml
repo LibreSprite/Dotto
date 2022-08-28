@@ -1,0 +1,14 @@
+<row forward="chk-label.text=label, chk-value.value=value" result="chk-value.value" id="row">
+  <span id="chk-label" width="50%"/>
+  <node width="50%">
+    <image controller="tabtarget, checkbox"
+           id="chk-value"
+           absolute="true"
+           x="center"
+           y="center"
+           width="13px"
+           height="13px"
+           true-src="%skin/check-on.png"
+           false-src="%skin/frame.png"/>
+  </node>
+</row>

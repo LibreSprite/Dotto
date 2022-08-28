@@ -1,0 +1,9 @@
+<image controller="tabtarget, button"
+       forward="labelspan.text=label"
+       multiply="#00000000"
+       up-multiply="#00000000"
+       down-multiply="#FF0f61cc"
+       hover-multiply="#800f61cc"
+       height="24px">
+  <span id="labelspan" color="rgb{0,0,0}" x="8px" y="0px" width="100%" absolute="true"/>
+</image>

@@ -1,0 +1,4 @@
+<row forward="num-label.text=label, num-value.value=value, num-value.options=options" result="num-value.value" id="row">
+  <span id="num-label"/>
+  <textbutton controller="cycle" forward="labelspan.text=value" id="num-value"/>
+</row>

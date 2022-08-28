@@ -1,0 +1,4 @@
+<image id="titlebar" flow="row" width="100%">
+  <span id="title" width="100%"/>
+  <image id="close" src="%skin/close.png"/>
+</image>

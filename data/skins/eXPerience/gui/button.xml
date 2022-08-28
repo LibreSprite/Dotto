@@ -1,0 +1,9 @@
+<image
+    controller="button, tabtarget"
+    forward="iconimage.src=icon, iconimage.multiply=icon-multiply"
+    up-src="%skin/button-up.png"
+    down-src="%skin/button-down.png"
+    slice="4 4"
+    padding="4 4 4 4">
+  <image id="iconimage"/>
+</image>

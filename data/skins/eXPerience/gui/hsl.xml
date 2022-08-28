@@ -1,0 +1,103 @@
+<node controller="script" type="js" parent="colorpanel" flow="column"><![CDATA[
+var H, S, L, color = app.activeColor, ignore = true;
+
+const events = {
+    init : function() {
+        app.addEventListener("activatecolor");
+        H = app.target.findChildById("H");
+        S = app.target.findChildById("S");
+        L = app.target.findChildById("L");
+        H.addEventListener("change");
+        S.addEventListener("change");
+        L.addEventListener("change");
+        write();
+    },
+
+    activatecolor : function() {
+        if (ignore)
+            return;
+        color = app.activeColor;
+        write();
+    },
+
+    change : function() {
+        if (ignore)
+            return;
+        read();
+        ignore = true;
+        if (color != app.activeColor)
+            app.command("activatecolor", "color", color >>> 0);
+        ignore = false;
+    }
+};
+
+function write() {
+    ignore = true;
+    const R = (color >> 0) & 0xFF;
+    const G = (color >> 8) & 0xFF;
+    const B = (color >> 16) & 0xFF;
+    const HSL = hsl(R, G, B);
+    H.set("value", (HSL[0]+0.5)|0);
+    S.set("value", (HSL[1]+0.5)|0);
+    L.set("value", (HSL[2]+0.5)|0);
+    ignore = false;
+}
+
+function read() {
+    const RGB = rgb(H.get("value")|0,
+                    S.get("value")|0,
+                    L.get("value")|0);
+    color = color & (0xFF << 24);
+    color |= (RGB[0]+0.5) << 0;
+    color |= (RGB[1]+0.5) << 8;
+    color |= (RGB[2]+0.5) << 16;
+}
+
+function hsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    var l = Math.max(r, g, b);
+    var s = l - Math.min(r, g, b);
+    var h = 0;
+    if (s) {
+        if (l === r) {
+            h = (g - b) / s;
+        } else if (l === g) {
+            h = 2 + (b - r) / s;
+        } else {
+            h = 4 + (r - g) / s
+        }
+    }
+
+    return [
+        60 * h < 0 ? 60 * h + 360 : 60 * h,
+        100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
+        (100 * (2 * l - s)) / 2,
+    ];
+}
+
+function rgb(h, s, l) {
+    s /= 100;
+    l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    function k(n) {
+        return (n + h / 30) % 12;
+    }
+    function f(n) {
+        return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    }
+    return [255 * f(0), 255 * f(8), 255 * f(4)];
+};
+
+function onEvent(event) {
+    if (event in events) {
+        events[event]();
+    }
+}
+]]>
+  <span text="HSL"/>
+  <range id="H" min="0" max="360" resolution="1" format="Hue: $1°"/>
+  <range id="S" min="0" max="100" resolution="1" format="Sat: $1%"/>
+  <range id="L" min="0" max="100" resolution="1" format="Lum: $1%"/>
+</node>

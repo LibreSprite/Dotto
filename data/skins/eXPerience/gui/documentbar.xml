@@ -1,0 +1,8 @@
+<node width="100%" flow="row" controller="script"><![CDATA[
+var node = app.target;
+app.addEventListener("opendocument");
+function onEvent(event) {
+  if (event == "opendocument")
+    node.createChild("docmenuitem");
+}
+]]></node>

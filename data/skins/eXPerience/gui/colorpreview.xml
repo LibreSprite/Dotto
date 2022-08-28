@@ -1,0 +1,1 @@
+<image parent="colorpanel" controller="inputcolor" forward="multiply=value" alwaysupdate="true"/>

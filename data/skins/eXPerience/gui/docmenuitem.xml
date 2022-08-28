@@ -1,0 +1,3 @@
+<image controller="tabtarget, button, docmenuitem" forward="labelspan.text=label" maxsize="32">
+  <span id="labelspan" inputEnabled="false"/>
+</image>

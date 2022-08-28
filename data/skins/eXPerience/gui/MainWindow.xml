@@ -1,0 +1,126 @@
+<window
+    id="mainwindow"
+    title="Dotto"
+    controller="script, shortcut"
+    steal-focus="true"
+    script="%skin/ui.js"
+    flow="column">
+  <background/>
+
+  <node id="editorcontainer" absolute="true" x="0px" y="0px" width="100%" height="100%"/>
+
+  <image src="%skin/bar.png" slice="1 1" absolute="true" x="0" y="100%-100%" width="100%" height="35px" flow="row">
+    <alttextbutton id="startbutton" click="toggleui id=filemenu" label="File" width="100px"/>
+    <documentbar/>
+    <image controller="tabtarget, button"
+           id="toolconfigbutton"
+           visible="false"
+           margin="4 4 4 4"
+           width="24px"
+           click="ToggleUI id=toolconfigmenu"/>
+    <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
+    <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
+    <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
+    <span controller="inputcolor"
+          forward="text=value"
+          width="100px"
+          margin="4 8 4 4"
+          text-transform="replace"
+          match="rgba\{([0-9]+),([0-9]+),([0-9]+),([0-9]+)\}"
+          replacement="$1:$2:$3:$4"
+          alwaysupdate="true"/>
+  </image>
+
+  <image
+      id="layersidebar"
+      controller="scrollable"
+      class="sidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      padding="5 5 5 5"
+      visible="false"
+      overflow-hidden="true">
+    <layercontrols/>
+    <node controller="layerlist" width="200px"/>
+  </image>
+
+  <image
+      id="filtersidebar"
+      controller="scrollable"
+      class="sidebar"
+      src="%skin/bar.png"
+      slice="2 8"
+      width="200px"
+      height="100%-35px"
+      absolute="true"
+      x="100%-100%"
+      y="100%-100%"
+      margin="0 0 0 35"
+      visible="false"
+      overflow-hidden="true">
+    <node controller="filterlist" width="200px"/>
+  </image>
+
+  <image id="colorsidebar"
+        visible="false"
+        class="sidebar"
+        controller="scrollable"
+        src="%skin/bar.png"
+        slice="2 8"
+        width="200px"
+        height="100%-35px"
+        absolute="true"
+        x="100%-100%"
+        y="100%-100%"
+        margin="0 0 0 35"
+        overflow-hidden="true"
+        >
+    <node id="colorpanel"/>
+  </image>
+
+  <popup controller="toolbox" container="inside" width="32px" x="0px" y="50%-50%" close="false" extra-height="35"/>
+
+  <image src="%skin/frame.png"
+         class="sidebar"
+         slice="2 2"
+         controller="metamenu"
+         id="toolconfigmenu"
+         absolute="true"
+         width="100px"
+         visible="false"
+         x="100%-100%"
+         y="100%-100%"
+         margin="0 0 0 36"
+         padding="5 5 5 5"/>
+
+  <node id="filemenu" x="0" y="0" width="100%" height="100%" absolute="true" visible="false">
+    <image src="%skin/filemenu.png" height="400px" width="380px" x="0" y="100%-435px" absolute="true" slice="2 67">
+
+      <span absolute="true" x="75px" y="24px" width="100%-100px" size="20px">Hello, ${username}!</span>
+
+      <node absolute="true" x="2px" y="67px" width="188px" height="100%-110px">
+        <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
+        <menubutton id="openbutton" click="openfile" label="Open"/>
+        <menubutton id="savebutton" click="savefile" label="Save"/>
+        <menubutton id="saveAsbutton" click="savefile saveas=true" label="Save As..."/>
+        <menubutton id="exportbutton" click="savefile saveas=true export=true" label="Export..."/>
+        <menubutton id="closebutton" click="closefile" label="Close"/>
+      </node>
+
+      <node xcontroller="recentfileslist" absolute="true" x="190px" y="67px" width="188px" height="100%-110px" multiply="#FF0000"/>
+
+      <node flow="row" controller="tabtarget, button" id="quitbutton" forward="iconimage.surface=surface" up-src="%skin/quit-up.png" down-src="%skin/quit-down.png" absolute="true" x="100%-150px" y="100%-35px" width="140px" height="24px">
+        <image id="iconimage" height="24px" width="24px"/>
+        <node width="5px"/>
+        <span width="120px">Quit</span>
+      </node>
+
+    </image>
+  </node>
+</window>
