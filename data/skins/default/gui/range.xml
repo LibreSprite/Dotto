@@ -1,5 +1,4 @@
-<image slice="3 3"
-       forward="num-label.text=label, lbl.text=drag-value"
+<image forward="num-label.text=label, lbl.text=drag-value"
        result="value"
        controller="tabtarget, range"
        handle="num-value"

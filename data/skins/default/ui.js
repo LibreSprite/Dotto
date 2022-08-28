@@ -1,22 +1,21 @@
 var views = {};
 var controllers = {
-    filemenu : {
-        click:closeStartMenu
-    },
-
     editor : {},
 
     script : {
         init : function() {
-            console.log("Booting eXPerience UI");
+            console.log("Booting Default UI");
 
             for (var name in controllers) {
-                var node = app.target.findChildById(name);
+                var node = app.target.findChildById(name) || app.target.findChild(name);
                 if (node) {
                     for (var event in controllers[name]) {
+                        console.log("Listening to " + name + "." + event);
                         node.addEventListener(event.trim());
                     }
                     views[name] = node;
+                } else {
+                    console.log("Could not find " + name);
                 }
             }
 
@@ -46,16 +45,6 @@ var controllers = {
 
     toolconfigbutton : {},
 
-    startbutton : {
-        mouseup : function() {
-            var pressed = views.startbutton.get("state") != "active";
-            views.filemenu.visible = pressed;
-            views.startbutton.set("state", pressed ? "active" : "enabled");
-            if (pressed)
-                views.filemenu.bringToFront();
-        }
-    },
-
     quitbutton : {
         click : function() {
             app.quit();
@@ -64,8 +53,17 @@ var controllers = {
 };
 
 function closeStartMenu() {
-    views.filemenu.visible = false;
-    views.startbutton.set("state", "enabled");
+    var target = app.eventTarget;
+    if (!target) {
+        console.log("No event target");
+        return;
+    }
+    var isClickout = target.hasTag("*clickout");
+    console.log("clazz " + isClickout);
+    if (!isClickout)
+        return;
+    target.visible = false;
+    // views.startbutton.set("state", "enabled");
 }
 
 function onEvent(name) {

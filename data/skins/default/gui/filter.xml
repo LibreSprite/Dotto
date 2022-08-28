@@ -1,10 +1,5 @@
 <image controller="tabtarget, button, activatefilter"
        interactive="true"
-       forward="labelspan.text=filter"
-       multiply="#00000000"
-       up-multiply="#00000000"
-       down-multiply="#FF8080FF"
-       hover-multiply="#808080FF"
-       height="20px">
+       forward="labelspan.text=filter">
   <span id="labelspan"/>
 </image>

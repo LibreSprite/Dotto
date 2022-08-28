@@ -1,0 +1,14 @@
+<node x="0"
+      y="0"
+      width="100%"
+      height="100%"
+      absolute="true"
+      visible="false"
+      controller="script"><![CDATA[
+var node = app.target;
+node.addEventListener("click");
+function onEvent(event) {
+  if (event == "click" && app.eventTarget == node)
+    node.visible = false;
+}
+]]></node>
