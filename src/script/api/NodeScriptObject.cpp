@@ -64,6 +64,15 @@ public:
             return nullptr;
         });
 
+        addFunction("findChild", [=](const String& tag) -> script::Value {
+            if (auto node = weak.lock()) {
+                return getEngine().toValue(node->findChildByPredicate([&](ui::Node* child){
+                    return child->hasTag(tag);
+                }));
+            }
+            return nullptr;
+        });
+
         addFunction("bringToFront", [=](){
             if (auto node = weak.lock()) {
                 auto& args = script::Function::varArgs();
