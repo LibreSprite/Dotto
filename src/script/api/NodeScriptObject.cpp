@@ -57,6 +57,13 @@ public:
             return nullptr;
         });
 
+        addFunction("hasTag", [=](const String& tag) -> bool {
+            if (auto node = weak.lock()) {
+                return node->hasTag(tag);
+            }
+            return false;
+        });
+
         addFunction("findChildById", [=](const String& id) -> script::Value {
             if (auto node = weak.lock()) {
                 return getEngine().toValue(node->findChildById(id));
