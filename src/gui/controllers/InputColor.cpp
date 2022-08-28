@@ -14,7 +14,7 @@
 
 class InputColor : public ui::Controller {
     PubSub<msg::ActivateColor> pub{this};
-    Property<String> pickerId{this, "picker-id", "colorpanel"};
+    Property<String> pickerId{this, "picker-id", "colorsidebar"};
     Property<String> hide{this, "hide", ""};
     Property<bool> alwaysUpdate{this, "alwaysupdate", false};
     InputColor* activeInput = nullptr;
