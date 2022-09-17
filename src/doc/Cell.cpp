@@ -2,10 +2,18 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#include <common/Config.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
+#include <common/inject.hpp>
 #include <doc/Cell.hpp>
 #include <doc/Document.hpp>
+
+void Cell::postInject() {
+    if (name.empty()) {
+        setName(inject<Config>{}->translate(getType()), true);
+    }
+}
 
 void Cell::setDocument(Document* document) {
     if (_document)

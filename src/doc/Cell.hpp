@@ -26,7 +26,9 @@ protected:
 
     void modify(bool silent);
 
-public:
+  public:
+    void postInject() override;
+
     virtual void setParent(Cell* parent) {_parent = parent;}
     Cell* parent() const {return _parent;}
 
