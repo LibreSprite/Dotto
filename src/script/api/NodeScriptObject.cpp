@@ -148,7 +148,11 @@ public:
             if (auto node = weak.lock()) {
                 auto child = ui::Node::fromXML(name);
                 if (child) {
-                    node->addChild(child);
+                    auto& args = script::Function::varArgs();
+                    auto index = ~U32{};
+                    if (args.size() >= 2)
+                        index = args[1];
+                    node->addChild(child, index);
                     return getEngine().toValue(child);
                 }
             }
@@ -160,7 +164,11 @@ public:
             if (auto node = weak.lock()) {
                 auto child = dynamic_cast<ui::Node*>(static_cast<Model*>(obj->getWrapped()));
                 if (child) {
-                    node->addChild(child->shared_from_this());
+                    auto& args = script::Function::varArgs();
+                    auto index = ~U32{};
+                    if (args.size() >= 2)
+                        index = args[1];
+                    node->addChild(child->shared_from_this(), index);
                 }
             }
             return 0;

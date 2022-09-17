@@ -459,11 +459,26 @@ void ui::Node::draw(S32 z, Graphics& gfx) {
     }
 }
 
-void ui::Node::addChild(std::shared_ptr<Node> child) {
-    if (!child || child->parent == this)
+void ui::Node::addChild(std::shared_ptr<Node> child, U32 index) {
+    if (!child)
         return;
+
+    if (child->parent == this) {
+        auto oldPos = std::find(children.begin(), children.end(), child);
+        auto newPos = std::next(children.begin(), index);
+        if (oldPos != newPos) {
+            children.erase(oldPos);
+            children.insert(newPos, child);
+        }
+        return;
+    }
+
     child->remove();
-    children.push_back(child);
+    if (index >= children.size()) {
+        children.push_back(child);
+    } else {
+        children.insert(std::next(children.begin(), index), child);
+    }
     child->parent = this;
     if (isInScene)
         child->processEvent(AddToScene{child.get()});

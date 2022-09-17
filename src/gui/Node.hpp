@@ -179,7 +179,7 @@ namespace ui {
             }
         }
 
-        virtual void addChild(std::shared_ptr<Node> child);
+        virtual void addChild(std::shared_ptr<Node> child, U32 index = ~U32{});
 
         virtual void removeChild(std::shared_ptr<Node> node);
     };
