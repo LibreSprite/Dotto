@@ -146,14 +146,8 @@ namespace ui {
             return parent;
         }
 
-        virtual void resize() {
-            if (parent) {
-                parent->doResize();
-            }
-        }
-
+        virtual void resize();
         virtual void doResize();
-
         virtual void onResize();
 
         S32 innerWidth() {

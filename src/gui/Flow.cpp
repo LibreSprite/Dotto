@@ -21,7 +21,7 @@ namespace ui {
 
     class FlowFill : public Flow {
     public:
-        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
+        bool update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             for (auto& child : children) {
                 if (!*child->visible)
                     continue;
@@ -47,6 +47,7 @@ namespace ui {
                 child->globalRect.y += child->margin->y;
                 child->onResize();
             }
+            return false;
         }
     };
 
@@ -64,7 +65,7 @@ namespace ui {
             S32 margins;
         };
 
-        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
+        bool update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
                 if (!*child->visible)
@@ -108,6 +109,7 @@ namespace ui {
                 child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 child->onResize();
             }
+            return false;
         }
 
         virtual void position(Vector<Size>& sizes, U32 parent) {
@@ -169,9 +171,10 @@ namespace ui {
 
     class FlowContainRow : public FlowRow {
     public:
-        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
+        bool update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             S32 width = 0;
             Node* parent = nullptr;
+            FlowRow::update(children, parentRect);
             for (auto& child : children) {
                 if (!*child->visible || *child->absolute)
                     continue;
@@ -183,10 +186,10 @@ namespace ui {
                 auto oldWidth = parent->width->toPixel(0, 0);
                 if (width != oldWidth) {
                     (*parent->width).setPixel(width);
-                    return;
+                    return true;
                 }
             }
-            FlowRow::update(children, parentRect);
+            return false;
         }
 
     };
@@ -194,7 +197,7 @@ namespace ui {
 
     class FlowColumn : public FlowRow {
     public:
-        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
+        bool update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             Vector<Size> sizes;
             for (auto& child : children) {
                 if (!*child->visible)
@@ -238,6 +241,7 @@ namespace ui {
                 child->globalRect.height -= child->margin->y + S32(child->margin->height);
                 child->onResize();
             }
+            return false;
         }
     };
 
@@ -246,9 +250,10 @@ namespace ui {
 
     class FlowContainColumn : public FlowColumn {
     public:
-        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
+        bool update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
             S32 height = 0;
             Node* parent = nullptr;
+            FlowColumn::update(children, parentRect);
             for (auto& child : children) {
                 if (!*child->visible || *child->absolute)
                     continue;
@@ -260,10 +265,10 @@ namespace ui {
                 auto oldHeight = parent->height->toPixel(0, 0);
                 if (height != oldHeight) {
                     (*parent->height).setPixel(height);
-                    return;
+                    return true;
                 }
             }
-            FlowColumn::update(children, parentRect);
+            return false;
         }
     };
     static Flow::Singleton<FlowContainColumn> containCol{"contain-column"};

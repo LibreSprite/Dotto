@@ -394,11 +394,19 @@ void ui::Node::forwardToChildren(const Event& event) {
 
 void ui::Node::eventHandler(const AddToScene& event) {
     isInScene = true;
-    resize();
     if (isDirty && parent) // parent is null for root node
         parent->setDirty();
     if (stealFocus)
         focus();
+}
+
+void ui::Node::resize() {
+    if (parent) {
+        if (absolute)
+            parent->doResize();
+        else
+            parent->resize();
+    }
 }
 
 void ui::Node::doResize() {
@@ -409,7 +417,13 @@ void ui::Node::doResize() {
     innerRect.y += padding->y;
     innerRect.width -= padding->x + padding->width;
     innerRect.height -= padding->y + padding->height;
-    flowInstance->update(children, innerRect);
+
+    if (flowInstance->update(children, innerRect)) {
+        logI("Reflowing parent");
+        resize();
+        return;
+    }
+
     for (auto& child : children) {
         if (child->visible)
             child->doResize();
@@ -453,6 +467,7 @@ void ui::Node::addChild(std::shared_ptr<Node> child) {
     child->parent = this;
     if (isInScene)
         child->processEvent(AddToScene{child.get()});
+    resize();
 }
 
 void ui::Node::removeChild(std::shared_ptr<Node> node) {
@@ -464,6 +479,7 @@ void ui::Node::removeChild(std::shared_ptr<Node> node) {
             children.erase(it);
             node->processEvent(Remove{node.get()});
             node->processEvent(RemoveFromScene{node.get()});
+            resize();
         }
     }
 }

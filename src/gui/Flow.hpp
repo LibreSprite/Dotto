@@ -15,6 +15,6 @@ namespace ui {
     protected:
         virtual void absolute(std::shared_ptr<Node> child, Rect& parentRect);
     public:
-        virtual void update(Vector<std::shared_ptr<Node>>&, Rect& parentRect) = 0;
+        virtual bool update(Vector<std::shared_ptr<Node>>&, Rect& parentRect) = 0;
     };
 }
