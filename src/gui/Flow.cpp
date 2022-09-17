@@ -118,9 +118,10 @@ namespace ui {
             }
         }
 
-        virtual void fit(Vector<Size>& sizes, U32 parent) {
+        virtual U32 fit(Vector<Size>& sizes, U32 parent) {
             U32 totalWeight = 0;
             U32 fillWidth = parent;
+            U32 total = 0;
 
             for (auto& size : sizes) {
                 size.done = false;
@@ -128,6 +129,7 @@ namespace ui {
                 case Unit::Type::Pixel: {
                     size.done = true;
                     size.result = size.given.toPixel(parent, parent) + size.margins;
+                    total += size.result;
                     fillWidth -= size.result;
                     break;
                 }
@@ -154,14 +156,41 @@ namespace ui {
                         adjusted = std::min(adjusted, size.max.toPixel(parent, parent));
                     fillWidth -= result - adjusted;
                     size.result = adjusted;
+                    total += adjusted;
                     size.done = true;
                 }
             }
+
+            return total;
         }
     };
 
     static Flow::Singleton<FlowRow> row{"row"};
 
+    class FlowContainRow : public FlowRow {
+    public:
+        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
+            S32 width = 0;
+            Node* parent = nullptr;
+            for (auto& child : children) {
+                if (!*child->visible || *child->absolute)
+                    continue;
+                parent = child->getParent();
+                width = std::max(width, child->localRect.right());
+            }
+            if (parent) {
+                width += parent->padding->width;
+                auto oldWidth = parent->width->toPixel(0, 0);
+                if (width != oldWidth) {
+                    (*parent->width).setPixel(width);
+                    return;
+                }
+            }
+            FlowRow::update(children, parentRect);
+        }
+
+    };
+    static Flow::Singleton<FlowContainRow> containRow{"contain-row"};
 
     class FlowColumn : public FlowRow {
     public:
@@ -214,5 +243,29 @@ namespace ui {
 
     static Flow::Singleton<FlowColumn> column{"column"};
 
+
+    class FlowContainColumn : public FlowColumn {
+    public:
+        void update(Vector<std::shared_ptr<Node>>& children, Rect& parentRect) override {
+            S32 height = 0;
+            Node* parent = nullptr;
+            for (auto& child : children) {
+                if (!*child->visible || *child->absolute)
+                    continue;
+                parent = child->getParent();
+                height = std::max(height, child->localRect.bottom());
+            }
+            if (parent) {
+                height += parent->padding->height;
+                auto oldHeight = parent->height->toPixel(0, 0);
+                if (height != oldHeight) {
+                    (*parent->height).setPixel(height);
+                    return;
+                }
+            }
+            FlowColumn::update(children, parentRect);
+        }
+    };
+    static Flow::Singleton<FlowContainColumn> containCol{"contain-column"};
 
 }
