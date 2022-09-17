@@ -106,8 +106,6 @@ public:
                     {"height", categoryHeight}
                 });
         }
-
-        node()->set("height", height);
     }
 
     void attach() override {

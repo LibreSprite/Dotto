@@ -21,7 +21,7 @@
            visible="false"
            margin="4 4 4 4"
            width="24px"
-           click="ToggleUI id=toolconfigsidebar"/>
+           click="ToggleUI id=toolconfigmenu"/>
     <image controller="tabtarget, button" id="togglelayersbutton" click="ToggleUI id=layersidebar" src="%appdata/icons/layers.png" margin="4 4 4 4" width="24px"/>
     <image controller="tabtarget, button" id="togglefiltersbutton" click="ToggleUI id=filtersidebar" src="%appdata/icons/filters.png" margin="4 4 4 4" width="24px"/>
     <image controller="inputcolor" src="%appdata/icons/color.png" forward="multiply=value" margin="4 4 4 4" width="24px" alwaysupdate="true"/>
@@ -37,29 +37,22 @@
 
   <node controller="toolbox" id="toolbox" extra-height="35"/>
 
-  <clickout id="layersidebar" class="sidebar">
-    <image class="sidebarcontainer">
-      <layercontrols/>
-      <node controller="layerlist" width="200px"/>
-    </image>
-  </clickout>
+  <image id="layersidebar" class="sidebarcontainer" width="200px">
+    <layercontrols controller="layerlist" flow="contain-column"/>
+  </image>
 
-  <clickout id="filtersidebar" class="sidebar">
-    <image class="sidebarcontainer">
-      <node controller="filterlist" width="200px"/>
-    </image>
-  </clickout>
+  <image id="filtersidebar" class="sidebarcontainer" width="200px">
+    <node controller="filterlist" width="200px"/>
+  </image>
 
-  <clickout id="colorsidebar" class="sidebar">
-    <image id="colorpanel" class="sidebarcontainer" width="200px"/>
-  </clickout>
+  <image id="colorsidebar" class="sidebarcontainer" width="200px">
+    <node id="colorpanel" flow="contain-column"/>
+  </image>
 
-  <clickout id="toolconfigsidebar" class="sidebar">
-    <image id="toolconfigmenu" class="sidebarcontainer" controller="metamenu" width="100px"/>
-  </clickout>
+  <image id="toolconfigmenu" class="sidebarcontainer" visible="false" controller="metamenu" width="100px"/>
 
-  <clickout id="filemenu" class="sidebar">
-    <image class="sidebarcontainer" height="250px" width="170px" x="0" y="35px">
+  <clickout id="filemenu" class="menu">
+    <image class="menucontainer" width="170px" x="0">
       <menubutton id="newbutton" click="newfile interactive=true" label="New"/>
       <menubutton id="openbutton" click="openfile" label="Open"/>
       <menubutton id="closebutton" click="closefile" label="Close"/>

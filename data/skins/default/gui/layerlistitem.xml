@@ -1,26 +1,21 @@
 <image
     controller="button"
-    forward="preview.surface=preview, alpha.cell=cell, blend.cell=cell, preview-holder.margin=preview-padding"
-    padding="5 5 5 5"
-    multiply="rgba{0, 0, 0, 0}"
-    normal-multiply="rgba{0, 0, 0, 0}"
-    hover-multiply="rgba{255, 255, 255, 100}"
-    down-multiply="rgba{255, 255, 255, 200}">
-  <image id="preview-holder" src="%skin/editor.png" slice="2 2" padding="1 1 1 1">
-    <image id="preview" fit="cover"/>
-  </image>
-  <node flow="row"
-        absolute="true"
-        y="100%-100%"
-        width="100%"
-        height="24px"
-        padding="0 0 3 3"
-        controller="hover-reveal">
+    forward="preview.surface=preview, alpha.cell=cell, blend.cell=cell, preview-holder.margin=preview-padding, layer-name.cell=cell">
+
+  <node flow="row" height="24px">
+    <image id="preview-holder" src="%skin/editor.png" width="24px" slice="2 2" padding="1 1 1 1">
+      <image id="preview" fit="cover"/>
+    </image>
+    <input id="layer-name" width="100%" controller="cellpropertymodifier" property="name" key="text"></input>
+  </node>
+
+  <node flow="row" height="24px">
     <textbutton id="blend"
                 width="50px"
                 controller="cellpropertymodifier, cycle"
                 property="blendmode"
-                forward="labelspan.text=value"/>
+                forward="labelspan.text=value"
+                margin="0 0 0 0"/>
     <range controller="cellpropertymodifier"
            property="alpha"
            label="Transparency:"

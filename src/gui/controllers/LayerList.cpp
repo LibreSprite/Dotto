@@ -67,10 +67,9 @@ public:
                 item->remove();
                 continue;
             }
-            if (!item->getParent())
-                node()->addChild(item);
+
             auto surface = cell ? cell->getComposite()->shared_from_this() : nullptr;
-            auto aspect = surface ? surface->width() / F32(surface->height()) : 4.0f;
+            auto aspect = surface ? surface->width() / F32(surface->height() ?: 1) : 1.0f;
             S32 itemHeight = width / aspect;
 
             auto maxHeight = item->maxHeight->toPixel(10000, 10000);
@@ -84,17 +83,18 @@ public:
 
             item->load({
                     {"preview", surface},
-                    {"height", itemHeight},
+                    {"preview-height", itemHeight},
                     {"preview-padding", previewPadding},
                     {"click", "ActivateLayer layer=" + std::to_string(layer)},
                     {"state", layer == currentLayer ? "active" : "enabled"},
                     {"cell", cell},
                 });
+
+            if (!item->getParent())
+                node()->addChild(item);
+
             height += itemHeight;
         }
-
-        if (height)
-            node()->set("height", height);
     }
 };
 
