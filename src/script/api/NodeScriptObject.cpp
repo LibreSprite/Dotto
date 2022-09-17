@@ -57,6 +57,13 @@ public:
             return nullptr;
         });
 
+        addFunction("hasFocus", [=]() -> bool {
+            if (auto node = weak.lock()) {
+                return node->hasFocus();
+            }
+            return false;
+        });
+
         addFunction("hasTag", [=](const String& tag) -> bool {
             if (auto node = weak.lock()) {
                 return node->hasTag(tag);
