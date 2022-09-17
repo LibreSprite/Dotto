@@ -30,6 +30,15 @@ public:
                         if (value.has<std::shared_ptr<PropertySet>>()) {
                             ps = value.get<std::shared_ptr<PropertySet>>().get();
                         }
+                    } else {
+                        PropertySet tps;
+                        for (std::size_t i = 0, max = args.size(); i < max; i += 2) {
+                            auto& key = args[i];
+                            auto& value = args[i + 1];
+                            tps.set(key, value.get());
+                        }
+                        model->load(tps);
+                        return 0;
                     }
                 }
                 if (!ps) {
