@@ -152,6 +152,15 @@ namespace ui {
             pressedKeys{pressedKeys} {
             bubble = Bubble::Up;
         }
+        virtual Vector<String> toStrings(const String& name) const {
+            auto ret = Event::toStrings(name);
+            ret.push_back(std::to_string(scancode));
+            ret.push_back(std::to_string(keycode));
+            ret.push_back(keyname);
+            for (auto &key : pressedKeys)
+                ret.push_back(key);
+            return ret;
+        }
     };
 
     struct KeyDown : public KeyEvent {
