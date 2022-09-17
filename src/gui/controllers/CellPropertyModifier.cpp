@@ -18,6 +18,7 @@ public:
     Property<std::shared_ptr<Cell>> cell{this, "cell", nullptr, &CellPropertyModifier::setCell};
     Property<String> property{this, "property", "", &CellPropertyModifier::setOptions};
     Property<Value> value{this, "value"};
+    Property<String> key{this, "key", "value", &CellPropertyModifier::setCell};
 
     void setOptions() {
         if (*property == "blendmode") {
@@ -33,9 +34,11 @@ public:
         if (property->empty() || !*cell)
             return;
         if (*property == "alpha")
-            node()->set("value", tostring((*cell)->getAlpha()));
-        if (*property == "blendmode")
-            node()->set("value", (*cell)->getBlendMode());
+            node()->set(*key, tostring((*cell)->getAlpha()));
+        else if (*property == "blendmode")
+            node()->set(*key, (*cell)->getBlendMode());
+        else if (*property == "name")
+            node()->set(*key, (*cell)->getName());
     }
 
     void attach() override {

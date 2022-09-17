@@ -24,6 +24,8 @@ public:
             (*targetCell)->setAlpha(prevValue, false);
         else if (*property == "blendmode")
             (*targetCell)->setBlendMode(prevValue, false);
+        else if (*property == "name")
+            (*targetCell)->setName(prevValue, false);
     }
 
     void run() override {
@@ -42,6 +44,10 @@ public:
             prevValue = (*targetCell)->getBlendMode();
             *value = getPropertySet().get<String>("value");
             (*targetCell)->setBlendMode(*value, false);
+        } else if (*property == "name") {
+            prevValue = (*targetCell)->getName();
+            *value = getPropertySet().get<String>("value");
+            (*targetCell)->setName(*value, false);
         } else {
             logE("Invalid SetCellProperty property [", *property, "]");
             return;
