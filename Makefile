@@ -142,20 +142,13 @@ C_FILES += $(shell find dependencies -type f -name '*.c')
 
 LN_FLAGS += $(SO_FILES)
 
-#BEGIN LUA SUPPORT
-CPP_FLAGS += -DSCRIPT_ENGINE_LUA
-LUAPKG += $(shell for p in lua5.4 lua-5.4 lua54 lua5.3 lua-5.3 lua53 lua5.2 lua-5.2 lua52 lua5.1 lua-5.1 lua51 lua ; do $(PKGCONFIG) --exists $$p && echo $$p && break ; done)
-CPP_FLAGS += $(shell $(PKGCONFIG) --cflags $(LUAPKG))
-LN_FLAGS += $(shell $(PKGCONFIG) --libs $(LUAPKG))
-#END
-
 ODIR = build
 
 CPP_FLAGS += --std=c++17
 CPP_FLAGS += -DCMS_NO_REGISTER_KEYWORD
 
 ifeq ($(DEBUG),true)
-FLAGS += -Og -g -D_DEBUG # debug build
+FLAGS += -O0 -g -D_DEBUG # debug build
 POSTBUILD =
 else
 FLAGS += -O3 # release build

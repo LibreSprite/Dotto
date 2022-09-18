@@ -27,7 +27,6 @@ jobs:
           mingw-w64-i686-SDL2 
           mingw-w64-i686-SDL2_image 
           mingw-w64-i686-lcms2 
-          mingw-w64-i686-lua 
           mingw-w64-i686-freetype
           mingw-w64-i686-glew
     - uses: actions/checkout@v2
@@ -42,7 +41,6 @@ jobs:
         cp /mingw32/bin/libfreetype-6.dll ./
         cp /mingw32/bin/liblcms2-2.dll ./
         cp /mingw32/bin/glew32.dll ./
-        cp /mingw32/bin/lua54.dll ./
         cp /mingw32/bin/libpng16-16.dll ./
         cp /mingw32/bin/libv8.dll ./
         cp /mingw32/bin/SDL2_image.dll ./

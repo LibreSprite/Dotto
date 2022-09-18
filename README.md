@@ -102,11 +102,11 @@ over Discord/Matrix.
 
 Install dependencies:
 
-- Arch-based distros: `pacman -S make sdl2 sdl2_image lua v8-r lcms2`
+- Arch-based distros: `pacman -S make sdl2 sdl2_image v8-r lcms2`
 
-- Debian-based distros: `sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev liblua5.3-dev libfreetype6-dev libnode-dev`
+- Debian-based distros: `sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev libfreetype6-dev libnode-dev`
 
-- Fedora-Based distros: `sudo dnf install g++ make SDL2-devel SDL2_image-devel lua-devel v8-devel lcms2-devel freetype-devel zenity libXi-devel`
+- Fedora-Based distros: `sudo dnf install g++ make SDL2-devel SDL2_image-devel v8-devel lcms2-devel freetype-devel zenity libXi-devel`
 
 Checkout project:
 
@@ -150,7 +150,7 @@ Initial setup: Open the MSYS2 shell and run:
 
 ```sh
 pacman -Syu
-pacman -S base-devel git mingw-w64-i686-gcc mingw-w64-i686-openssl mingw-w64-i686-v8  mingw-w64-i686-SDL2  mingw-w64-i686-SDL2_image  mingw-w64-i686-lcms2  mingw-w64-i686-lua  mingw-w64-i686-freetype mingw-w64-i686-glew
+pacman -S base-devel git mingw-w64-i686-gcc mingw-w64-i686-openssl mingw-w64-i686-v8  mingw-w64-i686-SDL2  mingw-w64-i686-SDL2_image  mingw-w64-i686-lcms2 mingw-w64-i686-freetype mingw-w64-i686-glew
 git clone --recurse-submodules https://github.com/LibreSprite/Dotto.git
 ```
 
@@ -170,7 +170,7 @@ make DEBUG=true
 Initial setup:
 
 ```sh
-brew install sdl2 sdl2_image lcms2 lua freetype v8 openssl pkg-config
+brew install sdl2 sdl2_image lcms2 freetype v8 openssl pkg-config
 ```
 
 Compiling:
