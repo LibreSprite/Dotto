@@ -19,7 +19,7 @@ public:
     } state = State::Ready;
 
     U32 code = 0;
-    String stdout;
+    String output;
     std::shared_ptr<script::EngineObjRef> event;
     std::shared_ptr<script::Engine> engine;
 
@@ -27,7 +27,7 @@ public:
         addMethod("exec", &ShellScriptObject::exec);
         addProperty("state", [=]{return (int) state;});
         addProperty("code", [=]{return code;});
-        addProperty("stdout", [=]{return stdout;});
+        addProperty("stdout", [=]{return output;});
         makeGlobal("shell");
     }
 
@@ -87,7 +87,7 @@ public:
                 result += buffer;
             }
         }
-        stdout = std::move(result);
+        output = std::move(result);
         return ret;
     }
 
@@ -125,10 +125,10 @@ public:
                 auto that = weak.lock();
                 if (!that)
                     return;
-                that->stdout = std::move(resp.first);
+                that->output = std::move(resp.first);
                 that->code = resp.second;
                 that->state = State::Ready;
-                event->call({that->code, that->stdout});
+                event->call({that->code, that->output});
                 event.reset();
                 auto copy = engine;
                 engine.reset();
