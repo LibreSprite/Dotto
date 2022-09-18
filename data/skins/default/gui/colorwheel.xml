@@ -2,36 +2,24 @@
       parent="colorpanel"><![CDATA[
 var sample = app.target.findChildById("sample");
 var fill = app.target.findChildById("fill");
-sample.addEventListener("mousedown");
-sample.addEventListener("mousemove");
+
+sample.addEventListener("mousedown", function(event, button, x, y){
+    const rawColor = getSample(x, y);
+    const activeColor = app.activeColor;
+    const color = rawColor & ~(0xFF << 24) | (activeColor & (0xFF << 24));
+    if (color != activeColor)
+        app.command("activatecolor", "color", color);
+});
+
+sample.addEventListener("mousemove", function(event, button, x, y){
+    fill.set("multiply", getSample(x, y));
+});
 
 function getSample(x, y) {
     const surface = sample.surface;
     x = x / sample.globalWidth * surface.width | 0;
     y = y / sample.globalHeight * surface.height | 0;
     return surface.getPixel(x, y);
-}
-
-const handlers = {
-    mousedown : function(button, x, y) {
-        const rawColor = getSample(x, y);
-        const activeColor = app.activeColor;
-        const color = rawColor & ~(0xFF << 24) | (activeColor & (0xFF << 24));
-        if (color != activeColor)
-            app.command("activatecolor", "color", color);
-    },
-
-    mousemove : function(button, x, y) {
-        fill.set("multiply", getSample(x, y));
-    }
-};
-
-function onEvent(event) {
-    var args = [];
-    for (var i = 1; i < arguments.length; ++i)
-        args.push(arguments[i]);
-    if (event in handlers)
-        handlers[event].apply(null, args);
 }
 ]]>
 <image id="sample" src="%skin/colorpicker.png"/>

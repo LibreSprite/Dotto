@@ -174,12 +174,12 @@ public:
             return 0;
         });
 
-        addFunction("addEventListener", [=](const String& name) {
+        addFunction("addEventListener", [=](const String& name, std::shared_ptr<script::EngineObjRef> eor) {
             if (auto node = weak.lock()) {
                 auto it = eventBinders.find(trim(tolower(name)));
                 if (it == eventBinders.end())
                     return 0;
-                it->second(node.get(), name);
+                it->second(node.get(), name, eor);
                 eventBinders.erase(it);
                 return 1;
             }
@@ -206,11 +206,11 @@ public:
         createEventBinder<ui::Remove>("remove");
     }
 
-    HashMap<String, std::function<void(ui::Node*, const String&)>> eventBinders;
+    HashMap<String, std::function<void(ui::Node*, const String&, std::shared_ptr<script::EngineObjRef>)>> eventBinders;
 
     template <typename Type>
     void createEventBinder(const String& name) {
-        eventBinders[name] = [=](ui::Node* node, const String& name) {
+        eventBinders[name] = [=](ui::Node* node, const String& name, std::shared_ptr<script::EngineObjRef> cb) {
             auto weakapp = getEngine().getGlobal("app")->weak_from_this();
             auto handler = [=](const auto& event) {
                 if (auto app = std::static_pointer_cast<AppScriptObject>(weakapp.lock())) {
@@ -225,7 +225,14 @@ public:
                     } else {
                         app->setEventTarget(nullptr);
                     }
-                    getEngine().raiseEvent(event.toStrings(name));
+                    if (!cb) {
+                        getEngine().raiseEvent(event.toStrings(name));
+                    } else {
+                        Vector<script::Value> args;
+                        for (auto& str : event.toStrings(name))
+                            args.push_back(str);
+                        cb->call(args);
+                    }
                     app->setTarget(oldTarget);
                 }
             };
