@@ -165,6 +165,7 @@ public:
 
     static int returnValue(lua_State* L, const script::Value& value) {
         switch (value.type) {
+        case script::Value::Type::ENGOBJREF:
         case script::Value::Type::UNDEFINED:
             return 0;
 

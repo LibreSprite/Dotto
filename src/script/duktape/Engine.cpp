@@ -146,6 +146,49 @@ public:
         }
     }
 
+    struct DukRef : public EngineObjRef {
+        duk_context* ctx;
+        std::weak_ptr<Engine> engine = inject<Engine>{}->shared_from_this();
+
+        DukRef(duk_context *ctx, int index) : ctx{ctx} {
+            duk_dup(ctx, index);
+            duk_put_global_string(ctx, id.c_str());
+        }
+
+        void push() {
+            if (auto lock = engine.lock()) {
+                duk_push_global_object(ctx);
+                duk_get_prop_string(ctx, -1, id.c_str());
+            }
+        }
+
+        script::Value call(const Vector<script::Value>& args) override {
+            auto lock = engine.lock();
+            if (!lock)
+                return {};
+            push();
+            std::size_t argc = 0;
+            for (auto& arg : args) {
+                argc += DukScriptObject::returnValue(ctx, arg);
+            }
+            Engine::PushDefault engine{lock.get()};
+            InternalScriptObject::PushDefault iso{lock->getInternalScriptObjectName()};
+            try {
+                duk_call(ctx, argc);
+            } catch (const std::exception& ex) {
+                logE(ex.what());
+            }
+            return getValue(ctx, -1);
+        }
+
+        ~DukRef() {
+            if (auto lock = engine.lock()) {
+                duk_push_global_object(ctx);
+                duk_del_prop_string(ctx, -1, id.c_str());
+            }
+        }
+    };
+
     static script::Value getValue(duk_context* ctx, int id) {
         auto type = duk_get_type(ctx, id);
         if (type == DUK_TYPE_UNDEFINED) {
@@ -169,6 +212,7 @@ public:
                 duk_pop(ctx);
                 return so;
             }
+            return {std::make_shared<DukRef>(ctx, id)};
         } else if (type == DUK_TYPE_BUFFER) {
             duk_size_t size = 0;
             void* buffer = duk_get_buffer_data(ctx, id, &size);
@@ -194,7 +238,8 @@ public:
     static duk_ret_t returnValue(duk_context* ctx, const script::Value& value) {
         switch (value.type) {
         case script::Value::Type::UNDEFINED:
-            return 0;
+            duk_push_undefined(ctx);
+            return 1;
 
         case script::Value::Type::INT:
             duk_push_int(ctx, value);
@@ -223,6 +268,13 @@ public:
             break;
         }
 
+        case script::Value::Type::ENGOBJREF: {
+            if (auto ptr = static_cast<std::shared_ptr<EngineObjRef>>(value)) {
+                std::static_pointer_cast<DukRef>(ptr)->push();
+            } else {
+                duk_push_null(ctx);
+            }
+        }
         }
 
         return 1;

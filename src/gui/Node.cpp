@@ -419,7 +419,6 @@ void ui::Node::doResize() {
     innerRect.height -= padding->y + padding->height;
 
     if (flowInstance->update(children, innerRect)) {
-        logI("Reflowing parent");
         resize();
         return;
     }

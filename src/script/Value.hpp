@@ -14,6 +14,7 @@
 
 namespace script {
     class ScriptObject;
+    class EngineObjRef;
 
     class Value {
     public:
@@ -23,8 +24,11 @@ namespace script {
             DOUBLE,
             STRING,
             OBJECT,
-            BUFFER
+            BUFFER,
+            ENGOBJREF
         } type = Type::UNDEFINED;
+
+        using EngineObjRefPtr = std::shared_ptr<EngineObjRef>;
 
         class Buffer {
         public:
@@ -98,6 +102,7 @@ namespace script {
             String* string_v;
             Buffer* buffer_v;
             ScriptObject* object_v;
+            std::shared_ptr<EngineObjRef>* engobjref_v;
         } data;
 
         Value() = default;
@@ -124,6 +129,9 @@ namespace script {
 
             case Type::BUFFER:
                 return "[BUFFER:" + std::to_string((uintptr_t)data.buffer_v) + "]";
+
+            case Type::ENGOBJREF:
+                return "[ENGOBJREF:" + std::to_string((uintptr_t)data.engobjref_v) + "]";
 
             default:
                 return "[INVALID]";
@@ -163,6 +171,9 @@ namespace script {
             } else if (other.has<std::shared_ptr<ScriptObject>>()) {
                 type = Type::OBJECT;
                 data.object_v = other.get<std::shared_ptr<ScriptObject>>().get();
+            } else if (other.has<EngineObjRefPtr>()) {
+                type = Type::ENGOBJREF;
+                data.engobjref_v = new EngineObjRefPtr(other.get<EngineObjRefPtr>());
             } else {
                 return false;
             }
@@ -184,6 +195,8 @@ namespace script {
                 return data.object_v;
             case Type::BUFFER:
                 return data.buffer_v;
+            case Type::ENGOBJREF:
+                return *data.engobjref_v;
             default:
                 return {};
             }
@@ -197,6 +210,8 @@ namespace script {
             } else if (type == Type::BUFFER) {
                 data.buffer_v = new Buffer {*other.data.buffer_v};
                 data.buffer_v->hold();
+            } else if (type == Type::ENGOBJREF) {
+                data.engobjref_v = new EngineObjRefPtr(*other.data.engobjref_v);
             } else {
                 data = other.data;
             }
@@ -218,6 +233,8 @@ namespace script {
                 delete data.string_v;
             if (type == Type::BUFFER)
                 delete data.buffer_v;
+            if (type == Type::ENGOBJREF)
+                delete data.engobjref_v;
             type = Type::UNDEFINED;
         }
 
@@ -237,6 +254,8 @@ namespace script {
                 return data.object_v != 0;
             case Type::BUFFER:
                 return !data.buffer_v->empty();
+            case Type::ENGOBJREF:
+                return !!*data.engobjref_v;
             default:
                 return false;
             }
@@ -375,5 +394,22 @@ namespace script {
             return nullptr;
         }
 
+// EngineObjects
+        Value(EngineObjRefPtr&& i) { *this = i; }
+        Value(const EngineObjRefPtr& i) { *this = i; }
+
+        operator EngineObjRefPtr () const {
+            if (type == Type::ENGOBJREF) {
+                return *data.engobjref_v;
+            }
+            return {};
+        }
+
+        Value& operator = (EngineObjRefPtr i) {
+            makeUndefined();
+            type = Type::ENGOBJREF;
+            data.engobjref_v = new EngineObjRefPtr(i);
+            return *this;
+        }
     };
 }

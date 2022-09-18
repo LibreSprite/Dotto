@@ -24,6 +24,15 @@ namespace script {
         }
     };
 
+    class EngineObjRef {
+    protected:
+        static inline U32 nextId = 0;
+        String id = "\x01_cb_" + std::to_string(nextId++);
+        virtual ~EngineObjRef() = default;
+    public:
+        virtual script::Value call(const Vector<script::Value>& args){return {};}
+    };
+
     struct DocumentedFunction : public Function {
         struct DocArg {
             String name;

@@ -37,6 +37,8 @@ namespace script {
     public:
         String scriptName;
 
+        const String& getInternalScriptObjectName() {return internalScriptObjectName;}
+
         void initGlobals() {
             if (globalScriptObjects.empty())
                 globalScriptObjects = ScriptObject::getAllWithFlag("global");
