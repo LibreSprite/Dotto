@@ -20,8 +20,7 @@ public:
     Property<String> allowRegex{this, "allow", ""};
     Property<String> text{this, "text", ""};
     Property<String> spanId{this, "span", "value"};
-    Color color;
-    std::shared_ptr<ui::Node> span;
+    ui::Node* span = nullptr;
 
     Property<String> state{this, "state", "enabled", &Input::changeState};
     void changeState() {
@@ -33,15 +32,18 @@ public:
                                  ui::KeyUp,
                                  ui::Blur,
                                  ui::Focus>(this);
-        span = node()->findChildById(spanId);
+        span = node()->findChildById(spanId).get();
         if (span)
             span->set("inputEnabled", false);
+        else
+            span = node();
     }
 
     void clearCaret() {
         if (span) {
+            auto backup = *text;
             span->set("text", ""); // force redraw to get rid of caret
-            span->set("text", *text);
+            span->set("text", backup);
         }
     }
 
@@ -50,12 +52,10 @@ public:
     }
 
     void eventHandler(const ui::Focus& event) {
+        auto index = span->get("cursor-index");
+        cursorPosition = std::min<U32>(text->size(), index ? index->get<U32>() : ~U32{});
         clearCaret();
-        cursorPosition = text->size();
-        auto surfaceValue = span->get("surface");
-        if (auto surface = surfaceValue ? surfaceValue->get<std::shared_ptr<Surface>>() : nullptr) {
-            drawCaret(surface, int(surface->width()) - 1);
-        }
+        drawCaret();
     }
 
     void eventHandler(const ui::MouseDown& event) {
@@ -79,15 +79,14 @@ public:
             }
         }
 
+        node()->set("cursor-index", cursorPosition);
         clearCaret();
-        auto surfaceValue = span->get("surface");
-        if (surfaceValue && surfaceValue->has<std::shared_ptr<Surface>>()) {
-            drawCaret(surfaceValue->get<std::shared_ptr<Surface>>(), cursorX);
-        }
+        drawCaret();
     }
 
     void drawCaret(std::shared_ptr<Surface> surface, S32 cursorX) {
         if (surface) {
+            Color color;
             if (span)
                 color = span->getPropertySet().get<Color>("color");
             surface->setVLine(cursorX, 0, surface->height(), color.toU32());
@@ -95,6 +94,9 @@ public:
     }
 
     void eventHandler(const ui::KeyDown& event) {
+        if (event.pressedKeys.count("LCTRL") || event.pressedKeys.count("RCTRL")) {
+            return;
+        }
         bool changed = false;
         event.cancel = true;
         String keyName = event.keyname;
@@ -106,18 +108,31 @@ public:
             keyName = keyName.substr(3);
         }
         if (keyName == "BACKSPACE") {
-            if (!cursorPosition)
+            if (!cursorPosition) {
+                event.cancel = false;
                 return;
+            }
             changed = true;
             text.erase(cursorPosition - 1, 1);
             cursorPosition--;
         } else if (keyName == "RIGHT") {
+            if (cursorPosition == text.size()) {
+                event.cancel = false;
+                return;
+            }
             cursorPosition = std::min(text.size(), cursorPosition + 1);
         } else if (keyName == "LEFT") {
-            if (cursorPosition)
+            if (cursorPosition) {
                 cursorPosition--;
+            } else {
+                event.cancel = false;
+                return;
+            }
         } else if (keycode >= ' ' && keycode < 0x80) {
             String key(reinterpret_cast<const char*>(&keycode));
+            if (event.pressedKeys.count("LSHIFT") || event.pressedKeys.count("RSHIFT")) {
+                key[0] = std::toupper(keycode);
+            }
             try {
                 if (!allowRegex->empty() && !std::regex_match(key, std::regex(*allowRegex))) {
                     return;
@@ -128,6 +143,7 @@ public:
             text.insert(cursorPosition++, key, 0, key.size());
             changed = true;
         } else {
+            event.cancel = false;
             return;
         }
 
@@ -135,7 +151,15 @@ public:
             span->set("text", ""); // force redraw to get rid of caret
         node()->set("text", text);
         node()->set("value", text);
+        node()->set("cursor-index", cursorPosition);
 
+        drawCaret();
+
+        if (changed)
+            node()->processEvent(ui::Changed{node()});
+    }
+
+    void drawCaret() {
         if (span) {
             auto advanceValue = span->get("text-advance");
             auto surfaceValue = span->get("surface");
@@ -148,13 +172,11 @@ public:
                     for (std::size_t i = 0; i < end; ++i) {
                         cursorX += advance[i];
                     }
+                    cursorX = std::min<S32>(surface->width() - 1, cursorX);
                     drawCaret(surface, cursorX);
                 }
             }
         }
-
-        if (changed)
-            node()->processEvent(ui::Changed{node()});
     }
 
     void eventHandler(const ui::KeyUp& event) {
