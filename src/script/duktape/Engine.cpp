@@ -108,10 +108,14 @@ public:
         try {
             duk_push_global_object(handle);
             duk_get_prop_string(handle, -1, "onEvent");
-            for (auto& str : event) {
-                duk_push_string(handle, str.c_str());
+            if (duk_is_callable(handle, -1)) {
+                for (auto& str : event) {
+                    duk_push_string(handle, str.c_str());
+                }
+                duk_call(handle, event.size());
+                duk_pop(handle);// remove return value
             }
-            duk_call(handle, event.size());
+            duk_pop(handle);// remove global object
             // return eval("if (typeof onEvent === \"function\") onEvent(\"" + join(event, "\",\"") + "\");");
 #ifdef _DEBUG
         } catch (const ScriptException& ex) {
@@ -186,25 +190,29 @@ public:
             auto lock = engine.lock();
             if (!lock)
                 return {};
-            push();
-            std::size_t argc = 0;
-            for (auto& arg : args) {
-                argc += DukScriptObject::returnValue(ctx, arg);
-            }
             Engine::PushDefault engine{lock.get()};
             InternalScriptObject::PushDefault iso{lock->getInternalScriptObjectName()};
             try {
+                push();
+                std::size_t argc = 0;
+                for (auto& arg : args) {
+                    argc += DukScriptObject::returnValue(ctx, arg);
+                }
                 duk_call(ctx, argc);
             } catch (const std::exception& ex) {
                 logE(ex.what());
             }
-            return getValue(ctx, -1);
+            auto ret = getValue(ctx, -1);
+            duk_pop(ctx); // pop ret val
+            duk_pop(ctx); // pop global object from push()
+            return ret;
         }
 
         ~DukRef() {
             if (auto lock = engine.lock()) {
                 duk_push_global_object(ctx);
                 duk_del_prop_string(ctx, -1, id.c_str());
+                duk_pop(ctx);
             }
         }
     };
