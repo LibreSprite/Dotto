@@ -101,7 +101,27 @@ public:
     }
 
     bool raiseEvent(const Vector<String>& event) override {
-        return eval("if (typeof onEvent === \"function\") onEvent(\"" + join(event, "\",\"") + "\");");
+        auto lock = shared_from_this();
+        PushDefault engine{this};
+        InternalScriptObject::PushDefault iso{internalScriptObjectName};
+        bool success = true;
+        try {
+            duk_push_global_object(handle);
+            duk_get_prop_string(handle, -1, "onEvent");
+            for (auto& str : event) {
+                duk_push_string(handle, str.c_str());
+            }
+            duk_call(handle, event.size());
+            // return eval("if (typeof onEvent === \"function\") onEvent(\"" + join(event, "\",\"") + "\");");
+#ifdef _DEBUG
+        } catch (const ScriptException& ex) {
+#else
+        } catch (const std::exception& ex) {
+#endif
+            log->write(Log::Level::Error, ex.what());
+            success = false;
+        }
+        return success;
     }
 
     bool eval(const String& code) override {
