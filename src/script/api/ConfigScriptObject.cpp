@@ -12,11 +12,20 @@ public:
 
     void postInject() override {
         addFunction("get", [=](const String& name) -> script::Value {
-            auto& map = config->properties->getMap();
-            auto value = map.find(name);
-            if (value == map.end() || !value->second)
-                return nullptr;
-            return getEngine().toValue(*value->second);
+            std::shared_ptr<PropertySet> properties = config->properties;
+            auto parts = split(name, ".");
+            for (std::size_t i = 0, max = parts.size(); i < max; ++i) {
+                if (!properties)
+                    break;
+                auto& map = properties->getMap();
+                auto value = map.find(parts[i]);
+                if (value == map.end() || !value->second)
+                    return nullptr;
+                if (i == max - 1)
+                    return getEngine().toValue(*value->second);
+                properties = value->second->get<std::shared_ptr<PropertySet>>();
+            }
+            return nullptr;
         });
 
         makeGlobal("config");
