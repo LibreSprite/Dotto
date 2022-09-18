@@ -197,6 +197,7 @@ public:
         createEventBinder<ui::MouseUp>("mouseup");
         createEventBinder<ui::MouseDown>("mousedown");
         createEventBinder<ui::Click>("click");
+        createEventBinder<ui::TextEvent>("textevent");
         createEventBinder<ui::KeyDown>("keydown");
         createEventBinder<ui::KeyUp>("keyup");
         createEventBinder<ui::Drag>("drag");

@@ -20,6 +20,7 @@ protected:
            msg::MouseUp,
            msg::MouseDown,
            msg::MouseWheel,
+           msg::TextEvent,
            msg::KeyDown,
            msg::KeyUp,
            msg::WindowClosed,
@@ -60,6 +61,7 @@ public:
     void on(msg::MouseDown& event);
     void on(msg::MouseUp& event);
     void on(msg::MouseWheel& event);
+    void on(msg::TextEvent& event);
     void on(msg::KeyDown& event);
     void on(msg::KeyUp& event);
     void on(msg::WindowClosed& event);

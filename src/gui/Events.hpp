@@ -136,6 +136,26 @@ namespace ui {
             MouseEvent{target, globalX, globalY, buttons} {}
     };
 
+    struct TextEvent : public Event {
+        const char* text;
+        std::unordered_set<String>& pressedKeys;
+        TextEvent(Node* target,
+                 const char* text,
+                 std::unordered_set<String>& pressedKeys) :
+            Event{target},
+            text{text},
+            pressedKeys{pressedKeys} {
+            bubble = Bubble::Up;
+        }
+        virtual Vector<String> toStrings(const String& name) const {
+            auto ret = Event::toStrings(name);
+            ret.push_back(text);
+            for (auto &key : pressedKeys)
+                ret.push_back(key);
+            return ret;
+        }
+    };
+
     struct KeyEvent : public Event {
         U32 scancode, keycode;
         const char* keyname;

@@ -99,6 +99,12 @@ namespace msg {
         U32 buttons;
     };
 
+    struct TextEvent {
+        const U32 windowId;
+        const char* text;
+        std::unordered_set<String>& pressedKeys;
+    };
+
     struct KeyUp {
         const U32 windowId;
         U32 scancode;

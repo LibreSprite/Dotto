@@ -54,6 +54,8 @@ public:
                 SDL_JoystickOpen(i);
         }
 
+        SDL_StartTextInput();
+
         root = inject<ui::Node>{"node"};
         root->processEvent(ui::AddToScene{root.get()});
 
@@ -271,6 +273,13 @@ public:
                 break;
 
             case SDL_TEXTINPUT:
+                pub(msg::TextEvent{
+                        event.text.windowID,
+                        event.text.text,
+                        pressedKeys
+                    });
+                break;
+
             case SDL_TEXTEDITING:
             case SDL_KEYMAPCHANGED:
                 break;

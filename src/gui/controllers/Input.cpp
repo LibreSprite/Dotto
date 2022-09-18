@@ -28,6 +28,7 @@ public:
 
     void attach() override {
         node()->addEventListener<ui::MouseDown,
+                                 ui::TextEvent,
                                  ui::KeyDown,
                                  ui::KeyUp,
                                  ui::Blur,
@@ -93,6 +94,35 @@ public:
         }
     }
 
+    void eventHandler(const ui::TextEvent& event) {
+        if (event.pressedKeys.count("LCTRL") || event.pressedKeys.count("RCTRL"))
+            return;
+
+        std::string_view key = event.text;
+        if (key.empty() || key[0] < ' ')
+            return;
+
+        try {
+            if (!allowRegex->empty() && !std::regex_match(event.text, std::regex(*allowRegex))) {
+                return;
+            }
+        } catch (std::regex_error& err) {
+            logE("Input Regex Error: ", err.what(), "\nExpression: /", *allowRegex, "/");
+        }
+
+        String text = this->text;
+        cursorPosition = std::min(text.size(), cursorPosition);
+        text.insert(cursorPosition++, key, 0, key.size());
+
+        node()->set("cursor-index", cursorPosition);
+        if (span)
+            span->set("text", ""); // force redraw to get rid of caret
+        node()->set("text", text);
+        node()->set("value", text);
+        drawCaret();
+        node()->processEvent(ui::Changed{node()});
+    }
+
     void eventHandler(const ui::KeyDown& event) {
         if (event.pressedKeys.count("LCTRL") || event.pressedKeys.count("RCTRL")) {
             return;
@@ -120,43 +150,34 @@ public:
                 event.cancel = false;
                 return;
             }
-            cursorPosition = std::min(text.size(), cursorPosition + 1);
+            cursorPosition++;
         } else if (keyName == "LEFT") {
-            if (cursorPosition) {
-                cursorPosition--;
-            } else {
+            if (!cursorPosition) {
                 event.cancel = false;
                 return;
             }
+            cursorPosition--;
         } else if (keycode >= ' ' && keycode < 0x80) {
-            String key(reinterpret_cast<const char*>(&keycode));
-            if (event.pressedKeys.count("LSHIFT") || event.pressedKeys.count("RSHIFT")) {
-                key[0] = std::toupper(keycode);
-            }
-            try {
-                if (!allowRegex->empty() && !std::regex_match(key, std::regex(*allowRegex))) {
-                    return;
-                }
-            } catch (std::regex_error& err) {
-                logE("Input Regex Error: ", err.what(), "\nExpression: /", *allowRegex, "/");
-            }
-            text.insert(cursorPosition++, key, 0, key.size());
-            changed = true;
+            return;
         } else {
             event.cancel = false;
             return;
         }
 
-        if (span)
-            span->set("text", ""); // force redraw to get rid of caret
-        node()->set("text", text);
-        node()->set("value", text);
         node()->set("cursor-index", cursorPosition);
-
-        drawCaret();
-
-        if (changed)
+        if (changed) {
+            if (span)
+                span->set("text", ""); // force redraw to get rid of caret
+            node()->set("text", text);
+            node()->set("value", text);
+            drawCaret();
             node()->processEvent(ui::Changed{node()});
+        } else {
+            if (span)
+                span->set("text", ""); // force redraw to get rid of caret
+            node()->set("text", text);
+            drawCaret();
+        }
     }
 
     void drawCaret() {

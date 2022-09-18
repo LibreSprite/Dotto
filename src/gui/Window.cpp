@@ -167,6 +167,16 @@ namespace ui {
         }
     }
 
+    void Window::on(msg::TextEvent& event) {
+        if (auto focus = getFocused()) {
+            focus->processEvent(ui::TextEvent{
+                    focus.get(),
+                    event.text,
+                    event.pressedKeys
+                });
+        }
+    }
+
     void Window::on(msg::KeyDown& event) {
         if (auto focus = getFocused()) {
             focus->processEvent(ui::KeyDown{
