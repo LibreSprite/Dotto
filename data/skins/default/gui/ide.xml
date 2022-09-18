@@ -1,0 +1,189 @@
+<image id="ideoverlay"
+       multiply="rgba{11,11,22,230}"
+       absolute="true"
+       width="100%"
+       height="100%"
+       visible="false"
+       padding="50 5 5 5"
+       controller="script"
+       flow="column"
+       ><![CDATA[
+{
+    var source = [];
+    var ide = app.target;
+    var doc = app.activeDocument;
+
+    var events = {
+        init:function(){
+            for (var key in events) {
+                ide.addEventListener(key);
+            }
+            setSource([
+                "",
+                "// Dotto JS Scratchpad - Press Esc again to hide, Ctrl+Enter to run",
+                "",
+                "",
+                "for (var y = 0; y < image.height; ++y) {",
+                "    for (var x = 0; x < image.width; ++x) {",
+                "        image.setPixel(x, y, Math.random() * 0xFFFFFF | 0xFF000000);",
+                "    }",
+                "}"
+            ].join("\n"));
+
+            console.log(getSource());
+        },
+
+        click:function() {
+        },
+
+        "LCTRL+RETURN,RCTRL+RETURN":function() {
+            var image = app.activeCell.composite;
+            try {
+                eval(getSource());
+            } catch (ex) {
+                console.log("ERROR:" + ex);
+            }
+        },
+
+        "RETURN":function() {
+            var current = currentLine();
+            var line = createLine(source.indexOf(current) + 1);
+            var cursor = current.get("cursor-index");
+            var src = current.get("text");
+            current.set("text", src.substr(0, cursor));
+            line.set("text", src.substr(cursor),
+                     "cursor-index", 0);
+            line.focus();
+        },
+
+        "BACKSPACE":function() {
+            var current = currentLine();
+            var currentIndex = source.indexOf(current);
+            var prev = source[currentIndex - 1];
+            if (!prev)
+                return;
+            prev.set("text", prev.get("text") + current.get("text"));
+            source.splice(currentIndex, 1);
+            current.remove();
+        },
+
+        "RIGHT":function(){
+            var focus = false;
+            source.forEach(function(line){
+                if (focus === false && line.hasFocus()) {
+                    focus = line;
+                } else if (focus) {
+                    line.set("cursor-index", 0);
+                    line.focus();
+                    focus = null;
+                }
+            });
+        },
+
+        "DOWN":function(){
+            var focus = false;
+            var pos;
+            source.forEach(function(line){
+                if (focus === false && line.hasFocus()) {
+                    focus = line;
+                } else if (focus) {
+                    line.set("cursor-index", focus.get("cursor-index"));
+                    line.focus();
+                    focus = null;
+                }
+            });
+        },
+
+        "LEFT":function(){
+            var focus = false;
+            source.forEach(function(line){
+                if (line.hasFocus()) {
+                    if (focus) {
+                        focus.set("cursor-index", ~0 >>> 0);
+                        focus.focus();
+                        focus = null;
+                    }
+                } else if (focus !== null) {
+                    focus = line;
+                }
+            });
+        },
+
+        "UP":function(){
+            var focus = false;
+            source.forEach(function(line){
+                if (line.hasFocus()) {
+                    if (focus) {
+                        focus.set("cursor-index", line.get("cursor-index"));
+                        focus.focus();
+                        focus = null;
+                    }
+                } else if (focus !== null) {
+                    focus = line;
+                }
+            });
+        },
+
+        keydown:function(mouseX, mouseY, scancode, keycode, keyname){
+            var args = [];
+            for (var i = 5; i < arguments.length; ++i)
+                args.push(arguments[i]);
+            args.sort();
+            args = args.join("+");
+            for (var k in events) {
+                k.split(",").forEach(function(p){
+                    if (p.trim().split("+").sort().join("+") == args)
+                        events[k]();
+                });
+            }
+        }
+    };
+
+    function createLine(index) {
+        var span = ide.createChild("span", index);
+        span.apply("font", "%appdata/fonts/DejaVuSansMono.ttf",
+                   "text-transform", "",
+                   "controller", "input",
+                   "color", "#77AACC",
+                   "size", "16px",
+                   "height", "16px",
+                   "font-padding", "1 1 2 1");
+        source.splice(index, 0, span);
+        return span;
+    }
+
+    function currentLine() {
+        var focus = false;
+        source.forEach(function(line){
+            if (focus === false && line.hasFocus()) {
+                focus = line;
+            }
+        });
+        return focus;
+    }
+
+    function getSource() {
+        return source.map(function(r){return r.get("text");}).join("\n");
+    }
+
+    function setSource(raw){
+        var lines = raw.split("\n");
+        while (source.length > lines.length)
+            ide.removeChild(source.pop());
+        while (source.length < lines.length)
+            createLine(source.length);
+        for (var i = 0; i < lines.length; ++i) {
+            source[i].apply("text", lines[i]);
+        }
+    }
+
+    function onEvent(event) {
+        if (event in events) {
+            var args = [];
+            for (var i = 2; i < arguments.length; ++i)
+                args.push(arguments[i]);
+            events[event].apply(ide, args);
+        }
+    }
+}
+]]></image>
