@@ -16,6 +16,7 @@
                 label="File"
                 width="100px"/>
     <documentbar/>
+    <node id="toolconfigquick" controller="metamenu" filter="quick" flow="contain-row"/>
     <image controller="tabtarget, button"
            id="toolconfigbutton"
            visible="false"

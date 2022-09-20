@@ -92,6 +92,13 @@ public:
             changeShape();
         auto meta = Tool::getMetaProperties();
 
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "image"},
+                    {"src", *shapeName},
+                    {"fit", Fit::fit},
+                    {"quick", true}
+                }));
+
         U32 rowCount = ~U32{};
         for (auto& brush : getBrushes()) {
             if (rowCount >= 4) {
@@ -109,6 +116,7 @@ public:
             rowCount++;
             meta->push(std::make_shared<PropertySet>(PropertySet{
                         {"widget", "brushbutton"},
+                        {"label", "shape"},
                         {"icon", brush},
                         {"parent", "brushrow"},
                         {"click", FunctionRef<void()>([=]{set("shape", brush);})}
@@ -136,7 +144,8 @@ public:
                     {"value", size.value},
                     {"min", 1},
                     {"max", 128},
-                    {"resolution", 1}
+                    {"resolution", 1},
+                    {"quick", true}
                 }));
 
         meta->push(std::make_shared<PropertySet>(PropertySet{

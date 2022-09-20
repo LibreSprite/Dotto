@@ -27,19 +27,30 @@ var controllers = {
         activatetool : function() {
             var activeTool = app.activeTool;
             if (activeTool) {
-                views.toolconfigbutton.src = activeTool.get("icon");
-                views.toolconfigbutton.visible = true;
-                views.toolconfigmenu.set("meta", activeTool.get("meta"));
+                views.toolconfigbutton.apply(
+                    "src", activeTool.get("icon"),
+                    "visible", true
+                );
+                var meta = activeTool.get("meta");
+                views.toolconfigquick.set("meta", meta);
+                views.toolconfigpanel.set("meta", meta);
             } else {
                 views.toolconfigbutton.visible = false;
             }
         }
     },
 
-    toolconfigmenu : {
+    toolconfigpanel : {
         change : function() {
-            views.toolconfigmenu.set("result", null); // clean previous result
-            app.activeTool.apply(views.toolconfigmenu.get("result"));
+            views.toolconfigpanel.set("result", null); // clean previous result
+            app.activeTool.apply(views.toolconfigpanel.get("result"));
+        }
+    },
+
+    toolconfigquick : {
+        change : function() {
+            views.toolconfigquick.set("result", null); // clean previous result
+            app.activeTool.apply(views.toolconfigquick.get("result"));
         }
     },
 
