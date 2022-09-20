@@ -45,6 +45,11 @@ namespace fs {
 
         template<typename Type>
         U64 write(const Type& target) {return write(&target, sizeof(target));}
+
+        U64 write(const String& target) {return write(target.c_str(), target.size());}
+        U64 write(const char* target) {return write(target, std::string_view(target).size());}
+        U64 write(char* target) {return write(target, std::string_view(target).size());}
+        U64 write(std::string_view target) {return write(target.begin(), target.size());}
     };
 
 }
