@@ -99,6 +99,14 @@ namespace msg {
         U32 buttons;
     };
 
+    struct Copy {
+        Value value;
+    };
+
+    struct PollPaste {
+        Value value;
+    };
+
     struct TextEvent {
         const U32 windowId;
         const char* text;

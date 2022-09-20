@@ -23,7 +23,7 @@ class SDL2System : public System {
 public:
     Provides sys{this};
     ui::Node::Provides win{"sdl2Window", "window"};
-    PubSub<> pub{this};
+    PubSub<msg::Copy, msg::PollPaste> pub{this};
 
     bool running = true;
     std::shared_ptr<ui::Node> root;
@@ -75,6 +75,18 @@ public:
 
     void setMouseCursorVisible(bool visible) override {
         SDL_ShowCursor(visible);
+    }
+
+    void on(msg::Copy& event) {
+        auto str = event.value.toString();
+        SDL_SetClipboardText(str.c_str());
+    }
+
+    void on(msg::PollPaste& event) {
+        if (SDL_HasClipboardText() && event.value.empty()) {
+            std::unique_ptr<char, decltype(&SDL_free)> text{SDL_GetClipboardText(), SDL_free};
+            event.value = String{text.get()};
+        }
     }
 
     void pumpEvents() {

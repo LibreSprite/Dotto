@@ -36,6 +36,32 @@
         click:function() {
         },
 
+        "LCTRL+c,RCTRL+c":function() {
+            app.copy(getSource());
+        },
+
+        "LCTRL+v,RCTRL+v":function() {
+            var current = currentLine();
+            var line = source.indexOf(current);
+            var cursor = current.get("cursor-index")|0;
+
+            var src = app.paste();
+            if (typeof src != "string")
+                return;
+
+            var currentText = current.get("text");
+            src = currentText.substr(0, cursor) + src + currentText.substr(cursor);
+
+            src.split("\n").forEach(function(src){
+                if (!current) {
+                    current = createLine(++line);
+                    cursor = 0;
+                }
+                current.set("text", src);
+                current = null;
+            });
+        },
+
         "LCTRL+RETURN,RCTRL+RETURN":function() {
             var image = app.activeCell.composite;
             try {
