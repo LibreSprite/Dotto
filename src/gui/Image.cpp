@@ -15,7 +15,7 @@
 namespace ui {
     class Image : public Node {
         Property<String> src{this, "src", "", &Image::reload};
-        Property<String> fit{this, "fit"};
+        Property<Fit> fit{this, "fit", Fit::stretch};
         Property<std::shared_ptr<Surface>> surface{this, "surface"};
         Property<Rect> nineSlice{this, "slice"};
         PubSub<msg::Flush> pub{this};
@@ -61,25 +61,36 @@ namespace ui {
         }
 
         void draw(S32 z, Graphics& g) override {
+            if (globalRect.empty())
+                return;
             if (*surface && (*surface)->dataSize()) {
                 U32 width = (*surface)->width();
                 U32 height = (*surface)->height();
                 Rect rect{0, 0, width, height};
-                if (*fit == "") { // stretch
-                } else if (*fit == "tile") {
+                auto globalRect = this->globalRect;
+                switch (fit) {
+                case Fit::stretch:
+                    break;
+                case Fit::tile: {
                     F32 wf = static_cast<F32>(localRect.width) / width;
                     F32 hf = static_cast<F32>(localRect.height) / height;
                     rect.width *= wf;
                     rect.height *= hf;
-                } else if (*fit == "fit") {
-                    F32 wf = static_cast<F32>(width) / localRect.width;
-                    F32 hf = static_cast<F32>(height) / localRect.height;
+                    break;
+                }
+                case Fit::fit: {
+                    F32 wf = static_cast<F32>(width) / globalRect.width;
+                    F32 hf = static_cast<F32>(height) / globalRect.height;
                     F32 f = std::max(wf, hf);
-                    rect.x = rect.width/2 - static_cast<S32>(localRect.width*f)/2;
-                    rect.y = rect.height/2 - static_cast<S32>(localRect.height*f)/2;
-                    rect.width = localRect.width * f;
-                    rect.height = localRect.height * f;
-                } else if (*fit == "cover") {
+                    wf = rect.width / f;
+                    hf = rect.height / f;
+                    globalRect.x += (globalRect.width - wf) / 2;
+                    globalRect.width -= (globalRect.width - wf);
+                    globalRect.y += (globalRect.height - hf) / 2;
+                    globalRect.height -= (globalRect.height - hf);
+                    break;
+                }
+                case Fit::cover: {
                     F32 wf = static_cast<F32>(globalRect.width) / width;
                     F32 hf = static_cast<F32>(globalRect.height) / height;
                     if (wf > hf) {
@@ -91,7 +102,10 @@ namespace ui {
                     }
                     rect.width = width;
                     rect.height = height;
+                    break;
                 }
+                }
+
                 g.blit({
                         .surface = *surface,
                         .source = rect,

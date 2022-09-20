@@ -84,6 +84,24 @@ public:
         Value::addBasicConverters();
         Value::addConverter([](const String& str) -> Rect {return str;});
         Value::addConverter([](const String& str) -> FunctionRef<void()> {return str;});
+
+        Value::addConverter([](const String& str) -> Fit {
+            if (str == "fit") return Fit::fit;
+            if (str == "stretch") return Fit::stretch;
+            if (str == "cover") return Fit::cover;
+            if (str == "tile") return Fit::tile;
+            return Fit::stretch;
+        });
+        Value::addConverter([](Fit fit) -> String {
+            switch (fit) {
+            case Fit::tile: return "tile";
+            case Fit::fit: return "fit";
+            case Fit::stretch: return "stretch";
+            case Fit::cover: return "cover";
+            }
+            return "stretch";
+        });
+
         ui::Unit::addConverters();
         Color::addConverters();
     }
