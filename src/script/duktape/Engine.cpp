@@ -101,10 +101,7 @@ public:
     }
 
     bool raiseEvent(const Vector<String>& event) override {
-        auto lock = shared_from_this();
-        PushDefault engine{this};
-        InternalScriptObject::PushDefault iso{internalScriptObjectName};
-        bool success = true;
+        EngineGuard eg{this};
         try {
             duk_push_global_object(handle);
             duk_get_prop_string(handle, -1, "onEvent");
@@ -123,22 +120,18 @@ public:
         } catch (const std::exception& ex) {
 #endif
             log->write(Log::Level::Error, ex.what());
-            success = false;
+            eg.success = false;
         }
-        return success;
+        return eg.success;
     }
 
     bool eval(const String& code) override {
-        auto lock = shared_from_this();
-        PushDefault engine{this};
-        InternalScriptObject::PushDefault iso{internalScriptObjectName};
+        EngineGuard eg{this};
         initGlobals();
-
-        bool success = true;
         try {
             if (duk_peval_string(handle, code.c_str()) != 0) {
                 log->write(Log::Level::Error, scriptName, " [", duk_safe_to_string(handle, -1), "]");
-                success = false;
+                eg.success = false;
             }
             duk_pop(handle);
 #ifdef _DEBUG
@@ -147,10 +140,9 @@ public:
         } catch (const std::exception& ex) {
 #endif
             log->write(Log::Level::Error, ex.what());
-            success = false;
+            eg.success = false;
         }
-        execAfterEval(success);
-        return success;
+        return eg.success;
     }
 };
 
