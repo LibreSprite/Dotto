@@ -10,11 +10,14 @@
 class CacheImpl : public Cache {
 public:
     HashMap<String, Value> index;
-    PubSub<msg::Shutdown> pub{this};
+    PubSub<msg::Shutdown, msg::Tock> pub{this};
+    bool dirty = false;
 
     void flush() override {
         if (locked())
             return;
+
+        dirty = false;
 
         for (auto it = index.begin(); it != index.end();) {
             if (pub(msg::Flush{it->second}).isHeld()) {
@@ -32,8 +35,14 @@ public:
     }
 
     void set(const String& key, const Value& resource) override {
-        flush();
+        dirty = true;
         index[key] = resource;
+    }
+
+    void on(msg::Tock&) {
+        if (dirty) {
+            flush();
+        }
     }
 
     void on(msg::Shutdown&) {
