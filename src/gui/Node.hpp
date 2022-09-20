@@ -92,7 +92,7 @@ namespace ui {
             return tags;
         }
 
-        static std::shared_ptr<Node> fromXML(const String& widgetName);
+        static std::shared_ptr<Node> fromXML(const String& widgetName, const HashSet<String>& tags = {});
 
         virtual bool init(const PropertySet& properties);
 

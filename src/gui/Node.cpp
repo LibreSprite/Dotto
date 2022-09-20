@@ -310,17 +310,33 @@ void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
     styles.pop_back();
 }
 
-std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName) {
+std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName, const HashSet<String>& tags) {
     static U32 depth = 0;
     depth++;
     auto lock = inject<Cache>{}->lock();
     auto ret = fromXMLInternal(widgetName);
     if (!--depth && ret) {
-        std::shared_ptr<PropertySet> style = inject<FileSystem>{}->parse("%skin/gui/style.ini");
-        if (style) {
-            Vector<PropertySet*> styles = {style.get(), inject<Config>{}->properties.get()};
-            applyStyle(ret, styles);
+        Vector<PropertySet*> styles;
+        std::shared_ptr<PropertySet> skinStyle = inject<FileSystem>{}->parse("%skin/gui/style.ini");
+        if (skinStyle) {
+            styles.push_back(skinStyle.get());
+            auto& map = skinStyle->getMap();
+            for (auto& tag : tags) {
+                auto it = map.find(tag);
+                if (it != map.end() && it->second->has<std::shared_ptr<PropertySet>>()) {
+                    logI("Inherit ", tag);
+                    std::shared_ptr<PropertySet> childSet = *it->second;
+                    styles.push_back(childSet.get());
+                }
+            }
         }
+
+        auto configStyle = inject<Config>{}->properties;
+        styles.push_back(configStyle.get());
+
+        if (!styles.empty())
+            applyStyle(ret, styles);
+
         auto parentKey = ret->get("parent");
         if (parentKey && parentKey->has<String>()) {
             inject<ui::Node> root{"root"};
