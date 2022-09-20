@@ -17,7 +17,7 @@ bool Writer::writeFile(const String& path, const Value& data) {
     auto file = fsentity->get<File>();
     if (!file)
         return false;
-    if (!file->open({.write=true, .create=true}))
+    if (!file->open({.write=true, .create=true, .truncate=true}))
         return false;
     return writeFile(file, data);
 }

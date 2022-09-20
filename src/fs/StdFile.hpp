@@ -27,7 +27,8 @@ public:
     bool open(const FileOpenSettings& settings) override {
         close();
         const char* mode = settings.write ? "rb+" : "rb";
-        file = fopen(path.c_str(), mode);
+        if (!settings.write || !settings.truncate)
+            file = fopen(path.c_str(), mode);
         if (!file && settings.create && settings.write)
             file = fopen(path.c_str(), "wb+");
         return file;

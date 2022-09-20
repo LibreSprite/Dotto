@@ -10,6 +10,7 @@
 struct FileOpenSettings {
     bool write = false;
     bool create = true;
+    bool truncate = true;
 };
 
 namespace fs {
