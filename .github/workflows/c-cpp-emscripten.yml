@@ -1,4 +1,4 @@
-name: Emscripten CI
+name: Emscripten
 
 on:
   push:

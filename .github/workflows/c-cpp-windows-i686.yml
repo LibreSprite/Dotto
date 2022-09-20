@@ -1,4 +1,4 @@
-name: Windows i686 CI
+name: Windows i686
 
 on:
   push:
