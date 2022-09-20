@@ -21,6 +21,7 @@ public:
     Property<std::shared_ptr<Vector<std::shared_ptr<ui::Node>>>> widgets{this, "widgets"};
     Property<std::shared_ptr<PropertySet>> meta{this, "meta", nullptr, &MetaMenu::changeMeta};
     Property<std::shared_ptr<PropertySet>> result{this, "result", std::make_shared<PropertySet>(), &MetaMenu::readResult};
+    Property<String> filter{this, "filter", "", &MetaMenu::changeMeta};
     Property<String> containerId{this, "container"};
     bool ignoreChange = false;
     void changeMeta() {
@@ -88,7 +89,9 @@ public:
                     logE("Descriptor ", i, " without \"widget\" key.");
                     continue;
                 }
-                auto node = ui::Node::fromXML(widgetName);
+                if (!filter->empty() && !descriptor->get<bool>(filter)) {
+                    continue;
+                }
                 auto node = ui::Node::fromXML(widgetName, tags);
                 if (!node) {
                     logE("Could not create widget \"", widgetName, "\" for meta property.");
