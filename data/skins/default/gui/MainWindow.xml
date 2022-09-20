@@ -49,7 +49,9 @@
     <node id="colorpanel" flow="contain-column"/>
   </image>
 
-  <image id="toolconfigmenu" class="sidebarcontainer" visible="false" controller="metamenu" width="100px"/>
+  <image id="toolconfigmenu" class="sidebarcontainer" width="200px">
+    <node id="toolconfigpanel" controller="metamenu" flow="contain-column"/>
+  </image>
 
   <clickout id="filemenu" class="menu">
     <image class="menucontainer" width="170px" x="0">

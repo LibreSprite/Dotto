@@ -113,12 +113,6 @@ public:
             }
         }
 
-        for (auto& node : rows) {
-            height += node->height->toPixel(0, 0);
-            height += node->margin->y + node->margin->height;
-            width = std::max(node->width->toPixel(width, 0), width);
-        }
-
         auto container = containerId->empty() ? node()->shared_from_this() : node()->findChildById(containerId);
         if (!container) {
             logI("Could not find [", *containerId, "]");
@@ -129,31 +123,6 @@ public:
         for (auto& row : rows) {
             container->addChild(row);
         }
-        container->load({
-                {"width", width},
-                {"height", height}
-            });
-
-        while (container && container.get() != node()) {
-            auto& properties = container->getPropertySet();
-            auto padding = properties.get<Rect>("padding");
-            height += padding.y + padding.height;
-            width += padding.x + padding.width;
-            auto margin = properties.get<Rect>("margin");
-            height += margin.y + margin.height;
-            width += margin.x + margin.width;
-            container = container->getParent()->shared_from_this();
-        }
-
-        auto& properties = node()->getPropertySet();
-        width += properties.get<ui::Unit>("extra-width").toPixel(0,0);
-        height += properties.get<ui::Unit>("extra-height").toPixel(0,0);
-        auto padding = properties.get<Rect>("padding");
-        height += padding.y + padding.height;
-        width += padding.x + padding.width;
-
-        node()->set("width", width);
-        node()->set("height", height);
         node()->set("widgets", widgets.value);
     }
 };
