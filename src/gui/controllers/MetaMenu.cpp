@@ -76,7 +76,7 @@ public:
 
         if (*this->meta) {
             HashMap<String, std::shared_ptr<ui::Node>> map;
-
+            auto tags = this->node()->getTags();
             auto& meta = this->meta.value->getMap();
             for (std::size_t i = 0, size = this->meta.value->size(); i < size; ++i) {
                 auto it = meta.find(std::to_string(i));
@@ -89,6 +89,7 @@ public:
                     continue;
                 }
                 auto node = ui::Node::fromXML(widgetName);
+                auto node = ui::Node::fromXML(widgetName, tags);
                 if (!node) {
                     logE("Could not create widget \"", widgetName, "\" for meta property.");
                     continue;
