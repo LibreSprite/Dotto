@@ -14,19 +14,24 @@ using namespace fs;
 
 class ConfigImpl : public Config {
 public:
-    PubSub<msg::Flush> pub{this};
+    PubSub<msg::Flush, msg::Tock> pub{this};
 
     std::shared_ptr<PropertySet> style;
+
+    bool _dirty = false;
 
     bool boot() override {
         inject<FileSystem> fs;
 
-        try {
-            properties = fs->parse("%userdata/settings.ini");
-        }catch(const std::exception& ex){}
-
         if (!properties)
             properties = fs->parse("%appdata/settings.ini");
+
+        try {
+            if (std::shared_ptr<PropertySet> userprops = fs->parse("%userdata/settings.ini")) {
+                properties->append(*userprops);
+            }
+        }catch(const std::exception& ex){}
+
         if (!properties) {
             Log::write(Log::Level::Error, "Could not open settings file. Reinstalling may fix this problem.");
             return false;
@@ -39,6 +44,18 @@ public:
 
     void on(msg::Flush& flush) {
         flush.hold(style);
+    }
+
+    void dirty() override {
+        _dirty = true;
+    }
+
+    void on(msg::Tock&) {
+        if (!_dirty) {
+            return;
+        }
+        _dirty = false;
+        inject<FileSystem>{}->write("%userdata/settings.ini", properties);
     }
 
     void initLanguage(inject<FileSystem>& fs) {

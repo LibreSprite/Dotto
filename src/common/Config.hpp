@@ -17,4 +17,5 @@ public:
     std::shared_ptr<PropertySet> language;
     virtual bool boot() = 0;
     virtual String translate(const String& str, const ui::Node* context = nullptr) = 0;
+    virtual void dirty() = 0;
 };
