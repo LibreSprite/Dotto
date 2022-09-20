@@ -4,6 +4,63 @@
 
 #include <tools/Tool.hpp>
 
+void Tool::save(std::shared_ptr<PropertySet> meta) {
+    inject<Config> cfg;
+    auto settings = cfg->properties->get<std::shared_ptr<PropertySet>>(_name);
+    if (!settings) {
+        settings = std::make_shared<PropertySet>();
+        cfg->properties->set(_name, settings);
+        cfg->dirty();
+    }
+
+    auto properties = getMetaProperties();
+    auto map = getPropertySet().getMap();
+    for (auto& entry : meta->getMap()) {
+        auto cps = entry.second->get<std::shared_ptr<PropertySet>>();
+        if (auto label = cps->get<String>("label"); !label.empty()) {
+            if (auto it = map.find(label); it != map.end()) {
+                auto& settingsValue = settings->getMap()[label];
+                if (settingsValue != it->second) {
+                    settingsValue = it->second;
+                    cfg->dirty();
+                }
+            }
+        }
+    }
+}
+
+void Tool::init(const String& name) {
+    _name = name;
+    instances.insert({name, shared_from_this()});
+    load({
+            {"icon", "%appdata/icons/" + name + ".png"},
+            {"tool", name},
+            {"meta", getMetaProperties()}
+        });
+
+    inject<Config> cfg;
+    auto settings = cfg->properties->get<std::shared_ptr<PropertySet>>(name);
+    if (settings) {
+        load(*settings);
+    } else {
+        settings = std::make_shared<PropertySet>();
+        cfg->properties->set(_name, settings);
+        cfg->dirty();
+    }
+
+    auto properties = getMetaProperties();
+    auto& map = getPropertySet().getMap();
+    for (auto& entry : properties->getMap()) {
+        auto cps = entry.second->get<std::shared_ptr<PropertySet>>();
+        if (auto label = cps->get<String>("label"); !label.empty()) {
+            if (auto it = map.find(label); it != map.end()) {
+                settings->getMap().insert({label, it->second});
+                cfg->dirty();
+            }
+        }
+    }
+}
+
 void Tool::Preview::drawOutlineSolid(bool clear, Preview& preview, Surface& surface, const Rect& container, F32 scale) {
     auto color = clear ? 0 : preview.overlayColor.toU32();
     Rect dirty;

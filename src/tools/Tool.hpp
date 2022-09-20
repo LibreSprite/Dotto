@@ -16,6 +16,7 @@ class Surface;
 
 class Tool : public Injectable<Tool>, public Model, public std::enable_shared_from_this<Tool> {
     PubSub<> pub{this};
+    String _name;
 public:
     static inline HashMap<String, std::shared_ptr<Tool>> instances;
     static inline std::weak_ptr<Tool> previous;
@@ -46,18 +47,7 @@ public:
     using Path = Vector<Point3D>;
     Property<bool> enabled{this, "enabled", true};
 
-    virtual void init(const String& name) {
-        instances.insert({name, shared_from_this()});
-        load({
-                {"icon", "%appdata/icons/" + name + ".png"},
-                {"tool", name},
-                {"meta", getMetaProperties()}
-            });
-
-        if (auto properties = inject<Config>{}->properties->get<std::shared_ptr<PropertySet>>(name)) {
-            load(*properties);
-        }
-    }
+    virtual void init(const String& name);
 
     virtual Preview* getPreview() {return nullptr;}
 
@@ -70,6 +60,7 @@ public:
             auto current = getMetaProperties();
             set("meta", current);
             pub(msg::InvalidateMetaMenu{old, current});
+            save(current);
         }
     }
 
@@ -78,4 +69,5 @@ public:
     virtual void end(Surface* surface, Path& points) {}
 
     virtual std::shared_ptr<PropertySet> getMetaProperties() {return std::make_shared<PropertySet>();}
+    virtual void save(std::shared_ptr<PropertySet> meta);
 };
