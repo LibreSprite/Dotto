@@ -5,6 +5,7 @@
 #ifdef __APPLE__
 
 #include <array>
+#include <filesystem>
 #include <limits.h>
 #include <unistd.h>
 #include <mach-o/dyld.h>
@@ -51,6 +52,7 @@ public:
             if (config.empty())
                 config = home + separator + ".config";
             config += separator + "dotto";
+            std::filesystem::create_directories(config);
             mount("%userdata", "dir", config);
         }
 
