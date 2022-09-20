@@ -88,16 +88,24 @@ public:
         Color::addConverters();
     }
 
+    U32 framesUntilTock = 60;
     bool run() override {
         pub(msg::Tick{});
         pub(msg::PostTick{});
+
+        if (!--framesUntilTock) {
+            pub(msg::Tock{});
+            framesUntilTock = 60;
+        }
 
 #if !defined(EMSCRIPTEN) && !defined(__N3DS__)
         if (running) {
             clock::time_point now = clock::now();
             auto delta = now - referenceTime;
             referenceTime = now;
-            std::this_thread::sleep_for(std::chrono::milliseconds{1000 / 60} - delta);
+            if (delta < std::chrono::milliseconds{1000 / 60}) {
+                std::this_thread::sleep_for(std::chrono::milliseconds{1000 / 60} - delta);
+            }
         }
 #endif
 
