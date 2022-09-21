@@ -164,6 +164,47 @@ static Engine::Shared<V8Engine> registration("js", {"js"});
 
 class V8ScriptObject : public InternalScriptObject {
 public:
+    struct V8Ref : public EngineObjRef {
+        std::weak_ptr<V8Engine> engine = inject<Engine>{}.shared<V8Engine>();
+
+        V8Ref(v8::Local<v8::Value>& local) {
+            auto engine = this->engine.lock();
+            auto isolate = engine->m_isolate;
+            auto global = engine->context()->Global();
+            Check(global->Set(engine->context(), ToLocal(v8::String::NewFromUtf8(isolate, id.c_str())), local));
+        }
+
+        script::Value call(const Vector<script::Value>& args) override {
+            auto engine = this->engine.lock();
+            if (!engine)
+                return {};
+            Engine::Guard eg{engine.get()};
+            auto isolate = engine->m_isolate;
+            v8::HandleScope handle_scope(isolate);
+            auto global = engine->context()->Global();
+            auto func = ToLocal(global->Get(engine->context(), ToLocal(v8::String::NewFromUtf8(isolate, id.c_str()))));
+            script::Value ret;
+            if (!func.IsEmpty() && func->IsFunction()) {
+                Vector<v8::Local<v8::Value>> argv;
+                argv.reserve(args.size());
+                for (auto& arg : args) {
+                    argv.emplace_back(returnValue(isolate, arg));
+                }
+                auto rv = ToLocal(func.As<v8::Function>()->Call(engine->context(), global, argv.size(), argv.data()));
+                ret = getValue(isolate, rv);
+            }
+            return ret;
+        }
+
+        ~V8Ref() {
+            if (auto engine = this->engine.lock()) {
+                auto isolate = engine->m_isolate;
+                v8::HandleScope handle_scope(isolate);
+                auto global = engine->context()->Global();
+                Check(global->Delete(engine->context(), ToLocal(v8::String::NewFromUtf8(isolate, id.c_str()))));
+            }
+        }
+    };
 
     static script::Value getValue(v8::Isolate *isolate, v8::Local<v8::Value> local) {
         if (local.IsEmpty() || local->IsNullOrUndefined())
@@ -199,6 +240,10 @@ public:
                 store->ByteLength(),
                 false
             };
+        }
+
+        if (local->IsFunction()) {
+            return {std::make_shared<V8Ref>(local)};
         }
 
         if (local->IsObject()) {
