@@ -10,7 +10,7 @@
           margin:0;
           padding:0;
       }
-      #canvas{
+      #canvas, #textarea{
           position: absolute;
           width: 100%;
           height: 100%;
@@ -18,8 +18,8 @@
     </style>
   </head>
   <body>
-    <canvas id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
     <textarea id=output rows=8></textarea>
+    <canvas id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
     <script>
       var statusElement = document.getElementById("status"),
     progressElement = document.getElementById("progress"),
@@ -43,14 +43,16 @@
         },
         totalDependencies: 0,
         monitorRunDependencies: function(e) {
-            this.totalDependencies = Math.max(this.totalDependencies, e), Module.setStatus(e ? "Preparing... (" + (this.totalDependencies - e) + "/" + this.totalDependencies + ")" : "All downloads complete.")
+            this.totalDependencies = Math.max(this.totalDependencies, e), Module.print(e ? "Preparing... (" + (this.totalDependencies - e) + "/" + this.totalDependencies + ")" : "All downloads complete.")
         }
     };
-Module.setStatus("Downloading..."), window.onerror = function(e) {
-    Module.setStatus("Exception thrown, see JavaScript console"), Module.setStatus = function(e) {
-        e && Module.printErr("[post-exception status] " + e)
+    Module.print("Downloading...");
+    window.onerror = function(e) {
+        Module.print("Exception thrown, see JavaScript console", e);
+        Module.setStatus = function(e) {
+            e && Module.print("[post-exception status] " + e)
+        }
     }
-}
     </script>
     <script async src=dotto.js></script>
   </body>
