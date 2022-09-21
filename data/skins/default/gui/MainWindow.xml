@@ -15,6 +15,7 @@
                 click="toggleui id=filemenu"
                 label="File"
                 width="100px"/>
+    <node width="100%"/>
     <node id="toolconfigquick" controller="metamenu" filter="quick" flow="contain-row"/>
     <image controller="tabtarget, button"
            id="toolconfigbutton"
