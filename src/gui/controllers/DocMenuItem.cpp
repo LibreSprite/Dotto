@@ -54,7 +54,9 @@ public:
         if (!_doc) {
             set("doc", msg.doc.get());
         }
-        if (msg.doc.get() == _doc) {
+        auto isActive = msg.doc.get() == _doc;
+        node()->set("is-active", isActive);
+        if (isActive) {
             node()->set("state", "active");
         } else {
             node()->set("state", "enabled");

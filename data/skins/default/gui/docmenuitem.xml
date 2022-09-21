@@ -1,9 +1,12 @@
-<node width="100%" flow="row" controller="docmenuitem">
-<menubutton controller="docmenuitem"/>
-  <image controller=" button, docmenuitem" 
-        src="%skin/close.png"
-        width="15px"
-        height="10px" 
-        margin="0 8 8 8"
-        click="closefile"/>
-</node>
+<menubutton controller="docmenuitem" forward="labelspan.text=label, close.visible=is-active">
+  <image id="close"
+         controller="button"
+         src="%skin/close.png"
+         absolute="true"
+         x="right"
+         y="center"
+         width="20px"
+         height="20px"
+         margin="0 0 8 0"
+         click="closefile"/>
+</menubutton>
