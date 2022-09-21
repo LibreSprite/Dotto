@@ -33,32 +33,32 @@ namespace script {
         String internalScriptObjectName;
         U32 reentrantCount = 0;
 
-        class EngineGuard {
-            std::shared_ptr<Engine> engine;
-            Engine::PushDefault engineDefault;
-            InternalScriptObject::PushDefault ISO;
-        public:
-            bool success = true;
-            EngineGuard(Engine* engine) :
-                engine{engine->shared_from_this()},
-                engineDefault{engine},
-                ISO{engine->internalScriptObjectName} {
-                engine->reentrantCount++;
-            }
-            ~EngineGuard() {
-                engine->reentrantCount--;
-                if (!engine->reentrantCount) {
-                    engine->execAfterEval(success);
-                }
-            }
-        };
-
         Engine(const String& internalScriptObjectName) : internalScriptObjectName{internalScriptObjectName} {}
 
     public:
         String scriptName;
 
         const String& getInternalScriptObjectName() {return internalScriptObjectName;}
+
+        class Guard {
+            std::shared_ptr<Engine> engine;
+            Engine::PushDefault engineDefault;
+            InternalScriptObject::PushDefault ISO;
+        public:
+            bool success = true;
+            Guard(Engine* engine) :
+                engine{engine->shared_from_this()},
+                engineDefault{engine},
+                ISO{engine->internalScriptObjectName} {
+                engine->reentrantCount++;
+            }
+            ~Guard() {
+                engine->reentrantCount--;
+                if (!engine->reentrantCount) {
+                    engine->execAfterEval(success);
+                }
+            }
+        };
 
         void initGlobals() {
             if (globalScriptObjects.empty())

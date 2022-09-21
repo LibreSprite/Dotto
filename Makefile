@@ -1,6 +1,8 @@
 LN_FLAGS :=
 CPP_FLAGS :=
 C_FLAGS :=
+LIB_DIRS :=
+SRC_DIRS :=
 
 ifeq ($(OS),Windows_NT)
     CC = /mingw32/bin/i686-w64-mingw32-gcc
