@@ -15,7 +15,6 @@
                 click="toggleui id=filemenu"
                 label="File"
                 width="100px"/>
-    <documentbar/>
     <node id="toolconfigquick" controller="metamenu" filter="quick" flow="contain-row"/>
     <image controller="tabtarget, button"
            id="toolconfigbutton"
@@ -35,6 +34,8 @@
           replacement="$1:$2:$3:$4"
           alwaysupdate="true"/>
   </image>
+
+  <documentbar absolute="true" x="0" y="35" height="35"/>
 
   <node controller="toolbox" id="toolbox" extra-height="35"/>
 
