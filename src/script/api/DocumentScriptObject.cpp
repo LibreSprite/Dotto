@@ -30,6 +30,13 @@ public:
             }
             return nullptr;
         });
+
+        addProperty("path", [=]{
+            if (auto doc = weak.lock()) {
+                return doc->path();
+            }
+            return String{};
+        });
     }
 
     Value getWrapped() override {
