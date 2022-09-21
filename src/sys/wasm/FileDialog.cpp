@@ -8,6 +8,7 @@
 #include <fs/FileDialog.hpp>
 #include <log/Log.hpp>
 #include <task/TaskManager.hpp>
+#include <gui/Node.hpp>
 
 class WasmFileDialog : public FileDialog {
 public:
@@ -35,23 +36,26 @@ public:
     }
 
     void save(Callback&& callback) override {
-        handle = taskManager->add(
-            [
-                filters = this->filters,
-                defaultPath = this->defaultPath,
-                filterDescription = this->filterDescription,
-                title = this->title,
-                allowMultiple = this->allowMultiple
-             ]()->Value{
-                return String{};
-            },
-            [=](Value&& result){
-                if (result.has<String>()) {
-                    callback(Vector<String>{result.get<String>()});
-                } else {
-                    callback({});
-                }
-            });
+        if (auto node = ui::Node::fromXML("websave")) {
+            node->set("default-path", this->defaultPath);
+        }
+        // handle = taskManager->add(
+        //     [
+        //         filters = this->filters,
+        //         defaultPath = this->defaultPath,
+        //         filterDescription = this->filterDescription,
+        //         title = this->title,
+        //         allowMultiple = this->allowMultiple
+        //      ]()->Value{
+        //         return String{};
+        //     },
+        //     [=](Value&& result){
+        //         if (result.has<String>()) {
+        //             callback(Vector<String>{result.get<String>()});
+        //         } else {
+        //             callback({});
+        //         }
+        //     });
     }
 };
 
