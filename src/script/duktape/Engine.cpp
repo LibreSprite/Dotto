@@ -101,7 +101,7 @@ public:
     }
 
     bool raiseEvent(const Vector<String>& event) override {
-        EngineGuard eg{this};
+        Guard eg{this};
         try {
             duk_push_global_object(handle);
             duk_get_prop_string(handle, -1, "onEvent");
@@ -126,7 +126,7 @@ public:
     }
 
     bool eval(const String& code) override {
-        EngineGuard eg{this};
+        Guard eg{this};
         initGlobals();
         try {
             if (duk_peval_string(handle, code.c_str()) != 0) {
@@ -182,8 +182,7 @@ public:
             auto lock = engine.lock();
             if (!lock)
                 return {};
-            Engine::PushDefault engine{lock.get()};
-            InternalScriptObject::PushDefault iso{lock->getInternalScriptObjectName()};
+            Engine::Guard eg{lock.get()};
             try {
                 push();
                 std::size_t argc = 0;
