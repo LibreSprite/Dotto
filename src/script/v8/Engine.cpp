@@ -65,11 +65,7 @@ public:
     }
 
     bool raiseEvent(const Vector<String>& event) override {
-        PushDefault engine{this};
-        InternalScriptObject::PushDefault iso{internalScriptObjectName};
-
-        auto lock = shared_from_this();
-        bool success = true;
+        Guard eg{this};
         try {
             v8::Isolate::Scope isolatescope(m_isolate);
             // Create a stack-allocated handle scope.
@@ -104,23 +100,18 @@ public:
                 } else {
                     log->write(Log::Level::Error, *utf8);
                 }
-                success = false;
+                eg.success = false;
             }
 
         } catch (const std::exception& ex) {
             log->write(Log::Level::Error, ex.what());
-            success = false;
+            eg.success = false;
         }
-        execAfterEval(success);
-        return success;
+        return eg.success;
     }
 
     bool eval(const String& code) override {
-        PushDefault engine{this};
-        InternalScriptObject::PushDefault iso{internalScriptObjectName};
-
-        auto lock = shared_from_this();
-        bool success = true;
+        Guard eg{this};
         try {
             v8::Isolate::Scope isolatescope(m_isolate);
             // Create a stack-allocated handle scope.
@@ -158,15 +149,14 @@ public:
                         log->write(Log::Level::Error, *utf8);
                     }
 
-                    success = false;
+                    eg.success = false;
                 }
             }
         } catch (const std::exception& ex) {
             log->write(Log::Level::Error, ex.what());
-            success = false;
+            eg.success = false;
         }
-        execAfterEval(success);
-        return success;
+        return eg.success;
     }
 };
 
