@@ -14,11 +14,13 @@
           position: absolute;
           width: 100%;
           height: 100%;
+          top: 0;
+          left: 0;
       }
     </style>
   </head>
   <body>
-    <textarea id=output rows=8></textarea>
+    <textarea id=output resize=none></textarea>
     <canvas id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
     <script>
       var statusElement = document.getElementById("status"),
