@@ -1,4 +1,4 @@
-<image controller="tabtarget, button"
+<image controller="tabtarget, button, row"
        forward="labelspan.text=label">
   <span id="labelspan" inputEnabled="false"/>
 </image>

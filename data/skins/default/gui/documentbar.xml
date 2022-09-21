@@ -5,4 +5,5 @@ function onEvent(event) {
   if (event == "opendocument")
     node.createChild("docmenuitem");
 }
-]]></node>
+]]>
+</node>
