@@ -18,87 +18,86 @@
 
 class HTTPScriptObject : public script::ScriptObject {
 public:
-    TaskHandle handle;
-
-    enum class State {
-        Ready,
-        Busy,
-        Error
-    } state = State::Ready;
-
-    U32 code = 0;
-    Vector<U8> bytes;
-    String error;
-    String url;
-    std::shared_ptr<script::Engine> engine;
+    enum class Method {
+        Get,
+        Post,
+    };
 
     HTTPScriptObject() {
-        addMethod("get", this, &HTTPScriptObject::get);
-        addProperty("state", [=]{return (int) state;});
-        addProperty("code", [=]{return code;});
-        addProperty("text", [=]{return String{bytes.begin(), bytes.end()};});
-        addProperty("url", [=]{return url;});
-        addProperty("error", [=]{return error;});
+        addFunction("get", [=]{request(Method::Get); return true;});
+        addFunction("post", [=]{request(Method::Post); return true;});
         makeGlobal("http");
     }
 
-    void get(const String& url){
-        engine = getEngine().shared_from_this();
+    void request(Method method){
+        struct Request {
+            int status = 400;
+            String url;
+            String postBody;
+            String contentType = "application/json";
+            Method method;
+            String result;
+            TaskHandle handle;
+            std::shared_ptr<script::EngineObjRef> callback;
+            std::shared_ptr<script::Engine> engine;
+        };
+        auto request = std::make_shared<Request>();
 
-        String event = "get";
+        request->method = method;
+        request->engine = getEngine().shared_from_this();
+
+        String key;
         auto& args = script::Function::varArgs();
-        if (args.size() >= 2)
-            event = args[1].str();
-
-        if (state == State::Busy) {
-            logE("Busy, can't request for [", url, "]");
-            return;
+        for (std::size_t i = 0, max = args.size(); i + 1 < max; i += 2) {
+            key = args[i].str();
+            auto& val = args[i + 1];
+            if (i == 0) {
+                request->url = key;
+                request->callback = val;
+            } else if (key == "body") {
+                request->postBody = val.str();
+            }
         }
 
-        code = 0;
-        bytes.clear();
-        this->url = url;
-        state = State::Busy;
-        std::weak_ptr<HTTPScriptObject> weak{std::static_pointer_cast<HTTPScriptObject>(shared_from_this())};
-        handle = inject<TaskManager>{}->add(
+        request->handle = inject<TaskManager>{}->add(
             [=]()->Value{
                 try {
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
                     static std::regex expr("^(https?://[^/]+)(.*$)");
                     std::cmatch match;
-                    std::regex_match(url.c_str(), match, expr);
-                    if (match.empty())
-                        return "Invalid URL:" + url;
+                    std::regex_match(request->url.c_str(), match, expr);
+
+                    if (match.empty()) {
+                        logI(request->result = "Invalid URL:" + request->url);
+                        return request;
+                    }
+
                     httplib::Client req{match[1].str().c_str()};
-                    auto resp = req.Get(match[2].str().c_str());
-                    if (!resp)
-                        return httplib::to_string(resp.error());
-                    bytes.insert(bytes.end(), resp->body.begin(), resp->body.end());
-                    return int(resp->status);
+                    auto resp = request->method == Method::Get ? req.Get(match[2].str().c_str()) :
+                        req.Post(match[2].str().c_str(), request->postBody, request->contentType.c_str());
+
+                    if (resp) {
+                        request->result = std::move(resp->body);
+                        request->status = resp->status;
+                    } else {
+                        request->result = httplib::to_string(resp.error());
+                    }
 #else
                     http::Request req{url};
                     auto resp = req.send("GET");
-                    bytes = std::move(resp.body);
-                    return int(resp.status.code);
+                    request->result = std::move(resp.body);
 #endif
                 } catch (const std::exception& ex) {
-                    return String{ex.what()};
+                    request->result = ex.what();
                 }
+                return request;
             },
-            [=](Value&& resp){
-                auto that = weak.lock();
-                if (!that)
-                    return;
-                if (resp.has<int>()) {
-                    that->code = resp.get<int>();
-                    that->state = State::Ready;
-                } else if (resp.has<String>()) {
-                    that->state = State::Error;
-                    logI("HTTP Get Error: ", resp.get<String>());
+            [=](Value&& vreq){
+                logI("End req");
+                if (auto req = vreq.get<std::shared_ptr<Request>>(); req && req->callback) {
+                    logI("Got req ", req->status);
+                    req->callback->call({req->status, std::move(req->result)});
                 }
-                auto copy = engine;
-                engine.reset();
-                copy->raiseEvent({event, std::to_string(that->code)});
             });
     }
 };
