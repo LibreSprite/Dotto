@@ -51,6 +51,7 @@ public:
 
             auto key = trim(line.substr(0, sep));
             auto value = trim(line.substr(sep + 1));
+            value = std::regex_replace(value.c_str(), std::regex("\u2028"), "\n");
             subset->set(key, value);
         }
 

@@ -60,7 +60,7 @@ public:
                 }
                 file.write(entry.key);
                 file.write(" = ");
-                file.write(str);
+                file.write(std::regex_replace(str.c_str(), std::regex("\n"), "\u2028"));
                 file.write("\n");
             }
         }
