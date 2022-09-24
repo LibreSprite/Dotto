@@ -13,34 +13,12 @@
     var ide = app.target;
     var doc = app.activeDocument;
 
-    var events = {
-        init:function(){
-            for (var key in events) {
-                ide.addEventListener(key);
-            }
-            setSource(config.get("ide.source") || [
-                "",
-                "// Dotto JS Scratchpad - Press Esc again to hide, Ctrl+Enter to run",
-                "",
-                "",
-                "for (var y = 0; y < image.height; ++y) {",
-                "    for (var x = 0; x < image.width; ++x) {",
-                "        image.setPixel(x, y, Math.random() * 0xFFFFFF | 0xFF000000);",
-                "    }",
-                "}"
-            ].join("\n"));
-
-            console.log(getSource());
-        },
-
-        click:function() {
-        },
-
-        "LCTRL+c,RCTRL+c":function() {
+    var actions = {
+        copy:function() {
             app.copy(getSource());
         },
 
-        "LCTRL+v,RCTRL+v":function() {
+        paste:function() {
             var current = currentLine();
             var line = source.indexOf(current);
             var cursor = current.get("cursor-index")|0;
@@ -52,7 +30,7 @@
             var currentText = current.get("text");
             src = currentText.substr(0, cursor) + src + currentText.substr(cursor);
 
-            src.split("\n").forEach(function(src){
+            src.split(/\r?\n/).forEach(function(src){
                 if (!current) {
                     current = createLine(++line);
                     cursor = 0;
@@ -62,7 +40,7 @@
             });
         },
 
-        "LCTRL+RETURN,RCTRL+RETURN":function() {
+        execute:function() {
             save();
             var image = app.activeCell.composite;
             try {
@@ -72,7 +50,7 @@
             }
         },
 
-        "RETURN":function() {
+        insertLine:function() {
             var current = currentLine();
             var line = createLine(source.indexOf(current) + 1);
             var cursor = current.get("cursor-index");
@@ -83,7 +61,7 @@
             line.focus();
         },
 
-        "BACKSPACE":function() {
+        delChar:function() {
             var current = currentLine();
             var currentIndex = source.indexOf(current);
             var prev = source[currentIndex - 1];
@@ -94,7 +72,7 @@
             current.remove();
         },
 
-        "RIGHT":function(){
+        forwardChar:function(){
             var focus = false;
             source.forEach(function(line){
                 if (focus === false && line.hasFocus()) {
@@ -107,7 +85,7 @@
             });
         },
 
-        "DOWN":function(){
+        nextLine:function(){
             var focus = false;
             var pos;
             source.forEach(function(line){
@@ -121,7 +99,7 @@
             });
         },
 
-        "LEFT":function(){
+        backChar:function(){
             var focus = false;
             source.forEach(function(line){
                 if (line.hasFocus()) {
@@ -136,7 +114,7 @@
             });
         },
 
-        "UP":function(){
+        prevLine:function(){
             var focus = false;
             source.forEach(function(line){
                 if (line.hasFocus()) {
@@ -149,6 +127,29 @@
                     focus = line;
                 }
             });
+        }
+    };
+
+    var events = {
+        init:function(){
+            for (var key in events) {
+                ide.addEventListener(key);
+            }
+            setSource(config.get("ide.source") || app.parse("%appdata/scratchpad.js", "txt"));
+            if (source[0])
+                source[0].focus();
+            var shortcuts = config.get("ide.shortcuts");
+            shortcuts.keys().split("\n").forEach(function(key) {
+                var value = shortcuts.get(key);
+                if (typeof actions[value] == "function") {
+                    events[key] = actions[value];
+                } else {
+                    console.log("Unknown IDE action [" + value + "] for shortcut [" + key + "]");
+                }
+            });
+        },
+
+        click:function() {
         },
 
         keydown:function(mouseX, mouseY, scancode, keycode, keyname){
@@ -198,7 +199,7 @@
     }
 
     function setSource(raw){
-        var lines = raw.split("\n");
+        var lines = raw.split(/\r?\n/);
         while (source.length > lines.length)
             ide.removeChild(source.pop());
         while (source.length < lines.length)
