@@ -61,6 +61,16 @@ public:
             }
             return nullptr;
         });
+
+        addFunction("keys", [=]{
+            Vector<String> keys;
+            if (auto model = weak.lock()) {
+                for (auto& [key, value] : model->getMap()) {
+                    keys.push_back(key);
+                }
+            }
+            return join(keys, "\n");
+        });
     }
 };
 
