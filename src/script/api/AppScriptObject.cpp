@@ -91,6 +91,16 @@ public:
             return true;
         });
 
+        addFunction("createSurface", [=](U32 w, U32 h) {
+            std::shared_ptr<Surface> surface;
+            if (!w || !h) {
+            } else {
+                surface = std::make_shared<Surface>();
+                surface->resize(w, h);
+            }
+            return getEngine().toValue(surface);
+        });
+
         addFunction("addTool", [=](const String& name) {
             script::Engine::Provides engine{getEngine().shared_from_this(), "toolengine"};
             script::ScriptObject::Provides app{shared_from_this(), "toolapp"};
