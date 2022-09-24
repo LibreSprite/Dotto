@@ -55,7 +55,9 @@ public:
             return;
         }
         _dirty = false;
-        inject<FileSystem>{}->write("%userdata/settings.ini", properties);
+        if (!inject<FileSystem>{}->write("%userdata/settings.ini", properties)) {
+            logE("Could not save user settings.");
+        }
     }
 
     void initLanguage(inject<FileSystem>& fs) {

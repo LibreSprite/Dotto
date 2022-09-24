@@ -18,7 +18,7 @@
             for (var key in events) {
                 ide.addEventListener(key);
             }
-            setSource([
+            setSource(config.get("ide.source") || [
                 "",
                 "// Dotto JS Scratchpad - Press Esc again to hide, Ctrl+Enter to run",
                 "",
@@ -63,6 +63,7 @@
         },
 
         "LCTRL+RETURN,RCTRL+RETURN":function() {
+            save();
             var image = app.activeCell.composite;
             try {
                 eval(getSource());
@@ -176,6 +177,10 @@
                    "font-padding", "1 1 2 1");
         source.splice(index, 0, span);
         return span;
+    }
+
+    function save() {
+        config.set("ide.source", getSource());
     }
 
     function currentLine() {
