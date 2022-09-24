@@ -4,16 +4,17 @@
 
 #ifdef __WINDOWS__
 
-#include <windows.h>
 #include <codecvt>
+#include <filesystem>
 #include <shlobj.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <windows.h>
 
 #include <common/String.hpp>
 #include <fs/FileSystem.hpp>
 #include <fs/Folder.hpp>
 #include <fs/StdFile.hpp>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 class WindowsRootDir : public fs::RootFolder {
 public:
@@ -37,6 +38,7 @@ public:
             if (config.empty())
                 config = home;
             config += separator + "dotto";
+            std::filesystem::create_directories(config);
             logI("UserData: ", home);
             mount("%userdata", "dir", config);
         }
