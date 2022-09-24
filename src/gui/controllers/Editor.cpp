@@ -168,6 +168,7 @@ public:
                     container->globalRect.y
                 });
         } else if (layerEditor) {
+            on(msg::Tick{});
             layerEditor->setGlobalCanvas(canvas->globalRect);
             layerEditor->setGlobalOverlay(node()->globalRect);
             layerEditor->setGlobalMouse({event.globalX, event.globalY, msg::MouseMove::pressure * 255});
@@ -178,6 +179,7 @@ public:
 
     void eventHandler(const ui::MouseUp& event) {
         if (layerEditor) {
+            on(msg::Tick{});
             layerEditor->setButtons(event.buttons);
             layerEditor->update();
         }
@@ -190,6 +192,7 @@ public:
     void eventHandler(const ui::MouseLeave&) {
         system->setMouseCursorVisible(true);
         if (layerEditor) {
+            on(msg::Tick{});
             layerEditor->setButtons(0);
             layerEditor->update();
             layerEditor->clearOverlays();
@@ -198,6 +201,7 @@ public:
 
     void eventHandler(const ui::MouseMove& event) {
         if (layerEditor) {
+            on(msg::Tick{});
             layerEditor->setGlobalCanvas(canvas->globalRect);
             layerEditor->setGlobalOverlay(node()->globalRect);
             layerEditor->setGlobalMouse({event.globalX, event.globalY, msg::MouseMove::pressure * 255});
@@ -339,7 +343,7 @@ public:
             msg.editor = node();
     }
 
-    void on(msg::Tick&) {
+    void on(const msg::Tick&) {
         if (needsGridRedraw) {
             if (layerEditor) {
                 layerEditor->setGlobalCanvas(canvas->globalRect);

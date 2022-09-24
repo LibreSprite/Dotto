@@ -56,6 +56,8 @@ public:
                 request->callback = val;
             } else if (key == "body") {
                 request->postBody = val.str();
+            } else if (key == "contentType") {
+                request->contentType = val.str();
             }
         }
 

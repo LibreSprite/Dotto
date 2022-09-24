@@ -37,7 +37,6 @@ public:
                 if (i == max - 1) {
                     properties->set(parts[i], value.get());
                     config->dirty();
-                    logI("Set ", parts[i], value);
                     return true;
                 }
                 auto& map = properties->getMap();
