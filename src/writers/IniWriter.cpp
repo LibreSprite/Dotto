@@ -77,4 +77,4 @@ public:
     }
 };
 
-static Writer::Shared<IniWriter> ini{"ini", {"*.ini"}};
+static Writer::Shared<IniWriter> ini{"ini", {"*.ini", typeid(std::shared_ptr<PropertySet>).name()}};

@@ -7,6 +7,7 @@
 
 #include <common/Surface.hpp>
 #include <common/Writer.hpp>
+#include <doc/Document.hpp>
 #include <log/Log.hpp>
 
 using namespace fs;
@@ -79,5 +80,10 @@ public:
     }
 };
 
-static Writer::Shared<PngWriter> png{"png", {"*.png"}};
+static Writer::Shared<PngWriter> png{"png", {
+        "*.png",
+        typeid(std::shared_ptr<Surface>).name(),
+        typeid(std::shared_ptr<Document>).name()
+    }
+};
 #endif

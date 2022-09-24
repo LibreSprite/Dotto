@@ -6,6 +6,7 @@
 
 #include <common/Surface.hpp>
 #include <common/Writer.hpp>
+#include <doc/Document.hpp>
 #include <sdl2/SDL2Image.hpp>
 
 class JpgWriter : public SimpleImageWriter {
@@ -15,7 +16,18 @@ public:
     }
 };
 
-static Writer::Shared<JpgWriter> jpg{"jpg", {"*.jpg"}};
-static Writer::Shared<JpgWriter> jpeg{"jpeg", {"*.jpeg"}};
+static Writer::Shared<JpgWriter> jpg{"jpg", {
+        "*.jpg",
+        typeid(std::shared_ptr<Surface>).name(),
+        typeid(std::shared_ptr<Document>).name()
+    }
+};
+
+static Writer::Shared<JpgWriter> jpeg{"jpeg", {
+        "*.jpeg",
+        typeid(std::shared_ptr<Surface>).name(),
+        typeid(std::shared_ptr<Document>).name()
+    }
+};
 
 #endif

@@ -6,6 +6,7 @@
 
 #include <common/Surface.hpp>
 #include <common/Writer.hpp>
+#include <doc/Document.hpp>
 #include <log/Log.hpp>
 
 using namespace fs;
@@ -27,4 +28,9 @@ public:
     }
 };
 
-static Writer::Shared<QoiWriter> qoi{"qoi", {"*.qoi"}};
+static Writer::Shared<QoiWriter> qoi{"qoi", {
+        "*.qoi",
+        typeid(std::shared_ptr<Surface>).name(),
+        typeid(std::shared_ptr<Document>).name()
+    }
+};

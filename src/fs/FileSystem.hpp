@@ -14,7 +14,7 @@ protected:
 public:
     Provides p{this};
     Vector<String> splitPath(const String& path);
-    String extension(const String& path);
+    static String extension(const String& path);
     std::shared_ptr<fs::FSEntity> getRoot() {return root;}
     virtual std::shared_ptr<fs::FSEntity> find(const String& path, const String& missingType = "std");
     virtual bool boot();

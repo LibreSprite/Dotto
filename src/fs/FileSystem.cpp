@@ -17,8 +17,23 @@ Value FileSystem::parse(const String& path, const String& ext) {
 }
 
 bool FileSystem::write(const String& path, const Value& data) {
-    inject<Writer> writer{inject<FileSystem>{}->extension(path)};
-    return writer && writer->writeFile(path, data);
+    auto ext = extension(path);
+    String dataTypeName = data.typeName();
+    for (auto& [id, entry] : Writer::getRegistry()) {
+        if (id == ext && entry.hasFlag(dataTypeName)) {
+            if (inject<Writer>{id}->writeFile(path, data)) {
+                return true;
+            }
+        }
+    }
+    for (auto& [id, entry] : Writer::getRegistry()) {
+        if (!id.empty() && entry.hasFlag("*") && entry.hasFlag(dataTypeName)) {
+            if (inject<Writer>{id}->writeFile(path, data)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool FileSystem::boot() {

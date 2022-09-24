@@ -131,14 +131,19 @@ public:
             return true;
         });
 
-        addFunction("parse", [=](const String& path, const String& ext) {
+        addFunction("parse", [=](const String& path) {
+            String ext;
+            if (script::Function::varArgs().size() >= 2)
+                ext = script::Function::varArgs()[1].str();
             return getEngine().toValue(FileSystem::parse(path, ext));
         });
 
         addFunction("write", [=](const String& path) {
             auto& args = script::Function::varArgs();
-            if (args.size() < 2)
+            if (args.size() < 2) {
+                logE("Not enough arguments to app.write");
                 return false;
+            }
 
             auto& argv = args[1];
             Value value;
@@ -148,10 +153,9 @@ public:
                 value = argv.get();
 
             if (!FileSystem::write(path, value)) {
-                logE("Could not save ", value.toString(), " to ", path);
+                logE("Could not save ", value.typeName(), " to ", path);
                 return false;
             }
-
             return true;
         });
 
