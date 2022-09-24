@@ -7,7 +7,11 @@
 class ConsoleLog : public Log {
 public:
     void internalWrite(const char* string) override {
-        std::cout << string;
+        if (string == std::string_view{"\n"}) {
+            std::cout << std::endl;
+        } else {
+            std::cout << string;
+        }
     }
 };
 
