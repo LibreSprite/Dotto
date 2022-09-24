@@ -73,7 +73,7 @@ public:
                 return left.first < right.first;
             });
             for (auto& entry : files)
-                entry.second->parse(true);
+                entry.second->parse("", true);
         }
         pub(msg::BootComplete{});
         auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - referenceTime);

@@ -25,7 +25,7 @@ namespace fs {
             return std::dynamic_pointer_cast<Type>(shared_from_this());
         }
 
-        Value parse(bool silent = false);
+        Value parse(const String& ext, bool silent = false);
 
         static inline String separator;
     };

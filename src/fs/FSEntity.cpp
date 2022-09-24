@@ -9,7 +9,7 @@
 
 using namespace fs;
 
-Value FSEntity::parse(bool silent) {
+Value FSEntity::parse(const String& ext, bool silent) {
     auto file = get<File>();
     if (!file) {
         logE("Could not get File to parse");
@@ -26,7 +26,7 @@ Value FSEntity::parse(bool silent) {
         return nullptr;
     }
 
-    if (auto parser = inject<Parser>{silent ? InjectSilent::Yes : InjectSilent::No, file->type()}) {
+    if (auto parser = inject<Parser>{silent ? InjectSilent::Yes : InjectSilent::No, ext.empty() ? file->type() : ext}) {
         value = parser->parseFile(file);
         if (!value.empty() && parser->canCache())
             cache->set(cacheKey, value);

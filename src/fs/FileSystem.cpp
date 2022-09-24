@@ -10,9 +10,9 @@
 
 using namespace fs;
 
-Value FileSystem::parse(const String& path) {
+Value FileSystem::parse(const String& path, const String& ext) {
     if (auto fsentity = inject<FileSystem>{}->find(path))
-        return fsentity->parse();
+        return fsentity->parse(ext);
     return nullptr;
 }
 

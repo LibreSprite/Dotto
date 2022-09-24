@@ -18,6 +18,6 @@ public:
     std::shared_ptr<fs::FSEntity> getRoot() {return root;}
     virtual std::shared_ptr<fs::FSEntity> find(const String& path, const String& missingType = "std");
     virtual bool boot();
-    static Value parse(const String& path);
+    static Value parse(const String& path, const String& ext = "");
     static bool write(const String& path, const Value& data);
 };

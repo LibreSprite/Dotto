@@ -131,8 +131,8 @@ public:
             return true;
         });
 
-        addFunction("parse", [=](const String& path) {
-            return getEngine().toValue(FileSystem::parse(path));
+        addFunction("parse", [=](const String& path, const String& ext) {
+            return getEngine().toValue(FileSystem::parse(path, ext));
         });
 
         addFunction("write", [=](const String& path) {
