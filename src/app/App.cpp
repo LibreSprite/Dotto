@@ -84,6 +84,9 @@ public:
         Value::addBasicConverters();
         Value::addConverter([](const String& str) -> Rect {return str;});
         Value::addConverter([](const String& str) -> FunctionRef<void()> {return str;});
+        Value::addConverter([](std::shared_ptr<script::EngineObjRef> eor) -> FunctionRef<void()>{
+                return std::function([=]{eor->call({});});
+        });
 
         Value::addConverter([](const String& str) -> Fit {
             if (str == "fit") return Fit::fit;
