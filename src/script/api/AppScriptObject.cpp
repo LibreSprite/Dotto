@@ -118,26 +118,41 @@ public:
             return Tool::color.toU32();
         });
 
-        addFunction("addEventListener", [=](const String& name) {
-            if (name == "tick") createMessageBinder<msg::Tick>(name);
-            else if (name == "bootcomplete") createMessageBinder<msg::BootComplete>(name);
-            else if (name == "shutdown") createMessageBinder<msg::Shutdown>(name);
-            else if (name == "requestshutdown") createMessageBinder<msg::RequestShutdown>(name);
-            else if (name == "flush") createMessageBinder<msg::Flush>(name);
-            else if (name == "windowmaximized") createMessageBinder<msg::WindowMaximized>(name);
-            else if (name == "windowminimized") createMessageBinder<msg::WindowMinimized>(name);
-            else if (name == "windowrestored") createMessageBinder<msg::WindowRestored>(name);
-            else if (name == "windowclosed") createMessageBinder<msg::WindowClosed>(name);
-            else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name);
-            else if (name == "activatetool") createMessageBinder<msg::ActivateTool>(name);
-            else if (name == "activatecolor") createMessageBinder<msg::ActivateColor>(name);
-            else if (name == "activatelayer") createMessageBinder<msg::ActivateLayer>(name);
-            else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name);
-            else if (name == "closedocument") createMessageBinder<msg::CloseDocument>(name);
-            else if (name == "opendocument") createMessageBinder<msg::OpenDocument>(name);
-            else if (name == "activatedocument") createMessageBinder<msg::ActivateDocument>(name);
-            else if (name == "activatecell") createMessageBinder<msg::ActivateCell>(name);
-            else if (name == "changepalette") createMessageBinder<msg::ChangePalette>(name);
+        addFunction("removeEventListener", [=](const String& name) {
+            U32 count = 0;
+            for (auto it = boundMessages.begin(); it != boundMessages.end();) {
+                auto& bound = *it;
+                if (bound->name == name) {
+                    it = boundMessages.erase(it);
+                    ++count;
+                } else {
+                    ++it;
+                }
+            }
+            return count;
+        });
+
+        addFunction("addEventListener", [=](const String& name, std::shared_ptr<script::EngineObjRef> callback) {
+            if (name == "tick") createMessageBinder<msg::Tick>(name, callback);
+            else if (name == "tock") createMessageBinder<msg::Tock>(name, callback);
+            else if (name == "bootcomplete") createMessageBinder<msg::BootComplete>(name, callback);
+            else if (name == "shutdown") createMessageBinder<msg::Shutdown>(name, callback);
+            else if (name == "requestshutdown") createMessageBinder<msg::RequestShutdown>(name, callback);
+            else if (name == "flush") createMessageBinder<msg::Flush>(name, callback);
+            else if (name == "windowmaximized") createMessageBinder<msg::WindowMaximized>(name, callback);
+            else if (name == "windowminimized") createMessageBinder<msg::WindowMinimized>(name, callback);
+            else if (name == "windowrestored") createMessageBinder<msg::WindowRestored>(name, callback);
+            else if (name == "windowclosed") createMessageBinder<msg::WindowClosed>(name, callback);
+            else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name, callback);
+            else if (name == "activatetool") createMessageBinder<msg::ActivateTool>(name, callback);
+            else if (name == "activatecolor") createMessageBinder<msg::ActivateColor>(name, callback);
+            else if (name == "activatelayer") createMessageBinder<msg::ActivateLayer>(name, callback);
+            else if (name == "activateeditor") createMessageBinder<msg::ActivateEditor>(name, callback);
+            else if (name == "closedocument") createMessageBinder<msg::CloseDocument>(name, callback);
+            else if (name == "opendocument") createMessageBinder<msg::OpenDocument>(name, callback);
+            else if (name == "activatedocument") createMessageBinder<msg::ActivateDocument>(name, callback);
+            else if (name == "activatecell") createMessageBinder<msg::ActivateCell>(name, callback);
+            else if (name == "changepalette") createMessageBinder<msg::ChangePalette>(name, callback);
             return true;
         });
 
@@ -214,21 +229,26 @@ public:
     Vector<std::unique_ptr<MessageBinder>> boundMessages;
 
     template <typename Type>
-    void createMessageBinder(const String& name) {
+    void createMessageBinder(const String& name, std::shared_ptr<script::EngineObjRef> callback) {
         class Binder : public MessageBinder {
         public:
             PubSub<Type> pub{this};
+            std::shared_ptr<script::EngineObjRef> callback;
 
-            Binder(AppScriptObject* aso, const String& name) : MessageBinder{aso, name} {}
+            Binder(AppScriptObject* aso, const String& name, std::shared_ptr<script::EngineObjRef> callback) :
+                MessageBinder{aso, name},
+                callback{callback} {}
 
             void on(Type& message) {
-                if (auto app = weakapp.lock()) {
+                if (callback) {
+                    callback->call({});
+                } else if (auto app = weakapp.lock()) {
                     auto engine = app->getEngine().shared_from_this();
                     engine->raiseEvent({name});
                 }
             }
         };
-        auto binder = std::make_unique<Binder>(this, name);
+        auto binder = std::make_unique<Binder>(this, name, callback);
         boundMessages.emplace_back(std::move(binder));
     }
 
