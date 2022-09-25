@@ -85,9 +85,12 @@ public:
                         request->result = httplib::to_string(resp.error());
                     }
 #else
-                    http::Request req{url};
+                    http::Request req{request->url};
                     auto resp = req.send("GET");
-                    request->result = std::move(resp.body);
+                    request->result = String{
+                        reinterpret_cast<char*>(resp.body.data()),
+                        reinterpret_cast<char*>(resp.body.data() + resp.body.size())
+                    };
 #endif
                 } catch (const std::exception& ex) {
                     request->result = ex.what();

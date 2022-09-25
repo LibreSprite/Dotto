@@ -1,4 +1,4 @@
-name: Windows i686
+name: Windows x86
 
 on:
   push:

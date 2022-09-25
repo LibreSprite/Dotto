@@ -1,7 +1,6 @@
 # LibreSprite Dotto! 
 
-[![Linux x86_64](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml) [![Windows i686](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml)
-[![MacOS x86_64](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml) [![Emscripten](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-emscripten.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-emscripten.yml)
+[![Linux x64](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml/badge.svg?branch=development)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-linux-x86_64.yml) [![Windows x86](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-windows-i686.yml) [![MacOS x86_64](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-macos-x86_64.yml) [![Emscripten](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-emscripten.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/c-cpp-emscripten.yml) [![Nintendo 3DS](https://github.com/LibreSprite/Dotto/actions/workflows/nintendo-3ds.yml/badge.svg)](https://github.com/LibreSprite/Dotto/actions/workflows/nintendo-3ds.yml)
 
 ## Funding / Contributing
 

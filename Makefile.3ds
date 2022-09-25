@@ -1,4 +1,4 @@
-DEVKITPRO = /opt/devkitpro
+#DEVKITPRO = /opt/devkitpro
 
 PKGCONFIG = $(DEVKITPRO)/portlibs/3ds/bin/arm-none-eabi-pkg-config
 LN = $(DEVKITPRO)/devkitARM/bin/arm-none-eabi-g++
