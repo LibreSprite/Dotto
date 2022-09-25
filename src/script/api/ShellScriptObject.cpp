@@ -2,6 +2,8 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#if !defined(EMSCRIPTEN) && !defined(__N3DS__)
+
 #include <regex>
 
 #include <script/Engine.hpp>
@@ -137,3 +139,5 @@ public:
 };
 
 static script::ScriptObject::Shared<ShellScriptObject> reg("ShellScriptObject", {"global"});
+
+#endif
