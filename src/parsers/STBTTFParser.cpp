@@ -143,24 +143,71 @@ public:
             return nullptr;
         auto surface = std::make_shared<Surface>();
         setSize(size);
-        Vector<Glyph*> glyphs;
+
+        struct Entity {
+            Glyph* glyph;
+            Color color;
+            bool hasAdvance;
+        } entity;
+        entity.color = color;
+        entity.hasAdvance = true;
+        Vector<Entity> glyphs;
+
         U32 width = 0;
         U32 height = 0;
+        U32 escapeDepth = 0;
+        U32 escapeStart = 0;
+        U32 escapeEnd = 0;
+        U32 maxWidth = 0;
         for (U32 i = 0, len = text.size(); i < len; ++i) {
+            if (escapeDepth) {
+                if (text[i] == '[') {
+                    escapeDepth++;
+                } else if (text[i] == ']') {
+                    escapeDepth--;
+                    if (escapeDepth == 1) {
+                        escapeDepth = 0;
+                        escapeEnd = i - 1;
+                        auto code = std::string_view{text}.substr(escapeStart, escapeEnd - escapeStart + 1);
+                        if (code == "zw") {
+                            entity.hasAdvance = false;
+                        } else if (code == "w" ) {
+                            entity.hasAdvance = true;
+                        } else if (code == "r") {
+                            entity.hasAdvance = true;
+                            entity.color = color;
+                        } else {
+                            entity.color.fromString(String{code});
+                        }
+                    }
+                }
+                continue;
+            }
+            if (text[i] == '\x1B') {
+                escapeDepth = 1;
+                escapeStart = i + 2;
+                continue;
+            }
             if (auto glyph = loadGlyph(text, i)) {
-                glyphs.push_back(glyph);
-                advance.push_back(glyph->advance);
-                width += glyph->advance;
+                entity.glyph = glyph;
+                glyphs.push_back(entity);
+                advance.push_back(entity.hasAdvance ? glyph->advance : 0);
+                maxWidth = std::max(maxWidth, width + glyph->advance);
+                if (entity.hasAdvance) {
+                    width += glyph->advance;
+                }
                 height = std::max(height, size + (glyph->height - glyph->bearingY));
             }
         }
+        width = std::max(maxWidth, width);
         if (!advance.empty()) {
             advance[0] += padding.x;
         }
         surface->resize(width + padding.x + padding.width, height + padding.y + padding.height);
         S32 x = padding.x, y = size + padding.y;
-        for (auto glyph : glyphs)
-            glyph->blitTo(x, y, color, *surface);
+        for (auto& entity : glyphs) {
+            entity.glyph->blitTo(x, y, entity.color, *surface);
+        }
         return surface;
     }
 };
