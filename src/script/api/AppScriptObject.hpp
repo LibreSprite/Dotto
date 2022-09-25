@@ -6,9 +6,13 @@
 
 #include <script/ScriptObject.hpp>
 
+namespace ui {
+    class Event;
+}
+
 class AppScriptObject : public script::ScriptObject {
 public:
-    virtual void setTarget(const Value& target) = 0;
-    virtual Value getTarget() = 0;
-    virtual void setEventTarget(const Value& eventTarget) = 0;
+    virtual Value setTarget(const Value& target) = 0;
+    virtual Value setEventTarget(const Value& eventTarget) = 0;
+    virtual const ui::Event* setEvent(const ui::Event* event) = 0;
 };

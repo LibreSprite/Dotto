@@ -26,18 +26,25 @@ class AppScriptObjectImpl : public AppScriptObject {
 public:
     script::Value target;
     script::Value eventTarget;
+    const ui::Event* event = nullptr;
     PubSub<> pub{this};
 
-    void setTarget(const ::Value& target) override {
+    ::Value setTarget(const ::Value& target) override {
+        auto old = this->target.get();
         this->target = getEngine().toValue(target);
+        return old;
     }
 
-    Value getTarget() override {
-        return target.get();
-    }
-
-    void setEventTarget(const Value& eventTarget) override {
+    ::Value setEventTarget(const Value& eventTarget) override {
+        auto old = this->eventTarget.get();
         this->eventTarget = getEngine().toValue(eventTarget);
+        return old;
+    }
+
+    const ui::Event* setEvent(const ui::Event* event) override {
+        auto old = this->event;
+        this->event = event;
+        return old;
     }
 
     AppScriptObjectImpl() {
@@ -48,6 +55,13 @@ public:
         addProperty("target", [this]{return target;});
 
         addProperty("eventTarget", [this]{return eventTarget;});
+        addProperty("cancelEvent",
+                    [this]{return event && event->cancel;},
+                    [this](bool v){
+                        if (event)
+                            event->cancel = v;
+                        return v;
+                    });
 
         addProperty("activeDocument", [this]{
             return getEngine().toValue(inject<Document>{"activedocument"}.shared());

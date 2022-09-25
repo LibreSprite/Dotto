@@ -11,7 +11,6 @@
 
 class NodeScriptObject : public ModelScriptObject {
     std::weak_ptr<ui::Node> weak;
-
 public:
     ~NodeScriptObject() {
         if (auto node = weak.lock()) {
@@ -216,8 +215,8 @@ public:
                 if (auto app = std::static_pointer_cast<AppScriptObject>(weakapp.lock())) {
                     auto engine = getEngine().shared_from_this();
                     auto target = std::static_pointer_cast<script::ScriptObject>(shared_from_this());
-                    auto oldTarget = app->getTarget();
-                    app->setTarget(target);
+                    auto oldTarget = app->setTarget(target);
+                    auto oldEvent = app->setEvent(&event);
                     if (event.target == node) {
                         app->setEventTarget(target);
                     } else if (event.target) {
@@ -233,6 +232,7 @@ public:
                             args.push_back(str);
                         cb->call(args);
                     }
+                    app->setEvent(oldEvent);
                     app->setTarget(oldTarget);
                 }
             };
