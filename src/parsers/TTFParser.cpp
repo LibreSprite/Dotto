@@ -18,54 +18,6 @@
 
 using namespace fs;
 
-class Glyph {
-    Vector<U8> data;
-
-public:
-    U32 width, height;
-    S32 bearingX, bearingY;
-    S32 advance;
-
-    Glyph(FT_Face face) {
-        data.resize(face->glyph->bitmap.width * face->glyph->bitmap.rows);
-        bearingX = face->glyph->bitmap_left;
-        bearingY = face->glyph->bitmap_top;
-        advance = face->glyph->advance.x >> 6;
-        width = face->glyph->bitmap.width;
-        U32 pitch = face->glyph->bitmap.pitch;
-        height = face->glyph->bitmap.rows;
-        for (U32 y = 0; y < height; ++y) {
-            for (U32 x = 0; x < width; ++x) {
-                data[y * width + x] = face->glyph->bitmap.buffer[y * pitch + x];
-            }
-        }
-    }
-
-    void blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target, U8 threshold = 0) {
-        if (threshold == 0) {
-            for (U32 y = 0; y < height; ++y) {
-                for (U32 x = 0; x < width; ++x) {
-                    auto alpha = data[y * width + x];
-                    target.setPixel(x + offsetX + bearingX,
-                                    y + offsetY - bearingY,
-                                    Color(color.r, color.g, color.b, alpha));
-                }
-            }
-        } else {
-            for (U32 y = 0; y < height; ++y) {
-                for (U32 x = 0; x < width; ++x) {
-                    if (data[y * width + x] < threshold)
-                        continue;
-                    target.setPixel(x + offsetX + bearingX,
-                                    y + offsetY - bearingY,
-                                    color);
-                }
-            }
-        }
-        offsetX += advance;
-    }
-};
-
 class TTFFont : public Font {
 public:
     static FT_Library init() {
@@ -82,8 +34,6 @@ public:
     }
 
     FT_Face face = nullptr;
-    U32 currentSize = ~U32{};
-    HashMap<FT_UInt, std::shared_ptr<Glyph>> glyphCache;
     Vector<FT_Byte> faceData;
 
     TTFFont(File& file) {
@@ -92,7 +42,7 @@ public:
             return;
 
         faceData.resize(file.size());
-        file.read(&faceData[0], faceData.size());
+        file.read(faceData.data(), faceData.size());
 
         auto err = FT_New_Memory_Face(ft, &faceData[0], faceData.size(), 0, &face);
         if (err != 0) {
@@ -100,32 +50,12 @@ public:
         }
     }
 
-    FT_UInt getGlyphIndex(const String& text, U32& offset, U32& glyph) {
-        glyph = text[offset];
-        U32 extras = 0;
-        if (glyph & 0b1000'0000) {
-            U32 max = text.size();
-            if (!(glyph & 0b0010'0000)) { // 110xxxxx 10xxxxxx
-                glyph &= 0b11111;
-                extras = 1;
-            } else if (!(glyph & 0b0001'0000)) { // 1110xxxx 10xxxxxx 10xxxxxx
-                glyph &= 0b1111;
-                extras = 2;
-            } else { // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-                glyph &= 0b111;
-                extras = 3;
-            }
-            for (U32 i = 0; i < extras; ++i) {
-                if (++offset < max) {
-                    glyph <<= 6;
-                    glyph |= text[offset] & 0b111111;
-                }
-            }
-        }
+    FT_UInt getGlyphIndex(const String& text, U32& offset) {
+        U32 glyph = getGlyph(text, offset);
         return FT_Get_Char_Index(face, glyph); // TODO: Harfbuzz
     }
 
-    void setSize(U32 size) {
+    void setSize(U32 size) override {
         if (size == currentSize)
             return;
         auto err = FT_Set_Pixel_Sizes(face, 0, size);
@@ -137,9 +67,8 @@ public:
         }
     }
 
-    Glyph* loadGlyph(const String& text, U32& offset) {
-        U32 utf8 = 0;
-        FT_UInt glyphIndex = getGlyphIndex(text, offset, utf8);
+    Glyph* loadGlyph(const String& text, U32& offset) override {
+        FT_UInt glyphIndex = getGlyphIndex(text, offset);
         auto it = glyphCache.find(glyphIndex);
         if (it != glyphCache.end())
             return it->second.get();
@@ -157,83 +86,23 @@ public:
             return nullptr;
         }
 
-        auto glyph = std::make_shared<Glyph>(face);
+        auto glyph = std::make_shared<Glyph>();
         glyphCache[glyphIndex] = glyph;
+
+        glyph->data.resize(face->glyph->bitmap.width * face->glyph->bitmap.rows);
+        glyph->bearingX = face->glyph->bitmap_left;
+        glyph->bearingY = face->glyph->bitmap_top;
+        glyph->advance = face->glyph->advance.x >> 6;
+        glyph->width = face->glyph->bitmap.width;
+        U32 pitch = face->glyph->bitmap.pitch;
+        glyph->height = face->glyph->bitmap.rows;
+        for (U32 y = 0; y < glyph->height; ++y) {
+            for (U32 x = 0; x < glyph->width; ++x) {
+                glyph->data[y * glyph->width + x] = face->glyph->bitmap.buffer[y * pitch + x];
+            }
+        }
+
         return glyph.get();
-    }
-
-    virtual std::shared_ptr<Surface> print(U32 size, const Color& color, const String& text, const Rect& padding, Vector<S32>& advance) {
-        advance.clear();
-        if (text.empty())
-            return nullptr;
-        auto surface = std::make_shared<Surface>();
-        setSize(size);
-
-        struct Entity {
-            Glyph* glyph;
-            Color color;
-            bool hasAdvance;
-        } entity;
-        entity.color = color;
-        entity.hasAdvance = true;
-        Vector<Entity> glyphs;
-
-        U32 width = 0;
-        U32 height = 0;
-        U32 escapeDepth = 0;
-        U32 escapeStart = 0;
-        U32 escapeEnd = 0;
-        U32 maxWidth = 0;
-        for (U32 i = 0, len = text.size(); i < len; ++i) {
-            if (escapeDepth) {
-                if (text[i] == '[') {
-                    escapeDepth++;
-                } else if (text[i] == ']') {
-                    escapeDepth--;
-                    if (escapeDepth == 1) {
-                        escapeDepth = 0;
-                        escapeEnd = i - 1;
-                        auto code = std::string_view{text}.substr(escapeStart, escapeEnd - escapeStart + 1);
-                        if (code == "zw") {
-                            entity.hasAdvance = false;
-                        } else if (code == "w" ) {
-                            entity.hasAdvance = true;
-                        } else if (code == "r") {
-                            entity.hasAdvance = true;
-                            entity.color = color;
-                        } else {
-                            entity.color.fromString(String{code});
-                        }
-                    }
-                }
-                continue;
-            }
-            if (text[i] == '\x1B') {
-                escapeDepth = 1;
-                escapeStart = i + 2;
-                continue;
-            }
-            if (auto glyph = loadGlyph(text, i)) {
-                entity.glyph = glyph;
-                glyphs.push_back(entity);
-                advance.push_back(entity.hasAdvance ? glyph->advance : 0);
-                maxWidth = std::max(maxWidth, width + glyph->advance);
-                if (entity.hasAdvance) {
-                    width += glyph->advance;
-                }
-                height = std::max(height, size + (glyph->height - glyph->bearingY));
-            }
-        }
-        width = std::max(maxWidth, width);
-        if (!advance.empty()) {
-            advance[0] += padding.x;
-        }
-        surface->resize(width + padding.x + padding.width, height + padding.y + padding.height);
-        S32 x = padding.x, y = size + padding.y;
-        for (auto& entity : glyphs) {
-            entity.glyph->blitTo(x, y, entity.color, *surface);
-        }
-        return surface;
     }
 };
 
