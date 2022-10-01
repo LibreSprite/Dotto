@@ -31,6 +31,7 @@ public:
     using Entity = std::variant<U32, Color, Command>;
 
     static Vector<Entity> parse(std::string_view text);
+    static std::string toString(const Vector<Entity>& entities, bool printable);
 
     virtual void setSize(U32 size) = 0;
     virtual Glyph* loadGlyph(U32 utf8) = 0;

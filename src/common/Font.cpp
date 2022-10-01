@@ -4,6 +4,7 @@
 
 #include "Font.hpp"
 #include <variant>
+#include <codecvt>
 
 void Font::Glyph::blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target, U8 threshold) {
     if (threshold == 0) {
@@ -28,6 +29,28 @@ void Font::Glyph::blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface
     }
     offsetX += advance;
 }
+
+std::string Font::toString(const Vector<Font::Entity>& entities, bool printable) {
+    std::string str;
+    for (auto& entity : entities) {
+        if (auto utf8 = std::get_if<U32>(&entity)) {
+            std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv1;
+            str += conv1.to_bytes(*utf8);
+        } else if (!printable) {
+            if (auto color = std::get_if<Color>(&entity)) {
+                str += "\x1B[" + color->toString() + "]";
+            } else if (auto command = std::get_if<Command>(&entity)) {
+                switch (*command) {
+                case Font::Command::Advance: str += "\x1B[w]"; break;
+                case Font::Command::NoAdvance: str += "\x1B[zw]"; break;
+                case Font::Command::Reset: str += "\x1B[r]"; break;
+                }
+            }
+        }
+    }
+    return str;
+}
+
 
 Vector<Font::Entity> Font::parse(std::string_view text) {
     Vector<Font::Entity> out;
