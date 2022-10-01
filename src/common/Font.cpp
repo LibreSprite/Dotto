@@ -3,6 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include "Font.hpp"
+#include <variant>
 
 void Font::Glyph::blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target, U8 threshold) {
     if (threshold == 0) {
@@ -28,24 +29,8 @@ void Font::Glyph::blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface
     offsetX += advance;
 }
 
-std::shared_ptr<Surface> Font::print(U32 size, const Color& color, const String& text, const Rect& padding, Vector<S32>& advance) {
-    advance.clear();
-    if (text.empty())
-        return nullptr;
-    auto surface = std::make_shared<Surface>();
-    setSize(size);
-
-    struct Entity {
-        Glyph* glyph;
-        Color color;
-        bool hasAdvance;
-    } entity;
-    entity.color = color;
-    entity.hasAdvance = true;
-    Vector<Entity> glyphs;
-
-    U32 width = 0;
-    U32 height = 0;
+Vector<Font::Entity> Font::parse(std::string_view text) {
+    Vector<Font::Entity> out;
     U32 escapeDepth = 0;
     U32 escapeStart = 0;
     U32 escapeEnd = 0;
@@ -59,16 +44,15 @@ std::shared_ptr<Surface> Font::print(U32 size, const Color& color, const String&
                 if (escapeDepth == 1) {
                     escapeDepth = 0;
                     escapeEnd = i - 1;
-                    auto code = std::string_view{text}.substr(escapeStart, escapeEnd - escapeStart + 1);
+                    auto code = text.substr(escapeStart, escapeEnd - escapeStart + 1);
                     if (code == "zw") {
-                        entity.hasAdvance = false;
+                        out.push_back(Command::NoAdvance);
                     } else if (code == "w" ) {
-                        entity.hasAdvance = true;
+                        out.push_back(Command::Advance);
                     } else if (code == "r") {
-                        entity.hasAdvance = true;
-                        entity.color = color;
+                        out.push_back(Command::Reset);
                     } else {
-                        entity.color.fromString(String{code});
+                        out.push_back(Color(String{code}));
                     }
                 }
             }
@@ -79,30 +63,85 @@ std::shared_ptr<Surface> Font::print(U32 size, const Color& color, const String&
             escapeStart = i + 2;
             continue;
         }
-        if (auto glyph = loadGlyph(text, i)) {
-            entity.glyph = glyph;
-            glyphs.push_back(entity);
-            advance.push_back(entity.hasAdvance ? glyph->advance : 0);
-            maxWidth = std::max(maxWidth, width + glyph->advance);
-            if (entity.hasAdvance) {
-                width += glyph->advance;
-            }
-            height = std::max(height, size + (glyph->height - glyph->bearingY));
+        if (auto glyph = getUTF8(text, i)) {
+            out.push_back(glyph);
         }
     }
-    width = std::max(maxWidth, width);
+    return out;
+}
+
+std::shared_ptr<Surface> Font::print(U32 size, const Color& color, const String& text, const Rect& padding, Vector<S32>& advance) {
+    advance.clear();
+    if (text.empty())
+        return nullptr;
+    auto surface = std::make_shared<Surface>();
+    setSize(size);
+
+    auto entities = parse(text);;
+    Vector<Glyph*> glyphs;
+    glyphs.reserve(entities.size());
+
+    Color fgColor = color;
+    bool hasAdvance = true;
+    U32 width = 0;
+    U32 maxWidth = 0;
+    U32 height = 0;
+    for (auto& entity : entities) {
+        if (auto index = std::get_if<U32>(&entity); index && *index) {
+            if (auto glyph = loadGlyph(*index)) {
+                advance.push_back(hasAdvance ? glyph->advance : 0);
+                maxWidth = std::max(maxWidth, width + glyph->advance);
+                if (hasAdvance) {
+                    width += glyph->advance;
+                }
+                height = std::max(height, size + (glyph->height - glyph->bearingY));
+                glyphs.push_back(glyph);
+                continue;
+            }
+        }else if (auto cmd = std::get_if<Command>(&entity)) {
+            if (*cmd == Command::Advance) {
+                hasAdvance = true;
+            } else if (*cmd == Command::NoAdvance) {
+                hasAdvance = false;
+            }
+        }
+        glyphs.push_back(nullptr);
+    }
+
+    hasAdvance = true;
     if (!advance.empty()) {
         advance[0] += padding.x;
     }
+
+    width = std::max(maxWidth, width);
     surface->resize(width + padding.x + padding.width, height + padding.y + padding.height);
+
     S32 x = padding.x, y = size + padding.y;
-    for (auto& entity : glyphs) {
-        entity.glyph->blitTo(x, y, entity.color, *surface);
+    for (U32 max = entities.size(), i = 0; i < max; ++i) {
+        if (auto glyph = glyphs[i]) {
+            glyph->blitTo(x, y, fgColor, *surface);
+        } else if (auto newColor = std::get_if<Color>(&entities[i])) {
+            fgColor = *newColor;
+        } else if (auto cmd = std::get_if<Command>(&entities[i])) {
+            switch (*cmd) {
+            case Command::Advance:
+                hasAdvance = true;
+                break;
+            case Command::NoAdvance:
+                hasAdvance = false;
+                break;
+            case Command::Reset:
+                hasAdvance = true;
+                fgColor = color;
+                break;
+            }
+        }
     }
+
     return surface;
 }
 
-U32 Font::getGlyph(const String& text, U32& offset) {
+U32 Font::getUTF8(std::string_view text, U32& offset) {
     U32 glyph = text[offset];
     U32 extras = 0;
     if (glyph & 0b1000'0000) {

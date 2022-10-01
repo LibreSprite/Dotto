@@ -31,11 +31,6 @@ public:
         }
     }
 
-    U32 getGlyphIndex(const String& text, U32& offset) {
-        U32 glyph = getGlyph(text, offset);
-        return stbtt_FindGlyphIndex(&font, glyph);
-    }
-
     F32 scale = 1.0f;
     void setSize(U32 size) override {
         if (size == currentSize)
@@ -45,13 +40,12 @@ public:
         glyphCache.clear();
     }
 
-    Glyph* loadGlyph(const String& text, U32& offset) {
-        U32 glyphIndex = getGlyphIndex(text, offset);
-        if (glyphIndex == 0)
+    Glyph* loadGlyph(U32 utf8) {
+        auto glyphIndex = stbtt_FindGlyphIndex(&font, utf8);
+        if (!glyphIndex)
             return nullptr;
 
-        auto it = glyphCache.find(glyphIndex);
-        if (it != glyphCache.end())
+        if (auto it = glyphCache.find(glyphIndex); it != glyphCache.end())
             return it->second.get();
 
         int advance, lsb;

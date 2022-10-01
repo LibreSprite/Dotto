@@ -50,11 +50,6 @@ public:
         }
     }
 
-    FT_UInt getGlyphIndex(const String& text, U32& offset) {
-        U32 glyph = getGlyph(text, offset);
-        return FT_Get_Char_Index(face, glyph); // TODO: Harfbuzz
-    }
-
     void setSize(U32 size) override {
         if (size == currentSize)
             return;
@@ -67,10 +62,12 @@ public:
         }
     }
 
-    Glyph* loadGlyph(const String& text, U32& offset) override {
-        FT_UInt glyphIndex = getGlyphIndex(text, offset);
-        auto it = glyphCache.find(glyphIndex);
-        if (it != glyphCache.end())
+    Glyph* loadGlyph(U32 utf8) override {
+        U32 glyphIndex = FT_Get_Char_Index(face, utf8);
+        if (!glyphIndex)
+            return nullptr;
+
+        if (auto it = glyphCache.find(glyphIndex); it != glyphCache.end())
             return it->second.get();
 
         FT_Int32 load_flags = FT_LOAD_DEFAULT;

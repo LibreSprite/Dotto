@@ -22,11 +22,21 @@ public:
         virtual void blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target, U8 threshold = 0);
     };
 
+    enum class Command {
+        Reset,
+        NoAdvance,
+        Advance,
+    };
+
+    using Entity = std::variant<U32, Color, Command>;
+
+    static Vector<Entity> parse(std::string_view text);
+
     virtual void setSize(U32 size) = 0;
-    virtual Glyph* loadGlyph(const String& text, U32& offset) = 0;
+    virtual Glyph* loadGlyph(U32 utf8) = 0;
 
 protected:
-    U32 getGlyph(const String& text, U32& offset);
+    static U32 getUTF8(std::string_view text, U32& offset);
     U32 currentSize = ~U32{};
     HashMap<U32, std::shared_ptr<Glyph>> glyphCache;
 };
