@@ -11,7 +11,6 @@
 {
     var source = [];
     var ide = app.target;
-    var doc = app.activeDocument;
 
     var actions = {
         copy:function() {
@@ -56,9 +55,27 @@
             var cursor = current.get("cursor-index");
             var src = current.get("text");
             current.set("text", src.substr(0, cursor));
-            line.set("text", src.substr(cursor),
-                     "cursor-index", 0);
+            line.apply("text", src.substr(cursor),
+                       "cursor-index", 0);
             line.focus();
+        },
+
+        cutLine:function() {
+            var current = currentLine();
+            var cursor = current.get("cursor-index")|0;
+            var text = current.get("text");
+            if (cursor >= text.length) {
+                var currentIndex = source.indexOf(current);
+                var next = source[currentIndex + 1];
+                if (!next)
+                    return;
+                text += next.get("text");
+                source.splice(currentIndex + 1, 1);
+                next.remove();
+            } else {
+                app.copy(current, text.substr(cursor));
+                current.set("text", text.substr(0, cursor));
+            }
         },
 
         delChar:function() {
@@ -67,8 +84,11 @@
             var prev = source[currentIndex - 1];
             if (!prev)
                 return;
-            prev.set("text", prev.get("text") + current.get("text"));
+            var text = prev.get("text");
+            prev.set("cursor-index", text.length);
+            prev.set("text", text + current.get("text"));
             source.splice(currentIndex, 1);
+            prev.focus();
             current.remove();
         },
 
@@ -158,12 +178,17 @@
                 args.push(arguments[i]);
             args.sort();
             args = args.join("+");
+            var caught = false;
             for (var k in events) {
                 k.split(",").forEach(function(p){
-                    if (p.trim().split("+").sort().join("+") == args)
+                    if (p.trim().split("+").sort().join("+") == args) {
+                        caught = true;
                         events[k]();
+                    }
                 });
             }
+            if (caught)
+                app.cancel = true;
         }
     };
 
