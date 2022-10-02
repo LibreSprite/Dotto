@@ -57,8 +57,13 @@ class Shortcut : public ui::Controller {
                         it = childMap->find(tolower(shortcut->lastKeyDown->keyname));
                     if (it == childMap->end() && isModifier(shortcut->lastKeyDown->keyname))
                         it = childMap->find(tolower(shortcut->lastKeyDown->keyname + 1));
-                    if (it == childMap->end())
-                        logV("Key name: ", shortcut->lastKeyDown->keyname);
+                    if (it == childMap->end()) {
+                        static String lastPrint;
+                        if (lastPrint != shortcut->lastKeyDown->keyname) {
+                            lastPrint = shortcut->lastKeyDown->keyname;
+                            logV("Key name: ", lastPrint);
+                        }
+                    }
                     shortcut->currentMap = (it != childMap->end()) ? it->second.get() : &shortcut->defaultMap;
                     if (!shortcut->currentMap->childMap || shortcut->currentMap->childMap->empty()) {
                         shortcut->currentMap->activate();
