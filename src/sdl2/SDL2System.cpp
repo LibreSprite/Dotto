@@ -73,6 +73,10 @@ public:
         return running;
     }
 
+    const std::unordered_set<String>& getPressedKeys() override {
+        return pressedKeys;
+    }
+
     void setMouseCursorVisible(bool visible) override {
         SDL_ShowCursor(visible);
     }

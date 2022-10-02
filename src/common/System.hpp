@@ -19,6 +19,7 @@ public:
     }
 
     virtual void setMouseCursorVisible(bool) = 0;
+    virtual const std::unordered_set<String>& getPressedKeys() = 0;
     virtual bool boot() = 0;
     virtual bool run() = 0;
 };
