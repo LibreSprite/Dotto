@@ -324,7 +324,6 @@ std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName, const Hash
             for (auto& tag : tags) {
                 auto it = map.find(tag);
                 if (it != map.end() && it->second->has<std::shared_ptr<PropertySet>>()) {
-                    logI("Inherit ", tag);
                     std::shared_ptr<PropertySet> childSet = *it->second;
                     styles.push_back(childSet.get());
                 }

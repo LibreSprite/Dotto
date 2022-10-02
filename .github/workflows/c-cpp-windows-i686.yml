@@ -47,7 +47,7 @@ jobs:
         cp /mingw32/bin/SDL2.dll ./
         cp /mingw32/bin/libv8_libplatform.dll ./
         cp /mingw32/bin/libbz2-*.dll ./
-        cp /mingw32/bin/libbrotlidec.dll ./
+        cp /mingw32/bin/libbrotli*.dll ./
         cp /mingw32/bin/libharfbuzz-*.dll ./
         cp /mingw32/bin/zlib1.dll ./
         cp /mingw32/bin/libwebp-*.dll ./
@@ -63,7 +63,6 @@ jobs:
         cp /mingw32/bin/libpcre*.dll ./
         cp /mingw32/bin/libintl-*.dll ./
         cp /mingw32/bin/libiconv-*.dll ./
-        cp /mingw32/bin/libbrotlicommon.dll ./
         cp /mingw32/bin/libglib-*.dll ./
         cp /mingw32/bin/libgraphite2.dll ./
         cp /mingw32/bin/libdeflate.dll ./
