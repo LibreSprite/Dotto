@@ -19,7 +19,7 @@ public:
         S32 bearingX, bearingY;
         U32 width, height;
         Vector<U8> data;
-        virtual void blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target, U8 threshold = 0);
+        virtual void blitTo(S32 offsetX, S32 offsetY, const Color& color, Surface& target, U8 threshold = 0);
     };
 
     enum class Command {

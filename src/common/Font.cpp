@@ -6,14 +6,26 @@
 #include <variant>
 #include <codecvt>
 
-void Font::Glyph::blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface& target, U8 threshold) {
+void Font::Glyph::blitTo(S32 offsetX, S32 offsetY, const Color& color, Surface& target, U8 threshold) {
     if (threshold == 0) {
+        auto pixels = target.data();
+        U32 w = target.width();
+        U32 h = target.height();
         for (U32 y = 0; y < height; ++y) {
+            U32 ty = y + offsetY - bearingY;
+            if (ty >= h)
+                break;
+            U32 tyw = ty * w;
             for (U32 x = 0; x < width; ++x) {
-                auto alpha = data[y * width + x];
-                target.setPixel(x + offsetX + bearingX,
-                                y + offsetY - bearingY,
-                                Color(color.r, color.g, color.b, alpha));
+                U32 tx = x + offsetX + bearingX;
+                if (tx >= w)
+                    break;
+                if (auto alpha = data[y * width + x]) {
+                    Color old{pixels[tyw + tx]};
+                    if (alpha > old.a) {
+                        pixels[tyw + tx] = Color(color.r, color.g, color.b, alpha).toU32();
+                    }
+                }
             }
         }
     } else {
@@ -27,7 +39,6 @@ void Font::Glyph::blitTo(S32& offsetX, S32& offsetY, const Color& color, Surface
             }
         }
     }
-    offsetX += advance;
 }
 
 std::string Font::toString(const Vector<Font::Entity>& entities, bool printable) {
@@ -142,7 +153,10 @@ std::shared_ptr<Surface> Font::print(U32 size, const Color& color, const String&
     S32 x = padding.x, y = size + padding.y;
     for (U32 max = entities.size(), i = 0; i < max; ++i) {
         if (auto glyph = glyphs[i]) {
-            glyph->blitTo(x, y, fgColor, *surface);
+            glyph->blitTo(x - (hasAdvance ? 0 : glyph->bearingX), y, fgColor, *surface);
+            if (hasAdvance) {
+                x += glyph->advance;
+            }
         } else if (auto newColor = std::get_if<Color>(&entities[i])) {
             fgColor = *newColor;
         } else if (auto cmd = std::get_if<Command>(&entities[i])) {
