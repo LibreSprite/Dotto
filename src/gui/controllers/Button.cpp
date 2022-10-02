@@ -23,6 +23,9 @@ public:
         if (*state == "pressed" || *state == "active") {
             current = pressedSurface;
             multiply = pressedMultiply;
+        } else if (*state == "hover") {
+            current = *hoverSurface ? hoverSurface : normalSurface;
+            multiply = hoverMultiply;
         } else if (*state == "enabled") {
             if (isHovering) {
                 current = *hoverSurface ? hoverSurface : normalSurface;

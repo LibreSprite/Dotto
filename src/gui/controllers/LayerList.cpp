@@ -3,16 +3,19 @@
 // Read LICENSE.txt for more information.
 
 #include <cmd/Command.hpp>
+#include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
+#include <common/System.hpp>
 #include <doc/Cell.hpp>
 #include <doc/Document.hpp>
 #include <doc/Timeline.hpp>
+#include <filters/Filter.hpp>
 #include <fs/FileSystem.hpp>
 #include <gui/Controller.hpp>
 #include <gui/Events.hpp>
 #include <gui/Node.hpp>
-#include <filters/Filter.hpp>
+#include <limits>
 
 class LayerList : public ui::Controller {
     PubSub<msg::ActivateDocument,
@@ -83,9 +86,39 @@ public:
 
             item->load({
                     {"preview", surface},
-                    {"preview-height", itemHeight},
-                    {"preview-padding", previewPadding},
-                    {"click", "ActivateLayer layer=" + std::to_string(layer)},
+                    {"layer-number", layer},
+                    {"click", FunctionRef<void()>([=]{
+                        auto& keys = inject<System>{}->getPressedKeys();
+                        auto parent = item->getParent();
+                        if (keys.count("LSHIFT") || keys.count("RSHIFT")) {
+                            if (auto [min, max] = getSelectionRange(); max != -1) {
+                                for (S32 j = 0; j < nodePool.size(); ++j) {
+                                    auto node = nodePool[j];
+                                    auto index = layerNumber(node);
+                                    if (index == -1) {
+                                        continue;
+                                    }
+                                    if (!((index >= layer && index <= max) || (index <= layer && index >= min))) {
+                                        continue;
+                                    }
+                                    if (layerState(nodePool[j]) != "active")
+                                        node->set("state", "hover");
+                                }
+                                return;
+                            }
+                        } else if ((keys.count("LCTRL") || keys.count("RCTRL")) && getSelectionRange().second != -1) {
+                            if (auto state = layerState(item); state != "hover" && state != "active") {
+                                item->set("state", "hover");
+                            } else if (state == "hover"){
+                                item->set("state", "enabled");
+                            }
+                            return;
+                        }
+                        if (inject<Command> cmd{"activatelayer"}; cmd) {
+                            cmd->set("layer", layer);
+                            cmd->run();
+                        }
+                    })},
                     {"state", layer == currentLayer ? "active" : "enabled"},
                     {"cell", cell},
                 });
@@ -95,6 +128,35 @@ public:
 
             height += itemHeight;
         }
+    }
+
+    String layerState(std::shared_ptr<ui::Node> node) {
+        auto prop = node->get("state");
+        return prop ? prop->get<String>() : "";
+    }
+
+    S32 layerNumber(std::shared_ptr<ui::Node> node) {
+        if (!node->getParent())
+            return -1;
+        auto prop = node->get("layer-number");
+        return prop ? prop->get<S32>() : -1;
+    }
+
+    std::pair<S32, S32> getSelectionRange() {
+        S32 min{std::numeric_limits<S32>::max()};
+        S32 max = -1;
+        for (S32 i = 0, size = nodePool.size(); i < size; ++i) {
+            auto node = nodePool[i];
+            if (!node->getParent())
+                continue;
+            auto state = layerState(node);
+            if (state == "enabled")
+                continue;
+            auto num = layerNumber(node);
+            min = std::min(min, num);
+            max = std::max(max, num);
+        }
+        return {min, max};
     }
 };
 

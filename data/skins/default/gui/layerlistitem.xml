@@ -1,11 +1,9 @@
 <image
     controller="button"
-    forward="preview.surface=preview, alpha.cell=cell, blend.cell=cell, preview-holder.margin=preview-padding, layer-name.cell=cell">
+    forward="preview.surface=preview, alpha.cell=cell, blend.cell=cell, layer-name.cell=cell">
 
   <node flow="row" height="24px">
-    <image id="preview-holder" src="%skin/editor.png" width="24px" slice="2 2" padding="1 1 1 1">
-      <image id="preview" fit="cover"/>
-    </image>
+    <image id="preview" fit="fit" width="24px"/>
     <input id="layer-name" width="100%" controller="cellpropertymodifier" property="name" key="text"></input>
   </node>
 
