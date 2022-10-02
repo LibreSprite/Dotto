@@ -36,10 +36,10 @@ jobs:
       run: |
         make -j 4
         cp /mingw32/bin/libgcc_s_dw2-1.dll ./
-        cp /mingw32/bin/libstdc++-6.dll ./
+        cp /mingw32/bin/libstdc++-*.dll ./
         cp /mingw32/bin/libwinpthread-1.dll ./
         cp /mingw32/bin/libfreetype-6.dll ./
-        cp /mingw32/bin/liblcms2-2.dll ./
+        cp /mingw32/bin/liblcms2-*.dll ./
         cp /mingw32/bin/glew32.dll ./
         cp /mingw32/bin/libpng*.dll ./
         cp /mingw32/bin/libv8.dll ./
@@ -70,7 +70,7 @@ jobs:
         cp /mingw32/bin/libjxl*.dll ./
         cp /mingw32/bin/libLerc.dll ./
         cp /mingw32/bin/libzstd.dll ./
-        cp /mingw32/bin/liblzma-5.dll ./
+        cp /mingw32/bin/liblzma-*.dll ./
         cp /mingw32/bin/snapshot_blob.bin ./
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
