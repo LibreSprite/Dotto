@@ -41,33 +41,34 @@ jobs:
         cp /mingw32/bin/libfreetype-6.dll ./
         cp /mingw32/bin/liblcms2-2.dll ./
         cp /mingw32/bin/glew32.dll ./
-        cp /mingw32/bin/libpng16-16.dll ./
+        cp /mingw32/bin/libpng*.dll ./
         cp /mingw32/bin/libv8.dll ./
         cp /mingw32/bin/SDL2_image.dll ./
         cp /mingw32/bin/SDL2.dll ./
         cp /mingw32/bin/libv8_libplatform.dll ./
-        cp /mingw32/bin/libbz2-1.dll ./
+        cp /mingw32/bin/libbz2-*.dll ./
         cp /mingw32/bin/libbrotlidec.dll ./
-        cp /mingw32/bin/libharfbuzz-0.dll ./
+        cp /mingw32/bin/libharfbuzz-*.dll ./
         cp /mingw32/bin/zlib1.dll ./
-        cp /mingw32/bin/libwebp-7.dll ./
-        cp /mingw32/bin/libjpeg-8.dll ./
-        cp /mingw32/bin/libtiff-5.dll ./
+        cp /mingw32/bin/libwebp-*.dll ./
+        cp /mingw32/bin/libjpeg-*.dll ./
+        cp /mingw32/bin/libtiff-*.dll ./
         cp /mingw32/bin/libv8_libbase.dll ./
-        cp /mingw32/bin/libcrypto-1_1.dll ./
-        cp /mingw32/bin/libssl-1_1.dll ./
-        cp /mingw32/bin/libssp-0.dll ./
+        cp /mingw32/bin/libcrypto-*.dll ./
+        cp /mingw32/bin/libssl-*.dll ./
+        cp /mingw32/bin/libssp-*.dll ./
         cp /mingw32/bin/libicuin*.dll ./
         cp /mingw32/bin/libicuuc*.dll ./
         cp /mingw32/bin/libicudt*.dll ./
-        cp /mingw32/bin/libpcre-1.dll ./
-        cp /mingw32/bin/libintl-8.dll ./
-        cp /mingw32/bin/libiconv-2.dll ./
+        cp /mingw32/bin/libpcre*.dll ./
+        cp /mingw32/bin/libintl-*.dll ./
+        cp /mingw32/bin/libiconv-*.dll ./
         cp /mingw32/bin/libbrotlicommon.dll ./
-        cp /mingw32/bin/libglib-2.0-0.dll ./
+        cp /mingw32/bin/libglib-*.dll ./
         cp /mingw32/bin/libgraphite2.dll ./
         cp /mingw32/bin/libdeflate.dll ./
-        cp /mingw32/bin/libjbig-0.dll ./
+        cp /mingw32/bin/libjbig-*.dll ./
+        cp /mingw32/bin/libjxl*.dll ./
         cp /mingw32/bin/libLerc.dll ./
         cp /mingw32/bin/libzstd.dll ./
         cp /mingw32/bin/liblzma-5.dll ./
