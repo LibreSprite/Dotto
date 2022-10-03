@@ -72,6 +72,15 @@ public:
         return data.size() > layer && data[layer] ? data[layer]->cell : nullptr;
     }
 
+    S32 getCellIndex(Cell* cell) const override {
+        for (S32 i = 0, max = data.size(); i < max; ++i) {
+            if (data[i] && data[i]->cell.get() == cell) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     void setCell(U32 layer, std::shared_ptr<Cell> cell) override {
         if (!cell) {
             if (layer >= layerCount())

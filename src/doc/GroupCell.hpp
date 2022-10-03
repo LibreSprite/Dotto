@@ -11,6 +11,7 @@ public:
     virtual U32 layerCount() const = 0;
     virtual std::shared_ptr<Cell> getCell(U32 layer) const = 0;
     virtual void setCell(U32 layer, std::shared_ptr<Cell> cell) = 0;
+    virtual S32 getCellIndex(Cell* cell) const = 0;
     virtual void resize(U32 count) = 0;
     virtual bool empty() = 0;
 };
