@@ -21,7 +21,8 @@ class LayerList : public ui::Controller {
     PubSub<msg::ActivateDocument,
            msg::ActivateLayer,
            msg::ActivateFrame,
-           msg::ModifyGroup> pub{this};
+           msg::ModifyGroup,
+           msg::PollSelectedCells> pub{this};
     Vector<std::shared_ptr<ui::Node>> nodePool;
 
 public:
@@ -30,6 +31,22 @@ public:
     void on(msg::ActivateFrame&) {update();}
     void on(msg::ActivateLayer&) {update();}
     void on(msg::ModifyGroup&) {update();}
+
+    void on(msg::PollSelectedCells& poll) {
+        for (auto item : nodePool) {
+            if (layerState(item) == "enabled")
+                continue;
+            auto prop = item->get("cell");
+            if (!prop)
+                continue;
+            auto cell = prop->get<std::shared_ptr<Cell>>();
+            if (!cell)
+                continue;
+            if (cell->document() != poll.doc.get())
+                continue;
+            poll.cells.push_back(cell);
+        }
+    }
 
     void update() {
         inject<ui::Node> editor{InjectSilent::Yes, "activeeditor"};

@@ -226,6 +226,12 @@ namespace msg {
         ModifyCell(std::shared_ptr<Cell> cell) : cell{cell} {}
     };
 
+    struct PollSelectedCells : public Message {
+        std::shared_ptr<Document> doc;
+        Vector<std::shared_ptr<Cell>> cells;
+        PollSelectedCells(std::shared_ptr<Document> doc) : doc{doc} {}
+    };
+
     struct ModifyGroup : public Message {};
 
     struct PreModifySelection : public Message {
