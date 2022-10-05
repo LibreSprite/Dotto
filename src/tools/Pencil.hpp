@@ -38,7 +38,9 @@ public:
     std::shared_ptr<Surface> shape;
     F32 scale;
     Property<S32> size{this, "size", 1, &Pencil::invalidateMetaMenu};
+    Property<F32> sizeVariation{this, "size-variation", 0.0f, &Pencil::invalidateMetaMenu};
     Property<F32> interval{this, "interval", 1.0f, &Pencil::invalidateMetaMenu};
+    Property<F32> intervalVariation{this, "interval-variation", 0.0f, &Pencil::invalidateMetaMenu};
     Property<F32> smoothing{this, "stroke-smoothing", 0.0f, &Pencil::invalidateMetaMenu};
     Property<String> mode{this, "blend-mode", "normal", &Pencil::invalidateMetaMenu};
     Property<bool> pressuresize{this, "pen-size", true, &Pencil::invalidateMetaMenu};
@@ -93,7 +95,7 @@ public:
         auto meta = Tool::getMetaProperties();
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
-                    {"widget", "image"},
+                    {"widget", "brushpreview"},
                     {"src", *shapeName},
                     {"fit", Fit::fit},
                     {"quick", true}
@@ -140,12 +142,30 @@ public:
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
                     {"widget", "range"},
+                    {"label", intervalVariation.name},
+                    {"value", intervalVariation.value},
+                    {"min", 0.0f},
+                    {"max", 1.0f},
+                    {"resolution", 0.1f}
+                }));
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "range"},
                     {"label", size.name},
                     {"value", size.value},
                     {"min", 1},
                     {"max", 128},
                     {"resolution", 1},
                     {"quick", true}
+                }));
+
+        meta->push(std::make_shared<PropertySet>(PropertySet{
+                    {"widget", "range"},
+                    {"label", sizeVariation.name},
+                    {"value", sizeVariation.value},
+                    {"min", 0.0f},
+                    {"max", 1.0f},
+                    {"resolution", 0.1}
                 }));
 
         meta->push(std::make_shared<PropertySet>(PropertySet{
@@ -209,12 +229,13 @@ public:
         auto x = point.x;
         auto y = point.y;
         auto z = which == Hover ? 0.5f : point.z / 255.0f;
-        auto size = which == Dropper ? 1 : *this->size;
+        F32 size = which == Dropper ? 1.0f : *this->size;
 
         if (!force) {
             S32 dx = x - prevPlotX;
             S32 dy = y - prevPlotY;
-            if (dx*dx+dy*dy < interval*interval)
+            F32 iv = *interval;// + *interval * (rand() / F32(RAND_MAX) * *intervalVariation);
+            if (dx*dx+dy*dy < iv*iv)
                 return;
         }
 
@@ -233,10 +254,12 @@ public:
         S32 hsw = sw / 2;
         S32 hsh = sh / 2;
 
+        // size += size * (rand() / F32(RAND_MAX) * *sizeVariation);
+
         if (pressuresize && which) {
-            scale = F32(size) * z / shape->width();
+            scale = size * z / shape->width();
         } else {
-            scale = F32(size) / shape->width();
+            scale = size / shape->width();
         }
 
         F32 alpha = pressurealpha ? z : 1.0f;
@@ -255,10 +278,29 @@ public:
                     }
                 }
             } else {
+                F32 density = alpha * scale * scale; // / ((1 / scale) * (1 / scale));
+                auto nh = S32(sh * scale + 0.5f);
+                auto nw = S32(sw * scale + 0.5f);
+                F32 tmp[nh + 1][nw + 1];
+
+                for (S32 sy = 0; sy < nh; ++sy) {
+                    for (S32 sx = 0; sx < nw; ++sx) {
+                        tmp[sy][sx] = 0;
+                    }
+                }
+
+                auto pixels = shape->getPixels().data();
                 for (S32 sy = 0; sy < sh; ++sy) {
                     for (S32 sx = 0; sx < sw; ++sx) {
-                        color = shape->getPixelUnsafe(sx, sy);
-                        selection->add(x + (sx - hsw) * scale, y + (sy - hsh) * scale, color.a * alpha * scale);
+                        U32 v = (pixels[sx + sy * sw] >> Color::Ashift) & 0xFF;
+                        tmp[S32(sy * scale)][S32(sx * scale)] += v * density;
+                    }
+                }
+
+                for (S32 sy = 0; sy < nh; ++sy) {
+                    for (S32 sx = 0; sx < nw; ++sx) {
+                        auto color = tmp[sy][sx];
+                        selection->add(x + sx - (hsw * scale), y + sy - (hsh * scale), color);
                     }
                 }
             }
@@ -396,9 +438,11 @@ public:
 
         auto& end = points[points.size() - 1];
         auto& begin = points[points.size() - 2];
+        bool force = which == Hover;
         line(begin, end, [&](S32 x, S32 y, S32 step, S32 max){
             F32 lerp = F32(step) / max;
-            plot({x, y, begin.z * (1 - lerp) + end.z * lerp}, false);
+            plot({x, y, begin.z * (1 - lerp) + end.z * lerp}, force);
+            force = false;
         });
 
         if (paint) {

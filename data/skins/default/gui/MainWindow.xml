@@ -56,7 +56,7 @@
     <node id="colorpanel" flow="contain-column"/>
   </image>
 
-  <image id="toolconfigmenu" class="sidebarcontainer" width="200px">
+  <image id="toolconfigmenu" class="sidebarcontainer" width="300px">
     <node id="toolconfigpanel" controller="metamenu" flow="contain-column"/>
   </image>
 
