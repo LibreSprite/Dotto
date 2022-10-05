@@ -10,9 +10,15 @@
 #include <log/Log.hpp>
 
 class Recorder {
-    PubSub<msg::ModifyDocument> pub{this};
+    PubSub<msg::ModifyDocument,
+           msg::Tick> pub{this};
     U32 sequence = 0;
+    bool tick = true;
 public:
+    void on(msg::Tick&) {
+        tick = true;
+    }
+
     void on(msg::ModifyDocument& event) {
         auto doc = event.doc;
         if (!doc)
@@ -27,7 +33,11 @@ public:
         if (!surface)
             return;
         auto shared = surface->shared_from_this();
-        FileSystem::write("%userdata/recording_" + std::to_string(sequence++) + ".png", shared);
+        FileSystem::write("%userdata/recording_" + std::to_string(sequence) + ".png", shared);
+        if (tick) {
+            tick = false;
+            sequence++;
+        }
     }
 };
 
@@ -37,10 +47,8 @@ class ToggleRecording : public Command {
 public:
     void run() override {
         if (recorder) {
-            logI("Toggling 0");
             recorder = std::nullopt;
         } else {
-            logI("Toggling 1");
             recorder.emplace();
         }
     }
