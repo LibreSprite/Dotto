@@ -73,7 +73,6 @@ public:
 
         widgets.value = std::make_shared<Vector<std::shared_ptr<ui::Node>>>();
         Vector<std::shared_ptr<ui::Node>> rows;
-        S32 height = 0, width = 300;
 
         if (*this->meta) {
             HashMap<String, std::shared_ptr<ui::Node>> map;
