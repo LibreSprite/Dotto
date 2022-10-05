@@ -33,6 +33,7 @@ public:
     bool mapJoyaxisToMouseWheel = false;
     bool invertMouseWheelX = false;
     bool invertMouseWheelY = false;
+    U32 mouseState = 0;
 
     bool boot() override {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_EVENTS) != 0) {
@@ -131,17 +132,35 @@ public:
                     });
                 break;
 
-            case SDL_MOUSEMOTION:
-                pub(msg::MouseMove{event.motion.windowID, event.motion.x, event.motion.y, event.motion.state});
+            case SDL_MOUSEMOTION:{
+                pub(msg::MouseMove{
+                        event.motion.windowID,
+                        event.motion.x,
+                        event.motion.y,
+                        mouseState
+                    });
+            }
                 break;
             case SDL_MOUSEBUTTONUP:
-                pub(msg::MouseUp{event.button.windowID, event.button.x, event.button.y, 1U << (event.button.button - 1)});
+                mouseState &= ~(1U << (event.button.button - 1));
+                pub(msg::MouseUp{
+                        event.button.windowID,
+                        event.button.x,
+                        event.button.y,
+                        1U << (event.button.button - 1)
+                    });
                 msg::MouseMove::pressure = 0.0f;
                 break;
             case SDL_MOUSEBUTTONDOWN:
+                mouseState |= 1U << (event.button.button - 1);
                 if (msg::MouseMove::pressure == 0.0f)
                     msg::MouseMove::pressure = 1.0f;
-                pub(msg::MouseDown{event.button.windowID, event.button.x, event.button.y, 1U << (event.button.button - 1)});
+                pub(msg::MouseDown{
+                        event.button.windowID,
+                        event.button.x,
+                        event.button.y,
+                        1U << (event.button.button - 1)
+                    });
                 break;
 
             case SDL_JOYHATMOTION:
