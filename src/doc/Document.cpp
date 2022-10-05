@@ -206,6 +206,7 @@ public:
         if (history.size() > maxUndoSize)
             history.erase(history.begin());
         historyCursor = history.size();
+        pub(msg::ModifyDocument{shared_from_this()});
     }
 
     void undo() override {
@@ -215,6 +216,7 @@ public:
         historyCursor--;
         history[historyCursor]->undo();
         lockHistory--;
+        pub(msg::ModifyDocument{shared_from_this()});
     }
 
     void redo() override {
@@ -224,6 +226,7 @@ public:
         history[historyCursor]->redo();
         historyCursor++;
         lockHistory--;
+        pub(msg::ModifyDocument{shared_from_this()});
     }
 
     HistoryLock getHistoryLock() override {

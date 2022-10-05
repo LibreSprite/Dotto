@@ -15,7 +15,11 @@
                 click="toggleui id=filemenu"
                 label="File"
                 width="100px"/>
-    <node width="100%"/>
+    <menubutton id="recbutton"
+                click="toggleui id=recmenu"
+                label="Recording"
+                width="100px"/>
+    <node width="100%" id="mainbarspacer"/>
     <node id="toolconfigquick" controller="metamenu" filter="quick" flow="contain-row"/>
     <image controller="tabtarget, button"
            id="toolconfigbutton"
@@ -69,6 +73,12 @@
       <menubutton id="quitbutton" click="quit" label="Quit"/>
       <node class="menuspacer"/>
       <menubutton id="hellobutton" label="Hello, ${username}!"/>
+    </image>
+  </clickout>
+
+  <clickout id="recmenu" class="menu">
+    <image class="menucontainer" width="170px" x="100">
+      <menubutton id="recstatusbutton" click="togglerec" label="Start Recording"/>
     </image>
   </clickout>
 

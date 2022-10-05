@@ -234,6 +234,11 @@ namespace msg {
 
     struct ModifyGroup : public Message {};
 
+    struct ModifyDocument : public Message {
+        std::shared_ptr<Document> doc;
+        ModifyDocument(std::shared_ptr<Document> doc) : doc{doc} {}
+    };
+
     struct PreModifySelection : public Message {
         Selection* selection;
         PreModifySelection(Selection* selection) : selection{selection} {}
