@@ -67,9 +67,7 @@ public:
         auto layerCount = timeline->layerCount();
 
         while (layerCount > nodePool.size()) {
-            auto item = ui::Node::fromXML("layerlistitem");
-            node()->addChild(item);
-            nodePool.push_back(item);
+            nodePool.push_back(ui::Node::fromXML("layerlistitem"));
         }
 
         while (layerCount < nodePool.size()) {
@@ -79,6 +77,7 @@ public:
 
         S32 height = 0;
         S32 width = node()->innerWidth();
+        U32 childNumber = 0;
         for (U32 i = 0; i < layerCount; ++i) {
             std::shared_ptr<ui::Node> item = nodePool[i];
             U32 layer = layerCount - 1 - i;
@@ -87,6 +86,8 @@ public:
                 item->remove();
                 continue;
             }
+
+            node()->addChild(item, childNumber++);
 
             auto surface = cell ? cell->getComposite()->shared_from_this() : nullptr;
             auto aspect = surface ? surface->width() / F32(surface->height() ?: 1) : 1.0f;
