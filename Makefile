@@ -157,6 +157,10 @@ FLAGS += -O3 # release build
 POSTBUILD = $(STRIP) $(DOTTO)
 endif
 
+ifeq ($(PROFILE),true)
+FLAGS += -DUSE_PROFILER
+endif
+
 FLAGS += -pthread
 LN_FLAGS += -lpng
 LN_FLAGS += -lm

@@ -3,6 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <common/Config.hpp>
+#include <common/Profiler.hpp>
 #include <common/XML.hpp>
 #include <fs/Cache.hpp>
 #include <fs/FileSystem.hpp>
@@ -12,11 +13,11 @@
 #include <gui/Node.hpp>
 #include <log/Log.hpp>
 
-
 static ui::Node::Shared<ui::Node> node{"node"};
 
 
 ui::Node::Node() {
+    PROFILER
     addEventListener<AddToScene, RemoveFromScene, Focus, Blur>(this);
     loadSilent({{"node", this}});
 }
@@ -38,6 +39,7 @@ void ui::Node::setTag(const String& tag) {
 }
 
 std::shared_ptr<ui::Node> ui::Node::findChildByPredicate(const std::function<bool(ui::Node*)> predicate) {
+    PROFILER
     if (predicate(this))
         return shared_from_this();
     for (auto& child : children) {
@@ -48,6 +50,7 @@ std::shared_ptr<ui::Node> ui::Node::findChildByPredicate(const std::function<boo
 }
 
 std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId, bool debug) {
+    PROFILER
     if (debug) {
         logV("Looking for [", targetId, "] in [", id.value, "]:", children.size());
     }
@@ -65,6 +68,7 @@ std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId, bool d
 }
 
 std::shared_ptr<ui::Node> ui::Node::findParentById(const String &targetId) {
+    PROFILER
     if (id.value == targetId)
         return shared_from_this();
     auto parent = this->parent;
@@ -91,6 +95,7 @@ void ui::Node::bringToFront(std::shared_ptr<ui::Node> child) {
 }
 
 bool ui::Node::isDescendantOf(std::shared_ptr<ui::Node> other) {
+    PROFILER
     if (!other)
         return false;
     auto current = this;
@@ -104,6 +109,7 @@ bool ui::Node::isDescendantOf(std::shared_ptr<ui::Node> other) {
 
 
 U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
+    PROFILER
     if (!child)
         return 0;
     auto current = child->parent;
@@ -118,6 +124,7 @@ U32 ui::Node::getChildSeparation(std::shared_ptr<ui::Node> child) {
 }
 
 void ui::Node::processEvent(const Event& event) {
+    PROFILER
     auto hold = shared_from_this();
     event.currentTarget = this;
     EventHandler::processEvent(event);
@@ -128,6 +135,7 @@ void ui::Node::processEvent(const Event& event) {
 }
 
 void ui::Node::setDirty() {
+    PROFILER
     if (!isDirty) {
         isDirty = true;
         if (parent)
@@ -136,12 +144,14 @@ void ui::Node::setDirty() {
 }
 
 bool ui::Node::init(const PropertySet& properties) {
+    PROFILER
     load(properties);
     reflow();
     return true;
 }
 
 bool ui::Node::update() {
+    PROFILER
     if (!isDirty)
         return false;
     isDirty = false;
@@ -184,6 +194,7 @@ void ui::Node::load(const PropertySet& set) {
 }
 
 void ui::Node::set(const String& key, Value& value, bool debug) {
+    PROFILER
     Model::set(key, value, debug);
     for (auto& entry : controllers) {
         entry.second->set(key, value, debug);
@@ -311,6 +322,7 @@ void applyStyle(std::shared_ptr<ui::Node> node, Vector<PropertySet*> styles) {
 }
 
 std::shared_ptr<ui::Node> ui::Node::fromXML(const String& widgetName, const HashSet<String>& tags) {
+    PROFILER
     static U32 depth = 0;
     depth++;
     auto lock = inject<Cache>{}->lock();
@@ -380,6 +392,7 @@ static std::shared_ptr<ui::Node> fromXMLInternal(const String& widgetName) {
 }
 
 void ui::Node::reflow() {
+    PROFILER
     flowInstance = inject<Flow>{*flow};
     setDirty();
 }
@@ -408,6 +421,7 @@ void ui::Node::forwardToChildren(const Event& event) {
 }
 
 void ui::Node::eventHandler(const AddToScene& event) {
+    PROFILER
     isInScene = true;
     if (isDirty && parent) // parent is null for root node
         parent->setDirty();
@@ -425,6 +439,7 @@ void ui::Node::resize() {
 }
 
 void ui::Node::doResize() {
+    PROFILER
     if (!parent || !flowInstance)
         return;
     auto innerRect = globalRect;
@@ -445,10 +460,12 @@ void ui::Node::doResize() {
 }
 
 void ui::Node::onResize() {
+    PROFILER
     processEvent(ui::Resize{this});
 }
 
 void ui::Node::draw(S32 z, Graphics& gfx) {
+    PROFILER
     auto prevAlpha = gfx.alpha;
     if (*hideOverflow) {
         Rect clip = gfx.pushClipRect(globalRect);
@@ -474,6 +491,7 @@ void ui::Node::draw(S32 z, Graphics& gfx) {
 }
 
 void ui::Node::addChild(std::shared_ptr<Node> child, U32 index) {
+    PROFILER
     if (!child)
         return;
 
@@ -500,6 +518,7 @@ void ui::Node::addChild(std::shared_ptr<Node> child, U32 index) {
 }
 
 void ui::Node::removeChild(std::shared_ptr<Node> node) {
+    PROFILER
     if (!node) return;
     if (node->parent == this) {
         auto it = std::find(children.begin(), children.end(), node);

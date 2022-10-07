@@ -21,6 +21,7 @@
 #include <common/match.hpp>
 #include <common/Rect.hpp>
 #include <common/Surface.hpp>
+#include <common/Profiler.hpp>
 #include <gui/Graphics.hpp>
 #include <gui/Texture.hpp>
 #include <log/Log.hpp>
@@ -66,6 +67,7 @@ public:
     U32 empty = 0;
 
     void init(const String& version) {
+        PROFILER
 #if defined(__WINDOWS__)
         glewInit();
 #endif
@@ -116,6 +118,7 @@ public:
     std::shared_ptr<Surface> renderTarget;
 
     void setupRawRenderTarget() {
+        PROFILER
         static U32 oldSize = 0;
         U32 size = U32(width * scale) * U32(height * scale);
         bool needsResize = size != oldSize;
@@ -147,6 +150,7 @@ public:
     }
 
     U32 compile(U32 type, const String& source) {
+        PROFILER
         U32 shader = glCreateShader(type);
         auto str = source.c_str();
         glShaderSource(shader, 1, &str, NULL);
@@ -167,6 +171,7 @@ public:
     }
 
     U32 link(U32 vertexShader, U32 fragmentShader) {
+        PROFILER
         U32 program = glCreateProgram();
         glAttachShader(program, vertexShader);
         glAttachShader(program, fragmentShader);
@@ -196,6 +201,7 @@ public:
     }
 
     void begin(Rect& globalRect, Color& clearColor) {
+        PROFILER
         clip = globalRect;
         width = globalRect.width;
         iwidth = 2.0f / width;
@@ -211,6 +217,7 @@ public:
     }
 
     void end() {
+        PROFILER
         flush();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         write();
@@ -220,53 +227,55 @@ public:
     U32 currentShader = 0;
 
     void flush() {
+        PROFILER
         if (vertices.empty()) {
             return;
         }
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        PROFILER_CALL(glEnable(GL_BLEND));
+        PROFILER_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                      PROFILER_CALL(glBindVertexArray(VAO));
+                                    PROFILER_CALL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
         U32 requiredSize = vertices.size() * sizeof(vertices[0]);
         if (requiredSize > currentBufferSize) {
-            glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW);
+            PROFILER_CALL(glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW));
             currentBufferSize = requiredSize;
 
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
+            PROFILER_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0));
+                          PROFILER_CALL(glEnableVertexAttribArray(0));
 
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-            glEnableVertexAttribArray(1);
+                                        PROFILER_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float))));
+                                        PROFILER_CALL(glEnableVertexAttribArray(1));
 
-            glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(5 * sizeof(float)));
-            glEnableVertexAttribArray(2);
+                                        PROFILER_CALL(glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(5 * sizeof(float))));
+                                        PROFILER_CALL(glEnableVertexAttribArray(2));
         } else {
-            glBufferSubData(GL_ARRAY_BUFFER, 0, requiredSize, vertices.data());
+            PROFILER_CALL(glBufferSubData(GL_ARRAY_BUFFER, 0, requiredSize, vertices.data()));
         }
 
         if (currentShader != shader) {
             currentShader = shader;
-            glUseProgram(shader);
+            PROFILER_CALL(glUseProgram(shader));
         }
 
         if (activeTexture) {
             activeTexture->bind(GL_TEXTURE_2D);
         } else {
-            glBindTexture(GL_TEXTURE_2D, empty);
+            PROFILER_CALL(glBindTexture(GL_TEXTURE_2D, empty));
         }
-        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9);
+        PROFILER_CALL(glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9));
 
         vertices.clear();
         activeTexture.reset();
     }
 
     void upload(Surface& surface, GLTexture* texture) {
+        PROFILER
         texture->bind(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         // TODO: Use dirtyRegion to upload only what changed
-        glTexImage2D(GL_TEXTURE_2D,
+        PROFILER_CALL(glTexImage2D(GL_TEXTURE_2D,
                      0,
                      GL_RGBA,
                      surface.width(),
@@ -274,7 +283,7 @@ public:
                      0,
                      GL_RGBA,
                      GL_UNSIGNED_BYTE,
-                     surface.data());
+                     surface.data()));
         texture->width = surface.width();
         texture->iwidth = 1.0f / texture->width;
         texture->height = surface.height();
@@ -297,6 +306,7 @@ public:
     };
 
     void push(const Vertex& vtx) {
+        PROFILER
         constexpr const F32 depthFactor = 0.0000001f;
         vertices.push_back(vtx.x * iwidth - 1.0f);
         if (vtx.flip) {
@@ -323,6 +333,7 @@ public:
     bool debug = false;
 
     void push(F32 z, const Rectf& rect) {
+        PROFILER
         F32 x1 = rect.x,
             y1 = rect.y,
             x2 = rect.x + rect.w,
@@ -379,6 +390,7 @@ public:
     }
 
     void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
+        PROFILER
         debug = settings.debug;
         F32 x = settings.destination.x;
         F32 y = settings.destination.y;
@@ -454,6 +466,7 @@ public:
     Vector<fork_ptr<Texture>> textures;
 
     std::shared_ptr<GLTexture> getTexture(Surface& surface) {
+        PROFILER
         auto texture = surface.info().get<GLTexture>(this);
 
         if (!texture) {
@@ -467,6 +480,7 @@ public:
     }
 
     void blit(const BlitSettings& settings) override {
+        PROFILER
         std::shared_ptr<GLTexture> texture;
         if (settings.surface) {
             auto& surface = *settings.surface;
@@ -496,12 +510,14 @@ public:
     }
 
     Surface* read() override {
+        PROFILER
         glReadPixels(0, 0, width * scale, height * scale, GL_RGBA, GL_UNSIGNED_BYTE, renderTarget->data());
         renderTarget->setDirty(renderTarget->rect());
         return renderTarget.get();
     }
 
     void write() override {
+        PROFILER
         if (!rawSurface)
             return;
         Rect rect(0, 0, width * scale, height * scale);

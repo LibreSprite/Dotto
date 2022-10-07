@@ -8,6 +8,7 @@
 
 #include <common/Config.hpp>
 #include <common/Messages.hpp>
+#include <common/Profiler.hpp>
 #include <common/PubSub.hpp>
 #include <common/System.hpp>
 #include <gui/Events.hpp>
@@ -64,6 +65,7 @@ public:
     }
 
     bool run() override {
+        PROFILER
         if (!running) return false;
         if (!root || root->getChildren().empty()) return false;
         pumpEvents();
@@ -95,6 +97,7 @@ public:
     }
 
     void pumpEvents() {
+        PROFILER
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {

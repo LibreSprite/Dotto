@@ -10,6 +10,7 @@
 #include <common/FunctionRef.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
+#include <common/Profiler.hpp>
 #include <common/PropertySet.hpp>
 #include <common/System.hpp>
 #include <fs/Cache.hpp>
@@ -45,6 +46,8 @@ public:
     using clock = std::chrono::high_resolution_clock;
 
     clock::time_point referenceTime;
+    clock::time_point tockTime;
+    U32 framesUntilTock = 0;
 
     void boot(int argc, const char* argv[]) override {
         auto lock = cache->lock();
@@ -76,8 +79,13 @@ public:
                 entry.second->parse("", true);
         }
         pub(msg::BootComplete{});
-        auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - referenceTime);
+
+        auto now = clock::now();
+        auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - referenceTime);
         logI("Boot time: ", delta.count());
+        tockTime = now;
+
+        PROFILER_START
     }
 
     void initValue() {
@@ -109,19 +117,25 @@ public:
         Color::addConverters();
     }
 
-    U32 framesUntilTock = 60;
     bool run() override {
+        PROFILER
         pub(msg::Tick{});
         pub(msg::PostTick{});
 
-        if (!--framesUntilTock) {
+        clock::time_point now = clock::now();
+
+        framesUntilTock++;
+        if (now - tockTime >= std::chrono::seconds(1)) {
+            PROFILER_END;
+            logV("FPS: ", framesUntilTock);
             pub(msg::Tock{});
-            framesUntilTock = 60;
+            framesUntilTock = 0;
+            PROFILER_START;
+            tockTime = clock::now();
         }
 
 #if !defined(EMSCRIPTEN) && !defined(__N3DS__)
         if (running) {
-            clock::time_point now = clock::now();
             auto delta = now - referenceTime;
             referenceTime = now;
             if (delta < std::chrono::milliseconds{1000 / 60}) {
