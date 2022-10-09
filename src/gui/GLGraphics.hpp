@@ -53,18 +53,67 @@ public:
     }
 };
 
-class GLGraphics : public Graphics, public std::enable_shared_from_this<GLGraphics> {
-public:
+struct Object {
     U32 VBO = 0;
     U32 VAO = 0;
+    static inline Object* bound;
+
+    Object() {
+        PROFILER;
+
+        glGenBuffers(1, &VBO);
+        glGenVertexArrays(1, &VAO);
+
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(5 * sizeof(float)));
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+    }
+
+    ~Object() {
+        if (VBO)
+            glDeleteBuffers(1, &VBO);
+        if (VAO)
+            glDeleteVertexArrays(1, &VAO);
+    }
+
+    void bind(Vector<F32>& vertices) {
+        if (bound != this) {
+            bound = this;
+            PROFILER_CALL(glBindVertexArray(VAO));
+            PROFILER_CALL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+            U32 requiredSize = vertices.size() * sizeof(vertices[0]);
+            PROFILER_CALL(glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW));
+        }
+    }
+};
+
+class GLGraphics : public Graphics, public std::enable_shared_from_this<GLGraphics> {
+public:
+    U32 currentObject = 0;
+    Vector<std::shared_ptr<Object>> objects;
     U32 shader = 0;
     Vector<F32> vertices;
     std::shared_ptr<GLTexture> activeTexture;
+    GLTexture* boundTexture;
 
     F32 iwidth, iheight;
     S32 width, height;
 
     U32 empty = 0;
+
+    Object& getObject() {
+        if (currentObject == objects.size()) {
+            objects.push_back(std::make_shared<Object>());
+        }
+        return *objects[currentObject++];
+    }
 
     void init(const String& version) {
         PROFILER;
@@ -75,9 +124,6 @@ public:
         PROFILER_INFO((const char*)glGetString(GL_VENDOR));
         PROFILER_INFO((const char*)glGetString(GL_RENDERER));
         PROFILER_INFO(version);
-
-        glGenBuffers(1, &VBO);
-        glGenVertexArrays(1, &VAO);
 
         glGenTextures(1, &empty);
         glBindTexture(GL_TEXTURE_2D, empty);
@@ -196,10 +242,7 @@ public:
         textures.clear();
         if (empty)
             glDeleteTextures(1, &empty);
-        if (VBO)
-            glDeleteBuffers(1, &VBO);
-        if (VAO)
-            glDeleteVertexArrays(1, &VAO);
+        objects.clear();
         if (shader)
             glDeleteProgram(shader);
     }
@@ -217,7 +260,9 @@ public:
                      clearColor.g/255.0f,
                      clearColor.b/255.0f,
                      clearColor.a/255.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        PROFILER_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        PROFILER_CALL(glEnable(GL_BLEND));
+        PROFILER_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     }
 
     void end() {
@@ -225,9 +270,9 @@ public:
         flush();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         write();
+        currentObject = 0;
     }
 
-    U32 currentBufferSize = 0;
     U32 currentShader = 0;
 
     void flush() {
@@ -236,39 +281,23 @@ public:
             return;
         }
 
-        PROFILER_CALL(glEnable(GL_BLEND));
-        PROFILER_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                      PROFILER_CALL(glBindVertexArray(VAO));
-                                    PROFILER_CALL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-        U32 requiredSize = vertices.size() * sizeof(vertices[0]);
-        if (requiredSize > currentBufferSize) {
-            PROFILER_CALL(glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW));
-            currentBufferSize = requiredSize;
-
-            PROFILER_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0));
-                          PROFILER_CALL(glEnableVertexAttribArray(0));
-
-                                        PROFILER_CALL(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float))));
-                                        PROFILER_CALL(glEnableVertexAttribArray(1));
-
-                                        PROFILER_CALL(glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(5 * sizeof(float))));
-                                        PROFILER_CALL(glEnableVertexAttribArray(2));
-        } else {
-            PROFILER_CALL(glBufferSubData(GL_ARRAY_BUFFER, 0, requiredSize, vertices.data()));
-        }
+        getObject().bind(vertices);
 
         if (currentShader != shader) {
             currentShader = shader;
             PROFILER_CALL(glUseProgram(shader));
         }
 
-        if (activeTexture) {
-            activeTexture->bind(GL_TEXTURE_2D);
-        } else {
-            PROFILER_CALL(glBindTexture(GL_TEXTURE_2D, empty));
+        if (activeTexture.get() != boundTexture) {
+            boundTexture = activeTexture.get();
+            if (activeTexture) {
+                activeTexture->bind(GL_TEXTURE_2D);
+            } else {
+                PROFILER_CALL(glBindTexture(GL_TEXTURE_2D, empty));
+            }
         }
-        PROFILER_CALL(glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9));
 
+        PROFILER_CALL(glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9));
         vertices.clear();
         activeTexture.reset();
     }
@@ -503,13 +532,13 @@ public:
 
     Rect pushClipRect(const Rect& rect) override {
         auto copy = clip;
-        flush();
+        // flush();
         clip.intersect(rect);
         return copy;
     }
 
     void setClipRect(const Rect& rect) override {
-        flush();
+        // flush();
         clip = rect;
     }
 
