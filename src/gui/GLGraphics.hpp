@@ -49,13 +49,15 @@ public:
     }
 
     void bind(U32 target) {
-        glBindTexture(target, id);
+        PROFILER_CALL(glBindTexture(target, id));
     }
 };
 
 struct Object {
     U32 VBO = 0;
     U32 VAO = 0;
+    U64 hash = 0;
+
     static inline Object* bound;
 
     Object() {
@@ -83,13 +85,16 @@ struct Object {
             glDeleteVertexArrays(1, &VAO);
     }
 
-    void bind(Vector<F32>& vertices) {
+    void bind(Vector<F32>& vertices, U64 hash) {
         if (bound != this) {
             bound = this;
             PROFILER_CALL(glBindVertexArray(VAO));
             PROFILER_CALL(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-            U32 requiredSize = vertices.size() * sizeof(vertices[0]);
-            PROFILER_CALL(glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW));
+            if (hash != this->hash) {
+                this->hash = hash;
+                U32 requiredSize = vertices.size() * sizeof(vertices[0]);
+                PROFILER_CALL(glBufferData(GL_ARRAY_BUFFER, requiredSize, vertices.data(), GL_STREAM_DRAW));
+            }
         }
     }
 };
@@ -99,6 +104,7 @@ public:
     U32 currentObject = 0;
     Vector<std::shared_ptr<Object>> objects;
     U32 shader = 0;
+    U64 hash = 0;
     Vector<F32> vertices;
     std::shared_ptr<GLTexture> activeTexture;
     GLTexture* boundTexture;
@@ -281,7 +287,8 @@ public:
             return;
         }
 
-        getObject().bind(vertices);
+        getObject().bind(vertices, hash);
+        hash = 0;
 
         if (currentShader != shader) {
             currentShader = shader;
@@ -338,23 +345,31 @@ public:
         bool flip;
     };
 
+#define PUSH(V) {                               \
+        F32 v = (V);                            \
+        hash += *reinterpret_cast<U32*>(&v);    \
+        hash ^= (hash << 5) | (hash >> 8);      \
+        vertices.push_back(v);                  \
+    }
+
     void push(const Vertex& vtx) {
         PROFILER
         constexpr const F32 depthFactor = 0.0000001f;
-        vertices.push_back(vtx.x * iwidth - 1.0f);
+        PUSH(vtx.x * iwidth - 1.0f);
         if (vtx.flip) {
-            vertices.push_back(vtx.y * iheight - 1.0f);
+            PUSH(vtx.y * iheight - 1.0f);
         } else {
-            vertices.push_back(1.0f - vtx.y * iheight);
+            PUSH(1.0f - vtx.y * iheight);
         }
-        vertices.push_back(vtx.z * depthFactor);
-        vertices.push_back(vtx.u);
-        vertices.push_back(vtx.v);
-        vertices.push_back(vtx.r);
-        vertices.push_back(vtx.g);
-        vertices.push_back(vtx.b);
-        vertices.push_back(vtx.a);
+        PUSH(vtx.z * depthFactor);
+        PUSH(vtx.u);
+        PUSH(vtx.v);
+        PUSH(vtx.r);
+        PUSH(vtx.g);
+        PUSH(vtx.b);
+        PUSH(vtx.a);
     }
+#undef PUSH
 
     struct Rectf {
         F32 x, y, w, h;
