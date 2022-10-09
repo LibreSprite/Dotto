@@ -67,10 +67,14 @@ public:
     U32 empty = 0;
 
     void init(const String& version) {
-        PROFILER
+        PROFILER;
 #if defined(__WINDOWS__)
         glewInit();
 #endif
+
+        PROFILER_INFO((const char*)glGetString(GL_VENDOR));
+        PROFILER_INFO((const char*)glGetString(GL_RENDERER));
+        PROFILER_INFO(version);
 
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);

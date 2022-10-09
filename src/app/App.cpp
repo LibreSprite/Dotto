@@ -126,6 +126,7 @@ public:
 
         framesUntilTock++;
         if (now - tockTime >= std::chrono::seconds(1)) {
+            PROFILER_INFO("FPS: " + std::to_string(framesUntilTock));
             PROFILER_END;
             logV("FPS: ", framesUntilTock);
             pub(msg::Tock{});

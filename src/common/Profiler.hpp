@@ -18,7 +18,7 @@ public:
     ~Profiler();
     static void start();
     static void end();
-
+    static void info(std::string_view str);
 private:
     Profiler* parent;
     const char* func;
@@ -30,12 +30,12 @@ private:
 #define PROFILER_START Profiler::start();
 #define PROFILER_END Profiler::end();
 #define PROFILER_CALL(cmd) {Profiler pccall_ (#cmd); cmd;}
-
+#define PROFILER_INFO(str) Profiler::info(str);
 #else
 
 #define PROFILER
 #define PROFILER_START
 #define PROFILER_END
-#define PROFILER_CALL(name, cmd) cmd;
-
+#define PROFILER_CALL(name, cmd) {cmd;}
+#define PROFILER_INFO(str) ;
 #endif

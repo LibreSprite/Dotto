@@ -2,16 +2,19 @@
 // This file is released under the terms of the MIT license.
 // Read LICENSE.txt for more information.
 
+#if defined(USE_PROFILER)
+
 #include "types.hpp"
 #include "Profiler.hpp"
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 
-#if defined(USE_PROFILER)
 static Profiler* current;
 static U32 started;
 static std::ofstream file{"profile.log"};
+static std::stringstream infoheader;
 
 struct Entry {
     std::chrono::duration<F64> selfTime = {};
@@ -40,6 +43,10 @@ Profiler::~Profiler() {
     }
 }
 
+void Profiler::info(std::string_view str) {
+    infoheader << String{str} << std::endl;
+}
+
 void Profiler::start() {
     started = 1;
 }
@@ -61,6 +68,9 @@ void Profiler::end() {
     std::sort(entryVec.begin(), entryVec.end(), [](auto& left, auto& right) {
         return right.second->selfTime < left.second->selfTime;
     });
+
+    file << infoheader.str() << std::endl;
+    infoheader.str("");
 
     for (auto& [key, entry] : entryVec) {
         auto selfTime = entry->selfTime.count();
