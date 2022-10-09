@@ -85,7 +85,7 @@ struct Object {
             glDeleteVertexArrays(1, &VAO);
     }
 
-    void bind(Vector<F32>& vertices, U64 hash) {
+    void bind(Vector<F32>& vertices, U64 hash, Vector<U16>& indices) {
         if (bound != this) {
             bound = this;
             PROFILER_CALL(glBindVertexArray(VAO));
@@ -105,7 +105,10 @@ public:
     Vector<std::shared_ptr<Object>> objects;
     U32 shader = 0;
     U64 hash = 0;
+    U32 VEO = 0;
     Vector<F32> vertices;
+    U32 uploadedIndexCount = 0;
+    Vector<U16> indices;
     std::shared_ptr<GLTexture> activeTexture;
     GLTexture* boundTexture;
 
@@ -131,6 +134,7 @@ public:
         PROFILER_INFO((const char*)glGetString(GL_RENDERER));
         PROFILER_INFO(version);
 
+        glGenBuffers(1, &VEO);
         glGenTextures(1, &empty);
         glBindTexture(GL_TEXTURE_2D, empty);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -246,6 +250,8 @@ public:
 
     ~GLGraphics() {
         textures.clear();
+        if (VEO)
+            glDeleteBuffers(1, &VEO);
         if (empty)
             glDeleteTextures(1, &empty);
         objects.clear();
@@ -287,7 +293,7 @@ public:
             return;
         }
 
-        getObject().bind(vertices, hash);
+        getObject().bind(vertices, hash, indices);
         hash = 0;
 
         if (currentShader != shader) {
@@ -304,8 +310,16 @@ public:
             }
         }
 
-        PROFILER_CALL(glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9));
+        PROFILER_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VEO));
+        if (uploadedIndexCount < indices.size()) {
+            uploadedIndexCount = indices.size();
+            PROFILER_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 2, indices.data(), GL_STREAM_DRAW));
+        }
+
+        // PROFILER_CALL(glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 9));
+        PROFILER_CALL(glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0));
         vertices.clear();
+        indices.clear();
         activeTexture.reset();
     }
 
@@ -429,12 +443,29 @@ public:
         if (debug)
             logI("Pushing ", x1, " ", y1, " => ", x2, " ", y2, " to ", shared_from_this(), " ", activeTexture);
 
+        // push({x1, y1, z, u0, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        // push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        // push({x2, y1, z, u1, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        // push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        // push({x2, y2, z, u1, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        // push({x2, y1, z, u1, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
+
+        auto S = vertices.size() / 9;
+
         push({x1, y1, z, u0, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
         push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
         push({x2, y1, z, u1, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
-        push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        // push({x1, y2, z, u0, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
         push({x2, y2, z, u1, v1, rect.r, rect.g, rect.b, rect.a, rect.flip});
-        push({x2, y1, z, u1, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
+        // push({x2, y1, z, u1, v0, rect.r, rect.g, rect.b, rect.a, rect.flip});
+
+        indices.push_back(S + 0);
+        indices.push_back(S + 1);
+        indices.push_back(S + 2);
+
+        indices.push_back(S + 1);
+        indices.push_back(S + 3);
+        indices.push_back(S + 2);
     }
 
     void push(std::shared_ptr<GLTexture>& texture, const BlitSettings& settings) {
