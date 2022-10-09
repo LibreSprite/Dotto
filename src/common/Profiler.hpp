@@ -36,6 +36,6 @@ private:
 #define PROFILER
 #define PROFILER_START
 #define PROFILER_END
-#define PROFILER_CALL(name, cmd) {cmd;}
+#define PROFILER_CALL(cmd) {cmd;}
 #define PROFILER_INFO(str) ;
 #endif
