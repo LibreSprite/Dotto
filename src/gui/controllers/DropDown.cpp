@@ -87,18 +87,16 @@ public:
             }
 
             auto rect = node()->globalRect;
-            logI(rect);
-            logI("x", std::to_string(rect.left()) + "px");
-            logI("y", std::to_string(rect.bottom()) + "px");
-            logI("width", std::to_string(rect.width) + "px");
-
             container->load({
                     {"x", std::to_string(rect.left()) + "px"},
                     {"y", std::to_string(rect.bottom()) + "px"},
                     {"width", std::to_string(rect.width) + "px"}
                 });
             window->addChild(container);
-            logI("added container");
+            window->doResize();
+            if (container->globalRect.bottom() > window->innerHeight()) {
+                container->load({{"y", std::to_string(rect.y - container->globalRect.height) + "px"}});
+            }
         }
     }
 };
