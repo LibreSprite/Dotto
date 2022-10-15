@@ -11,15 +11,17 @@ void Font::Glyph::blitTo(S32 offsetX, S32 offsetY, const Color& color, Surface& 
         auto pixels = target.data();
         U32 w = target.width();
         U32 h = target.height();
+        U32 sx = -std::min<S32>(0, offsetX + bearingX);
         for (U32 y = 0; y < height; ++y) {
             U32 ty = y + offsetY - bearingY;
             if (ty >= h)
                 break;
             U32 tyw = ty * w;
-            for (U32 x = 0; x < width; ++x) {
+            for (U32 x = sx; x < width; ++x) {
                 U32 tx = x + offsetX + bearingX;
-                if (tx >= w)
+                if (tx >= w) {
                     break;
+                }
                 if (auto alpha = data[y * width + x]) {
                     Color old{pixels[tyw + tx]};
                     if (alpha > old.a) {
