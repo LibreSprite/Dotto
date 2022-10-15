@@ -29,9 +29,6 @@ public:
 
         {
             config = "/";
-            if (config.empty())
-                config = home + separator + ".config";
-            config += separator + "dotto";
             mount("%userdata", "dir", config);
         }
 
