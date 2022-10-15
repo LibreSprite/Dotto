@@ -1,4 +1,18 @@
-<node id="layercontrols">
-  <textbutton id="newlayer" label="New Layer" click="AddLayer type=bitmap" height="24px"/>
-  <textbutton id="deletelayer" label="Delete Layer" click="DeleteLayer" height="24px"/>
-</node>
+<image id="layercontrols">
+  <input height="24px" controller="cellpropertymodifier" property="name" key="text" align="0"/>
+  <textbutton id="blend"
+              height="24px"
+              controller="cellpropertymodifier, dropdown"
+              property="blendmode"
+              forward="labelspan.text=value"
+              margin="0 0 0 0"/>
+  <range controller="cellpropertymodifier"
+         property="alpha"
+         label="Transparency:"
+         id="alpha"
+         percent="true"/>
+  <row height="24px">
+    <textbutton id="newlayer" label="New" click="AddLayer type=bitmap"/>
+    <textbutton id="deletelayer" label="Delete" click="DeleteLayer"/>
+  </row>
+</image>

@@ -45,7 +45,10 @@
   <node controller="toolbox" id="toolbox" extra-height="35"/>
 
   <image id="layersidebar" class="sidebarcontainer" width="200px">
-    <layercontrols controller="layerlist" flow="contain-column"/>
+    <node controller="scrollable">
+      <node controller="layerlist"/>
+    </node>
+    <layercontrols/>
   </image>
 
   <image id="filtersidebar" class="sidebarcontainer" width="200px">

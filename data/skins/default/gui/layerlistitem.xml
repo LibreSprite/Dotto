@@ -4,21 +4,6 @@
 
   <node flow="row" height="24px">
     <image id="preview" fit="fit" width="24px"/>
-    <input id="layer-name" width="100%" controller="cellpropertymodifier" property="name" key="text"></input>
-  </node>
-
-  <node flow="row" height="24px">
-    <textbutton id="blend"
-                width="50px"
-                controller="cellpropertymodifier, cycle"
-                property="blendmode"
-                forward="labelspan.text=value"
-                margin="0 0 0 0"/>
-    <range controller="cellpropertymodifier"
-           property="alpha"
-           label="Transparency:"
-           id="alpha"
-           percent="true"
-           width="50%"/>
+    <span id="layer-name" width="100%" controller="cellpropertymodifier" property="name" key="text" />
   </node>
 </image>
