@@ -234,7 +234,7 @@ public:
         if (!force) {
             S32 dx = x - prevPlotX;
             S32 dy = y - prevPlotY;
-            F32 iv = *interval;// + *interval * (rand() / F32(RAND_MAX) * *intervalVariation);
+            F32 iv = *interval + *interval * (rand() / F32(RAND_MAX) * *intervalVariation);
             if (dx*dx+dy*dy < iv*iv)
                 return;
         }
@@ -254,7 +254,7 @@ public:
         S32 hsw = sw / 2;
         S32 hsh = sh / 2;
 
-        // size += size * (rand() / F32(RAND_MAX) * *sizeVariation);
+        size += size * (rand() / F32(RAND_MAX) * *sizeVariation);
 
         if (pressuresize && which) {
             scale = size * z / shape->width();
