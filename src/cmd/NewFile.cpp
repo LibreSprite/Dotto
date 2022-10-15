@@ -8,8 +8,6 @@
 class NewFile : public Command {
 public:
     Property<bool> interactive{this, "interactive", false};
-    Property<U32> width{this, "width", 32};
-    Property<U32> height{this, "height", 32};
 
     void run() override {
         if (interactive) {

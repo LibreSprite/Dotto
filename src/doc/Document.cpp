@@ -121,10 +121,17 @@ public:
         if (!properties)
             return false;
         auto timeline = createTimeline();
+        docWidth = properties->get<U32>("width") ?: 16;
+        docHeight = properties->get<U32>("height") ?: 16;
+
         inject<Cell> cell{"bitmap"};
         auto surface = cell->getComposite();
-        surface->resize(properties->get<U32>("width") ?: 16,
-                        properties->get<U32>("height") ?: 16);
+        surface->resize(docWidth, docHeight);
+        if (auto fill = properties->get<String>("background-fill"); !fill.empty() && fill != "clear") {
+            surface->fillRect(surface->rect(), Color{fill}.toU32());
+        }
+        timeline->setCell(0, 0, cell);
+
         Value palette;
         auto palettePath = properties->get<String>("palette");
         if (!palettePath.empty()) {
@@ -146,9 +153,13 @@ public:
             }
         }
 
-        timeline->setCell(0, 0, cell);
-        docWidth = surface->width();
-        docHeight = surface->height();
+        for (U32 i = 1, max = properties->get<U32>("layers"); i < max; ++i) {
+            inject<Cell> cell{"bitmap"};
+            auto surface = cell->getComposite();
+            surface->resize(docWidth, docHeight);
+            timeline->setCell(0, i, cell);
+        }
+
         return true;
     }
 

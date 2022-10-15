@@ -4,6 +4,8 @@ var views = {script:app.target};
 var controllers = {
     widthtextbox :{},
     heighttextbox :{},
+    layerstextbox :{},
+    fillcolor :{},
 
     script : {
         init : function() {
@@ -16,8 +18,10 @@ var controllers = {
                     views[name] = node;
                 }
             }
-            views.widthtextbox.set("value", config.get("new-image-width"));
-            views.heighttextbox.set("value", config.get("new-image-height"));
+            views.widthtextbox.set("value", ((config.get("new-image-width")|0) || 1) + "");
+            views.heighttextbox.set("value", ((config.get("new-image-height")|0) || 1) + "");
+            views.layerstextbox.set("value", ((config.get("new-image-layers")|0) || 1) + "");
+            views.fillcolor.set("value", config.get("new-image-fill") || "clear");
         }
     },
 
@@ -25,13 +29,20 @@ var controllers = {
         click : function() {
             var width = views.widthtextbox.findChildById("value").get("text");
             var height = views.heighttextbox.findChildById("value").get("text");
+            var layers = views.layerstextbox.findChildById("value").get("text");
+            var fill = views.fillcolor.get("value");
             var palette = config.get("new-image-palette");
             config.set("new-image-width", width);
             config.set("new-image-height", height);
+            config.set("new-image-fill", fill);
+            config.set("new-image-layers", layers);
+
             app.command("newfile",
                         "width", width,
                         "height", height,
-                        "palette", palette);
+                        "background-fill", fill,
+                        "palette", palette,
+                        "layers", layers);
             views.script.remove();
         }
     },
@@ -70,6 +81,11 @@ function onEvent(name) {
   ]]><inside>
     <number id="widthtextbox" label="Width:" value="64"/>
     <number id="heighttextbox" label="Height:" value="64"/>
+    <number id="layerstextbox" label="Layers:" value="1"/>
+    <row>
+      <span>Background Fill:</span>
+      <dropdown id="fillcolor" value="clear" options="clear,white,black"/>
+    </row>
     <row>
       <textbutton id="cancelbutton" label="Cancel"/>
       <textbutton id="okbutton" label="OK" steal-focus="true"/>

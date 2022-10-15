@@ -5,7 +5,8 @@
        handle="titlebar"
        x="50%-50%"
        y="50%-50%"
-       overflow-hidden="true">
+       overflow-hidden="true"
+       flow="contain-column">
   <titlebar/>
-  <node id="inside" height="100%"/>
+  <node id="inside" flow="contain-column"/>
 </image>

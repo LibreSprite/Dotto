@@ -4,6 +4,12 @@
 
 #include <common/Color.hpp>
 
+static HashMap<String, Color> colorTable = {
+    {"clear", {0, 0, 0, 0}},
+    {"black", {0, 0, 0, 255}},
+    {"white", {255, 255, 255, 255}}
+};
+
 void Color::fromString(const String& color) {
     if (color.empty())
         return;
@@ -36,6 +42,11 @@ void Color::fromString(const String& color) {
             else if (key == 'a') a = value;
             else continue;
         }
+        return;
+    }
+
+    if (auto it = colorTable.find(color); it != colorTable.end()) {
+        *this = it->second;
         return;
     }
 
