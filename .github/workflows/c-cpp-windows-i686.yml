@@ -56,7 +56,6 @@ jobs:
         cp /mingw32/bin/libv8_libbase.dll ./
         cp /mingw32/bin/libcrypto-*.dll ./
         cp /mingw32/bin/libssl-*.dll ./
-        cp /mingw32/bin/libssp-*.dll ./
         cp /mingw32/bin/libicuin*.dll ./
         cp /mingw32/bin/libicuuc*.dll ./
         cp /mingw32/bin/libicudt*.dll ./
