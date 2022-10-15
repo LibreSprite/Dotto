@@ -17,7 +17,7 @@
                 width="100px"/>
     <menubutton id="recbutton"
                 click="toggleui id=recmenu"
-                label="Recording"
+                label="Timelapse"
                 width="100px"/>
     <node width="100%" id="mainbarspacer"/>
     <node id="toolconfigquick" controller="metamenu" filter="quick" flow="contain-row"/>
@@ -72,13 +72,22 @@
       <node class="menuspacer"/>
       <menubutton id="quitbutton" click="quit" label="Quit"/>
       <node class="menuspacer"/>
-      <menubutton id="hellobutton" label="Hello, ${username}!"/>
+      <menuspan id="hellobutton" text="Hello, ${username}!"/>
     </image>
   </clickout>
 
   <clickout id="recmenu" class="menu">
     <image class="menucontainer" width="170px" x="100">
-      <menubutton id="recstatusbutton" click="togglerec" label="Start Recording"/>
+      <menubutton
+          controller="recorderstatus"
+          click="togglerec"
+          stopped="Start Recording"
+          forward="labelspan.text=text"/>
+      <menubutton
+          controller="recordersequence"
+          click="resetrecsequence"
+          label="Reset Frame (#${value})"
+          forward="labelspan.text=text"/>
     </image>
   </clickout>
 
