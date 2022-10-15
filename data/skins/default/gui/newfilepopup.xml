@@ -26,6 +26,8 @@ var controllers = {
             var width = views.widthtextbox.findChildById("value").get("text");
             var height = views.heighttextbox.findChildById("value").get("text");
             var palette = config.get("new-image-palette");
+            config.set("new-image-width", width);
+            config.set("new-image-height", height);
             app.command("newfile",
                         "width", width,
                         "height", height,
