@@ -15,7 +15,6 @@ class ToolBox : public ui::Controller {
     Vector<std::shared_ptr<ui::Node>> buttonPool;
     HashMap<Tool*, std::shared_ptr<ui::Node>> toolButton;
     Property<String> containerId{this, "container", "", &ToolBox::setContainer};
-    Property<S32> extraHeight{this, "extra-height", 0};
     std::weak_ptr<ui::Node> container;
 
 public:
@@ -67,7 +66,6 @@ public:
             }
         }
 
-        U32 height = *extraHeight + node()->padding->y + node()->padding->height;
         for (auto entry : enabled) {
             std::shared_ptr<ui::Node> button;
             auto tool = entry->second;
@@ -87,12 +85,10 @@ public:
                 }
                 toolButton[tool.get()] = button;
                 button->load(entry->second->getPropertySet());
+                logI(String(*button->height));
             }
-            height += button->outerHeight();
             container->addChild(button);
         }
-
-        node()->set("height", height);
     }
 
     void attach() override {
