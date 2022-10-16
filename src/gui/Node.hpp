@@ -56,11 +56,13 @@ namespace ui {
         }
 
         virtual void eventHandler(const Focus& event) {
-            parent->processEvent(FocusChild{this});
+            if (parent)
+                parent->processEvent(FocusChild{this});
         }
 
         virtual void eventHandler(const Blur& event) {
-            parent->processEvent(BlurChild{this});
+            if (parent)
+                parent->processEvent(BlurChild{this});
         }
 
     public:
@@ -139,6 +141,10 @@ namespace ui {
             if (parent) {
                 parent->focus(child ?: shared_from_this());
             }
+        }
+
+        virtual std::shared_ptr<ui::Node> getFocus() {
+            return parent ? parent->getFocus() : nullptr;
         }
 
         virtual bool hasFocus(std::shared_ptr<ui::Node> child = nullptr) {

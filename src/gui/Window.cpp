@@ -22,7 +22,7 @@ namespace ui {
         Node::doResize();
     }
 
-    std::shared_ptr<ui::Node> Window::getFocused() {
+    std::shared_ptr<ui::Node> Window::getFocus() {
         if (focusTarget.expired()) {
             focus(findChildByPredicate([](ui::Node* node){
                 return *node->stealFocus;
@@ -117,10 +117,9 @@ namespace ui {
             if (!guiEvent.target)
                 return;
 
-            focus(guiEvent.target->shared_from_this());
-
-            if (guiEvent.target)
-                guiEvent.target->processEvent(guiEvent);
+            auto target = guiEvent.target->shared_from_this();
+            focus(target);
+            target->processEvent(guiEvent);
         }
     }
 
@@ -147,7 +146,7 @@ namespace ui {
 
             auto shared = guiEvent.target->shared_from_this();
 
-            if (auto focus = getFocused()) {
+            if (auto focus = getFocus()) {
                 if (focus.get() == guiEvent.target) {
                     guiEvent.target->processEvent(ui::Click{focus.get(), eventX, eventY, event.buttons});
                 }
@@ -162,13 +161,15 @@ namespace ui {
             hoverWindow = this;
             ui::MouseWheel guiEvent{nullptr, mouseX, mouseY, mouseButtons, event.wheelX, event.wheelY};
             guiEvent.target = findEventTarget(guiEvent);
-            if (guiEvent.target)
-                guiEvent.target->processEvent(guiEvent);
+            if (guiEvent.target) {
+                auto shared = guiEvent.target->shared_from_this();
+                shared->processEvent(guiEvent);
+            }
         }
     }
 
     void Window::on(msg::TextEvent& event) {
-        if (auto focus = getFocused()) {
+        if (auto focus = getFocus()) {
             focus->processEvent(ui::TextEvent{
                     focus.get(),
                     event.text,
@@ -178,7 +179,7 @@ namespace ui {
     }
 
     void Window::on(msg::KeyDown& event) {
-        if (auto focus = getFocused()) {
+        if (auto focus = getFocus()) {
             focus->processEvent(ui::KeyDown{
                     focus.get(),
                     event.scancode,
@@ -190,7 +191,7 @@ namespace ui {
     }
 
     void Window::on(msg::KeyUp& event) {
-        if (auto focus = getFocused()) {
+        if (auto focus = getFocus()) {
             focus->processEvent(ui::KeyUp{
                     focus.get(),
                     event.scancode,

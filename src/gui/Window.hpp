@@ -29,7 +29,6 @@ protected:
            msg::PollActiveWindow> pub{this};
     std::weak_ptr<ui::Node> mouseOverTarget;
     std::weak_ptr<ui::Node> focusTarget;
-    std::shared_ptr<ui::Node> getFocused();
 
     static inline ui::Window* hoverWindow = nullptr;
     static inline std::weak_ptr<ui::Node> dragTarget;
@@ -53,6 +52,7 @@ public:
     void postInject() override;
     void resize() override;
     void doResize() override;
+    std::shared_ptr<ui::Node> getFocus() override;
     bool hasFocus(std::shared_ptr<ui::Node> child) override;
     void focus(std::shared_ptr<ui::Node> child) override;
     void blur(std::shared_ptr<ui::Node> child) override;
