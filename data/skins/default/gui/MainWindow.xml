@@ -80,7 +80,7 @@
   </clickout>
 
   <clickout id="recmenu" class="menu">
-    <image class="menucontainer" width="170px" x="100">
+    <image class="menucontainer" width="200px" x="100">
       <menubutton
           controller="recorderstatus"
           click="togglerec"
@@ -90,6 +90,11 @@
           controller="recordersequence"
           click="resetrecsequence"
           label="Reset Frame (#${value})"
+          forward="labelspan.text=text"/>
+      <menubutton
+          controller="recorderencode"
+          click="recorderencode"
+          label="Encode MP4"
           forward="labelspan.text=text"/>
     </image>
   </clickout>
