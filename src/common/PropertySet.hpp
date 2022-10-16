@@ -99,8 +99,13 @@ public:
     }
 
     void append(const PropertySet& other) {
-        for (auto& entry : other.properties) {
-            properties.insert_or_assign(entry.first, entry.second);
+        for (auto& [key, value] : other.properties) {
+            auto it = properties.find(key);
+            if (it == properties.end()) {
+                properties.insert({key, std::make_shared<Value>(*value)});
+            } else {
+                *it->second = *value;
+            }
         }
     }
 
