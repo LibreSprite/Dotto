@@ -23,10 +23,11 @@ public:
     Property<String> allowRegex{this, "allow", ""};
     Property<String> text{this, "text", ""};
     Property<String> spanId{this, "span", "value"};
+    Property<String> value{this, "value", "", &Input::changeValue};
     ui::Node* span = nullptr;
 
-    Property<String> state{this, "state", "enabled", &Input::changeState};
-    void changeState() {
+    void changeValue() {
+        node()->set("text", *value);
     }
 
     void attach() override {
@@ -136,7 +137,7 @@ public:
             offset += insert.size();
         }
         node()->set("text", Font::toString(entities, false));
-        node()->set("value", Font::toString(entities, true));
+        node()->set("value", *value = Font::toString(entities, true));
     }
 
     void eventHandler(const ui::TextEvent& event) {
@@ -187,7 +188,7 @@ public:
             }
             if (changed) {
                 node()->set("text", Font::toString(entities, false));
-                node()->set("value", Font::toString(entities, true));
+                node()->set("value", *value = Font::toString(entities, true));
                 node()->processEvent(ui::Changed{node()});
             }
         } else if (keyName == "RIGHT") {
