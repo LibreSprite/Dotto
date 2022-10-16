@@ -24,13 +24,16 @@ public:
         if (container)
             return container;
         container = ui::Node::fromXML("dropdowncontainer");
+        container->load({
+                {"steal-focus", true},
+                {"controller", "blur-remove"}
+            });
 
         for (auto& opt : getOptions()) {
             auto entry = ui::Node::fromXML("menubutton");
             entry->load({
                     {"label", opt},
                     {"click", FunctionRef<void()>([=]{
-                        logI("Click ", opt);
                         if (*value != opt) {
                             container->remove();
                             node()->load({{"value", opt}});
