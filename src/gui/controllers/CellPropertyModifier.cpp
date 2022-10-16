@@ -23,6 +23,7 @@ public:
     Property<String> key{this, "key", "value", &CellPropertyModifier::setCell};
 
     Cell* currentCell = nullptr;
+    bool ignore = false;
 
     void setOptions() {
         if (*property == "blendmode") {
@@ -47,7 +48,8 @@ public:
             return;
         }
 
-        node()->set("visible", true);
+        if (!node()->visible)
+            node()->set("visible", true);
 
         if (*property == "alpha")
             node()->set(*key, tostring(cell->getAlpha()));
@@ -72,22 +74,24 @@ public:
     }
 
     void on(msg::ModifyCell& event) {
-        if (event.cell.get() == currentCell)
+        if (event.cell.get() == currentCell && !ignore)
             setCell();
     }
 
-    void eventHandler(const ui::Changed&) {
+    void eventHandler(const ui::Changed& event) {
         auto cell = getCell();
         if (!cell)
             return;
 
         if (auto cmd = inject<Command>{"setcellproperty"}) {
+            ignore = true;
             cmd->load({
                     {"cell", cell},
                     {"property", *property},
-                    {"value", *value}
+                    {"value", event.target->getPropertySet().get<String>(*key)}
                 });
             cmd->run();
+            ignore = false;
         }
     }
 };
