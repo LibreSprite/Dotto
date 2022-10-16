@@ -15,6 +15,11 @@
 
 static ui::Node::Shared<ui::Node> node{"node"};
 
+#ifdef _DEBUG
+#define CHILDREN ChildLock{this}
+#else
+#define CHILDREN children
+#endif
 
 ui::Node::Node() {
     PROFILER
@@ -24,7 +29,7 @@ ui::Node::Node() {
 
 ui::Node::~Node() {
     // logV("Deleting node ", *id);
-    for (auto& child : children)
+    for (auto& child : CHILDREN)
         child->parent = nullptr;
 }
 
@@ -42,7 +47,7 @@ std::shared_ptr<ui::Node> ui::Node::findChildByPredicate(const std::function<boo
     PROFILER
     if (predicate(this))
         return shared_from_this();
-    for (auto& child : children) {
+    for (auto& child : CHILDREN) {
         if (auto found = child->findChildByPredicate(predicate))
             return found;
     }
@@ -56,11 +61,11 @@ std::shared_ptr<ui::Node> ui::Node::findChildById(const String& targetId, bool d
     }
     if (id.value == targetId)
         return shared_from_this();
-    for (auto& child : children) {
+    for (auto& child : CHILDREN) {
         if (child->id.value == targetId)
             return child;
     }
-    for (auto& child : children) {
+    for (auto& child : CHILDREN) {
         if (auto found = child->findChildById(targetId, debug))
             return found;
     }
@@ -155,7 +160,7 @@ bool ui::Node::update() {
     if (!isDirty)
         return false;
     isDirty = false;
-    for (auto& child : children) {
+    for (auto& child : CHILDREN) {
         child->update();
     }
     return true;
@@ -416,7 +421,7 @@ void ui::Node::reattach() {
 }
 
 void ui::Node::forwardToChildren(const Event& event) {
-    for (auto& child : children)
+    for (auto& child : CHILDREN)
         child->processEvent(event);
 }
 
@@ -448,6 +453,8 @@ void ui::Node::doResize() {
     innerRect.width -= padding->x + padding->width;
     innerRect.height -= padding->y + padding->height;
 
+    ChildLock lock{this};
+
     if (flowInstance->update(children, innerRect)) {
         resize();
         return;
@@ -470,7 +477,7 @@ void ui::Node::draw(S32 z, Graphics& gfx) {
     if (*hideOverflow) {
         Rect clip = gfx.pushClipRect(globalRect);
         if (!gfx.isEmptyClipRect()) {
-            for (auto& child : children) {
+            for (auto& child : CHILDREN) {
                 if (child->visible) {
                     gfx.alpha *= child->alpha;
                     child->draw(z + 1 + *child->zIndex, gfx);
@@ -480,7 +487,7 @@ void ui::Node::draw(S32 z, Graphics& gfx) {
         }
         gfx.setClipRect(clip);
     } else {
-        for (auto& child : children) {
+        for (auto& child : CHILDREN) {
             if (child->visible) {
                 gfx.alpha *= child->alpha;
                 child->draw(z + 1 + *child->zIndex, gfx);
@@ -494,6 +501,9 @@ void ui::Node::addChild(std::shared_ptr<Node> child, U32 index) {
     PROFILER
     if (!child)
         return;
+
+    if (childLockCount)
+        logE("PANIC ", __PRETTY_FUNCTION__, ":", __LINE__);
 
     if (child->parent == this) {
         auto oldPos = std::find(children.begin(), children.end(), child);
@@ -521,6 +531,8 @@ void ui::Node::removeChild(std::shared_ptr<Node> node) {
     PROFILER
     if (!node) return;
     if (node->parent == this) {
+        if (childLockCount)
+            logE("PANIC ", __PRETTY_FUNCTION__, ":", __LINE__);
         auto it = std::find(children.begin(), children.end(), node);
         if (it != children.end()) {
             node->parent = nullptr;

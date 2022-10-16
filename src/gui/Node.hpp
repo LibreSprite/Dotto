@@ -24,6 +24,7 @@ namespace ui {
                  public std::enable_shared_from_this<Node> {
         friend class EventHandler;
         Vector<std::shared_ptr<Node>> children;
+        U32 childLockCount = 0;
         Node* parent = nullptr;
         bool isInScene = false;
         bool isDirty = true;
@@ -36,6 +37,17 @@ namespace ui {
         void changeStealFocus();
 
     protected:
+        class ChildLock {
+            Node* node;
+        public:
+            ChildLock(Node* node) : node{node} {
+                node->childLockCount++;
+            }
+            ~ChildLock() {node->childLockCount--;}
+            Vector<std::shared_ptr<Node>>::iterator begin() {return node->children.begin();}
+            Vector<std::shared_ptr<Node>>::iterator end() {return node->children.end();}
+        };
+
         void forwardToChildren(const Event& event);
         virtual void eventHandler(const AddToScene& event);
 
