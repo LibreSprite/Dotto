@@ -18,7 +18,8 @@
     <menubutton id="recbutton"
                 click="toggleui id=recmenu"
                 label="Timelapse"
-                width="100px"/>
+                width="100px"
+                controller="recorderhider"/>
     <node width="100%" id="mainbarspacer"/>
     <node id="toolconfigquick" controller="metamenu" filter="quick" flow="contain-row"/>
     <image controller="tabtarget, button"

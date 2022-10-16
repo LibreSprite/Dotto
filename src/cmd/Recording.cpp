@@ -52,10 +52,11 @@ public:
     TaskHandle handle;
 
     bool done() {
-        return handle.task->isDone();
+        return handle.task && handle.task->isDone();
     }
 
     void run() {
+#if !defined(__N3DS__) && !defined(__ANDROID__)
         String cmd;
         PubSub<>::pub(msg::RecorderEncodingStart{});
 
@@ -84,6 +85,7 @@ public:
                     PubSub<>::pub(msg::RecorderEncodingFail{});
                 }
             });
+#endif
     }
 };
 static std::optional<Encoder> encoder;
@@ -146,6 +148,16 @@ public:
 };
 static ui::Controller::Shared<RecorderStatus> recstat{"recorderstatus"};
 
+class RecorderHider : public ui::Controller {
+public:
+    void attach() override {
+#if defined(EMSCRIPTEN)
+        node()->set("visible", false);
+#endif
+    }
+};
+static ui::Controller::Shared<RecorderHider> rechider{"recorderhider"};
+
 class RecorderSequence : public ui::Controller {
 public:
     PubSub<msg::RecorderUpdateSequence> pub{this};
@@ -174,6 +186,9 @@ public:
     Property<String> label{this, "label", "${value}"};
 
     void attach() override {
+#if defined(__N3DS__) || defined(__ANDROID__)
+        node()->set("visible", false);
+#else
         if (encoder) {
             if (encoder->done())
                 on(msg::RecorderEncodingDone{});
@@ -182,6 +197,7 @@ public:
         } else {
             on(msg::RecorderUpdateSequence{});
         }
+#endif
     }
 
     void on(const msg::RecorderUpdateSequence&) {
