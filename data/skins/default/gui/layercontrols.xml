@@ -1,5 +1,5 @@
 <image id="layercontrols">
-  <input height="24px" controller="cellpropertymodifier" property="name" key="text" align="0"/>
+  <input height="24px" controller="cellpropertymodifier" property="name" align="0"/>
   <textbutton id="blend"
               height="24px"
               controller="cellpropertymodifier, dropdown"
