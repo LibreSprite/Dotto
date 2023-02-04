@@ -16,9 +16,13 @@ jobs:
       with:
         submodules: 'true'
     - name: install-dependencies
-      run: brew install sdl2 sdl2_image lcms2 freetype v8 openssl@1.1
-    - name: list openssl package contents
+      run: brew install sdl2 sdl2_image lcms2 freetype v8 openssl@1.1 lua@5.3 jpeg
+    - name: list openssl@1.1
       run: brew ls --verbose openssl@1.1
+    - name: list lua@5.3
+      run: brew ls --verbose lua@5.3
+    - name: list jpeg
+      run: brew ls --verbose jpeg
 #     - name: configure
 #       run: ./configure
 #     - name: make
