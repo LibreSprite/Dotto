@@ -41,6 +41,11 @@ declare -a dependencies=(
 "/usr/local/opt/little-cms2/lib/liblcms2.2.dylib"
 "/usr/local/opt/openssl/lib/libssl.1.1.dylib"
 "/usr/local/opt/openssl/lib/libcrypto.1.1.dylib"
+
+"/usr/local/Cellar/lua@5.3/5.3.6/lib/liblua.dylib"
+"/usr/local/Cellar/jpeg/9e/lib/libjpeg.9.dylib"
+"/usr/local/Cellar/openssl@1.1/1.1.1s/lib/libssl.1.1.dylib"
+"/usr/local/Cellar/openssl@1.1/1.1.1s/lib/libcrypto.1.1.dylib"
 )
 
 for srcname in "${dependencies[@]}"
