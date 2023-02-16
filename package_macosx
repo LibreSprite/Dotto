@@ -24,39 +24,5 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
 </dict>
 </plist>' > $package/Contents/Info.plist
 
-
-
-# List from:
-# DYLD_PRINT_LIBRARIES=1 DYLD_PRINT_LIBRARIES_POST_LAUNCH=1 ./dotto > /dev/null
-
-declare -a dependencies=(
-"/usr/local/opt/libpng/lib/libpng16.16.dylib"
-"/usr/local/opt/lua/lib/liblua.dylib"
-"/usr/local/opt/freetype/lib/libfreetype.6.dylib"
-"/usr/local/opt/jpeg/lib/libjpeg.9.dylib"
-"/usr/local/opt/libtiff/lib/libtiff.5.dylib"
-"/usr/local/opt/webp/lib/libwebp.7.dylib"
-"/usr/local/opt/sdl2/lib/libSDL2-2.0.0.dylib"
-"/usr/local/opt/sdl2_image/lib/libSDL2_image-2.0.0.dylib"
-"/usr/local/opt/little-cms2/lib/liblcms2.2.dylib"
-"/usr/local/opt/openssl/lib/libssl.1.1.dylib"
-"/usr/local/opt/openssl/lib/libcrypto.1.1.dylib"
-
-"/usr/local/Cellar/lua@5.3/5.3.6/lib/liblua.dylib"
-"/usr/local/Cellar/jpeg/9e/lib/libjpeg.9.dylib"
-"/usr/local/Cellar/openssl@1.1/1.1.1s/lib/libssl.1.1.dylib"
-"/usr/local/Cellar/openssl@1.1/1.1.1s/lib/libcrypto.1.1.dylib"
-)
-
-for srcname in "${dependencies[@]}"
-do
-   filename=$(basename $srcname)
-   echo "Adding dependency $srcname"
-   install_name_tool -change $srcname $filename $macos/dotto
-   cp $srcname $macos
-   chmod +w "$macos/$filename"
-   for depname in "${dependencies[@]}"
-   do
-      install_name_tool -change $depname $(basename $depname) "$macos/$filename"
-   done
-done
+mkdir -p $package/Contents/libs/
+dylibbundler -od -b -ns -x $macos/dotto -d $package/Contents/libs/
