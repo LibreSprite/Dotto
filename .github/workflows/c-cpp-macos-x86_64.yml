@@ -28,3 +28,4 @@ jobs:
       with:
         name: dotto-development-macos-11-x86_64
         path: Dotto.app
+
