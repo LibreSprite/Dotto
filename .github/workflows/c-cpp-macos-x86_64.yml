@@ -16,7 +16,7 @@ jobs:
       with:
         submodules: 'true'
     - name: install-dependencies
-      run: brew install sdl2 sdl2_image lcms2 freetype v8 openssl@1.1 lua@5.3 jpeg dylibbundler
+      run: brew install pkg-config sdl2 sdl2_image lcms2 freetype v8 openssl@1.1 lua@5.3 jpeg dylibbundler
     - name: debug
       run: |
         pkg-config sdl2 --cflags
