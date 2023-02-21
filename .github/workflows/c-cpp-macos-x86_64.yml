@@ -19,8 +19,8 @@ jobs:
       run: brew install sdl2 sdl2_image lcms2 freetype v8 openssl@1.1 lua@5.3 jpeg dylibbundler
     - name: debug
       run: |
-        pkg-config --cflags
-        pkg-config --libs
+        pkg-config sdl2 --cflags
+        pkg-config sdl2 --libs
 #     - name: configure
 #       run: ./configure
 #     - name: make
