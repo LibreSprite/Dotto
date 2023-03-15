@@ -170,22 +170,22 @@ OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
 DEP := $(OBJ:.o=.d)
 
 $(ODIR)/%.cpp.o: %.cpp
-    $(info CXX - $<)
+	$(info CXX - $<)
 	@mkdir -p "$$(dirname "$@")"
 	@$(CXX) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)
 
 $(ODIR)/%.c.o: %.c
-    $(info CC   - $<)
+	$(info CC   - $<)
 	@mkdir -p "$$(dirname "$@")"
 	@$(CC) -c $< -o $@ $(FLAGS) $(C_FLAGS)
 
 $(ODIR)/%.mm.o: %.mm
-    $(info OBJC - $<)
+	$(info OBJC - $<)
 	@mkdir -p "$$(dirname "$@")"
 	@$(OBJC) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)
 
 $(DOTTO): $(OBJ)
-    $(info Linking $@)
+	$(info Linking $@)
 	@$(LN) $^ -o $@ $(FLAGS) $(LN_FLAGS)
 	@$(POSTBUILD)
 
