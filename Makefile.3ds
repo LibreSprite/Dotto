@@ -91,20 +91,24 @@ OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
 DEP := $(OBJ:.o=.d)
 
 $(ODIR)/%.cpp.o: %.cpp
+	$(info CXX - $<)
 	@mkdir -p "$$(dirname "$@")"
-	$(CPP) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+	@$(CPP) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
 
 $(ODIR)/%.c.o: %.c
+	$(info CC   - $<)
 	@mkdir -p "$$(dirname "$@")"
-	$(CC) $(FLAGS) $(C_FLAGS) -c $< -o $@
+	@$(CC) $(FLAGS) $(C_FLAGS) -c $< -o $@
 
 $(ODIR)/%.mm.o: %.mm
+	$(info OBJC - $<)
 	@mkdir -p "$$(dirname "$@")"
-	$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
+	@$(OBJC) $(FLAGS) $(CPP_FLAGS) -c $< -o $@
 
 $(DOTTO): $(OBJ)
-	$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
-	$(POSTBUILD)
+	$(info Linking $@)
+	@$(LN) $(FLAGS) $^ -o $@ $(LN_FLAGS)
+	@$(POSTBUILD)
 
 .PHONY: clean
 
