@@ -172,13 +172,17 @@ public:
             keycode = keyName[3];
             keyName = keyName.substr(3);
         }
-        if (keyName == "BACKSPACE") {
+        if (keyName == "BACKSPACE" || keyName == "DELETE") {
             bool changed = false;
+            bool deleteAfterCaret = keyName == "DELETE";
             auto positions = carets(entities);
             for (S32 i = positions.size() - 1; i > -1; --i) {
                 auto pos = positions[i];
-                auto it = entities.begin() + pos;
                 while (--pos < entities.size() && !std::get_if<U32>(&entities[pos]));
+                /* a carret is 3 characters, "pos" points to the character before the carret,
+                   so we need to offset the "pos" by 4 characters to point to the character
+                   after the carret. */
+                if (deleteAfterCaret) pos += pcursor.size() + 1;
                 if (pos >= entities.size()) {
                     event.cancel = false;
                     break;
@@ -191,6 +195,17 @@ public:
                 node()->set("value", *value = Font::toString(entities, true));
                 node()->processEvent(ui::Changed{node()});
             }
+        } else if (keyName == "HOME" || keyName == "END") {
+            auto positions = carets(entities);
+            for (S32 i = positions.size() - 1; i > -1; --i) {
+                auto it = entities.begin() + positions[i];
+                entities.erase(it, it + pcursor.size()); // remove carret from current position
+            }
+            entities.insert(
+                keyName == "HOME" ? entities.begin() : entities.end(),
+                pcursor.begin(), pcursor.end()
+            );
+            node()->set("text", Font::toString(entities, false));
         } else if (keyName == "RIGHT") {
             auto positions = carets(entities);
             for (S32 i = positions.size() - 1; i > -1; --i) {
