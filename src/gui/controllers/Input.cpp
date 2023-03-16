@@ -182,7 +182,7 @@ public:
                 /* a carret is 3 characters, "pos" points to the character before the carret,
                    so we need to offset the "pos" by 4 characters to point to the character
                    after the carret. */
-                if (deleteAfterCaret) pos += 4;
+                if (deleteAfterCaret) pos += pcursor.size() + 1;
                 if (pos >= entities.size()) {
                     event.cancel = false;
                     break;
