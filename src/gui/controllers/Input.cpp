@@ -172,13 +172,17 @@ public:
             keycode = keyName[3];
             keyName = keyName.substr(3);
         }
-        if (keyName == "BACKSPACE") {
+        if (keyName == "BACKSPACE" || keyName == "DELETE") {
             bool changed = false;
+            bool deleteAfterCaret = keyName == "DELETE";
             auto positions = carets(entities);
             for (S32 i = positions.size() - 1; i > -1; --i) {
                 auto pos = positions[i];
-                auto it = entities.begin() + pos;
                 while (--pos < entities.size() && !std::get_if<U32>(&entities[pos]));
+                /* a carret is 3 characters, "pos" points to the character before the carret,
+                   so we need to offset the "pos" by 4 characters to point to the character
+                   after the carret. */
+                if (deleteAfterCaret) pos += 4;
                 if (pos >= entities.size()) {
                     event.cancel = false;
                     break;
