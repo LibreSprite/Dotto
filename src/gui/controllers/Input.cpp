@@ -195,6 +195,17 @@ public:
                 node()->set("value", *value = Font::toString(entities, true));
                 node()->processEvent(ui::Changed{node()});
             }
+        } else if (keyName == "HOME" || keyName == "END") {
+            auto positions = carets(entities);
+            for (S32 i = positions.size() - 1; i > -1; --i) {
+                auto it = entities.begin() + positions[i];
+                entities.erase(it, it + pcursor.size()); // remove carret from current position
+            }
+            entities.insert(
+                keyName == "HOME" ? entities.begin() : entities.end(),
+                pcursor.begin(), pcursor.end()
+            );
+            node()->set("text", Font::toString(entities, false));
         } else if (keyName == "RIGHT") {
             auto positions = carets(entities);
             for (S32 i = positions.size() - 1; i > -1; --i) {
