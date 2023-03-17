@@ -40,6 +40,7 @@ jobs:
         make -j 4
 
     - name: Copy Dependencies
+      run: |
         curl -L https://raw.githubusercontent.com/pegvin/mingw-bundledlls/master/mingw-bundledlls --output ./bundledlls.py
         python3 ./bundledlls.py --copy ./dotto.exe --search-dir /mingw32/bin/
         cp /mingw32/bin/snapshot_blob.bin ./
