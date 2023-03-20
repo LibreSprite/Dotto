@@ -21,6 +21,7 @@ jobs:
           base-devel
           git
           mingw-w64-i686-gcc
+          mingw-w64-i686-nodejs
           mingw-w64-i686-openssl
           mingw-w64-i686-v8 
           mingw-w64-i686-icu
@@ -35,41 +36,7 @@ jobs:
     - shell: msys2 {0}
       run: |
         make -j 4
-        cp /mingw32/bin/libgcc_s_dw2-1.dll ./
-        cp /mingw32/bin/libstdc++-*.dll ./
-        cp /mingw32/bin/libwinpthread-1.dll ./
-        cp /mingw32/bin/libfreetype-6.dll ./
-        cp /mingw32/bin/liblcms2-*.dll ./
-        cp /mingw32/bin/glew32.dll ./
-        cp /mingw32/bin/libpng*.dll ./
-        cp /mingw32/bin/libv8.dll ./
-        cp /mingw32/bin/SDL2_image.dll ./
-        cp /mingw32/bin/SDL2.dll ./
-        cp /mingw32/bin/libv8_libplatform.dll ./
-        cp /mingw32/bin/libbz2-*.dll ./
-        cp /mingw32/bin/libbrotli*.dll ./
-        cp /mingw32/bin/libharfbuzz-*.dll ./
-        cp /mingw32/bin/zlib1.dll ./
-        cp /mingw32/bin/libwebp-*.dll ./
-        cp /mingw32/bin/libjpeg-*.dll ./
-        cp /mingw32/bin/libtiff-*.dll ./
-        cp /mingw32/bin/libv8_libbase.dll ./
-        cp /mingw32/bin/libcrypto-*.dll ./
-        cp /mingw32/bin/libssl-*.dll ./
-        cp /mingw32/bin/libicuin*.dll ./
-        cp /mingw32/bin/libicuuc*.dll ./
-        cp /mingw32/bin/libicudt*.dll ./
-        cp /mingw32/bin/libpcre*.dll ./
-        cp /mingw32/bin/libintl-*.dll ./
-        cp /mingw32/bin/libiconv-*.dll ./
-        cp /mingw32/bin/libglib-*.dll ./
-        cp /mingw32/bin/libgraphite2.dll ./
-        cp /mingw32/bin/libdeflate.dll ./
-        cp /mingw32/bin/libjbig-*.dll ./
-        cp /mingw32/bin/libjxl*.dll ./
-        cp /mingw32/bin/libLerc.dll ./
-        cp /mingw32/bin/libzstd.dll ./
-        cp /mingw32/bin/liblzma-*.dll ./
+        node package_win.js dotto.exe
         cp /mingw32/bin/snapshot_blob.bin ./
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
