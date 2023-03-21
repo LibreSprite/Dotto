@@ -1,6 +1,6 @@
 ## Code
 
-For contributing and adding your code is actually pretty easy, since we use Github for our project.
+Contributing and adding your code is actually pretty easy, since we use Github for our project.
 Getting an account is a must if you want to contribute to [Dotto](https://github.com/LibreSprite/Dotto).
 
 ### Setting Up
