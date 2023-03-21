@@ -62,14 +62,14 @@ so developers will know what you've been up to. This can be done by commenting o
 
 1. Publish the branch and commit to your fork.
 2. Go to https://github.com/LibreSprite/Dotto/pulls and create a new pull request.
-3. Give a detailed title and description of your changes so developers will know what you changed.
-4. Wait for a response
-5. If asked to change something do it then repeat step 1.
+3. Give a detailed title and description of your changes so that developers will know what you changed.
+4. Wait for a response.
+5. If you are asked to change something, change it and repeat step 1.
 
 
 ### Pushing Changes
 
-You are ready for your contribution to be reviewed and merged. There are a few things you can do to make this easier for maintainers to review your code, so please follow all steps.
+You are ready for your contribution to be reviewed and merged. There are a few things you can do to make it easier for maintainers to review your code, so please follow all steps.
 
 1. Follow the instructions for Updating Your Repository.
 
