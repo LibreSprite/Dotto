@@ -1,7 +1,7 @@
 ## Code
 
-For contributing and adding your code is actually pretty easy, since we use Github for our project 
-so getting an account is a must for the following steps on how to commit to [Dotto](https://github.com/LibreSprite/Dotto).
+Contributing and adding your code is actually pretty easy, since we use Github for our project.
+Getting an account is a must if you want to contribute to [Dotto](https://github.com/LibreSprite/Dotto).
 
 ### Setting Up
 
@@ -38,7 +38,7 @@ These instructions will update both your local repository and online fork:
 
 ### Making Changes
 
-So you have added a feature or fixed some bugs which were found by you, well good job you can now contribute to the master project. In that case you will need to create a feature branch.
+So you have added a feature or fixed some bugs which were found by you, good job! You can now contribute to the master project. In that case you will need to create a feature branch.
 This means that you will add your code to the master project and ensure that the master branch is working fine. With that said you might need to add comments in your code a clear title or a description on what you have found / created
 so developers will know what you've been up to. This can be done by commenting or creating an issue or pull request here: https://github.com/LibreSprite/Dotto/pulls.
 
@@ -60,16 +60,16 @@ so developers will know what you've been up to. This can be done by commenting o
 
 ## Github Desktop
 
-1. Publish the branch and commit to your fork 
-2. Go to https://github.com/LibreSprite/Dotto/pulls and create a new pull request
-3. Give a detailed title and description of your changes so developers will know what you changed.
-4. wait for a response
-5. If asked to change something do it then repeat step 1
+1. Publish the branch and commit to your fork.
+2. Go to https://github.com/LibreSprite/Dotto/pulls and create a new pull request.
+3. Give a detailed title and description of your changes so that developers will know what you changed.
+4. Wait for a response.
+5. If you are asked to change something, change it and repeat step 1.
 
 
 ### Pushing Changes
 
-You are ready for your contribution to be reviewed and merged. There are a few things you can do to make this easier for maintainers to review your code, so please follow all steps.
+You are ready for your contribution to be reviewed and merged. There are a few things you can do to make it easier for maintainers to review your code, so please follow all steps.
 
 1. Follow the instructions for Updating Your Repository.
 
