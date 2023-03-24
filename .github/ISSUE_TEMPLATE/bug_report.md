@@ -27,3 +27,5 @@ If applicable, add screenshots to help explain your problem.
  - Device: (e.g. Macbook Air M2)
  - OS and Version:  (e.g. Windows 10)
  - Browser: (e.g. Chrome)
+ - Video Card: (e.g. Nvidia GTX 970 with proprietary driver)
+ - Screen Resolution and Desktop Scaling Factor (e.g. 1080p, 125%)
