@@ -3,11 +3,9 @@
 ## Supported Versions
 
 | Version | Supported          |
-
-| ------- | ------------------ |
-
-| 1.0+   | :white_check_mark: |
-| <0.9   | :x: |
+| :-------: | :------------------: |
+| 1.0+   | :white_check_mark:  |
+| <0.9   | :x:                 |
 ## Reporting a Vulnerability
 
 If a vulnerability has been found:
