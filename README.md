@@ -38,44 +38,29 @@ over Discord/Matrix.
 | Themes support                 | OK          | 0.5     |                                 |
 | Scripting support              | OK          | 0.5     |                                 |
 | Internationalization           | OK          | 0.5     |                                 |
-| OpenGL Hardware acceleration   | OK          | 1.0     |                                 |
-| x86/64 Linux                   | OK          | 0.5     |                                 |
-| x86/64 Windows                 | OK          | 0.5     |                                 |
-| x86_64 MacOS                   | OK          | 0.5     |                                 |
-| Android                        | OK          | 2.0     | Will require specific theme     |
-| Nintendo 3DS                   | OK          | 1.0     | Will require specific theme     |
-| Raspberry Pi 4 support         | OK          | 1.0     |                                 |
 | Undo / Redo                    | OK          | 0.5     |                                 |
 | Copy + Paste                   | Planned     | 0.5     |                                 |
 | Crop Sprite                    | OK          | 0.5     |                                 |
 | Pencil tool                    | OK          | 0.5     |                                 |
 | Pencil shapes/sizes            | OK          | 0.5     |                                 |
-| Pencil blending modes          | OK          | 1.0     |                                 |
-| Line smoothing                 | Basic       | 1.0     |                                 |
+| x86/64 Linux                   | OK          | 0.5     |                                 |
+| x86/64 Windows                 | OK          | 0.5     |                                 |
+| x86_64 MacOS                   | OK          | 0.5     |                                 |
 | Eraser tool                    | OK          | 0.5     |                                 |
-| Text tool                      | Planned     | 1.0     |                                 |
 | Selection                      | Basic       | 0.5     |                                 |
 | Rectangular Selection tool     | OK          | 0.5     |                                 |
 | Wand Selection tool            | Planned     | 0.5     |                                 |
 | Fill Bucket                    | OK          | 0.5     |                                 |
 | Fill Bucket blending           | OK          | 0.5     |                                 |
-| Gradient tool                  | Planned     | 2.0     |                                 |
 | Layers support                 | OK          | 0.5     |                                 |
-| Layer groups                   | Planned     | 2.0     |                                 |
-| Layer masks                    | Planned     | 2.0     |                                 |
 | Layer blending                 | OK          | 0.5     |                                 |
 | Layer alpha                    | OK          | 0.5     |                                 |
 | Filter support                 | OK          | 0.5     |                                 |
 | Resize: Nearest Neighbor       | OK          | 0.5     |                                 |
 | Resize: Scale2X                | OK          | 0.5     |                                 |
 | Drop Shadow filter             | OK          | 0.5     |                                 |
-| Solarize                       | Planned     | 2.0     |                                 |
-| Sobel edge-detection           | Planned     | 2.0     |                                 |
 | Mirror image                   | OK          | 0.5     |                                 |
 | Flip image                     | OK          | 0.5     |                                 |
-| Curves adjustment              | Planned     | 1.0     |                                 |
-| Salt and Pepper filter         | Planned     | 2.0     |                                 |
-| 2D Fast Fourier Transform      | Planned     | 2.0     |                                 |
 | Load Dotto format              | Planned     | 0.5     |                                 |
 | Load PNG, BMP, GIF, JPEG       | OK          | 0.5     | Using `libpng` and `SDL2_image` |
 | Load LBM, PCX, PNM, SVG        | OK          | 0.5     | Using `SDL2_image`              |
@@ -87,9 +72,24 @@ over Discord/Matrix.
 | Save JPEG                      | OK          | 0.5     | Using `SDL2_image`              |
 | Save Dotto format              | Planned     | 0.5     |                                 |
 | Palette editor                 | Planned     | 0.5     |                                 |
+| eXPerience theme               | In Progress | 0.5     | Windows XP-inspired skin        |
+| OpenGL Hardware acceleration   | OK          | 1.0     |                                 |
+| Nintendo 3DS                   | OK          | 1.0     | Will require specific theme     |
+| Raspberry Pi 4 support         | OK          | 1.0     |                                 |
+| Pencil blending modes          | OK          | 1.0     |                                 |
+| Line smoothing                 | Basic       | 1.0     |                                 |
+| Text tool                      | Planned     | 1.0     |                                 |
 | Online Palette browser         | Planned     | 1.0     |                                 |
 | Online Resource/Script browser | Planned     | 1.0     |                                 |
-| eXPerience theme               | In Progress | 0.5     | Windows XP-inspired skin        |
+| Curves adjustment              | Planned     | 1.0     |                                 |
+| Android                        | OK          | 2.0     | Will require specific theme     |
+| Gradient tool                  | Planned     | 2.0     |                                 |
+| Layer groups                   | Planned     | 2.0     |                                 |
+| Layer masks                    | Planned     | 2.0     |                                 |
+| Solarize                       | Planned     | 2.0     |                                 |
+| Sobel edge-detection           | Planned     | 2.0     |                                 |
+| Salt and Pepper filter         | Planned     | 2.0     |                                 |
+| 2D Fast Fourier Transform      | Planned     | 2.0     |                                 |
 | Touchscreen-specific theme     | Planned     | 2.0     |                                 |
 | Non-destructive Layer Filters  | Planned     | 3.0     |                                 |
 | Commandline interface          | Planned     | 3.0     |                                 |
