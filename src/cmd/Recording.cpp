@@ -3,6 +3,7 @@
 // Read LICENSE.txt for more information.
 
 #include <cmd/Command.hpp>
+#include <common/Config.hpp>
 #include <common/Messages.hpp>
 #include <common/PubSub.hpp>
 #include <doc/Cell.hpp>
@@ -12,11 +13,16 @@
 #include <gui/Controller.hpp>
 #include <gui/Node.hpp>
 #include <log/Log.hpp>
+#include <optional>
+#include <task/TaskManager.hpp>
 
 namespace msg {
 struct RecorderStart {};
 struct RecorderStop {};
 struct RecorderUpdateSequence {U32 number;};
+struct RecorderEncodingStart {};
+struct RecorderEncodingDone {};
+struct RecorderEncodingFail {};
 }
 
 U32 initSequence() {
@@ -40,6 +46,49 @@ U32& sequence() {
     static U32 num = initSequence();
     return num;
 }
+
+class Encoder {
+public:
+    TaskHandle handle;
+
+    bool done() {
+        return handle.task && handle.task->isDone();
+    }
+
+    void run() {
+#if !defined(__N3DS__) && !defined(__ANDROID__)
+        String cmd;
+        PubSub<>::pub(msg::RecorderEncodingStart{});
+
+        auto userdata = std::filesystem::path{inject<FileSystem>{}->find("%userdata", "dir")->getUID()};
+        cmd += "cd " + join(split(userdata.string(), "\\"), "\\\\") + " && ";
+
+        cmd += "\"";
+        if (auto ffmpeg = inject<Config>{}->properties->get<String>("ffmpeg-path"); ffmpeg.empty()) {
+            cmd += "ffmpeg";
+        } else {
+            cmd += join(split(ffmpeg, "\\"), "\\\\");
+        }
+        cmd += "\" -y ";
+        cmd += "-start_number 1 -i \"recording_%d.png\" -c:v libx264 -r 30 -pix_fmt yuv420p out.mp4";
+
+        logI(cmd);
+
+        handle = inject<TaskManager>{}->add(
+            [=]() -> int {
+                return system(cmd.c_str());
+            },
+            [=](int code){
+                if (code == 0) {
+                    PubSub<>::pub(msg::RecorderEncodingDone{});
+                } else {
+                    PubSub<>::pub(msg::RecorderEncodingFail{});
+                }
+            });
+#endif
+    }
+};
+static std::optional<Encoder> encoder;
 
 class Recorder {
     PubSub<msg::ModifyDocument,
@@ -99,6 +148,16 @@ public:
 };
 static ui::Controller::Shared<RecorderStatus> recstat{"recorderstatus"};
 
+class RecorderHider : public ui::Controller {
+public:
+    void attach() override {
+#if defined(EMSCRIPTEN)
+        node()->set("visible", false);
+#endif
+    }
+};
+static ui::Controller::Shared<RecorderHider> rechider{"recorderhider"};
+
 class RecorderSequence : public ui::Controller {
 public:
     PubSub<msg::RecorderUpdateSequence> pub{this};
@@ -117,6 +176,47 @@ public:
     }
 };
 static ui::Controller::Shared<RecorderSequence> recseq{"recordersequence"};
+
+class RecorderEncode : public ui::Controller {
+public:
+    PubSub<msg::RecorderEncodingStart,
+           msg::RecorderEncodingDone,
+           msg::RecorderEncodingFail,
+           msg::RecorderUpdateSequence> pub{this};
+    Property<String> label{this, "label", "${value}"};
+
+    void attach() override {
+#if defined(__N3DS__) || defined(__ANDROID__)
+        node()->set("visible", false);
+#else
+        if (encoder) {
+            if (encoder->done())
+                on(msg::RecorderEncodingDone{});
+            else
+                on(msg::RecorderEncodingStart{});
+        } else {
+            on(msg::RecorderUpdateSequence{});
+        }
+#endif
+    }
+
+    void on(const msg::RecorderUpdateSequence&) {
+        node()->set("text", "Encode MP4");
+    }
+
+    void on(const msg::RecorderEncodingDone&) {
+        node()->set("text", "Encoding Done");
+    }
+
+    void on(const msg::RecorderEncodingStart&) {
+        node()->set("text", "Encoding MP4");
+    }
+
+    void on(const msg::RecorderEncodingFail&) {
+        node()->set("text", "Encoding Error");
+    }
+};
+static ui::Controller::Shared<RecorderEncode> recenc{"recorderencode"};
 
 class ToggleRecording : public Command {
 public:
@@ -138,3 +238,16 @@ public:
     }
 };
 static Command::Shared<ResetRecordingSequence> cmd2{"resetrecsequence"};
+
+class RecorderEncodeCmd : public Command {
+public:
+    void run() override {
+        if (encoder && !encoder->done()) {
+            return;
+        }
+        encoder = std::nullopt;
+        encoder.emplace();
+        encoder->run();
+    }
+};
+static Command::Shared<RecorderEncodeCmd> cmd3{"recorderencode"};
