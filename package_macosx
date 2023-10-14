@@ -1,0 +1,28 @@
+#!/bin/sh
+
+package=Dotto.app/Dotto.app
+macos=$package/Contents/MacOS
+mkdir -p $macos
+chmod +x dotto
+cp ./dotto $macos
+cp -r ./data $macos
+
+echo '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>dotto</string>
+    <key>CFBundleIdentifier</key>
+    <string>io.github.libresprite.dotto</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>dotto</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+</dict>
+</plist>' > $package/Contents/Info.plist
+
+mkdir -p $package/Contents/libs/
+dylibbundler -od -b -ns -x $macos/dotto -d $package/Contents/libs/

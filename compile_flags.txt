@@ -1,0 +1,15 @@
+-rdynamic
+-O0
+-g
+-D_DEBUG
+-pthread
+-Isrc
+-MMD
+-MP
+-DCPPHTTPLIB_OPENSSL_SUPPORT
+-DUSE_SDL2
+-I/usr/include/SDL2
+-D_REENTRANT
+-DNO_FREETYPE
+-DUSE_STBTTF
+--std=c++20

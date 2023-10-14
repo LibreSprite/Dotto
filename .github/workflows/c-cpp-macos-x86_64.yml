@@ -1,0 +1,31 @@
+name: MacOS Intel
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: install-dependencies
+      run: brew install pkg-config sdl2 sdl2_image lcms2 freetype v8 openssl@1.1 lua@5.3 jpeg dylibbundler
+    - name: configure
+      run: ./configure
+    - name: make
+      run: MACOSX_DEPLOYMENT_TARGET=10.15 PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig" make -j 4
+    - name: package
+      run: ./package_macosx
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dotto-development-macos-11-x86_64
+        path: Dotto.app
+

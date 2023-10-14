@@ -1,0 +1,32 @@
+name: Linux x64
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: update Apt
+      run: sudo apt-get update
+    - name: install-dependencies
+      run: sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev libfreetype6-dev libnode-dev libfuse2
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make -j 4
+    - name: package
+      run: ./package
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dotto-development-linux-x86_64
+        path: Dotto-x86_64.AppImage

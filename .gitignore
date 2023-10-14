@@ -1,0 +1,11 @@
+*~
+build
+*.o
+*.d
+*.org
+*.elf
+*.s
+dotto
+dotto.exe
+snapshot_blob.bin
+*.dll

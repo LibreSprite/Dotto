@@ -1,0 +1,59 @@
+#!/bin/sh
+
+add()
+{
+  echo "adding $1"
+
+  if [ -e "/usr/lib/x86_64-linux-gnu/$1" ]; then
+      src="/usr/lib/x86_64-linux-gnu"
+  elif [ -e "/usr/lib/x86_64-linux-gnu/pulseaudio/$1" ]; then
+      src="/usr/lib/x86_64-linux-gnu/pulseaudio"
+  elif [ -e "/usr/lib64/$1" ]; then
+      src="/usr/lib64"
+  fi
+
+  if [ $src != $out ]; then
+      cp "$src/$1" "$out/$1"
+  fi
+
+  dependencies=$(readelf -d "$src/$1" | grep NEEDED | sed -En "s/[^\[]*\[([^]]*)\S*/\1/gp")
+
+  for dependency in $dependencies
+  do
+    if [ ! -f "$out/$dependency" ]; then
+        add $dependency
+    fi
+  done
+}
+
+out=$(pwd)
+src=$(pwd)
+
+add "dotto"
+
+rm libc.so*
+rm libpthread.so*
+rm librt.so*
+rm libstdc++.so*
+
+chmod +x dotto
+
+mkdir Dotto
+mkdir Dotto/usr
+mkdir Dotto/usr/bin
+mkdir Dotto/usr/lib
+
+mv data/Dotto.desktop Dotto
+cp data/icon.png Dotto/dotto.png
+
+mv dotto Dotto/usr/bin
+mv data Dotto/usr/bin
+mv *.so* Dotto/usr/lib
+
+wget https://github.com/AppImage/AppImageKit/releases/download/13/AppRun-x86_64 -O Dotto/AppRun
+chmod +x Dotto/AppRun
+
+wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -O appimagetool
+chmod +x appimagetool
+
+./appimagetool Dotto

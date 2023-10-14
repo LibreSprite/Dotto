@@ -1,0 +1,25 @@
+name: Nintendo 3DS
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container:
+      image: 'devkitpro/devkitarm'
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'true'
+    - name: make
+      run: make -j4 -f Makefile.3ds
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dotto-development-n3ds
+        path: dotto.3dsx
