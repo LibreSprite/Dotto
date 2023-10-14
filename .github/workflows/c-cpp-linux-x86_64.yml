@@ -2,9 +2,9 @@ name: Linux x64
 
 on:
   push:
-    branches: [ development ]
+    branches: [ DIRT ]
   pull_request:
-    branches: [ development ]
+    branches: [ DIRT ]
 
 jobs:
   build:
@@ -18,15 +18,6 @@ jobs:
     - name: update Apt
       run: sudo apt-get update
     - name: install-dependencies
-      run: sudo apt-get install libsdl2-dev libsdl2-image-dev liblcms2-dev libfreetype6-dev libnode-dev libfuse2
-    - name: configure
-      run: ./configure
+      run: sudo apt-get install libsdl2-dev libfuse2 gcc-arm-none-eabi
     - name: make
-      run: make -j 4
-    - name: package
-      run: ./package
-    - name: Archive production artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: dotto-development-linux-x86_64
-        path: Dotto-x86_64.AppImage
+      run: ./plugins/build.sh

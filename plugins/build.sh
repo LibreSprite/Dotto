@@ -7,7 +7,7 @@ VM_HEAP_SIZE=1024
 
 CPP_FLAGS="-DVM_HEAP_SIZE=$VM_HEAP_SIZE --std=c++17 -Os -fno-rtti -Wno-pointer-arith -c -fno-exceptions -fno-builtin -ffunction-sections -fdata-sections -funsigned-char -MMD -fno-delete-null-pointer-checks -fomit-frame-pointer -mcpu=cortex-m0plus -mthumb -Wno-psabi -Wno-conversion-null -Wno-narrowing -Wno-write-strings"
 
-LD_FLAGS="-Os -Wl,--gc-sections -Wl,-n --specs=nano.specs --specs=nosys.specs -mcpu=cortex-m0plus -Wl,--no-warn-rwx-segments -mthumb -T ../link.ld -Wl,--start-group -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys -Wl,--end-group"
+LD_FLAGS="-Os -Wl,--gc-sections -Wl,-n --specs=nano.specs --specs=nosys.specs -mcpu=cortex-m0plus -mthumb -T ../link.ld -Wl,--start-group -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys -Wl,--end-group"
 
 CPP_FLAGS=($CPP_FLAGS)
 LD_FLAGS=($LD_FLAGS)
@@ -40,4 +40,4 @@ done
 cd ..
 
 make -k -j4 #DEBUG=true
-./gate 42
+./dirt 42

@@ -12,10 +12,8 @@ ifeq ($(OS),Windows_NT)
     STRIP = strip
     FIND = find src -type f -name
     PKGCONFIG = pkg-config
-    PROJECT = gate.exe
+    PROJECT = dirt.exe
 
-    LN_FLAGS += -lv8 -lv8_libplatform
-    CPP_FLAGS += -DSCRIPT_ENGINE_V8
     CPP_FLAGS += -D__WINDOWS__
 
     LN_FLAGS += -lopengl32
@@ -38,7 +36,7 @@ else
     STRIP = strip
     FIND = find src -type f -name
     UNAME_S := $(shell uname -s)
-    PROJECT = gate
+    PROJECT = dirt
 
     ifeq ($(OLDGCC),true)
         LN_FLAGS += -lstdc++fs
@@ -89,12 +87,10 @@ ifeq ($(BACKEND),SDL1)
     CPP_FLAGS += -DUSE_SDL1
     CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl)
     LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl)
-    LN_FLAGS += -lSDL_image
 else
     CPP_FLAGS += -DUSE_SDL2
     CPP_FLAGS += $(shell $(PKGCONFIG) --cflags sdl2)
     LN_FLAGS += $(shell $(PKGCONFIG) --libs sdl2)
-    LN_FLAGS += -lSDL2_image
 endif
 
 CPP_FLAGS += -DNO_FREETYPE

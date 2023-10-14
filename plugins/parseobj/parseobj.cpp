@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <cstdio>
-#include <format>
 #include <fstream>
 #include <unistd.h>
 #include <vector>

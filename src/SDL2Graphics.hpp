@@ -40,7 +40,11 @@ public:
         if (!window)
             return 100;
         int w, h;
+	#if SDL_VERSION_ATLEAST(2, 26, 0)
         SDL_GetWindowSizeInPixels(window, &w, &h);
+	#else
+        SDL_GetWindowSize(window, &w, &h);
+	#endif
         return w;
     }
 
@@ -48,7 +52,11 @@ public:
         if (!window)
             return 100;
         int w, h;
+	#if SDL_VERSION_ATLEAST(2, 26, 0)
         SDL_GetWindowSizeInPixels(window, &w, &h);
+	#else
+        SDL_GetWindowSize(window, &w, &h);
+	#endif
         return h;
     }
 
