@@ -1,3 +1,4 @@
+#include "API.hpp"
 #include <fmt.hpp>
 
 #include <cstdint>
@@ -29,7 +30,7 @@ void onError(j_common_ptr cinfo) {
     longjmp(handler->setjmp_buffer, 1);
 }
 
-bool readImageJPG(const char* name) {
+SurfaceId readImageJPG(const char* name) {
     JSAMPARRAY buffer = NULL;     /* Output row buffer */
     J12SAMPARRAY buffer12 = NULL; /* 12-bit output row buffer */
     jpeg_decompress_struct cinfoi;
@@ -38,7 +39,7 @@ bool readImageJPG(const char* name) {
     auto file = fopen(name, "rb");
     if (!file) {
 	log("Could not open jpeg file: {}", name);
-	return false;
+	return SurfaceId(0);
     }
     cinfo->err = jpeg_std_error(&errorHandler.pub);
     errorHandler.pub.error_exit = onError;
@@ -50,7 +51,7 @@ bool readImageJPG(const char* name) {
 	 */
 	jpeg_destroy_decompress(cinfo);
 	fclose(file);
-	return file;
+	return SurfaceId(0);
     }
 
     /* Now we can initialize the JPEG decompression object. */
@@ -66,9 +67,12 @@ bool readImageJPG(const char* name) {
     /* In this example, we don't need to change any of the defaults set by
      * jpeg_read_header(), so we do nothing here.
      */
+    cinfoi.out_color_space = JCS_EXT_RGBA;
 
     /* Step 5: Start decompressor */
     jpeg_start_decompress(cinfo);
+
+    auto surface = createSurface(cinfo->output_width, cinfo->output_height);
 
     /* We may need to do some setup of our own at this point before readinig
      * the data.  After jpeg_start_decompress() we have the correct scaled
@@ -106,6 +110,7 @@ bool readImageJPG(const char* name) {
 		    buffer12[0][col] = ((buffer12[0][col] & 0xFF) << 8) |
 			((buffer12[0][col] >> 8) & 0xFF);
 	    }
+	    Surface_write(surface, 0, cinfo->output_scanline - 1, cinfo->output_width, 1, (Color*)buffer);
 	    // fwrite(buffer12[0], 1, row_stride * sizeof(J12SAMPLE), outfile);
 	}
     } else {
@@ -115,7 +120,7 @@ bool readImageJPG(const char* name) {
 	     * more than one scanline at a time if that's more convenient.
 	     */
 	    (void)jpeg_read_scanlines(cinfo, buffer, 1);
-	    // fwrite(buffer[0], 1, row_stride, outfile);
+	    Surface_write(surface, 0, cinfo->output_scanline - 1, cinfo->output_width, 1, (Color*)buffer[0]);
 	}
     }
 
@@ -128,7 +133,7 @@ bool readImageJPG(const char* name) {
     jpeg_destroy_decompress(cinfo);
 
     fclose(file);
-    return true;
+    return surface;
 }
 
 int main(int argc, const char* argv[]) {
@@ -136,14 +141,7 @@ int main(int argc, const char* argv[]) {
 	printf("parseobj error: expected 2 arguments, got %d.\n", argc);
 	return 1;
     }
-    std::string answer = fmt("{} {} ", argv[1], getpid());
-
-    bool ok = readImageJPG(argv[0]);
-    if (!ok) {
-	system((answer + "0 \"Could not open file\"").c_str());
-	return 1;
-    }
-
-    system((answer + "1").c_str());
+    auto ok = readImageJPG(argv[0]);
+    message("{} {:#x} {:#x}", argv[1], getpid(), ok);
     return 0;
 }

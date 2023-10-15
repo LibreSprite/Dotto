@@ -90,6 +90,11 @@ inline std::string operator << (FMT&, long unsigned int i) {return FMT::to_strin
 inline std::string operator << (FMT&, float i) {return FMT::to_string(i);}
 inline std::string operator << (FMT&, double i) {return FMT::to_string(i);}
 
+inline std::string operator << (FMT&, MeshId i) {return FMT::to_string((uint32_t)i, false);}
+inline std::string operator << (FMT&, MaterialId i) {return FMT::to_string((uint32_t)i, false);}
+inline std::string operator << (FMT&, NodeId i) {return FMT::to_string((uint32_t)i, false);}
+inline std::string operator << (FMT&, SurfaceId i) {return FMT::to_string((uint32_t)i, false);}
+
 inline std::string fmt(std::string_view f, std::vector<FMT>&& args) {
     std::string out;
     out.reserve(f.size());
@@ -184,3 +189,4 @@ inline void log(std::string_view fmt, Args&& ... args) {
     // puts(std::vformat(fmt, std::make_format_args(std::forward<Args>(args)...)).c_str());
     puts(::fmt(fmt, args...).c_str());
 }
+

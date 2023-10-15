@@ -31,6 +31,14 @@ enum class EventId : uint32_t {
 enum class MaterialId : uint32_t;
 enum class NodeId : uint32_t;
 enum class MeshId : uint32_t;
+enum class SurfaceId : uint32_t;
+
+struct Color {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+};
 
 // Model
 DECL_IMPORT(getFloat, float (*)(const char* key, float defval));
@@ -56,6 +64,12 @@ DECL_IMPORT(Mesh_pushElements, void (*)(MeshId, const void*, const void*));
 
 DECL_IMPORT(createMaterial, MaterialId (*)(const char*));
 DECL_IMPORT(Material_addTag, void(*)(MaterialId, const char*));
+DECL_IMPORT(Material_setTexture, void(*)(MaterialId, const char*, SurfaceId));
+
+DECL_IMPORT(createSurface, SurfaceId (*)(uint32_t, uint32_t));
+DECL_IMPORT(Surface_resize, void (*)(SurfaceId, uint32_t, uint32_t));
+DECL_IMPORT(Surface_fill, void (*)(SurfaceId, uint32_t, uint32_t, uint32_t, uint32_t));
+DECL_IMPORT(Surface_write, void (*)(SurfaceId, int32_t, int32_t, uint32_t, uint32_t, Color*));
 
 // Events
 DECL_IMPORT(pollEvents, EventId (*)());
