@@ -3,13 +3,22 @@
 #include <fstream>
 #include <sys/unistd.h>
 #include <math.h>
-
 #include <fmt.hpp>
-#include <MessagePump.hpp>
 
 using namespace std::literals;
 
+bool loadJPGImage(const char* name) {
+    return message("parsejpg {} {}", name, getpid()) != 0;
+}
+
+bool loadPNGImage(const char* name) {
+    return message("parsepng {} {}", name, getpid()) != 0;
+}
+
 int main(int argc, const char* argv[]) {
+    log("Loading png image: {}", loadPNGImage("test.png"));
+    log("Loading jpg image: {}", loadJPGImage("test.jpg"));
+
     // system(("parseobj file.obj " + std::to_string(getpid())).c_str());
     auto parsejob = message("parseobj {} {:#x}", "craft_speederA.obj", getpid());
 
@@ -47,11 +56,6 @@ int main(int argc, const char* argv[]) {
 
     float x{}, y{}, z{10};
     float t{};
-
-    // auto fp = fopen("bacon.txt", "r+");
-    // fwrite("derp", 1, 4, fp);
-    // fclose(fp);
-    // std::ofstream{"bacon.txt"} << "boop" << std::endl;
 
     NodeId obj;
 
