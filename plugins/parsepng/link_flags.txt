@@ -1,0 +1,1 @@
+-Wl,--start-group -lz -lpng -Wl,--end-group
