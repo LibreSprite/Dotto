@@ -69,19 +69,29 @@ private:
 };
 
 class AutoIndex {
-    void (*remove)(uint32_t);
-    uint32_t _key;
+    void (*remove)(uint32_t){};
+    uint32_t _key{};
 public:
     template<typename Type>
     AutoIndex(Type* ref) {
-        _key = Index<Type*>::_ptr->add(ref);
+	init(ref);
+    }
+
+    AutoIndex() = default;
+
+    template<typename Type>
+    Type init(Type ref) {
+        _key = Index<Type>::_ptr->add(ref);
         remove = +[](uint32_t key){
-            Index<Type*>::_ptr->remove(key);
+	    if (auto index = Index<Type>::_ptr)
+		index->remove(key);
         };
+	return ref;
     }
 
     ~AutoIndex() {
-        remove(_key);
+	if (_key)
+	    remove(_key);
     }
 
     uint32_t operator* () {

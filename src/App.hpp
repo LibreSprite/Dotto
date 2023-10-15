@@ -8,6 +8,7 @@
 #include "Model.hpp"
 #include "Node.hpp"
 #include "String.hpp"
+#include "Surface.hpp"
 #include "VMImpl.hpp"
 #include "VMPool.hpp"
 #include "Vector.hpp"
@@ -30,6 +31,7 @@ public:
     Index<Node*> nodeIndex{0x20000000};
     Index<Mesh*> meshIndex{0x30000000};
     Index<Material*> materialIndex{0x40000000};
+    Index<std::shared_ptr<Surface>> textureIndex{0x50000000};
 
     Log log;
     Model model;
@@ -44,6 +46,8 @@ public:
 
     void boot() {
         model.parse(readTextFile(model.get("main.settings", "settings.ini")));
+	Surface::maxWidth = model.get("main.max-image-width", 4*1024.0f);
+	Surface::maxHeight = model.get("main.max-image-height", 4*1024.0f);
         emit(EventId::Boot);
 
 	std::vector<std::string> mainArgs;

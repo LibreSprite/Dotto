@@ -8,15 +8,33 @@
 #include "String.hpp"
 #include "Uniform.hpp"
 #include "Vector.hpp"
+#include "Surface.hpp"
 
 #include <GL/gl.h>
 #include <GLES3/gl3.h>
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+class GLTexture {
+public:
+    GLuint id{};
+
+    GLTexture() {
+        glGenTextures(1, &id);
+    }
+
+    ~GLTexture() {
+	if (id) {
+	    glDeleteTextures(1, &id);
+	}
+    }
+};
 
 inline uint32_t glType(MeshAttribute::ElementType type) {
     switch (type) {
@@ -73,6 +91,39 @@ inline UniformUploader u_RGBA{[](const RGBA& f, GLint uniformLocation) {
 
 inline UniformUploader u_Matrix{[](const Matrix& f, GLint uniformLocation) {
     glUniformMatrix4fv(uniformLocation, 1, GL_TRUE, f.v);
+}};
+
+inline uint32_t textureUnit{};
+inline UniformUploader u_Surface{[](const std::shared_ptr<Surface>& surface, GLint uniformLocation) {
+    if (!surface) {
+	return;
+    }
+    if (!surface->texture) {
+	auto texture = std::make_shared<GLTexture>();
+	surface->texture = texture;
+	surface->dirty.expand({0, 0, surface->width, surface->height});
+    }
+    // auto texture = std::static_pointer_cast<GLTexture>(surface->texture);
+    auto texture = static_cast<GLTexture*>(surface->texture.get());
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glBindTexture(GL_TEXTURE_2D, texture->id);
+    if (!surface->dirty.empty()) {
+	surface->dirty.clear();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        // TODO: Use dirtyRegion to upload only what changed
+	glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     GL_RGBA,
+                     surface->width,
+                     surface->height,
+                     0,
+                     GL_RGBA,
+                     GL_UNSIGNED_BYTE,
+                     surface->pixels.data());
+    }
+    glUniform1i(uniformLocation, textureUnit);
+    textureUnit++;
 }};
 
 class ComponentRenderData {
@@ -232,6 +283,7 @@ public:
     }
 
     void rebind(RenderableNode& node, RenderableNode::Component& component) {
+	textureUnit = 0;
         if (!vbo)
             glGenBuffers(1, &vbo);
 
@@ -300,7 +352,8 @@ public:
             needsRebind = true;
         }
 
-        if (needsRebind) {
+        if (needsRebind || component.material->dirty) {
+	    component.material->dirty = false;
             rebind(node, component);
         }
     }

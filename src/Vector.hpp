@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 
 class UV {
@@ -62,7 +63,7 @@ public:
 	float g, y;
     };
     union {
-	float b, z;
+	float b, z, h;
     };
     union {
 	float a, w;
@@ -78,6 +79,50 @@ public:
 };
 
 using Vector4 = RGBA;
+
+class Rect {
+public:
+    int32_t x, y;
+    uint32_t width, height;
+
+    void clear() {
+	x = y = 0;
+	width = height = 0;
+    }
+
+    bool empty() {
+	return !(width || height);
+    }
+
+    void expand(Rect o) {
+	if (o.x < x) {
+	    width += x - o.x;
+	    x = o.x;
+	}
+	if (static_cast<int32_t>(o.x + o.width) > static_cast<int32_t>(x + width)) {
+	    width = static_cast<int32_t>(o.x + o.width) - x;
+	}
+	if (o.y < y) {
+	    height += y - o.y;
+	    y = o.y;
+	}
+	if (static_cast<int32_t>(o.y + o.height) > static_cast<int32_t>(y + height)) {
+	    height = static_cast<int32_t>(o.y + o.height) - y;
+	}
+    }
+};
+
+struct Color {
+    union {
+	struct {
+	    uint8_t r;
+	    uint8_t g;
+	    uint8_t b;
+	    uint8_t a;
+	};
+	uint32_t rgba;
+    };
+};
 
 inline std::ostream& operator << (std::basic_ostream<char>& str, const RGBA& rgba) {
     str << "{R:" << rgba.r << ", G:" << rgba.g << ", B:" << rgba.b << ", A:" << rgba.a << "}";
