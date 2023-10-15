@@ -13,6 +13,11 @@ extern "C" int _isatty(int fd){
     return fd < 3;
 }
 
+extern "C" int _unlink(const char* name) {
+    puts("unlinking file");
+    return -1;
+}
+
 extern "C" int _open(const char* name, const char* mode){
     return vmOpen(name, mode);
 };
