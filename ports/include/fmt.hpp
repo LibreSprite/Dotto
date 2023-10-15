@@ -33,6 +33,7 @@ public:
     static std::string to_string(uint32_t ui, bool s) {
 	uint32_t base = 10;
 	std::string acc;
+	bool force = true;
 	if (s && int32_t(ui) < 0) {
 	    acc.push_back('-');
 	    ui = -ui;
@@ -42,7 +43,8 @@ public:
 	    acc += "0x";
 	}
 	auto it = acc.end();
-	while (ui || acc.empty()) {
+	while (ui || force) {
+	    force = false;
 	    auto d = ui % base;
 	    ui /= base;
 	    acc.insert(it, ((d < 10) ? '0' : 'A' - 10) + d);

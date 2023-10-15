@@ -4,8 +4,8 @@
 #include <sys/unistd.h>
 #include <math.h>
 
-#include "../fmt.hpp"
-#include "../MessagePump.hpp"
+#include <fmt.hpp>
+#include <MessagePump.hpp>
 
 using namespace std::literals;
 
