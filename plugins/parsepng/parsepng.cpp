@@ -1,9 +1,11 @@
+#include "API.hpp"
+#include <cstdint>
 #include <png.h>
 #include <cstring>
 #include <fmt.hpp>
 #include <sys/unistd.h>
 
-bool loadPNGImage(const char* name) {
+SurfaceId loadPNGImage(const char* name) {
     png_image image; /* The control structure used by libpng */
     /* Initialize the 'png_image' structure. */
     memset(&image, 0, (sizeof image));
@@ -16,8 +18,10 @@ bool loadPNGImage(const char* name) {
 	 * textual message in the 'png_image' structure:
 	 */
 	fprintf(stderr, "pngtopng: error: %s\n", image.message);
-	return false;
+	return SurfaceId(0);
     }
+
+    uint32_t width{image.width}, height{image.height};
 
     /* Set the format in which to read the PNG file; this code chooses a
      * simple sRGB format with a non-associated alpha channel, adequate to
@@ -59,29 +63,20 @@ bool loadPNGImage(const char* name) {
      *
      * to find the maximum size of the colormap in bytes.
      */
-    if (png_image_finish_read(&image, NULL/*background*/, buffer.data(), 0/*row_stride*/, NULL/*colormap*/) != 0)
+    if (!png_image_finish_read(&image, NULL/*background*/, buffer.data(), 0/*row_stride*/, NULL/*colormap*/))
     {
-	return true;
-	// /* Now write the image out to the second argument.  In the write
-	//  * call 'convert_to_8bit' allows 16-bit data to be squashed down to
-	//  * 8 bits; this isn't necessary here because the original read was
-	//  * to the 8-bit format.
-	//  */
-	// if (png_image_write_to_file(&image, argv[2], 0/*convert_to_8bit*/,
-	//     buffer, 0/*row_stride*/, NULL/*colormap*/) != 0)
-	// {
-	//    /* The image has been written successfully. */
-	//    exit(0);
-	// }
-    } else {
 	/* Calling png_image_free is optional unless the simplified API was
 	 * not run to completion.  In this case, if there wasn't enough
 	 * memory for 'buffer', we didn't complete the read, so we must
 	 * free the image:
 	 */
 	png_image_free(&image);
-	return false;
+	return SurfaceId(0);
     }
+
+    auto surface = createSurface(width, height);
+    Surface_write(surface, 0, 0, width, height, (Color*)buffer.data());
+    return surface;
 }
 
 
@@ -90,14 +85,7 @@ int main(int argc, const char* argv[]) {
 	printf("parseobj error: expected 2 arguments, got %d.\n", argc);
 	return 1;
     }
-    std::string answer = fmt("{} {} ", argv[1], getpid());
-
-    bool ok = loadPNGImage(argv[0]);
-    if (!ok) {
-	system((answer + "0 \"Could not open file\"").c_str());
-	return 1;
-    }
-
-    system((answer + "1").c_str());
+    auto ok = loadPNGImage(argv[0]);
+    message("{} {:#x} {:#x}", argv[1], getpid(), ok);
     return 0;
 }

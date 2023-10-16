@@ -8,13 +8,8 @@
 
 using namespace std::literals;
 
-bool loadPNGImage(const char* name) {
-    return message("parsepng {} {}", name, getpid()) != 0;
-}
-
 int main(int argc, const char* argv[]) {
-    auto jpgparsejob = message("parsejpg {} {}", "test.jpg", getpid());
-    log("Loading png image: {}", loadPNGImage("test.png"));
+    auto jpgparsejob = message("parsepng {} {}", "test.png", getpid());
 
     auto tex = createSurface(256, 256);
     Surface_fill(tex, 32, 128, 255, 255);
@@ -101,7 +96,7 @@ int main(int argc, const char* argv[]) {
         }
 
 	t += 0.001f;
-	Node_setPosition(node, x, sinf(t) * 5, z);
+	Node_setPosition(node, x, sinf(t) * 2, z);
 
 	if (int(obj)) {
 	    Node_rotate(obj, 0.001f, 1, 0, 0);
