@@ -1581,9 +1581,7 @@ uint32_t countImports(const std::byte* RAM, std::uint32_t ramSize) {
     return importCount;
 }
 
-void VM::boot(const std::vector<std::byte>& image) {
-    std::size_t ramSize = 0;
-
+void VM::boot(const std::vector<std::byte>& image, std::size_t ramSize) {
     if (image.size() <= 8) {
         printf("Invalid image size\n");
         return;
@@ -1596,10 +1594,12 @@ void VM::boot(const std::vector<std::byte>& image) {
         printf("Invalid image magic\n");
     }
 
-    ramSize = static_cast<uint32_t>(image[7]) << 24;
-    ramSize |= static_cast<uint32_t>(image[6]) << 16;
-    ramSize |= static_cast<uint32_t>(image[5]) << 8;
-    ramSize |= static_cast<uint32_t>(image[4]);
+    std::size_t headerRamSize = 0;
+    headerRamSize = static_cast<uint32_t>(image[7]) << 24;
+    headerRamSize |= static_cast<uint32_t>(image[6]) << 16;
+    headerRamSize |= static_cast<uint32_t>(image[5]) << 8;
+    headerRamSize |= static_cast<uint32_t>(image[4]);
+    ramSize = std::max(std::max(ramSize, headerRamSize), image.size() + 1024*1024);
 
     ramSize += 3;
     ramSize &=~ 3;

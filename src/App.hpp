@@ -64,24 +64,24 @@ public:
 	} catch (std::exception& ex) {
 	    log("Exception: ", ex.what());
 	}
-	log("Node index ", nodeIndex.count());
-        // auto checkpoint = vm.suspend();
-        // VMType vm2{api};
-        // vm2.thaw(checkpoint);
-        // vm2.run();
-        // vm.run();
     }
 
     uint32_t bootVM(std::vector<std::string>&& parts) {
 	if (parts.empty()) {
 	    return 0;
 	}
-	parts[0] = "./plugins/" + parts[0] + "/" + parts[0] + ".drt";
-	auto data = readBinaryFile(parts[0]);
+	auto folder = "./plugins/" + parts[0] + "/";
+	auto data = readBinaryFile(folder + parts[0] + ".drt");
 	if (data.empty())
 	    return 0;
+	if (model.get(parts[0] + ".settingsLoaded", 0.0f) == 0.0f) {
+	    model.parse(readTextFile(folder + "settings.ini"));
+	    model.set(parts[0] + ".settingsLoaded", 1.0f);
+	}
+	auto ramSize = model.get(parts[0] + ".reserve-ram-max", 0.0f);
         auto vm = createVM();
-        vm->boot(data);
+	vm->speed = std::max(0.1f, model.get(parts[0] + ".speed", 1.0f)) * 1024.0f * 1024.0f;
+        vm->boot(data, int(ramSize)*1024*1024);
 	parts.erase(parts.begin());
 	if (!parts.empty()) {
 	    vm->message(std::move(parts));

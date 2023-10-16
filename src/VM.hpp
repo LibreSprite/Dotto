@@ -87,7 +87,7 @@ public:
             api[entry.first] = entry.second;
     }
 
-    void boot(const std::vector<std::byte>& image);
+    void boot(const std::vector<std::byte>& image, std::size_t ramSize);
     void run();
     std::vector<std::byte> suspend();
     void thaw(const std::vector<std::byte>&);
