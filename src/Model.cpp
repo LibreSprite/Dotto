@@ -5,6 +5,32 @@
 #include <cstdlib>
 #include <mutex>
 #include <shared_mutex>
+#include <variant>
+
+void Model::print(std::vector<std::string>* section) {
+    if (!section) {
+	std::vector<std::string> s;
+	print(&s);
+	return;
+    }
+    for (auto& entry : values) {
+	if (auto child = std::get_if<std::shared_ptr<Model>>(&entry.second)) {
+	    section->push_back(entry.first);
+	    printf("[%s]\n", join(*section, ".").c_str());
+	    (*child)->print(section);
+	    section->pop_back();
+	    printf("[%s]\n", join(*section, ".").c_str());
+	} else if (auto f = std::get_if<float>(&entry.second)) {
+	    printf("%s = %f\n", entry.first.c_str(), *f);
+	} else if (auto s = std::get_if<std::string>(&entry.second)) {
+	    printf("%s =`%s`\n", entry.first.c_str(), s->c_str());
+	} else if (auto u = std::get_if<Undefined>(&entry.second)) {
+	    printf("%s undefined\n", entry.first.c_str());
+	} else {
+	    printf("%s panic %d\n", entry.first.c_str(), (int) entry.second.index());
+	}
+    }
+}
 
 void Model::set(const std::string& key, const Value& value) {
     Model* container = this;
@@ -170,5 +196,15 @@ void Model::parse(const std::string& iniFile) {
                 mode = Mode::Start;
             break;
         }
+    }
+    if (mode == Mode::Value) {
+	acc = trim(acc);
+	char* end = nullptr;
+	float fval = strtof(acc.data(), &end);
+	if (end == acc.data() + acc.size()) {
+	    container->set(key, fval);
+	} else {
+	    container->set(key, acc);
+	}
     }
 }

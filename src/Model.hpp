@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <shared_mutex>
+#include <vector>
 
 class Model;
 enum class Undefined {};
@@ -14,6 +15,8 @@ class Model {
     std::shared_mutex mutex;
 public:
     std::unordered_map<std::string, Value> values;
+
+    void print(std::vector<std::string>* section = nullptr);
 
     void set(const std::string& key, const Value& value);
     const Value& get(const std::string& key);

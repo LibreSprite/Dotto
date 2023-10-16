@@ -6,6 +6,29 @@
 #include <string>
 #include <vector>
 
+std::string join(const std::vector<std::string>& parts, const std::string& glue) {
+    std::string acc;
+    bool first{true};
+    std::size_t s{};
+    for (auto& i : parts) {
+	if (!first) {
+	    s += glue.size();
+	}
+	first = false;
+	s += i.size();
+    }
+    acc.reserve(s);
+    first = true;
+    for (auto& i : parts) {
+	if (!first) {
+	    acc.append(glue);
+	}
+	first = false;
+	acc.append(i);
+    }
+    return acc;
+}
+
 std::vector<std::string> split(const std::string& line, const std::string& del) {
     std::vector<std::string> acc;
     int end = -del.size();
