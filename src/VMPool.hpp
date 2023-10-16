@@ -21,6 +21,10 @@ public:
             thread.join();
     }
 
+    bool empty() {
+	return vms.empty();
+    }
+
     bool busy() {
 	return _busy || !queue.empty();
     }

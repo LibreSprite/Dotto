@@ -1606,7 +1606,7 @@ void VM::boot(const std::vector<std::byte>& image, std::size_t ramSize) {
 
     uint32_t importCount = countImports(image.data(), ramSize);
     auto extendedRamSize = ramSize + importCount * 4;
-    printf("Booting VM with size=%.2fKB, api size=%d, and image size=%.2fKB\n", ramSize / 1024.0f, (int)api.size(), image.size() / 1024.0f);
+    printf("Booting VM with size=%.2fKB, api size=%d, image size=%.2fKB, speed=%dc\n", ramSize / 1024.0f, (int)api.size(), image.size() / 1024.0f, int(speed));
 
     {
         std::lock_guard guard{ramSizeMutex};

@@ -114,7 +114,7 @@ public:
     }
 
     bool running() {
-        return gfx.running;
+        return gfx.running && !vmpool.empty();
     }
 
     int step = 0;

@@ -76,7 +76,7 @@ public:
         }
     };
 
-    std::size_t speed = (32*1024*1024)/30;
+    std::size_t speed = 1024*1024;
 
     VM() = default;
     VM(const VM&) = delete;
