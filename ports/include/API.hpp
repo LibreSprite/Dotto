@@ -51,6 +51,7 @@ DECL_IMPORT(Node_getMesh, MeshId (*)(NodeId, uint32_t));
 DECL_IMPORT(Node_getMaterial, MaterialId (*)(NodeId, uint32_t));
 DECL_IMPORT(Node_addComponent, void (*)(NodeId, MeshId, MaterialId));
 DECL_IMPORT(Node_setPosition, void (*)(NodeId, float, float, float));
+DECL_IMPORT(Node_setScale, void (*)(NodeId, float, float, float));
 DECL_IMPORT(Node_rotate, void (*)(NodeId, float, float, float, float));
 
 DECL_IMPORT(createMesh, MeshId (*)());
@@ -70,6 +71,8 @@ DECL_IMPORT(createSurface, SurfaceId (*)(uint32_t, uint32_t));
 DECL_IMPORT(Surface_resize, void (*)(SurfaceId, uint32_t, uint32_t));
 DECL_IMPORT(Surface_fill, void (*)(SurfaceId, uint32_t, uint32_t, uint32_t, uint32_t));
 DECL_IMPORT(Surface_write, void (*)(SurfaceId, int32_t, int32_t, uint32_t, uint32_t, Color*));
+DECL_IMPORT(Surface_width, uint32_t (*)(SurfaceId));
+DECL_IMPORT(Surface_height, uint32_t (*)(SurfaceId));
 
 // Events
 DECL_IMPORT(pollEvents, EventId (*)());

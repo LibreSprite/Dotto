@@ -55,7 +55,7 @@ public:
 
     Vector position;
     Matrix rotation;
-    Vector scale;
+    Vector scale{1, 1, 1};
 
     Matrix transform;
 };

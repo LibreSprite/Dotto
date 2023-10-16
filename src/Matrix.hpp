@@ -50,6 +50,18 @@ public:
         return *this;
     }
 
+    Matrix& setScale(const Vector& pos) {
+        setScale(pos.x, pos.y, pos.z);
+        return *this;
+    }
+
+    Matrix& setScale(float x, float y, float z) {
+        v[ 0] = x;
+        v[ 5] = y;
+        v[10] = z;
+        return *this;
+    }
+
     Matrix& setPosition(const Vector& pos) {
         setPosition(pos.x, pos.y, pos.z);
         return *this;
@@ -128,6 +140,12 @@ public:
 	// 0,           0,           0,           1
 
 	return mat;
+    }
+
+    static Matrix scale(float x, float y, float z) {
+        Matrix m;
+        m.setScale(x, y, z);
+        return m;
     }
 
     static Matrix position(float x, float y, float z) {

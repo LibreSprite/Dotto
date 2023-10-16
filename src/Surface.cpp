@@ -112,9 +112,27 @@ static void Surface_write(const VM::Args& args) {
     }
 }
 
+static void Surface_width(const VM::Args& args) {
+    if (auto surface = Surface::find(args.get(0))) {
+	args.result = surface->width;
+    } else {
+	args.result = 0;
+    }
+}
+
+static void Surface_height(const VM::Args& args) {
+    if (auto surface = Surface::find(args.get(0))) {
+	args.result = surface->height;
+    } else {
+	args.result = 0;
+    }
+}
+
 static VM::API api {{
         {"createSurface", createSurface},
 	{"Surface_resize", Surface_resize},
 	{"Surface_fill", Surface_fill},
 	{"Surface_write", Surface_write},
+	{"Surface_width", Surface_width},
+	{"Surface_height", Surface_height},
     }};

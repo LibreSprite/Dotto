@@ -39,6 +39,7 @@ void GLRenderer::enqueueComponents(const Matrix& transform, Node& node, Scene* s
     mat = transform;
     mat *= Matrix::position(node.position.x, node.position.y, node.position.z);
     mat *= node.rotation;
+    mat *= Matrix::scale(node.scale.x, node.scale.y, node.scale.z);
 
     if (auto renderable = node.renderable()) {
         for (auto& component : renderable->components) {

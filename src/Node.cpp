@@ -37,6 +37,19 @@ static void Node_setPosition(const VM::Args& args) {
     });
 }
 
+static void Node_setScale(const VM::Args& args) {
+    auto id = args.get<uint32_t>(0);
+    auto x = args.get<float>(1);
+    auto y = args.get<float>(2);
+    auto z = args.get<float>(3);
+    mainThread([=] {
+	auto node = Index<Node*>::find(id);
+	if (!node)
+	    return;
+	(*node)->scale.set(x, y, z);
+    });
+}
+
 static void Node_getComponentCount(const VM::Args& args) {
     auto renderable = renderableFromNodeId(args.get<uint32_t>(0));
     if (!renderable) {
@@ -118,6 +131,7 @@ static void Node_rotate(const VM::Args& args) {
 static VM::API api {{
 	{"createRenderable", createRenderable},
 	{"Node_setPosition", Node_setPosition},
+	{"Node_setScale", Node_setScale},
 	{"Node_rotate", Node_rotate},
 	{"Node_getComponentCount", Node_getComponentCount},
 	{"Node_getMesh", Node_getMesh},

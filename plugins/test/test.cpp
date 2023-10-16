@@ -18,10 +18,10 @@ int main(int argc, const char* argv[]) {
     auto parsejob = message("parseobj {} {:#x}", "craft_speederA.obj", getpid());
 
     std::vector<float> position {
-	0.0f, 0.0f,  0.0f,
-	1.0f, 0.0f,  0.0f,
-	0.0f, 1.0f,  0.0f,
-	1.0f, 1.0f, 0.0f,
+	-.5f, -.5f,  0.0f,
+	0.5f, -.5f,  0.0f,
+	-.5f, 0.5f,  0.0f,
+	0.5f, 0.5f, 0.0f,
     };
 
     std::vector<float> color {
@@ -81,6 +81,8 @@ int main(int argc, const char* argv[]) {
 	    if (i == jpgparsejob) {
 		auto tex = (SurfaceId) std::strtol(msg[1].c_str(), nullptr, 0);
 		Material_setTexture(mat, "texDiffuse", tex);
+		float aspect = float(Surface_width(tex)) / Surface_height(tex);
+		Node_setScale(node, 2 * aspect, 2, 1);
 	    }
 	}
 
