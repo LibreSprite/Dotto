@@ -1,4 +1,5 @@
 #include "API.hpp"
+#include <cstddef>
 #include <fmt.hpp>
 
 #include <cstdint>
@@ -93,6 +94,9 @@ SurfaceId readImageJPG(const char* name) {
     /* Step 6: while (scan lines remain to be read) */
     /*           jpeg_read_scanlines(...); */
 
+    auto interval = cinfo->output_height > 1000 ? cinfo->output_height / 20 : 0;
+    std::size_t t = interval;
+
     /* Here we use the library's state variable cinfo->output_scanline as the
      * loop counter, so that we don't have to keep track ourselves.
      */
@@ -119,6 +123,10 @@ SurfaceId readImageJPG(const char* name) {
 	     * Here the array is only one element long, but you could ask for
 	     * more than one scanline at a time if that's more convenient.
 	     */
+	    if (interval > 1 && (t++ >= interval)) {
+		log("decoding {}%", cinfo->output_scanline * 100 / cinfo->output_height);
+		t = 0;
+	    }
 	    (void)jpeg_read_scanlines(cinfo, buffer, 1);
 	    Surface_write(surface, 0, cinfo->output_scanline - 1, cinfo->output_width, 1, (Color*)buffer[0]);
 	}
@@ -142,6 +150,6 @@ int main(int argc, const char* argv[]) {
 	return 1;
     }
     auto ok = readImageJPG(argv[0]);
-    message("{} {:#x} {:#x}", argv[1], getpid(), ok);
+    message("{} {:#x} {:#x} surface", argv[1], getpid(), ok);
     return 0;
 }
