@@ -10,17 +10,10 @@
 
 using namespace std::literals;
 
-int main(int argc, const char* argv[]) {
-    if (argc < 2) {
-	printf("parseobj error: expected 2 arguments, got %d.\n", argc);
-	return 1;
-    }
-    std::string answer = fmt("{} {} ", argv[1], getpid());
-
+NodeId loadOBJ(const char* name) {
     objl::Loader loader;
-    if (!loader.LoadFile(argv[0])) {
-	system((answer + "0 \"Could not open file\"").c_str());
-	return 1;
+    if (!loader.LoadFile(name)) {
+	return NodeId(0);
     }
 
     auto node = createRenderable();
@@ -70,6 +63,16 @@ int main(int argc, const char* argv[]) {
 	buffer.clear();
     }
 
-    system((answer + std::to_string((int)node)).c_str());
+    return node;
+}
+
+int main(int argc, const char* argv[]) {
+    if (argc < 2) {
+	printf("parseobj error: expected 2 arguments, got %d.\n", argc);
+	return 1;
+    }
+    std::string answer = fmt("{} {} ", argv[1], getpid());
+    auto ok = loadOBJ(argv[0]);
+    message("{} {:#x} {:#x} node", argv[1], getpid(), ok);
     return 0;
 }
