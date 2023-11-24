@@ -58,7 +58,14 @@ for PAYLOAD in */ ; do
 
     arm-none-eabi-objcopy -O binary $PROJECT.elf $PROJECT.drt
     arm-none-eabi-objdump -lSd $PROJECT.elf > $PROJECT.s
-    size $PROJECT.elf
+    arm-none-eabi-size $PROJECT.elf
+
+    mkdir -p ../../data/plugins/$PROJECT/
+
+    cp $PROJECT.drt ../../data/plugins/$PROJECT/
+    if [ -f settings.ini ] ; then
+        cp settings.ini ../../data/plugins/$PROJECT/
+    fi
 
     popd > /dev/null
 done
@@ -66,4 +73,4 @@ done
 cd ..
 
 make -k -j4 #DEBUG=true
-./dirt 42
+# ./dirt 42

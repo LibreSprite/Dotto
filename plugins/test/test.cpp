@@ -9,13 +9,13 @@
 using namespace std::literals;
 
 int main(int argc, const char* argv[]) {
-    auto jpgparsejob = message("parsepng {} {}", "test.png", getpid());
+    auto jpgparsejob = message("parsejpg {} {}", "brno-snow.jpg", getpid());
 
     auto tex = createSurface(256, 256);
     Surface_fill(tex, 32, 128, 255, 255);
 
     // system(("parseobj file.obj " + std::to_string(getpid())).c_str());
-    auto parsejob = message("parseobj {} {:#x}", "craft_speederA.obj", getpid());
+    auto parsejob = message("parseobj {} {:#x}", "data/craft_speederA.obj", getpid());
 
     std::vector<float> position {
 	-.5f, -.5f,  0.0f,
@@ -61,7 +61,7 @@ int main(int argc, const char* argv[]) {
     enableEvent(EventId::MouseRightDown);
     enableEvent(EventId::MouseMove);
 
-    float x{}, y{}, z{5};
+    float x{}, y{}, z{10};
     float t{};
 
     NodeId obj;
@@ -82,7 +82,7 @@ int main(int argc, const char* argv[]) {
 		auto tex = (SurfaceId) std::strtol(msg[1].c_str(), nullptr, 0);
 		Material_setTexture(mat, "texDiffuse", tex);
 		float aspect = float(Surface_width(tex)) / Surface_height(tex);
-		Node_setScale(node, 2 * aspect, 2, 1);
+		Node_setScale(node, aspect, 1, 1);
 	    }
 	}
 
