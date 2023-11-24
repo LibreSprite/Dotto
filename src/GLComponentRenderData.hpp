@@ -10,8 +10,6 @@
 #include "Vector.hpp"
 #include "Surface.hpp"
 
-#include <GL/gl.h>
-#include <GLES3/gl3.h>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -136,6 +134,7 @@ public:
     std::shared_ptr<GLShader> shader;
     GLuint vbo{};
     GLuint vao{};
+    GLuint veo{};
     std::size_t stride{};
     std::size_t length{};
 
@@ -305,6 +304,13 @@ public:
             }
         }
 
+        if (!component.mesh->elements.empty()) {
+            glGenBuffers(1, &veo);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements->size() * 4, elements->data(), GL_STREAM_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+
         uniforms.clear();
         for (auto& entry : shader->uniforms) {
             auto& name = entry.first;
@@ -375,7 +381,9 @@ public:
         }
 
 	if (elements) {
-	    glDrawElements(GL_TRIANGLES, elements->size(),  GL_UNSIGNED_INT, elements->data());
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
+            glDrawElements(GL_TRIANGLES, elements->size(),  GL_UNSIGNED_INT, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	} else {
 	    glDrawArrays(GL_TRIANGLES, 0, length);
 	}
