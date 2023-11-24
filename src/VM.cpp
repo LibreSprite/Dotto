@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "VM.hpp"
+#include "Log.hpp"
 
 static constexpr std::array<uint8_t, 256> genBitsSet() {
     std::array<uint8_t, 256> vals{};
@@ -84,7 +85,7 @@ struct VMState {
     }
 
     void thumbUI(uint32_t opcode) {
-	printf("UNKNOWN OP %x\n", opcode);
+	LOG("UNKNOWN OP ", opcode);
     }
 
 // Common macros //////////////////////////////////////////////////////////
@@ -492,7 +493,6 @@ struct VMState {
     void thumb42_2(uint32_t opcode) {
 	int dest = opcode & 7;
 	uint32_t value = reg[((opcode >> 3)&7)].I;
-        (dest);
 	CMP_RD_RS(dest, value);
     }
 
@@ -651,7 +651,7 @@ struct VMState {
 
 	if (reg[base].I >= ramSize) {
             auto call = (reg[base].I - ramSize) >> 2;
-            // printf("API call: %d\n", int(call));
+            // LOG("API call: %d", int(call));
             if (call < vm->apiIndex.size()) {
                 VM::Args args{this, vm};
                 vm->apiIndex[call](args);
@@ -973,7 +973,7 @@ struct VMState {
         static bool wasHit = false;
         if (!wasHit) {
             wasHit = true;
-            printf("Breakpoint hit. Halting.\n");
+            LOG("Breakpoint hit. Halting.");
             armNextPC -= 2;
             reg[15].I -= 2;
         }
@@ -1463,12 +1463,15 @@ struct VMState {
 	    prefetchNext();
 	    (this->*thumbInsnTable[OPCODE>>6])(OPCODE);
 	}
+        if (vm->debug) {
+            LOG((crashed ? "crashed " : "yield "), std::hex, "vm", (uintptr_t)this, " at 0x", armNextPC, std::dec);
+        }
     }
 
     uint32_t read32(uint32_t address) {
         if (address + 3 > maxRAMAddr) {
             if (!crashed)
-                printf("read32 invalid address %p\n", (void*)(intptr_t)address);
+                LOG("read32 invalid address 0x", std::hex, address, std::dec);
             speed = 0;
             crashed = true;
             return 0xCCCCCCCC;
@@ -1479,7 +1482,7 @@ struct VMState {
     uint32_t read16(uint32_t address){
         if (address + 1 > maxRAMAddr) {
             if (!crashed)
-                printf("read16 invalid address %p (> %p)\n", (void*)(intptr_t)address, (void*)(intptr_t)maxRAMAddr);
+                LOG("read16 invalid address 0x", std::hex, address, " (> ", maxRAMAddr, ")");
             crashed = true;
             return 0;
         }
@@ -1489,7 +1492,7 @@ struct VMState {
     int16_t read16s(uint32_t address){
         if (address + 1 > maxRAMAddr) {
             if (!crashed)
-                printf("read16s invalid address %p\n", (void*)(intptr_t)address);
+                LOG("read16s invalid address ", std::hex, address, std::dec);
             speed = 0;
             crashed = true;
             return 0;
@@ -1500,7 +1503,7 @@ struct VMState {
     uint8_t read8(uint32_t address) {
         if (address > maxRAMAddr) {
             if (!crashed)
-                printf("read8 invalid address %p\n", (void*)(intptr_t)address);
+                LOG("read8 invalid address ", std::hex, address, std::dec);
             speed = 0;
             crashed = true;
             return 0;
@@ -1512,7 +1515,7 @@ struct VMState {
     uint32_t exec16(uint32_t address){
         if (address + 1 > maxRAMAddr) {
             if (!crashed)
-                printf("exec16 invalid address %p (> %p)\n", (void*)(intptr_t)address, (void*)(intptr_t)maxRAMAddr);
+                LOG("exec16 invalid address ", address);
             crashed = true;
             return 0;
         }
@@ -1523,7 +1526,7 @@ struct VMState {
     void write32(uint32_t address, uint32_t value) {
         if (address >= ramSize - 3) {
             if (!crashed)
-                printf("write32 invalid address %p\n", (void*)(intptr_t)address);
+                LOG("write32 invalid address ", address);
             crashed = true;
             speed = 0;
         } else {
@@ -1534,7 +1537,7 @@ struct VMState {
     void write16(uint32_t address, uint16_t value) {
         if (address >= ramSize - 1) {
             if (!crashed)
-                printf("write16 invalid address %p\n", (void*)(intptr_t)address);
+                LOG("write16 invalid address ", address);
             crashed = true;
             speed = 0;
         } else {
@@ -1545,7 +1548,7 @@ struct VMState {
     void write8(uint32_t address, uint8_t b) {
         if (address >= ramSize) {
             if (!crashed)
-                printf("write8 invalid address %p\n", (void*)(intptr_t)address);
+                LOG("write8 invalid address ", address);
             crashed = true;
             speed = 0;
         } else {
@@ -1583,7 +1586,7 @@ uint32_t countImports(const std::byte* RAM, std::uint32_t ramSize) {
 
 void VM::boot(const std::vector<std::byte>& image, std::size_t ramSize) {
     if (image.size() <= 8) {
-        printf("Invalid image size\n");
+        LOG("Invalid image size");
         return;
     }
 
@@ -1591,7 +1594,7 @@ void VM::boot(const std::vector<std::byte>& image, std::size_t ramSize) {
         char(image[1]) != 'I' ||
         char(image[2]) != 'R' ||
         char(image[3]) != 'T') {
-        printf("Invalid image magic\n");
+        LOG("Invalid image magic");
     }
 
     std::size_t headerRamSize = 0;
@@ -1606,7 +1609,12 @@ void VM::boot(const std::vector<std::byte>& image, std::size_t ramSize) {
 
     uint32_t importCount = countImports(image.data(), ramSize);
     auto extendedRamSize = ramSize + importCount * 4;
-    printf("Booting VM with size=%.2fKB, api size=%d, image size=%.2fKB, speed=%dc\n", ramSize / 1024.0f, (int)api.size(), image.size() / 1024.0f, int(speed));
+    LOG(
+        "Booting VM with size=", ramSize / 1024.0f, "KB, "
+        "api size=", api.size(),
+        ", image size=", image.size() / 1024.0f, "KB, "
+        "speed=", speed
+        );
 
     {
         std::lock_guard guard{ramSizeMutex};
@@ -1645,7 +1653,7 @@ void VM::link(uint32_t ramSize) {
         if (it == globalAPI.end()) {
             it = api.find(key);
             if (it == api.end()) {
-                printf("WARNING: Invalid import #%d: [%s]\n", importPtr>>2, key.c_str());
+                LOG("WARNING: Invalid import #", importPtr>>2, ": [", key, "]");
                 continue;
             }
         }
@@ -1660,7 +1668,7 @@ void VM::link(uint32_t ramSize) {
         RAM[keyBackupPtr + 2] = keyPtr >> 16;
         RAM[keyBackupPtr + 1] = keyPtr >> 8;
         RAM[keyBackupPtr + 0] = keyPtr;
-        // printf("linked [%s @ %x] = %x\n", key.c_str(), importPtr, apiPtr);
+        // LOG("linked [%s @ %x] = %x", key.c_str(), importPtr, apiPtr);
     }
 }
 
@@ -1703,7 +1711,7 @@ void* VM::toHost(uint32_t ptr, std::size_t size) const {
         return nullptr;
     uint32_t max = RAM.size();
     if (ptr >= max || ptr + size > max) {
-        printf("toHost error: Invalid ptr %p\n", (void*)(uintptr_t)ptr);
+        LOG("toHost error: Invalid ptr ", std::hex, ptr, std::dec);
         return nullptr;
     }
     return state->RAM + ptr;

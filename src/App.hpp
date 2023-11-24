@@ -80,6 +80,7 @@ public:
 	auto ramSize = model.get(parts[0] + ".reserve-ram-max", 0.0f);
         auto vm = createVM();
 	vm->speed = std::max(0.1f, model.get(parts[0] + ".speed", 1.0f)) * 1024.0f * 1024.0f;
+	vm->debug = model.get(parts[0] + ".debug", 0.0f) > 0.5f;
         vm->boot(data, int(ramSize)*1024*1024);
 	parts.erase(parts.begin());
 	if (!parts.empty()) {

@@ -9,7 +9,7 @@
 using namespace std::literals;
 
 int main(int argc, const char* argv[]) {
-    auto jpgparsejob = message("parsejpg {} {}", "brno-snow.jpg", getpid());
+    auto jpgparsejob = message("parsejpg {} {}", "data/brno-snow.jpg", getpid());
 
     auto tex = createSurface(256, 256);
     Surface_fill(tex, 32, 128, 255, 255);

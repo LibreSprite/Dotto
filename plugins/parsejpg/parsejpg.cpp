@@ -57,24 +57,16 @@ SurfaceId readImageJPG(const char* name) {
 	return SurfaceId(0);
     }
 
-    #define STEP log("Decoding jpeg LINE {}", __LINE__)
-
-    STEP;
-
     /* Now we can initialize the JPEG decompression object. */
     jpeg_create_decompress(cinfo);
-
-    STEP;
 
     /* Step 2: specify data source (eg, a file) */
     jpeg_stdio_src(cinfo, file);
 
-    STEP;
 
     /* Step 3: read file parameters with jpeg_read_header() */
     jpeg_read_header(cinfo, TRUE);
 
-    STEP;
 
     /* Step 4: set parameters for decompression */
     /* In this example, we don't need to change any of the defaults set by
@@ -82,16 +74,13 @@ SurfaceId readImageJPG(const char* name) {
      */
     cinfoi.out_color_space = JCS_EXT_RGBA;
 
-    STEP;
 
     /* Step 5: Start decompressor */
     jpeg_start_decompress(cinfo);
 
-    STEP;
 
     auto surface = createSurface(cinfo->output_width, cinfo->output_height);
 
-    STEP;
 
     /* We may need to do some setup of our own at this point before readinig
      * the data.  After jpeg_start_decompress() we have the correct scaled
@@ -112,18 +101,16 @@ SurfaceId readImageJPG(const char* name) {
     /* Step 6: while (scan lines remain to be read) */
     /*           jpeg_read_scanlines(...); */
 
-    STEP;
 
     auto interval = cinfo->output_height > 1000 ? cinfo->output_height / 20 : 0;
     std::size_t t = interval;
 
-    STEP;
+
 
     /* Here we use the library's state variable cinfo->output_scanline as the
      * loop counter, so that we don't have to keep track ourselves.
      */
     if (cinfo->data_precision == 12) {
-        STEP;
 	while (cinfo->output_scanline < cinfo->output_height) {
 	    /* jpeg12_read_scanlines expects an array of pointers to scanlines.
 	     * Here the array is only one element long, but you could ask for
@@ -141,7 +128,6 @@ SurfaceId readImageJPG(const char* name) {
 	    // fwrite(buffer12[0], 1, row_stride * sizeof(J12SAMPLE), outfile);
 	}
     } else {
-        STEP;
 	while (cinfo->output_scanline < cinfo->output_height) {
 	    /* jpeg_read_scanlines expects an array of pointers to scanlines.
 	     * Here the array is only one element long, but you could ask for
@@ -156,7 +142,6 @@ SurfaceId readImageJPG(const char* name) {
 	}
     }
 
-    STEP;
 
     /* Step 7: Finish decompression */
 

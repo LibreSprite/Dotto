@@ -77,6 +77,7 @@ public:
     };
 
     std::size_t speed = 1024*1024;
+    bool debug{};
 
     VM() = default;
     VM(const VM&) = delete;
