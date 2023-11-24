@@ -10,7 +10,7 @@
 
 #include "Events.hpp"
 
-template <typename Log, typename VM>
+template <typename VM>
 class VMPool {
 public:
     virtual ~VMPool() {
@@ -55,13 +55,13 @@ public:
                 return;
             }
         }
-        log("VM not found");
+        LOG("VM not found");
     }
 
 protected:
     void init() {
         auto maxThreads = std::max<std::size_t>(1, std::thread::hardware_concurrency());
-        log("Initializing pool with ", maxThreads, " threads");
+        LOG("Initializing pool with ", maxThreads, " threads");
         for (std::size_t i = 0; i < maxThreads; ++i) {
             threads.push_back(std::thread([&]{run();}));
         }
@@ -108,5 +108,4 @@ private:
     std::vector<std::thread> threads;
     std::vector<std::shared_ptr<VM>> vms;
     std::vector<typename VM::APIFunc> api;
-    Log log;
 };

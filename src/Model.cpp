@@ -7,6 +7,8 @@
 #include <shared_mutex>
 #include <variant>
 
+Model Model::root;
+
 void Model::print(std::vector<std::string>* section) {
     if (!section) {
 	std::vector<std::string> s;
@@ -76,7 +78,7 @@ const Value& Model::get(const std::string& key) {
             auto it = container->values.find(chunk);
             if (it == container->values.end())
                 return empty;
-            if (auto ptr = std::get_if<std::shared_ptr<Model>>(&it->second))
+            if (auto ptr = std::get_if<std::shared_ptr<Model>>(&it->second); ptr && *ptr)
                 container = ptr->get();
             else
                 return empty;

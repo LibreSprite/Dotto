@@ -8,13 +8,12 @@
 #include <SDL_video.h>
 
 #include "Events.hpp"
+#include "Log.hpp"
 #include "Model.hpp"
 #include "GLRenderer.hpp"
 
-template<typename Log>
 class SDL2Graphics {
 public:
-    Log log;
     bool running;
     SDL_Window* window = nullptr;
     SDL_GLContext context = nullptr;
@@ -61,7 +60,7 @@ public:
     }
 
     ON(Boot) {
-        auto cfg = Model::main->get("window", std::make_shared<Model>());
+        auto cfg = Model::root.get("window", std::make_shared<Model>());
         auto title = cfg->get("title", "MicroDIRT");
         int width = cfg->get("width", 320.0f);
         int height = cfg->get("height", 200.0f);
@@ -71,7 +70,7 @@ public:
         window = SDL_CreateWindow(title, x, y, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if (!window) {
             running = false;
-            log("Could not create window");
+            LOG("Could not create window");
             return;
         }
 
@@ -111,13 +110,13 @@ public:
         }
 #endif
         if (!context) {
-            log("Could not create OpenGL context");
+            LOG("Could not create OpenGL context");
             running = false;
             return;
         }
 
         auto version = std::to_string(oglMajor) + std::to_string(oglMinor) + "0 " + oglProfile;
-        log("OpenGL ", version);
+        LOG("OpenGL ", version);
         renderer.init(oglMajor, oglMinor, oglProfile);
     }
 
@@ -142,8 +141,8 @@ public:
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
-		Model::main->set("mouseX", float(event.button.x));
-		Model::main->set("mouseY", float(event.button.y));
+		Model::root.set("mouseX", float(event.button.x));
+		Model::root.set("mouseY", float(event.button.y));
                 if (event.button.button == 1)
                     emit(EventId::MouseLeftDown);
                 if (event.button.button == 2)
@@ -153,8 +152,8 @@ public:
                 break;
 
             case SDL_MOUSEBUTTONUP:
-		Model::main->set("mouseX", float(event.button.x));
-		Model::main->set("mouseY", float(event.button.y));
+		Model::root.set("mouseX", float(event.button.x));
+		Model::root.set("mouseY", float(event.button.y));
                 if (event.button.button == 1)
                     emit(EventId::MouseLeftUp);
                 if (event.button.button == 2)
@@ -164,8 +163,8 @@ public:
                 break;
 
             case SDL_MOUSEMOTION:
-		Model::main->set("mouseX", float(event.button.x));
-		Model::main->set("mouseY", float(event.button.y));
+		Model::root.set("mouseX", float(event.button.x));
+		Model::root.set("mouseY", float(event.button.y));
                 emit(EventId::MouseMove);
                 break;
 
@@ -180,7 +179,6 @@ public:
     }
 };
 
-template<typename Log>
-using Graphics = SDL2Graphics<Log>;
+using Graphics = SDL2Graphics;
 
 #endif

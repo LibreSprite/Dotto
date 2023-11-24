@@ -212,7 +212,7 @@ public:
     }
 
     std::string getShaderSegment(const std::string tag) {
-	return Model::main->get(tag, "");
+	return Model::root.get(tag, "");
     }
 
     std::string processShaderSource(const std::string type, const std::set<std::string>& tags) {

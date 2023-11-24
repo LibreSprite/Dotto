@@ -20,12 +20,12 @@
 #include <memory>
 #include <string>
 
-template <typename Log, typename Graphics>
+template <typename Graphics>
 class App {
 public:
     using GraphicsType = Graphics;
     using VMType = VMImpl;
-    using VMPoolType = VMPool<Log, VMType>;
+    using VMPoolType = VMPool<VMType>;
 
     Index<VMType*> vms{0x10000000};
     Index<Node*> nodeIndex{0x20000000};
@@ -33,25 +33,23 @@ public:
     Index<Material*> materialIndex{0x40000000};
     Index<std::shared_ptr<Surface>> textureIndex{0x50000000};
 
-    Log log;
-    Model model;
     GraphicsType gfx;
     Scene scene;
     VMPoolType vmpool;
 
     App() {
-	Model::main = &model;
 	Scene::main = &scene;
     }
 
     void boot() {
-        model.parse(readTextFile(model.get("main.settings", "settings.ini")));
+        auto& model = Model::root;
+        model.parse(readTextFile(model.get("main.settings", "data/settings.ini")));
 	Surface::maxWidth = model.get("main.max-image-width", 4*1024.0f);
 	Surface::maxHeight = model.get("main.max-image-height", 4*1024.0f);
         emit(EventId::Boot);
 
 	std::vector<std::string> mainArgs;
-	mainArgs.push_back(model.get("main.plugin", "boot.bin"));
+	mainArgs.push_back(model.get("main.plugin", "boot"));
 	for (int i = 0; true; ++i) {
 	    auto arg = model.get("main.args." + std::to_string(i), std::string{});
 	    if (arg.empty())
@@ -62,7 +60,7 @@ public:
 	try {
 	    bootVM(std::move(mainArgs));
 	} catch (std::exception& ex) {
-	    log("Exception: ", ex.what());
+	    LOG("Exception: ", ex.what());
 	}
     }
 
@@ -70,7 +68,8 @@ public:
 	if (parts.empty()) {
 	    return 0;
 	}
-	auto folder = "./plugins/" + parts[0] + "/";
+        auto& model = Model::root;
+	auto folder = "data/plugins/" + parts[0] + "/";
 	auto data = readBinaryFile(folder + parts[0] + ".drt");
 	if (data.empty())
 	    return 0;

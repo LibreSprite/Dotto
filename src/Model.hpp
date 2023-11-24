@@ -35,6 +35,5 @@ public:
         return def;
     }
 
-    static inline Model* main;
+    static Model root;
 };
-

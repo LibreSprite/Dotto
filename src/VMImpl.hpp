@@ -121,7 +121,8 @@ public:
                     auto buffer = args.get<char *>(1);
                     auto len = args.get(2);
 		    if (fh < 3) {
-			args.result = static_cast<uint32_t>(write(fh, buffer, len));
+			args.result = static_cast<uint32_t>(len); // write(fh, buffer, len));
+                        LOG(std::string_view{buffer, len});
 			return;
 		    }
 		    fh -= 3;
