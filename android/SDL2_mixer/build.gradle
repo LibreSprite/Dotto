@@ -1,0 +1,53 @@
+apply plugin: 'com.android.model.native'
+
+def lib_distribution_root = '../distribution'
+model {
+
+    android {
+        compileSdkVersion = gradle.sdkVersion
+        buildToolsVersion = gradle.buildToolsVersion
+
+        defaultConfig {
+            minSdkVersion.apiLevel = 13
+            targetSdkVersion.apiLevel = gradle.sdkVersion
+            versionCode = 1
+            versionName = '1.0'
+        }
+        ndk {
+            moduleName = 'SDL2_mixer'
+            ldLibs.addAll(["GLESv1_CM", "EGL", "GLESv2", "log", "android", "dl"])
+            CFlags.addAll(["-DGL_GLEXT_PROTOTYPES"])
+            CFlags.addAll(["-I" + file("include/").absolutePath,"-DGL_GLEXT_PROTOTYPES"])
+        }
+
+        sources {
+            main {
+                jni {
+                    dependencies {
+                        project ':SDL2' linkage 'shared'
+                    }
+                    exportedHeaders {
+                        srcDir "../SDL2/include"
+                    }
+                    source {
+                        srcDir "src"
+                        exclude "playwave.c"
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+// This is just copy out the header file and built lib into distribution
+// directory for clint application to use; it is a small overhead of this sample:
+//    both lib and app are put inside one project space [save maintenance time]
+task(distributeLib, type : Copy) {
+    // trigger build library
+    dependsOn assemble
+    into '../distribution/SDL2_mixer/'
+    from('build/outputs/native/release/lib') {
+        into 'lib/'
+    }
+}

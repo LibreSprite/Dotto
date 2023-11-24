@@ -1,0 +1,48 @@
+apply plugin: 'com.android.model.native'
+
+model {
+    android {
+        compileSdkVersion = gradle.sdkVersion
+        buildToolsVersion = gradle.buildToolsVersion
+
+        defaultConfig {
+            minSdkVersion.apiLevel = gradle.minSdkVersion
+            versionCode = 1
+            versionName = '1.0'
+        }
+        ndk {
+            moduleName = 'SDL2_ttf'
+            ldLibs.addAll(["GLESv1_CM", "EGL", "GLESv2", "log", "android", "dl"])
+            CFlags.addAll(["-DGL_GLEXT_PROTOTYPES"])
+            CFlags.addAll(["-I" + file("include/").absolutePath,"-DGL_GLEXT_PROTOTYPES"])
+        }
+
+        sources {
+            main {
+                jni {
+                    dependencies {
+                        project ':SDL2' linkage 'shared'
+                        project ':freetype' linkage 'shared'
+                    }
+                    exportedHeaders {
+                        srcDir "../SDL2/include"
+                        srcDir "../freetype/include"
+                    }
+                    source {
+                        srcDir "src"
+                        exclude "showfont.c"
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+task(distributeLib, type : Copy) {
+    dependsOn assemble
+    into '../distribution/SDL2_ttf/'
+    from('build/outputs/native/release/lib') {
+        into 'lib/'
+    }
+}

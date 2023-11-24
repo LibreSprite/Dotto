@@ -1,0 +1,82 @@
+apply plugin: 'com.android.model.native'
+
+model {
+    android {
+        compileSdkVersion = gradle.sdkVersion
+        buildToolsVersion = gradle.buildToolsVersion
+
+        defaultConfig {
+            minSdkVersion.apiLevel = gradle.minSdkVersion
+            versionCode = 1
+            versionName = '1.0'
+        }
+        ndk {
+            moduleName = 'freetype'
+            ldLibs.addAll(["GLESv1_CM", "EGL", "GLESv2", "log", "android", "dl"])
+            CFlags.addAll(["-DFT_CONFIG_CONFIG_H=<ftconfig.h>", "-DFT2_BUILD_LIBRARY", "-DFT_CONFIG_MODULES_H=<ftmodule.h>"])
+            CFlags.addAll([
+                "-I" + file("include/").absolutePath, 
+                "-DGL_GLEXT_PROTOTYPES"])
+        }
+
+        sources {
+            main {
+                jni {
+                    source {
+                        srcDir "src"
+                        exclude "autofit"
+                        exclude "base/ftpic.c"
+                        exclude "base/basepic.c"
+                        exclude "base/ftadvanc.c"
+                        exclude "base/ftcalc.c"
+                        exclude "base/ftdbgmem.c"
+                        exclude "base/ftgloadr.c"
+                        exclude "base/ftobjs.c"
+                        exclude "base/ftoutln.c"
+                        exclude "base/ftrfork.c"
+                        exclude "base/ftsnames.c"
+                        exclude "base/ftstream.c"
+                        exclude "base/fttrigon.c"
+                        exclude "base/ftutil.c"
+                        exclude "base/ftmac.c"
+                        exclude "bdf"
+                        exclude "cache"
+                        exclude "cff/cffcmap.c"
+                        exclude "cid"
+                        exclude "cff"
+                        exclude "gzip"
+                        exclude "gxvalid"
+                        exclude "lzw"
+                        exclude "otvalid"
+                        exclude "outvalid"
+                        exclude "pcf"
+                        exclude "pfr"
+                        exclude "pshinter"
+                        exclude "psnames"
+                        exclude "psaux"
+                        exclude "raster/raster.c"
+                        exclude "sfnt/sfnt.c"
+                        exclude "sfnt/ttsbit0.c"
+                        exclude "smooth/smooth.c"
+                        exclude "tools"
+                        // Including this file in build causes duplications, because it includes directly C files
+                        exclude "truetype/truetype.c"
+                        exclude "type1"
+                        exclude "type42"
+                        exclude "winfonts"
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+task(distributeLib, type : Copy) {
+    // trigger build library
+    dependsOn assemble
+    into gradle.libDistributionRoot + '/freetype/'
+    from('build/outputs/native/release/lib') {
+        into 'lib/'
+    }
+}

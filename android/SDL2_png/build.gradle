@@ -1,0 +1,42 @@
+apply plugin: 'com.android.model.native'
+
+model {
+    android {
+        compileSdkVersion = gradle.sdkVersion
+        buildToolsVersion = gradle.buildToolsVersion
+
+        defaultConfig {
+            minSdkVersion.apiLevel = gradle.minSdkVersion
+            versionCode = 1
+            versionName = '1.0'
+        }
+        ndk {
+            moduleName = 'SDL2_png'
+            ldLibs.addAll(["GLESv1_CM", "EGL", "GLESv2", "log", "android", "dl", "z"])
+            CFlags.addAll([
+                           "-DGL_GLEXT_PROTOTYPES"
+            ])
+            CFlags.addAll(["-I" + file("include/").absolutePath,"-DGL_GLEXT_PROTOTYPES"])
+        }
+
+        sources {
+            main {
+                jni {
+                    source {
+                        srcDir "src"
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+task(distributeLib, type : Copy) {
+    // trigger build library
+    dependsOn assemble
+    into gradle.libDistributionRoot + '/SDL2_png/'
+    from('build/outputs/native/release/lib') {
+        into 'lib/'
+    }
+}

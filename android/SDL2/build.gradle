@@ -1,0 +1,147 @@
+apply plugin: 'com.android.model.native'
+
+model {
+    android {
+        compileSdkVersion = gradle.sdkVersion
+        buildToolsVersion = gradle.buildToolsVersion
+
+        defaultConfig {
+            minSdkVersion.apiLevel = gradle.minSdkVersion
+            versionCode = 1
+            versionName = '1.0'
+        }
+        ndk {
+            moduleName = 'SDL2'
+            ldLibs.addAll(["GLESv1_CM", "EGL", "GLESv2", "log", "android", "dl"])
+            CFlags.addAll(["-DGL_GLEXT_PROTOTYPES"])
+            CFlags.addAll(["-I" + file("include/").absolutePath,"-DGL_GLEXT_PROTOTYPES"])
+        }
+
+        sources {
+            main {
+                jni {
+                    source {
+                        srcDir "src"
+                        exclude "audio/alsa/"
+                        exclude "audio/arts/"
+                        exclude "audio/bsd/"
+                        exclude "audio/coreaudio/"
+                        exclude "audio/directsound/"
+                        exclude "audio/disk/"
+                        exclude "audio/dsp/"
+                        exclude "audio/emscripten/"
+                        exclude "audio/esd/"
+                        exclude "audio/fusionsound/"
+                        exclude "audio/haiku/"
+                        exclude "audio/nacl/"
+                        exclude "audio/nas/"
+                        exclude "audio/psp/"
+                        exclude "audio/pulseaudio/"
+                        exclude "audio/qsa/"
+                        exclude "audio/sndio/"
+                        exclude "audio/sun/"
+                        exclude "audio/winmm/"
+                        exclude "audio/xaudio2/"
+                        exclude "core/linux/"
+                        exclude "core/windows/"
+                        exclude "core/winrt/"
+                        exclude "file/cocoa/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/darwin/"
+                        exclude "haptic/linux/"
+                        exclude "libm/"
+                        exclude "main/dummy/"
+                        exclude "main/android/"
+                        exclude "main/haiku/"
+                        exclude "main/nacl/"
+                        exclude "main/psp/"
+                        exclude "main/windows/"
+                        exclude "main/winrt/"
+                        exclude "joystick/bsd/"
+                        exclude "joystick/darwin/"
+                        exclude "joystick/dummy/"
+                        exclude "joystick/emscripten/"
+                        exclude "joystick/haiku/"
+                        exclude "joystick/iphoneos/"
+                        exclude "joystick/linux/"
+                        exclude "joystick/psp/"
+                        exclude "joystick/windows/"
+                        exclude "loadso/dummy/"
+                        exclude "loadso/haiku/"
+                        exclude "loadso/windows/"
+                        exclude "power/emscripten/"
+                        exclude "power/haiku/"
+                        exclude "power/linux/"
+                        exclude "power/macosx/"
+                        exclude "power/psp/"
+                        exclude "power/uikit/"
+                        exclude "power/windows/"
+                        exclude "power/winrt/"
+                        exclude "filesystem/cocoa/"
+                        exclude "filesystem/dummy/"
+                        exclude "filesystem/emscripten/"
+                        exclude "filesystem/haiku/"
+                        exclude "filesystem/nacl/"
+                        exclude "filesystem/unix/"
+                        exclude "filesystem/windows/"
+                        exclude "filesystem/winrt/"
+                        exclude "render/direct3d/"
+                        exclude "render/direct3d11/"
+                        exclude "thread/generic/"
+                        exclude "thread/psp/"
+                        exclude "thread/stdcpp/"
+                        exclude "thread/windows/"
+                        exclude "timer/dummy/"
+                        exclude "timer/haiku/"
+                        exclude "timer/psp/"
+                        exclude "timer/windows/"
+                        exclude "video/cocoa/"
+                        exclude "video/directfb/"
+                        exclude "video/dummy/"
+                        exclude "video/emscripten/"
+                        exclude "video/haiku/"
+                        exclude "video/mir/"
+                        exclude "video/nacl/"
+                        exclude "video/pandora/"
+                        exclude "video/psp/"
+                        exclude "video/raspberry/"
+                        exclude "video/uikit/"
+                        exclude "video/vivante/"
+                        exclude "video/wayland/"
+                        exclude "video/windows/"
+                        exclude "video/winrt/"
+                        exclude "video/x11/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "haptic/windows/"
+                        exclude "test"
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+// This is just copy out the header file and built lib into distribution
+// directory for clint application to use; it is a small overhead of this sample:
+//    both lib and app are put inside one project space [save maintenance time]
+task(distributeLib, type : Copy) {
+    // trigger build library
+    dependsOn assemble
+    into gradle.libDistributionRoot + '/SDL2/'
+    from('build/outputs/native/release/lib') {
+        into 'lib/'
+    }
+}
+
+test {
+    exclude '**/*'
+}

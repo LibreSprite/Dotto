@@ -1,0 +1,113 @@
+apply plugin: 'com.android.model.native'
+
+model {
+     repositories {
+        libs(PrebuiltLibraries) {
+            SDL2 {
+                headers.srcDir "../SDL2/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/SDL2/lib/${targetPlatform.getName()}/libSDL2.so")
+                }
+            }
+            SDL2_gfx {
+                headers.srcDir "../SDL2_gfx/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/SDL2_gfx/lib/${targetPlatform.getName()}/libSDL2_gfx.so")
+                }
+            }
+            SDL2_jpeg {
+                headers.srcDir "../SDL2_jpeg/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/SDL2_jpeg/lib/${targetPlatform.getName()}/libSDL2_jpeg.so")
+                }
+            }
+            SDL2_png {
+                headers.srcDir "../SDL2_png/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/SDL2_png/lib/${targetPlatform.getName()}/libSDL2_png.so")
+                }
+            }
+            SDL2_image {
+                headers.srcDir "../SDL2_image/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/SDL2_image/lib/${targetPlatform.getName()}/libSDL2_image.so")
+                }
+            }
+            SDL2_mixer {
+                headers.srcDir "../SDL2_mixer/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/SDL2_mixer/lib/${targetPlatform.getName()}/libSDL2_mixer.so")
+                }
+            }
+            SDL2_ttf {
+                headers.srcDir "../SDL2_ttf/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/SDL2_ttf/lib/${targetPlatform.getName()}/libSDL2_ttf.so")
+                }
+            }
+            freetype {
+                headers.srcDir "../freetype/include"
+                binaries.withType(SharedLibraryBinary) {
+                    sharedLibraryFile = file("${gradle.libDistributionRoot}/freetype/lib/${targetPlatform.getName()}/libfreetype.so")
+                }
+            }
+
+        }
+    }
+
+   android {
+        compileSdkVersion = gradle.sdkVersion
+        buildToolsVersion = gradle.buildToolsVersion
+
+        defaultConfig {
+            minSdkVersion.apiLevel = gradle.minSdkVersion
+            versionCode = 1
+            versionName = '1.0'
+        }
+        ndk {
+            moduleName = 'main'
+            cppFlags.addAll([
+                    "-I" + file("../SDL2/include/").absolutePath,
+                    "-I" + file("../SDL2_image/include/").absolutePath,
+            ])
+            CFlags.addAll([
+                    "-I" + file("../SDL2/include/").absolutePath,
+                    "-I" + file("../SDL2_image/include/").absolutePath,
+            ])
+            stl "stlport_static"
+        }
+
+        sources {
+            main {
+                jni {
+                    dependencies {
+                        library 'SDL2' linkage 'shared'
+                        library 'SDL2_gfx' linkage 'shared'
+                        library 'SDL2_jpeg' linkage 'shared'
+                        library 'SDL2_png' linkage 'shared'
+                        library 'SDL2_image' linkage 'shared'
+                        library 'SDL2_mixer' linkage 'shared'
+                        library 'SDL2_ttf' linkage 'shared'
+                        library 'freetype' linkage 'shared'
+                    }
+                    source {
+                        srcDirs 'src/'
+
+                        // The code from this directory contains bridge between Java and C for SDL2
+                        srcDirs '../SDL2/src/main/android/'
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+task(distributeLib, type : Copy) {
+    // trigger build library
+    dependsOn assemble
+    into gradle.libDistributionRoot + '/main/'
+    from('build/outputs/native/release/lib') {
+        into 'lib/'
+    }
+}
