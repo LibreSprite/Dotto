@@ -86,6 +86,6 @@ int main(int argc, const char* argv[]) {
 	return 1;
     }
     auto ok = loadPNGImage(argv[0]);
-    message("{} {:#x} {:#x}", argv[1], getpid(), ok);
+    message("{} {:#x} {:#x} surface", argv[1], getpid(), ok);
     return 0;
 }
