@@ -7,6 +7,9 @@
 #include "Log.hpp"
 
 #ifdef __APPLE__
+#ifndef GL_SILENCE_DEPRECATION
+  #define GL_SILENCE_DEPRECATION
+#endif
   #include <OpenGL/gl3.h>
 #elif defined(__WINDOWS__)
   #include <windef.h>
@@ -19,6 +22,18 @@
   #include <GL/gl.h>
   #include <GLES3/gl3.h>
 #endif
+
+#define GLCHECK                                                                \
+  {                                                                            \
+    if (auto err = glGetError()) {                                             \
+      static bool e = false;                                                   \
+      if (!e) {                                                                \
+        e = true;                                                              \
+        LOG("gl error ", std::hex, err, ":", __PRETTY_FUNCTION__, " ",         \
+            std::dec, __LINE__);                                               \
+      }                                                                        \
+    }                                                                          \
+  }
 
 class GLShader {
 public:
@@ -64,6 +79,7 @@ public:
 
     void use() {
       glUseProgram(program);
+      GLCHECK;
     }
 
     static std::shared_ptr<GLShader> create(const std::string& vtxSrc, const std::string& frgSrc) {
@@ -76,18 +92,21 @@ public:
         auto frg = compile(GL_FRAGMENT_SHADER, "#version " + version + "\n" + frgSrc);
         if (!frg) {
             glDeleteShader(vtx);
+            GLCHECK;
             return nullptr;
         }
 
         auto prg = link(vtx, frg);
         glDeleteShader(vtx);
         glDeleteShader(frg);
+        GLCHECK;
 
         return prg ? std::make_shared<GLShader>(prg) : nullptr;
     }
 
     static uint32_t compile(uint32_t type, const std::string& source) {
         uint32_t shader = glCreateShader(type);
+        LOG("Shader{\n", source, "\n}");
         auto str = source.c_str();
         glShaderSource(shader, 1, &str, NULL);
         glCompileShader(shader);
@@ -112,8 +131,11 @@ public:
     static uint32_t link(uint32_t vertexShader, uint32_t fragmentShader) {
         uint32_t program = glCreateProgram();
         glAttachShader(program, vertexShader);
+        GLCHECK;
         glAttachShader(program, fragmentShader);
+        GLCHECK;
         glLinkProgram(program);
+        GLCHECK;
         int success;
         glGetProgramiv(program, GL_LINK_STATUS, &success);
         if (!success) {
@@ -123,6 +145,7 @@ public:
             glGetProgramInfoLog(program, 512, NULL, infoLog);
             LOG("ERROR::SHADER::LINK_FAILED ", infoLog);
         }
+        GLCHECK;
         return program;
     }
 };

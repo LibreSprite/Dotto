@@ -273,8 +273,11 @@ public:
 	    shader = it->second;
 	} else {
 	    auto vert = processShaderSource("vertex", component.material->tags);
+            GLCHECK;
 	    auto frag = processShaderSource("fragment", component.material->tags);
+            GLCHECK;
 	    shader = GLShader::create(vert, frag);
+            GLCHECK;
 	    if (shader) {
 		shaderCache[acc] = shader;
 	    }
@@ -369,29 +372,37 @@ public:
             return;
 
         shader->use();
+        GLCHECK;
         glBindVertexArray(vao);
+        GLCHECK;
 
         for (auto& uniform : uniforms) {
             uniform.uploader(uniform.ref->raw(), uniform.index);
         }
+        GLCHECK;
 
         for (auto& attrib : attributes) {
             if (attrib.index > -1)
                 glEnableVertexAttribArray(attrib.index);
         }
+        GLCHECK;
 
 	if (elements) {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, veo);
+            GLCHECK;
             glDrawElements(GL_TRIANGLES, elements->size(),  GL_UNSIGNED_INT, 0);
+            GLCHECK;
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	} else {
 	    glDrawArrays(GL_TRIANGLES, 0, length);
+            GLCHECK;
 	}
 
         for (auto& attrib : attributes) {
             if (attrib.index > -1)
                 glDisableVertexAttribArray(attrib.index);
         }
+        GLCHECK;
 
     }
 };

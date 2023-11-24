@@ -10,8 +10,11 @@ void GLRenderer::init(uint32_t major, uint32_t minor, const std::string profile)
 #if defined(__WINDOWS__)
     glewInit();
 #endif
+    GLCHECK;
     glEnable(GL_DEPTH_TEST);
+    GLCHECK;
     glDepthFunc(GL_LESS);
+    GLCHECK;
     GLShader::major = major;
     GLShader::minor = minor;
     GLShader::profile = profile;
@@ -22,16 +25,22 @@ void GLRenderer::shutdown() {
 }
 
 void GLRenderer::draw(Scene* scene) {
+    GLCHECK;
     glViewport(0, 0, scene->width, scene->height);
+    GLCHECK;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.2f, 0.1f, 0.0f, 1.0f);
+    GLCHECK;
 
     queue.clear();
 
     Matrix transform;
     transform.setPosition(-scene->camera->position);
     enqueueComponents(transform, *scene->root, scene);
+    GLCHECK;
 
     drawComponents();
+    GLCHECK;
 }
 
 void GLRenderer::enqueueComponents(const Matrix& transform, Node& node, Scene* scene) {
