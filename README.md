@@ -78,6 +78,7 @@ over Discord/Matrix.
 | 2D Fast Fourier Transform      | Planned     | 2.0     |                                 |
 | Load Dotto format              | Planned     | 0.5     |                                 |
 | Load PNG, BMP, GIF, JPEG       | OK          | 0.5     | Using `libpng` and `SDL2_image` |
+| Load JXL                       | Planned     | 0.5     |                                 |
 | Load LBM, PCX, PNM, SVG        | OK          | 0.5     | Using `SDL2_image`              |
 | Load TGA, TIFF, WEBP, XCF      | OK          | 0.5     | Using `SDL2_image`              |
 | Load XPM, XV                   | OK          | 0.5     | Using `SDL2_image`              |
@@ -85,6 +86,7 @@ over Discord/Matrix.
 | Save QOI                       | OK          | 0.5     | Using `qoi.h`                   |
 | Save PNG                       | OK          | 0.5     | Using `libpng`                  |
 | Save JPEG                      | OK          | 0.5     | Using `SDL2_image`              |
+| Save JXL                       | Planned     | 0.5     |                                 |
 | Save Dotto format              | Planned     | 0.5     |                                 |
 | Palette editor                 | Planned     | 0.5     |                                 |
 | Online Palette browser         | Planned     | 1.0     |                                 |
