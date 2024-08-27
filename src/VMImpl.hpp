@@ -202,6 +202,12 @@ protected:
 
 public:
     ~VMImpl() {
+	mainThread([resources=std::move(*heldResources.write())]{
+	    if (nextHeldResources) {
+		auto out = nextHeldResources->write();
+		out->insert(out->end(), resources.begin(), resources.end());
+	    }
+	});
         eventListeners.write([&](auto& eventListeners) {
             for (std::size_t id = 0; id < static_cast<uint32_t>(EventId::MaxEvent); ++id) {
                 for (auto& slot : eventListeners[id]) {

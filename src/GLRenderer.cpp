@@ -5,7 +5,7 @@
 
 #include "GLComponentRenderData.hpp"
 #include <cstdint>
-
+#include <algorithm>
 #include <fmt/format.h>
 
 void GLRenderer::init(uint32_t major, uint32_t minor, const std::string profile) {

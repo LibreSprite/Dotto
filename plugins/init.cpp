@@ -64,6 +64,9 @@ extern "C" int _fstat(int fd, struct stat *st) {
     return -1;
 }
 
+extern "C" int __ssputws_r (FILE *fp, const wchar_t *buf, size_t len) {return 0;}
+extern "C" int _getentropy(void *buf, size_t buflen){return -1;}
+
 extern "C" void __libc_init_array(void);
 extern uint32_t __data_section_table;
 extern uint32_t __data_section_table_end;

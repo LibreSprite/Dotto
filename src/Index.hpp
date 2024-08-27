@@ -70,7 +70,8 @@ private:
     static inline Index<Type>* _ptr;
 };
 
-inline Shared<std::vector<std::shared_ptr<void>>> heldResources;
+inline auto heldResources = std::make_unique<Shared<std::vector<std::shared_ptr<void>>>>();
+inline auto nextHeldResources = std::make_unique<Shared<std::vector<std::shared_ptr<void>>>>();
 
 template<typename T>
 class Y : public T {
@@ -89,13 +90,13 @@ public:
         LOG("Creating ", typeid(Derived).name());
         auto ptr = std::make_shared<Y<T>>(std::forward<Args>(args)...);
         ptr->_key = Index<Derived>::_ptr->add(ptr);
-        heldResources.write([&](auto& heldResources){heldResources.push_back(ptr);});
+        heldResources->write()->push_back(ptr);
         return ptr;
     }
 
     ~AutoIndex() {
         LOG("Destroying ", typeid(Derived).name());
-	if (_key)
+	if (_key && Index<Derived>::_ptr)
             Index<Derived>::_ptr->remove(_key);
     }
 
@@ -105,7 +106,9 @@ public:
 };
 
 inline void gc() {
-    heldResources.write([](auto& hr) {
-	hr.clear();
-    });
+    auto hr = heldResources->write();
+    auto nhr = nextHeldResources->write();
+    hr->clear();
+    hr->insert(hr->end(), nhr->begin(), nhr->end());
+    nhr->clear();
 }
