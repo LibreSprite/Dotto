@@ -16,7 +16,7 @@ NodeId loadOBJ(const char* name) {
 	return NodeId(0);
     }
 
-    auto node = createRenderable();
+    auto node = createNode();
     auto defmat = createMaterial("3d vertex-color");
 
     for (auto& src : loader.LoadedMeshes) {
@@ -71,8 +71,6 @@ int main(int argc, const char* argv[]) {
 	printf("parseobj error: expected 2 arguments, got %d.\n", argc);
 	return 1;
     }
-    std::string answer = fmt("{} {} ", argv[1], getpid());
-    auto ok = loadOBJ(argv[0]);
-    message("{} {:#x} {:#x} node", argv[1], getpid(), ok);
+    message("{} {:#x} {:#x} node", argv[1], getpid(), loadOBJ(argv[0]));
     return 0;
 }

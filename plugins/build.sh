@@ -3,6 +3,11 @@
 set -e
 
 cd "$(dirname -- "${BASH_SOURCE[0]}")"
+
+pushd ..
+make -k -j4 #DEBUG=true
+popd
+
 PLUGINS_DIR="$(pwd)"
 VM_HEAP_SIZE=1024
 
@@ -25,6 +30,8 @@ arm-none-eabi-g++ init.cpp -I../ports/include -DVM_HEAP_SIZE=$VM_HEAP_SIZE "${CP
 
 for PAYLOAD in */ ; do
     PROJECT="$(basename "$PAYLOAD")"
+    [ -f "${PROJECT}/skip" ] && continue
+
     pushd $PROJECT > /dev/null
 
     touch compiling.o
@@ -71,6 +78,4 @@ for PAYLOAD in */ ; do
 done
 
 cd ..
-
-make -k -j4 #DEBUG=true
-# ./dirt 42
+./dirt 42

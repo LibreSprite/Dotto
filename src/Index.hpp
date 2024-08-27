@@ -8,20 +8,21 @@
 #include <vector>
 
 #include "Shared.hpp"
+#include "Log.hpp"
 
 template <typename Type>
 class Index {
 public:
     const std::size_t offset;
 
-    using Optional = std::optional<Type>;
+    using Optional = std::shared_ptr<Type>;
 
     Index(std::size_t offset) : offset{offset} {_ptr = this;}
 
     ~Index() {_ptr = nullptr;}
 
     uint32_t count() {
-        return _data.read([&](auto& _data){ return _data.size(); });
+        return _data.read().size();
     }
 
     Optional operator [] (uint32_t key) {
@@ -29,7 +30,7 @@ public:
 	    return Optional{};
         auto vkey = key - offset;
         return _data.read([&](auto& _data){
-	    return (vkey >= _data.size()) ? Optional{} : _data[vkey];
+	    return (vkey >= _data.size()) ? Optional{} : _data[vkey].lock();
 	});
     }
 
@@ -37,13 +38,13 @@ public:
 	return _ptr ? (*_ptr)[key] : Optional{};
     }
 
-    uint32_t add(const Type& v) {
+    uint32_t add(const std::shared_ptr<Type>& v) {
 	std::size_t max{};
 	_data.write([&](auto& _data) {
 	    max = _data.size();
 	    for (std::size_t i = 0; i < max; ++i) {
 		auto& o = _data[i];
-		if (!o.has_value()) {
+		if (o.expired()) {
 		    o = v;
 		    max = i;
 		    return;
@@ -63,56 +64,48 @@ public:
     }
 
 private:
-    friend class AutoIndex;
-    Shared<std::vector<Optional>> _data;
+    template <typename Derived> friend class AutoIndex;
+
+    Shared<std::vector<std::weak_ptr<Type>>> _data;
     static inline Index<Type>* _ptr;
 };
 
-class AutoIndex {
-    void (*remove)(uint32_t){};
-    uint32_t _key{};
+inline Shared<std::vector<std::shared_ptr<void>>> heldResources;
+
+template<typename T>
+class Y : public T {
 public:
-    template<typename Type>
-    AutoIndex(Type* ref) {
-	init(ref);
-    }
+    template <typename ... PArgs>
+    Y(PArgs&& ... args) : T{std::forward<PArgs>(args)...} {}
+};
 
-    AutoIndex() = default;
+template <typename Derived>
+class AutoIndex : public std::enable_shared_from_this<Derived> {
+    uint32_t _key{};
 
-    template<typename Type>
-    Type init(Type ref) {
-        _key = Index<Type>::_ptr->add(ref);
-        remove = +[](uint32_t key){
-	    if (auto index = Index<Type>::_ptr)
-		index->remove(key);
-        };
-	return ref;
+public:
+    template<typename T=Derived, typename ... Args>
+    static std::shared_ptr<T> create(Args&& ... args) {
+        LOG("Creating ", typeid(Derived).name());
+        auto ptr = std::make_shared<Y<T>>(std::forward<Args>(args)...);
+        ptr->_key = Index<Derived>::_ptr->add(ptr);
+        heldResources.write([&](auto& heldResources){heldResources.push_back(ptr);});
+        return ptr;
     }
 
     ~AutoIndex() {
+        LOG("Destroying ", typeid(Derived).name());
 	if (_key)
-	    remove(_key);
+            Index<Derived>::_ptr->remove(_key);
     }
 
-    uint32_t operator* () {
+    uint32_t key() const {
         return _key;
     }
 };
-
-inline Shared<std::vector<std::shared_ptr<void>>> heldResources;
 
 inline void gc() {
     heldResources.write([](auto& hr) {
 	hr.clear();
     });
-}
-
-template<typename Type, typename ... Args>
-inline uint32_t create(Args&& ... args) {
-    auto ptr = std::make_shared<Type>(std::forward<Args>(args)...);
-    auto key = *ptr->key;
-    heldResources.write([&](auto& heldResources){
-	heldResources.push_back(ptr);
-    });
-    return key;
 }

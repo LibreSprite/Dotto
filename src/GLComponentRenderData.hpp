@@ -9,12 +9,14 @@
 #include "Uniform.hpp"
 #include "Vector.hpp"
 #include "Surface.hpp"
+#include "ShaderBuilder.hpp"
 
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <map>
 #include <memory>
+#include <shared_mutex>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -73,25 +75,34 @@ public:
 
 inline UniformUploader u_float{[](float f, GLint uniformLocation) {
     glUniform1f(uniformLocation, f);
+    GFXLOG("glUniform1f", uniformLocation, f);
 }};
 
 inline UniformUploader u_UV{[](const UV& f, GLint uniformLocation) {
     glUniform2f(uniformLocation, f.x, f.y);
+    GFXLOG("glUniform2f", uniformLocation, f.x, f.y);
 }};
 
 inline UniformUploader u_Vector{[](const Vector& f, GLint uniformLocation) {
     glUniform3f(uniformLocation, f.x, f.y, f.z);
+    GFXLOG("glUniform3f", uniformLocation, f.x, f.y, f.z);
 }};
 
 inline UniformUploader u_RGBA{[](const RGBA& f, GLint uniformLocation) {
     glUniform4f(uniformLocation, f.r, f.g, f.b, f.a);
+    GFXLOG("glUniform4f", uniformLocation, f.r, f.g, f.b, f.a);
 }};
 
 inline UniformUploader u_Matrix{[](const Matrix& f, GLint uniformLocation) {
     glUniformMatrix4fv(uniformLocation, 1, GL_TRUE, f.v);
+    GFXLOG("glUniformMatrix4fv", uniformLocation, 1, GL_TRUE);
+    GFXLOG(f.v[0], f.v[1], f.v[2], f.v[3]);
+    GFXLOG(f.v[4], f.v[5], f.v[6], f.v[7]);
+    GFXLOG(f.v[8], f.v[9], f.v[10], f.v[11]);
+    GFXLOG(f.v[12], f.v[13], f.v[14], f.v[15]);
 }};
 
-inline uint32_t textureUnit{};
+inline uint32_t nextTextureUnit{};
 inline UniformUploader u_Surface{[](const std::shared_ptr<Surface>& surface, GLint uniformLocation) {
     if (!surface) {
 	return;
@@ -103,12 +114,20 @@ inline UniformUploader u_Surface{[](const std::shared_ptr<Surface>& surface, GLi
     }
     // auto texture = std::static_pointer_cast<GLTexture>(surface->texture);
     auto texture = static_cast<GLTexture*>(surface->texture.get());
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + nextTextureUnit);
+    GFXLOG("glActiveTexture", nextTextureUnit);
+    GLCHECK_MSG(nextTextureUnit);
     glBindTexture(GL_TEXTURE_2D, texture->id);
+    GFXLOG("glBindTexture", GL_TEXTURE_2D, texture->id);
+    GLCHECK;
     if (!surface->dirty.empty()) {
 	surface->dirty.clear();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        GFXLOG("glTexParameteri");
+        GLCHECK;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        GFXLOG("glTexParameteri");
+        GLCHECK;
         // TODO: Use dirtyRegion to upload only what changed
 	glTexImage2D(GL_TEXTURE_2D,
                      0,
@@ -119,15 +138,21 @@ inline UniformUploader u_Surface{[](const std::shared_ptr<Surface>& surface, GLi
                      GL_RGBA,
                      GL_UNSIGNED_BYTE,
                      surface->pixels.data());
+        GFXLOG("glTexParameteri");
+        GLCHECK;
     }
-    glUniform1i(uniformLocation, textureUnit);
-    textureUnit++;
+    glUniform1i(uniformLocation, nextTextureUnit);
+    GFXLOG("glUniform1i", uniformLocation, nextTextureUnit);
+    GLCHECK;
+    nextTextureUnit++;
 }};
 
 class ComponentRenderData {
 public:
     static inline std::unordered_map<std::string, std::shared_ptr<GLShader>> shaderCache;
+    static inline ShaderBuilder builder;
 
+    float priority{};
     Matrix transform;
     std::vector<uint8_t> raw;
     std::vector<uint32_t>* elements{};
@@ -189,82 +214,6 @@ public:
         }
     }
 
-    std::pair<std::string, std::string> findShaderSegment(const std::string& name) {
-	using namespace std;
-	auto major = std::to_string(GLShader::major);
-	auto minor = std::to_string(GLShader::minor);
-	auto full = "material." + GLShader::profile + major + minor + "0" + "." + name;
-	auto segment = getShaderSegment(full);
-	if (!segment.empty())
-	    return {full, segment};
-	full = "material." + GLShader::profile + major + "." + name;
-	segment = getShaderSegment(full);
-	if (!segment.empty())
-	    return {full, segment};
-	full = "material." + GLShader::profile + "." + name;
-	segment = getShaderSegment(full);
-	if (!segment.empty())
-	    return {full, segment};
-	full = "material.opengl." + name;
-	segment = getShaderSegment(full);
-	return {full, segment};
-    }
-
-    std::string getShaderSegment(const std::string tag) {
-	return Model::root.get(tag, "");
-    }
-
-    std::string processShaderSource(const std::string type, const std::set<std::string>& tags) {
-	using Tag = std::pair<std::string, std::string>;
-	std::vector<Tag> parts;
-	auto activeTag = ~std::size_t{};
-
-	std::vector<std::string> tagQueue {type};
-	for (auto& tag : tags)
-	    tagQueue.push_back(tag + "." + type);
-
-	for (auto& tag : tagQueue) {
-	    auto [fullPath, src] = findShaderSegment(tag);
-	    auto tagSrc = split(src, "\n");
-	    for (auto& line : tagSrc) {
-		auto trimmed = trim(line);
-		if (!trimmed.empty() && trimmed.back() == '>') {
-		    if (trimmed.find("//section<") == 0) {
-			auto sectionName = trimmed.substr(10, trimmed.size() - 11);
-			std::size_t targetTag = 0;
-			auto max = parts.size();
-			for (; targetTag < max; ++targetTag) {
-			    if (parts[targetTag].first == sectionName)
-				break;
-			}
-			if (targetTag >= max) {
-			    targetTag = activeTag + 1;
-			    auto it = parts.begin();
-			    std::advance(it, targetTag);
-			    parts.insert(it, {sectionName, {}});
-			} else {
-			    line = "// *** " + fullPath + " ***";
-			}
-			activeTag = targetTag;
-			continue;
-		    }
-		}
-		if (activeTag < parts.size()) {
-		    parts[activeTag].second += line + (" // " + fullPath) + "\n";
-		} else {
-		    LOG("skipping ", activeTag, "[", line, "]");
-		}
-	    }
-	}
-
-	std::string src;
-	for (auto& tag : parts) {
-	    // src += "// begin " + tag.first + "\n";
-	    src += tag.second;
-	}
-	return src;
-    }
-
     void rebuildMaterial(RenderableNode::Component& component) {
 	std::string acc;
 	for (auto& entry : component.material->tags)
@@ -272,9 +221,9 @@ public:
 	if (auto it = shaderCache.find(acc); it != shaderCache.end()) {
 	    shader = it->second;
 	} else {
-	    auto vert = processShaderSource("vertex", component.material->tags);
+	    auto vert = builder.processShaderSource("vertex", component.material->tags);
             GLCHECK;
-	    auto frag = processShaderSource("fragment", component.material->tags);
+	    auto frag = builder.processShaderSource("fragment", component.material->tags);
             GLCHECK;
 	    shader = GLShader::create(vert, frag);
             GLCHECK;
@@ -285,7 +234,6 @@ public:
     }
 
     void rebind(RenderableNode& node, RenderableNode::Component& component) {
-	textureUnit = 0;
         if (!vbo)
             glGenBuffers(1, &vbo);
 
@@ -315,15 +263,20 @@ public:
         }
 
         uniforms.clear();
+
+        auto sceneUniforms = Scene::main->uniforms.read();
+        auto nodeUniforms = node.uniforms.read();
+        auto materialUniforms = component.material->uniforms.read();
+
         for (auto& entry : shader->uniforms) {
             auto& name = entry.first;
 
-            auto it = node.uniforms.find(name);
-            if (it == node.uniforms.end()) {
-                it = component.material->uniforms.find(name);
-                if (it == component.material->uniforms.end()) {
-                    it = Scene::main->uniforms.find(name);
-                    if (it == Scene::main->uniforms.end())
+            auto it = nodeUniforms->find(name);
+            if (it == nodeUniforms->end()) {
+                it = materialUniforms->find(name);
+                if (it == materialUniforms->end()) {
+                    it = sceneUniforms->find(name);
+                    if (it == sceneUniforms->end())
                         continue;
                 }
             }
@@ -342,9 +295,9 @@ public:
         }
     }
 
-    void update(RenderableNode& node, RenderableNode::Component& component) {
+    bool update(RenderableNode& node, RenderableNode::Component& component) {
         if (!component.mesh || !component.material)
-            return;
+            return false;
 
         bool needsRebind = false;
         if (raw.empty() || component.mesh->dirty()) {
@@ -356,7 +309,7 @@ public:
             rebuildMaterial(component);
             if (!shader) {
                 component.material.reset();
-                return;
+                return false;
             }
             needsRebind = true;
         }
@@ -365,6 +318,8 @@ public:
 	    component.material->dirty = false;
             rebind(node, component);
         }
+
+        return true;
     }
 
     void draw() {
@@ -376,8 +331,11 @@ public:
         glBindVertexArray(vao);
         GLCHECK;
 
+	nextTextureUnit = 0;
+
         for (auto& uniform : uniforms) {
             uniform.uploader(uniform.ref->raw(), uniform.index);
+            GLCHECK_MSG(shader->uniformNameFromIndex(uniform.index));
         }
         GLCHECK;
 

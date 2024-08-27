@@ -67,6 +67,7 @@ else
 endif
 
 # LIB_DIRS += $(shell find dependencies -type d)
+LIB_DIRS += $(shell find dependencies -type d -name "include")
 CPP_FLAGS += $(patsubst %,-I%,$(LIB_DIRS))
 
 SRC_DIRS += $(shell find src -type d)
@@ -98,6 +99,7 @@ CPP_FLAGS += -DUSE_STBTTF
 
 CPP_FILES += $(shell find src -type f -name '*.cpp')
 # CPP_FILES += $(shell find dependencies -type f -name '*.cpp')
+CPP_FILES += $(shell find dependencies -type f -name '*.cc')
 
 C_FLAGS += $(CPP_FLAGS)
 C_FILES += $(shell find src -type f -name '*.c')
@@ -120,7 +122,7 @@ endif
 ifeq ($(PROFILE),true)
 FLAGS += -DUSE_PROFILER
 endif
-
+# FLAGS += -DDEBUG_GRAPHICS
 FLAGS += -pthread
 # LN_FLAGS += -lpng
 LN_FLAGS += -lm
@@ -130,6 +132,11 @@ OBJ += $(patsubst %,$(ODIR)/%.o,$(C_FILES))
 DEP := $(OBJ:.o=.d)
 
 $(ODIR)/%.cpp.o: %.cpp
+	$(info CXX - $<)
+	@mkdir -p "$$(dirname "$@")"
+	$(CXX) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)
+
+$(ODIR)/%.cc.o: %.cc
 	$(info CXX - $<)
 	@mkdir -p "$$(dirname "$@")"
 	$(CXX) -c $< -o $@ $(FLAGS) $(CPP_FLAGS)

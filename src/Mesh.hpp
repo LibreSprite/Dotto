@@ -7,10 +7,11 @@
 #include "Index.hpp"
 #include "MeshAttribute.hpp"
 
-class Mesh : public std::enable_shared_from_this<Mesh> {
-public:
-    AutoIndex key{this};
+class Mesh : public AutoIndex<Mesh> {
+protected:
+    Mesh() = default;
 
+public:
     std::shared_ptr<void> rendererData;
 
     template<typename Type>

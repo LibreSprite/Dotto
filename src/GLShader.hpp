@@ -23,6 +23,7 @@
   #include <GLES3/gl3.h>
 #endif
 
+#ifdef _DEBUG
 #define GLCHECK                                                                \
   {                                                                            \
     if (auto err = glGetError()) {                                             \
@@ -34,6 +35,22 @@
       }                                                                        \
     }                                                                          \
   }
+
+#define GLCHECK_MSG(MSG)                                                       \
+  {                                                                            \
+    if (auto err = glGetError()) {                                             \
+      static bool e = false;                                                   \
+      if (!e) {                                                                \
+        e = true;                                                              \
+        LOG("gl error ", MSG, " ", std::hex, err, ":", __PRETTY_FUNCTION__, " ", \
+            std::dec, __LINE__);                                               \
+      }                                                                        \
+    }                                                                          \
+  }
+#else
+#define GLCHECK
+#define GLCHECK_MSG(MSG)
+#endif
 
 class GLShader {
 public:
@@ -50,6 +67,14 @@ public:
     };
     std::unordered_map<std::string, Attribute> attributes;
     std::unordered_map<std::string, Attribute> uniforms;
+
+    const char* uniformNameFromIndex(GLuint index) {
+        for (auto& entry : uniforms) {
+            if (entry.second.index == index)
+                return entry.first.c_str();
+        }
+        return "";
+    }
 
     GLShader(uint32_t program) : program{program} {
         constexpr const GLsizei bufSize = 32; // maximum name length
@@ -106,7 +131,7 @@ public:
 
     static uint32_t compile(uint32_t type, const std::string& source) {
         uint32_t shader = glCreateShader(type);
-        LOG("Shader{\n", source, "\n}");
+        GFXLOG("Shader{\n", source, "\n}");
         auto str = source.c_str();
         glShaderSource(shader, 1, &str, NULL);
         glCompileShader(shader);

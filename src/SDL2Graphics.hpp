@@ -15,8 +15,9 @@
 class SDL2Graphics {
 public:
     bool running;
-    SDL_Window* window = nullptr;
-    SDL_GLContext context = nullptr;
+    bool forceResize {};
+    SDL_Window* window {};
+    SDL_GLContext context {};
     GLRenderer renderer;
 
     SDL2Graphics() {
@@ -74,6 +75,8 @@ public:
             return;
         }
 
+        forceResize = true;
+
         // id = SDL_GetWindowID(window);
 
         int oglMajor = 3;
@@ -130,6 +133,17 @@ public:
         SDL_GL_SwapWindow(window);
     }
 
+    void setMousePos(float x, float y) {
+        float deltaX = x - Model::root.get("mouseX", 0.0f);
+        float deltaY = y - Model::root.get("mouseY", 0.0f);
+        Model::root.set("mouseX", x);
+        Model::root.set("mouseY", y);
+        Model::root.set("mouseDeltaX", deltaX);
+        Model::root.set("mouseDeltaY", deltaY);
+        if (static_cast<int>(deltaX) || static_cast<int>(deltaY))
+            emit(EventId::MouseMove);
+    }
+
     ON(PreUpdate) {
         if (!window || !running)
             return;
@@ -141,8 +155,7 @@ public:
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
-		Model::root.set("mouseX", float(event.button.x));
-		Model::root.set("mouseY", float(event.button.y));
+		setMousePos(event.button.x, event.button.y);
                 if (event.button.button == 1)
                     emit(EventId::MouseLeftDown);
                 if (event.button.button == 2)
@@ -152,8 +165,7 @@ public:
                 break;
 
             case SDL_MOUSEBUTTONUP:
-		Model::root.set("mouseX", float(event.button.x));
-		Model::root.set("mouseY", float(event.button.y));
+                setMousePos(event.button.x, event.button.y);
                 if (event.button.button == 1)
                     emit(EventId::MouseLeftUp);
                 if (event.button.button == 2)
@@ -163,18 +175,21 @@ public:
                 break;
 
             case SDL_MOUSEMOTION:
-		Model::root.set("mouseX", float(event.button.x));
-		Model::root.set("mouseY", float(event.button.y));
-                emit(EventId::MouseMove);
+                setMousePos(event.button.x, event.button.y);
                 break;
 
             case SDL_WINDOWEVENT:
                 switch (event.window.event)  {
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
                     emit(EventId::Resize);
+                    forceResize = false;
                     break;
                 }
             }
+        }
+        if (forceResize) {
+            forceResize = false;
+            emit(EventId::Resize);
         }
     }
 };

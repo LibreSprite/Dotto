@@ -21,10 +21,5 @@ int main(int argc, const char* argv[])
     LOG("Running");
     while (app.running())
         app.update();
-    // Matrix m;
-    // m *= Matrix::position(1, 2, 3);
-    // m *= Matrix::position(1, 2, 3);
-    // LOGGER log;
-    // log(m.v[3], m.v[7], m.v[11], m.v[15]);
     return 0;
 }

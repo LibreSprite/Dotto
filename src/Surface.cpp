@@ -5,11 +5,6 @@
 #include <cstdint>
 #include <mutex>
 
-std::shared_ptr<Surface> Surface::create() {
-    auto ptr = std::make_shared<Surface>();
-    return ptr->key.init(ptr);
-}
-
 void Surface::resize(uint32_t width, uint32_t height) {
     if (width == this->width && height == this->height)
 	return;
@@ -71,17 +66,17 @@ void Surface::write(Rect region, Color* data) {
 }
 
 std::shared_ptr<Surface> Surface::find(uint32_t surfaceId) {
-    auto surface = Index<std::shared_ptr<Surface>>::find(surfaceId);
+    auto surface = Index<Surface>::find(surfaceId);
     if (!surface) {
 	LOG("Invalid surface id ", std::hex, surfaceId, std::dec);
     }
-    return surface ? *surface : std::shared_ptr<Surface>{};
+    return surface;
 }
 
 static void createSurface(const VM::Args& args) {
-    auto surface = Surface::create();
+    auto surface = args.create<Surface>();
     surface->resize(args.get(0), args.get(1));
-    args.result = *surface->key;
+    args.result = surface->key();
 }
 
 static void Surface_resize(const VM::Args& args) {

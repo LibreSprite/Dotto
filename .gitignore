@@ -9,3 +9,7 @@ dotto
 dotto.exe
 snapshot_blob.bin
 *.dll
+.cxx
+.idea
+.gradle
+/android/local.properties

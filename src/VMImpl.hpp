@@ -25,11 +25,9 @@
 #define	NLO_NONBLOCK	0x4000	/* non blocking I/O (POSIX style) */
 #define	NLO_NOCTTY	0x8000	/* don't assign a ctty on this open */
 
-class VMImpl : public VM {
+class VMImpl : public VM, public AutoIndex<VMImpl> {
 public:
     static void reservedAPISlot(const VM::Args&){}
-
-    AutoIndex key{this};
     void* app{};
 
     class File {
@@ -50,12 +48,13 @@ public:
     };
     std::vector<File> files;
 
+protected:
     template<typename APP>
     VMImpl(APP* app) : app{app} {
         addAPI({
                 {"getId", [=](const VM::Args& args) {
 		    auto that = static_cast<VMImpl*>(args.vm);
-                    args.result = *that->key;
+                    args.result = that->key();
                 }},
 
                 {"yield", +[](const VM::Args& args) {args.vm->yield();}},
@@ -161,13 +160,13 @@ public:
 		    args.result = 0;
 		    auto that = static_cast<VMImpl*>(args.vm);
 		    that->activeMessage.clear();
-		    if (!that->messages.read([](auto& messages){return messages.empty();})) {
-			that->messages.write([=](auto& messages){
-			    that->activeMessage = std::move(messages.front());
-			    messages.pop();
-			});
-			args.result = static_cast<uint32_t>(that->activeMessage.size());
-		    }
+                    if (that->messages.read()->empty())
+                        return;
+                    that->messages.write([=](auto& messages){
+                        that->activeMessage = std::move(messages.front());
+                        messages.pop();
+                    });
+                    args.result = static_cast<uint32_t>(that->activeMessage.size());
 		}},
 
 		{"getMessageArg", +[](const VM::Args& args) {
@@ -201,6 +200,7 @@ public:
             });
     }
 
+public:
     ~VMImpl() {
         eventListeners.write([&](auto& eventListeners) {
             for (std::size_t id = 0; id < static_cast<uint32_t>(EventId::MaxEvent); ++id) {

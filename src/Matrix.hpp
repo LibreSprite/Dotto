@@ -101,7 +101,7 @@ public:
     }
 
     static Matrix rotation(float s, Vector3 axis) {
-	// s *= 0.5f;
+	s *= 0.5f;
 
 	// Vector3 v = axis;
 	// v.normalize();                  // convert to unit vector

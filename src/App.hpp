@@ -27,11 +27,11 @@ public:
     using VMType = VMImpl;
     using VMPoolType = VMPool<VMType>;
 
-    Index<VMType*> vms{0x10000000};
-    Index<Node*> nodeIndex{0x20000000};
-    Index<Mesh*> meshIndex{0x30000000};
-    Index<Material*> materialIndex{0x40000000};
-    Index<std::shared_ptr<Surface>> textureIndex{0x50000000};
+    Index<VMType> vms{0x10000000};
+    Index<Node> nodeIndex{0x20000000};
+    Index<Mesh> meshIndex{0x30000000};
+    Index<Material> materialIndex{0x40000000};
+    Index<Surface> textureIndex{0x50000000};
 
     GraphicsType gfx;
     Scene scene;
@@ -80,6 +80,7 @@ public:
 	auto ramSize = model.get(parts[0] + ".reserve-ram-max", 0.0f);
         auto vm = createVM();
 	vm->speed = std::max(0.1f, model.get(parts[0] + ".speed", 1.0f)) * 1024.0f * 1024.0f;
+	vm->runInBackground = model.get(parts[0] + ".runInBackground", 0.0f);
 	vm->debug = model.get(parts[0] + ".debug", 0.0f) > 0.5f;
         vm->boot(data, int(ramSize)*1024*1024);
 	parts.erase(parts.begin());
@@ -87,11 +88,11 @@ public:
 	    vm->message(std::move(parts));
 	}
         vmpool.add(vm);
-        return *vm->key;
+        return vm->key();
     }
 
     std::shared_ptr<VMType> createVM() {
-        auto vm = std::make_shared<VMType>(this);
+        auto vm = VMType::create(this);
         vm->addAPI({
                 {"vmSystem", [&](const VM::Args& arg) {
 		    arg.result = 0;
@@ -101,7 +102,7 @@ public:
 			    return;
 			uint32_t vmid = strtoul(parts[0].c_str(), nullptr, 0);
 			if (auto vm = vms.find(vmid)) {
-			    (*vm)->message(std::move(parts));
+			    vm->message(std::move(parts));
 			    arg.result = vmid;
 			} else {
 			    arg.result = bootVM(std::move(parts));
@@ -124,13 +125,12 @@ public:
 	    if (vmpool.wait())
 		return;
 	    runMainThreadCallbacks();
-	    gc();
 	    switch (step) {
 	    case 0: emit(EventId::PreUpdate); break;
 	    case 1: emit(EventId::Update); break;
 	    case 2: emit(EventId::Draw); break;
 	    case 3: emit(EventId::PostUpdate); break;
-	    case 4: step = 0; return;
+	    case 4: gc(); step = 0; return;
 	    }
 	    step++;
 	}

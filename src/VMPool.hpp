@@ -60,10 +60,11 @@ public:
 
 protected:
     void init() {
-        auto maxThreads = std::max<std::size_t>(1, std::thread::hardware_concurrency());
+        auto maxThreads = 2 * std::max<std::size_t>(1, std::thread::hardware_concurrency());
         LOG("Initializing pool with ", maxThreads, " threads");
+        threads.reserve(maxThreads);
         for (std::size_t i = 0; i < maxThreads; ++i) {
-            threads.push_back(std::thread([&]{run();}));
+            threads.emplace_back([&]{run();});
         }
     }
 
@@ -73,7 +74,10 @@ protected:
         if (threads.empty())
             init();
         std::lock_guard lg{queueMutex};
-        queue = vms;
+        for (auto& vm : vms) {
+            if (!vm->locked)
+                queue.push_back(vm);
+        }
     }
     
     void run() {
@@ -85,18 +89,24 @@ protected:
             }
 
             std::shared_ptr<VM> vm;
+            bool blocking{};
 
             {
                 std::lock_guard lg{queueMutex};
                 if (queue.empty())
                     continue;
-		_busy++;
                 vm = queue.back();
+                blocking = vm->runInBackground;
+                if (blocking)
+                    _busy++;
                 queue.pop_back();
             }
 
-            vm->run();
-	    _busy--;
+            if (!vm->locked)
+                vm->run();
+
+            if (blocking)
+                _busy--;
         }
     }
 

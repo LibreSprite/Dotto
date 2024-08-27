@@ -7,37 +7,42 @@
 #include "Vector.hpp"
 
 static void createMesh(const VM::Args& args) {
-    args.result = create<Mesh>();
+    args.result = args.create<Mesh>()->key();
 }
 
 template <typename Type>
 static void addAttribute(const VM::Args& args) {
     auto meshId = args.get<uint32_t>(0);
+    auto mesh = Index<Mesh>::find(meshId);
+    if (!mesh) {
+        LOG("Could not find mesh ", meshId);
+        return;
+    }
     auto attributeName = args.get<std::string>(1);
     mainThread([=]{
-	auto mesh = Index<Mesh*>::find(meshId);
-	if (!mesh) {
-	    LOG("Could not find mesh ", meshId);
-	    return;
-	}
-	(*mesh)->addAttribute<Type>(attributeName);
+	mesh->addAttribute<Type>(attributeName);
     });
 }
 
 static void Mesh_clearElements(const VM::Args& args) {
     auto meshId = args.get<uint32_t>(0);
+    auto mesh = Index<Mesh>::find(meshId);
+    if (!mesh) {
+        LOG("Could not find mesh ", meshId);
+        return;
+    }
     mainThread([=]{
-	auto mesh = Index<Mesh*>::find(meshId);
-	if (!mesh) {
-	    LOG("Could not find mesh ", meshId);
-	    return;
-	}
-	(*mesh)->elements.clear();
+	mesh->elements.clear();
     });
 }
 
 static void Mesh_pushElements(const VM::Args& args) {
     auto meshId = args.get<uint32_t>(0);
+    auto mesh = Index<Mesh>::find(meshId);
+    if (!mesh) {
+        LOG("Could not find mesh ", meshId);
+        return;
+    }
     auto begin = args.get<uint32_t*>(1);
     auto end = args.get<uint32_t*>(2);
     if (!end || !begin || reinterpret_cast<uintptr_t>(begin) & 3 || reinterpret_cast<uintptr_t>(end) & 3) {
@@ -46,18 +51,18 @@ static void Mesh_pushElements(const VM::Args& args) {
     }
     std::vector<uint8_t> data{begin, end};
     mainThread([=, data=std::move(data)]{
-	auto mesh = Index<Mesh*>::find(meshId);
-	if (!mesh) {
-	    LOG("Could not find mesh ", meshId);
-	    return;
-	}
-	auto& elements = (*mesh)->elements;
+	auto& elements = mesh->elements;
 	elements.insert(elements.end(), data.begin(), data.end());
     });
 }
 
 static void Mesh_pushAttribute(const VM::Args& args) {
     auto meshId = args.get<uint32_t>(0);
+    auto mesh = Index<Mesh>::find(meshId);
+    if (!mesh) {
+        LOG("Could not find mesh ", meshId);
+        return;
+    }
     auto attributeName = args.get<std::string>(1);
     auto begin = args.get<uint8_t*>(2);
     auto end = args.get<uint8_t*>(3);
@@ -67,12 +72,7 @@ static void Mesh_pushAttribute(const VM::Args& args) {
     }
     std::vector<uint8_t> data{begin, end};
     mainThread([=, attributeName=std::move(attributeName), data=std::move(data)]{
-	auto mesh = Index<Mesh*>::find(meshId);
-	if (!mesh) {
-	    LOG("Could not find mesh ", meshId);
-	    return;
-	}
-	auto& attributes = (*mesh)->attributes;
+	auto& attributes = mesh->attributes;
 	auto it = attributes.find(attributeName);
 	if (it == attributes.end()) {
 	    LOG("pushError: No attribute ", attributeName, " in mesh ", meshId);

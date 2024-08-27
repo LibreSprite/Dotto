@@ -1613,7 +1613,8 @@ void VM::boot(const std::vector<std::byte>& image, std::size_t ramSize) {
         "Booting VM with size=", ramSize / 1024.0f, "KB, "
         "api size=", api.size(),
         ", image size=", image.size() / 1024.0f, "KB, "
-        "speed=", speed
+        "speed=", speed,
+        ", RiBG=", runInBackground
         );
 
     {
@@ -1674,6 +1675,7 @@ void VM::link(uint32_t ramSize) {
 
 
 void VM::run() {
+    std::lock_guard lg{*this};
     state->exec(speed);
 }
 

@@ -8,9 +8,10 @@
 #include <shared_mutex>
 #include <vector>
 
-class Surface {
+class Surface : public AutoIndex<Surface> {
+protected:
+    Surface() = default;
 public:
-    AutoIndex key;
     std::shared_mutex mutex;
     std::vector<Color> pixels;
     uint32_t width;
@@ -23,6 +24,5 @@ public:
 
     static inline uint32_t maxWidth;
     static inline uint32_t maxHeight;
-    static std::shared_ptr<Surface> create();
     static std::shared_ptr<Surface> find(uint32_t surfaceId);
 };

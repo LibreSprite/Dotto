@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -19,6 +20,7 @@ class VMState;
 class VM {
     std::shared_ptr<VMState> state;
 public:
+    Shared<std::vector<std::shared_ptr<void>>> heldResources;
 
     class Args {
         VMState* state;
@@ -26,6 +28,13 @@ public:
         VM* vm;
 
         Args(VMState* state, VM* vm) : state{state}, vm{vm} {}
+
+        template<typename T, typename ... Args>
+        auto create(Args&& ... args) const {
+            auto ptr = T::template create<T>(std::forward<Args>(args)...);
+            vm->heldResources.write([&](auto& hr){hr.push_back(ptr);});
+            return ptr;
+        }
 
         template<typename Type>
         Type get (uint32_t i) const {
@@ -77,7 +86,12 @@ public:
     };
 
     std::size_t speed = 1024*1024;
+    bool runInBackground{};
     bool debug{};
+
+    std::atomic_bool locked{};
+    void lock() {locked = true;}
+    void unlock() {locked = false;}
 
     VM() = default;
     VM(const VM&) = delete;
